@@ -1,0 +1,13 @@
+{
+  "id": "session-conflict",
+  "expected": "CONFLICT",
+  "notes": "SEC-SESSION says 30 min, OPS-RUNBOOK says 60 min",
+  "story": {
+    "externalId": "PILOT-6",
+    "title": "Idle session timeout",
+    "description": "Idle sessions end automatically.",
+    "acceptanceCriteria": [
+      { "id": "AC-SESSION-01", "text": "An idle session expires and returns the user to sign-in." }
+    ]
+  }
+}

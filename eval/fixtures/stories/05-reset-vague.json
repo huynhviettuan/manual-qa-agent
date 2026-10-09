@@ -1,0 +1,11 @@
+{
+  "id": "reset-email-vague",
+  "expected": "CLARIFICATION",
+  "notes": "AC-RESET-03 has no approved source and a vague expectation",
+  "story": {
+    "externalId": "PILOT-5",
+    "title": "Reset email delivery",
+    "description": "Users receive the reset email.",
+    "acceptanceCriteria": [{ "id": "AC-RESET-03", "text": "The password reset email arrives quickly." }]
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "@qa/retrieval",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@qa/db": "workspace:*",
+    "@qa/domain": "workspace:*",
+    "@qa/observability": "workspace:*",
+    "yaml": "^2.9.1",
+    "zod": "^4.6.5"
+  }
+}

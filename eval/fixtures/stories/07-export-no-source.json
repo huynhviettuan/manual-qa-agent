@@ -1,0 +1,11 @@
+{
+  "id": "export-no-trusted-source",
+  "expected": "MISSING_KNOWLEDGE",
+  "notes": "only an UNAPPROVED note and another project mention AC-EXPORT-01",
+  "story": {
+    "externalId": "PILOT-7",
+    "title": "CSV export",
+    "description": "Admins export user lists.",
+    "acceptanceCriteria": [{ "id": "AC-EXPORT-01", "text": "CSV export finishes within 5 seconds." }]
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "@qa/llm-adapter",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@qa/domain": "workspace:*",
+    "@anthropic-ai/sdk": "^0.132.1",
+    "openai": "^7.31.0",
+    "@typesafe-ai/sdk": "^0.6.0",
+    "zod": "^4.6.5"
+  }
+}

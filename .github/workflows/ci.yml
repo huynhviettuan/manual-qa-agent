@@ -1,0 +1,33 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      # Live provider calls are never made in CI.
+      QA_LIVE_LLM: ''
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm format:check
+      - run: pnpm typecheck
+      # Unit, mocked-provider contract, policy/tenancy and PGlite integration tests.
+      - run: pnpm test
+      - run: pnpm eval
+      - run: pnpm eval
+        env:
+          QA_LLM_PROVIDER: openai
+      - run: pnpm eval
+        env:
+          QA_READINESS_PROVIDER: jev

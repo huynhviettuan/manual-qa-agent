@@ -1,0 +1,18 @@
+{
+  "name": "@qa/api",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@qa/db": "workspace:*",
+    "@qa/domain": "workspace:*",
+    "@qa/llm-adapter": "workspace:*",
+    "@qa/observability": "workspace:*",
+    "@qa/orchestrator": "workspace:*",
+    "@qa/retrieval": "workspace:*",
+    "@qa/review": "workspace:*",
+    "@fastify/rate-limit": "^11.2.1",
+    "fastify": "^5.12.5",
+    "zod": "^4.6.5"
+  }
+}

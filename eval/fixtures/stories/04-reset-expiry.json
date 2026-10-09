@@ -1,0 +1,13 @@
+{
+  "id": "reset-expiry",
+  "expected": "DRAFT",
+  "expectedSourceRefs": ["SPEC-RESET@v3"],
+  "story": {
+    "externalId": "PILOT-4",
+    "title": "Reset link expiry",
+    "description": "Password reset links are time limited.",
+    "acceptanceCriteria": [
+      { "id": "AC-RESET-01", "text": "An expired reset link shows \"This link has expired\"." }
+    ]
+  }
+}

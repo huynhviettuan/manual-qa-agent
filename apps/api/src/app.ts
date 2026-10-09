@@ -1,0 +1,235 @@
+import Fastify, {
+  type FastifyBaseLogger,
+  type FastifyInstance,
+  type FastifyReply,
+  type FastifyRequest,
+} from 'fastify';
+import rateLimit from '@fastify/rate-limit';
+import { z } from 'zod';
+import { findActorByApiKey, getReview, getWorkflow, listRevisions, workflowUsage, type Db } from '@qa/db';
+import {
+  AcceptanceCriterion,
+  type Actor,
+  DomainError,
+  hasRole,
+  newId,
+  REVIEW_STATUSES,
+  Role,
+} from '@qa/domain';
+import { silentLogger, type Logger } from '@qa/observability';
+import {
+  resolveReviewAndContinue,
+  runStoryWorkflow,
+  submitStory,
+  type OrchestratorDeps,
+} from '@qa/orchestrator';
+import { ingestSource, revokeSource, SourceMeta } from '@qa/retrieval';
+import { listQueue, promoteToReference, reviewTestCase } from '@qa/review';
+
+declare module 'fastify' {
+  interface FastifyRequest {
+    actor: Actor;
+    correlationId: string;
+  }
+}
+
+export type AppOptions = { deps: OrchestratorDeps; logger?: Logger; rateLimitPerMinute?: number };
+
+const STATUS_BY_CODE: Record<DomainError['code'], number> = {
+  VALIDATION: 400,
+  FORBIDDEN: 403,
+  NOT_FOUND: 404,
+  CONFLICT: 409,
+  IMMUTABLE: 409,
+  ILLEGAL_TRANSITION: 409,
+};
+
+const StoryBody = z.object({
+  externalId: z.string().min(1).max(100),
+  title: z.string().min(1).max(500),
+  description: z.string().max(20_000).default(''),
+  acceptanceCriteria: z.array(AcceptanceCriterion).max(100),
+  targetRelease: z.string().max(100).nullish(),
+  environmentId: z.string().max(100).optional(),
+});
+
+const IngestBody = z.object({ meta: SourceMeta, content: z.string().min(1).max(200_000) });
+const RevokeBody = z.object({ sourceId: z.string(), version: z.string() });
+const DraftBody = z.object({ storyId: z.string(), environmentId: z.string().optional() });
+const CaseReviewBody = z.discriminatedUnion('decision', [
+  z.object({ decision: z.literal('APPROVE'), reason: z.string().optional() }),
+  z.object({ decision: z.literal('REJECT'), reason: z.string().min(1) }),
+  z.object({ decision: z.literal('EDIT'), content: z.unknown(), reason: z.string().optional() }),
+]);
+const ResolveBody = z.discriminatedUnion('action', [
+  z.object({ action: z.literal('ASSIGN') }),
+  z.object({ action: z.literal('REQUEST_INFO'), reason: z.string().min(1) }),
+  z.object({ action: z.literal('ESCALATE'), reason: z.string().min(1), toRole: Role }),
+  z.object({ action: z.literal('REJECT'), reason: z.string().min(1) }),
+  z.object({ action: z.literal('CANCEL'), reason: z.string().min(1) }),
+  z.object({
+    action: z.literal('APPROVE'),
+    reason: z.string().min(1),
+    publishSource: z
+      .object({
+        sourceId: z.string().regex(/^[A-Za-z0-9._-]+$/),
+        version: z.string().regex(/^[A-Za-z0-9._-]+$/),
+        content: z.string().min(1).max(200_000),
+        ruleKeys: z.array(z.string()).optional(),
+      })
+      .optional(),
+    approvalTtlMs: z.number().int().positive().optional(),
+  }),
+]);
+const QueueQuery = z.object({
+  status: z.enum(REVIEW_STATUSES).optional(),
+  mine: z.coerce.boolean().optional(),
+  limit: z.coerce.number().int().min(1).max(200).default(50),
+  offset: z.coerce.number().int().min(0).default(0),
+});
+const IdParams = z.object({ id: z.string().min(1).max(100) });
+
+function apiKeyFrom(req: FastifyRequest): string | null {
+  const header = req.headers['x-api-key'];
+  if (typeof header === 'string' && header) return header;
+  const auth = req.headers.authorization;
+  return auth?.startsWith('Bearer ') ? auth.slice(7) : null;
+}
+
+export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
+  const { deps } = opts;
+  const db: Db = deps.db;
+  const app = Fastify({
+    loggerInstance: (opts.logger ?? silentLogger) as FastifyBaseLogger,
+  }) as unknown as FastifyInstance;
+
+  await app.register(rateLimit, {
+    max: opts.rateLimitPerMinute ?? 120,
+    timeWindow: '1 minute',
+    keyGenerator: (req) => apiKeyFrom(req) ?? req.ip,
+  });
+
+  app.decorateRequest('actor', null as unknown as Actor);
+  app.decorateRequest('correlationId', '');
+
+  app.addHook('onRequest', async (req, reply) => {
+    const incoming = req.headers['x-correlation-id'];
+    req.correlationId =
+      typeof incoming === 'string' && /^[\w-]{1,100}$/.test(incoming) ? incoming : newId('corr');
+    reply.header('x-correlation-id', req.correlationId);
+    if (req.url === '/healthz') return;
+    // Identity and roles come only from the server-side key lookup, never from the request body.
+    const key = apiKeyFrom(req);
+    const actor = key ? await findActorByApiKey(db, key) : null;
+    if (!actor) return reply.code(401).send({ error: 'UNAUTHENTICATED' });
+    req.actor = actor;
+  });
+
+  app.setErrorHandler((err: unknown, req, reply: FastifyReply) => {
+    if (err instanceof DomainError)
+      return reply.code(STATUS_BY_CODE[err.code]).send({ error: err.code, message: err.message });
+    if (err instanceof z.ZodError) return reply.code(400).send({ error: 'VALIDATION', issues: err.issues });
+    const status = (err as { statusCode?: number }).statusCode;
+    if (status && status < 500)
+      return reply.code(status).send({ error: 'REQUEST_ERROR', message: (err as Error).message });
+    req.log.error({ err, correlationId: req.correlationId }, 'unhandled error');
+    return reply.code(500).send({ error: 'INTERNAL', correlationId: req.correlationId });
+  });
+
+  const scope = (req: FastifyRequest) => ({ tenantId: req.actor.tenantId, projectId: req.actor.projectId });
+  const idempotencyKey = (req: FastifyRequest) => {
+    const k = req.headers['idempotency-key'];
+    return typeof k === 'string' && k.length > 0 && k.length <= 200 ? k : undefined;
+  };
+  const orchestratorDeps = (req: FastifyRequest): OrchestratorDeps => ({
+    ...deps,
+    logger: req.log as unknown as Logger,
+  });
+
+  app.get('/healthz', async () => ({ ok: true }));
+
+  app.post('/api/stories', async (req, reply) => {
+    const body = StoryBody.parse(req.body);
+    const result = await submitStory(orchestratorDeps(req), req.actor, body, {
+      environmentId: body.environmentId,
+      idempotencyKey: idempotencyKey(req),
+      correlationId: req.correlationId,
+    });
+    return reply.code(result.deduplicated ? 200 : 201).send(result);
+  });
+
+  app.post('/api/knowledge/ingestions', async (req, reply) => {
+    const body = IngestBody.parse(req.body);
+    const result = await ingestSource(db, req.actor, { meta: body.meta, body: body.content });
+    return reply.code(result.status === 'INGESTED' ? 201 : 200).send(result);
+  });
+
+  app.post('/api/knowledge/revocations', async (req) => {
+    const body = RevokeBody.parse(req.body);
+    return { revoked: await revokeSource(db, req.actor, body.sourceId, body.version) };
+  });
+
+  app.post('/api/test-cases/draft', async (req, reply) => {
+    const body = DraftBody.parse(req.body);
+    const result = await runStoryWorkflow(orchestratorDeps(req), req.actor, body.storyId, {
+      environmentId: body.environmentId,
+      idempotencyKey: idempotencyKey(req),
+      correlationId: req.correlationId,
+    });
+    return reply.code(result.deduplicated ? 200 : 201).send(result);
+  });
+
+  app.get('/api/test-cases/:id', async (req) => {
+    const { id } = IdParams.parse(req.params);
+    const revisions = await listRevisions(db, scope(req), id);
+    if (revisions.length === 0) throw new DomainError('NOT_FOUND', `test case ${id} not found`);
+    return { caseId: id, storyId: revisions[0]!.storyId, revisions };
+  });
+
+  app.post('/api/test-cases/:id/review', async (req) => {
+    const { id } = IdParams.parse(req.params);
+    return reviewTestCase(db, req.actor, id, CaseReviewBody.parse(req.body));
+  });
+
+  app.post('/api/test-cases/:id/promote', async (req, reply) => {
+    const { id } = IdParams.parse(req.params);
+    return reply.code(201).send(await promoteToReference(db, req.actor, id));
+  });
+
+  app.get('/api/reviews', async (req) => {
+    const q = QueueQuery.parse(req.query);
+    return { items: await listQueue(db, req.actor, q), limit: q.limit, offset: q.offset };
+  });
+
+  app.get('/api/reviews/:id', async (req) => {
+    const { id } = IdParams.parse(req.params);
+    if (hasRole(req.actor, 'AI_AGENT'))
+      throw new DomainError('FORBIDDEN', 'the AI agent cannot read reviews');
+    const review = await getReview(db, scope(req), id);
+    if (!review) throw new DomainError('NOT_FOUND', `review ${id} not found`);
+    return review;
+  });
+
+  app.post('/api/reviews/:id/resolve', async (req) => {
+    const { id } = IdParams.parse(req.params);
+    return resolveReviewAndContinue(orchestratorDeps(req), req.actor, id, ResolveBody.parse(req.body));
+  });
+
+  app.get('/api/workflows/:id', async (req) => {
+    const { id } = IdParams.parse(req.params);
+    const wf = await getWorkflow(db, scope(req), id);
+    if (!wf) throw new DomainError('NOT_FOUND', `workflow ${id} not found`);
+    return wf;
+  });
+
+  app.get('/api/workflows/:id/usage', async (req) => {
+    const { id } = IdParams.parse(req.params);
+    if (!hasRole(req.actor, 'QA_LEAD', 'ADMIN'))
+      throw new DomainError('FORBIDDEN', 'usage data requires QA lead/admin');
+    if (!(await getWorkflow(db, scope(req), id)))
+      throw new DomainError('NOT_FOUND', `workflow ${id} not found`);
+    return workflowUsage(db, scope(req), id);
+  });
+
+  return app;
+}

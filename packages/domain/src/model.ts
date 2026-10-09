@@ -1,0 +1,116 @@
+import { z } from 'zod';
+
+export const TrustTier = z.enum(['T1', 'T2', 'T3', 'T4']);
+export type TrustTier = z.infer<typeof TrustTier>;
+
+export const SourceType = z.enum([
+  'ACCEPTANCE_CRITERIA',
+  'SPECIFICATION',
+  'TEST_CASE',
+  'CLARIFICATION',
+  'API_CONTRACT',
+  'BUG_REPORT',
+  'NOTE',
+]);
+export type SourceType = z.infer<typeof SourceType>;
+
+export const ApprovalStatus = z.enum(['APPROVED', 'UNAPPROVED']);
+export type ApprovalStatus = z.infer<typeof ApprovalStatus>;
+
+export const Role = z.enum(['QA_ENGINEER', 'QA_LEAD', 'PRODUCT_OWNER', 'ADMIN', 'AI_AGENT']);
+export type Role = z.infer<typeof Role>;
+
+export const EnvironmentKind = z.enum(['test', 'staging', 'production']);
+export type EnvironmentKind = z.infer<typeof EnvironmentKind>;
+
+export const Readiness = z.enum(['ready', 'clarification', 'blocked', 'other']);
+export type Readiness = z.infer<typeof Readiness>;
+
+/** Every read and write is scoped by the authenticated caller's tenant and project. */
+export type TenantScope = { tenantId: string; projectId: string };
+
+/** Server-resolved identity. Roles come from the database, never from the request body. */
+export type Actor = {
+  id: string;
+  tenantId: string;
+  projectId: string;
+  roles: Role[];
+};
+
+export function hasRole(actor: Actor, ...roles: Role[]): boolean {
+  return actor.roles.some((r) => roles.includes(r));
+}
+
+export const AcceptanceCriterion = z.object({
+  id: z.string().min(1),
+  text: z.string(),
+});
+export type AcceptanceCriterion = z.infer<typeof AcceptanceCriterion>;
+
+/**
+ * Content of a test-case draft revision. The model emits this shape; the same schema
+ * validates reviewer edits. Kept free of length constraints so it maps cleanly onto
+ * provider structured-output schemas; business rules are checked in code.
+ */
+export const DraftContent = z.object({
+  title: z.string(),
+  priority: z.enum(['P0', 'P1', 'P2', 'P3']),
+  preconditions: z.array(z.string()),
+  testData: z.array(z.string()),
+  steps: z.array(
+    z.object({
+      action: z.string(),
+      expected: z.string(),
+      sourceRefs: z.array(z.string()),
+    }),
+  ),
+  assumptions: z.array(z.string()),
+  missingRequirements: z.array(z.string()),
+});
+export type DraftContent = z.infer<typeof DraftContent>;
+
+export type EvidenceChunk = {
+  sourceId: string;
+  version: string;
+  chunkId: string;
+  content: string;
+  trustTier: TrustTier;
+  /** Retriever-specific ranking signal; not a correctness probability. */
+  relevance: number;
+};
+
+/** `sourceId@version`, the citation format used in prompts, drafts and reviews. */
+export function sourceRef(sourceId: string, version: string): string {
+  return `${sourceId}@${version}`;
+}
+
+export type RetrievalResult = {
+  status: 'OK' | 'NO_TRUSTED_CONTEXT';
+  chunks: EvidenceChunk[];
+  snapshotId: string;
+  usedTokensEstimate: number;
+  budgetExceeded: boolean;
+  /** Requested identifiers that at least one selected trusted chunk references. */
+  coveredIdentifiers: string[];
+  gaps: string[];
+  contradictions: Array<{ first: string; second: string; ruleKey: string }>;
+};
+
+export type NextAction =
+  | { type: 'GENERATE_DRAFT'; contextIds: string[] }
+  | { type: 'EXECUTE_APPROVED'; caseId: string; approvalId?: string }
+  | { type: 'REQUEST_REVIEW'; reason: string; sourceIds: string[] }
+  | { type: 'STOP'; reason: string };
+
+export type ActionKind = 'draft' | 'execute' | 'delete' | 'publish_bug';
+
+export type ActionProposal = {
+  workflowId: string;
+  caseId?: string;
+  actorId: string;
+  projectId: string;
+  environmentId: string;
+  kind: ActionKind;
+  parameters: Record<string, unknown>;
+  knowledgeSnapshotId: string;
+};

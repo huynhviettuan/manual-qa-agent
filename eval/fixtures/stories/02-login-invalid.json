@@ -1,0 +1,13 @@
+{
+  "id": "login-invalid",
+  "expected": "DRAFT",
+  "expectedSourceRefs": ["AC-LOGIN@v1"],
+  "story": {
+    "externalId": "PILOT-2",
+    "title": "Wrong password message",
+    "description": "Failed sign-in feedback must not leak account existence.",
+    "acceptanceCriteria": [
+      { "id": "AC-LOGIN-02", "text": "A wrong password shows \"Invalid email or password\"." }
+    ]
+  }
+}

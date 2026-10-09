@@ -1,0 +1,32 @@
+{
+  "name": "manual-qa-agent",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "db:migrate": "tsx apps/cli/src/main.ts migrate",
+    "seed": "tsx apps/cli/src/main.ts seed",
+    "qa": "tsx apps/cli/src/main.ts",
+    "api": "tsx apps/api/src/main.ts",
+    "eval": "tsx apps/cli/src/main.ts eval eval/fixtures"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.0",
+    "@types/node": "^22.15.0",
+    "eslint": "^10.12.0",
+    "prettier": "^3.9.9",
+    "tsx": "^4.23.15",
+    "typescript": "5.9.3",
+    "typescript-eslint": "^8.71.1",
+    "vitest": "^5.0.3"
+  }
+}

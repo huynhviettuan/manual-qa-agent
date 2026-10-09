@@ -1,0 +1,11 @@
+{
+  "sourceId": "BUG-1042",
+  "version": "v1",
+  "sourceType": "BUG_REPORT",
+  "trustTier": "T2",
+  "approvalStatus": "APPROVED",
+  "approvedBy": "pilot-lead",
+  "owner": "pilot-lead",
+  "effectiveFrom": "2025-11-01",
+  "content": "# BUG-1042 Sign-in error message\nHistorical: a wrong password once showed \"User not found\", revealing account existence (fixed in 2025.12)."
+}

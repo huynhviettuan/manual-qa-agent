@@ -1,0 +1,10 @@
+{
+  "id": "empty-ac",
+  "expected": "CLARIFICATION",
+  "story": {
+    "externalId": "PILOT-8",
+    "title": "Dark mode",
+    "description": "Users want dark mode.",
+    "acceptanceCriteria": []
+  }
+}

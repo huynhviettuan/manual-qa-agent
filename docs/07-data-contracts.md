@@ -1,0 +1,91 @@
+# 07 — Data model and conceptual API contracts
+
+**Status:** Entities and endpoints below are implemented (`packages/db` migrations, `apps/api`), except test runs and evidence (Phase 2). Additional MVP endpoints: `POST /api/knowledge/revocations`, `GET /api/test-cases/{id}`, `POST /api/test-cases/{id}/promote`, `GET /api/reviews/{id}`, `GET /api/workflows/{id}`. Auth is an `x-api-key` header resolved server-side to an actor with database roles. There are no cookies, so CSRF does not apply.
+
+## Core entities
+
+| Entity | Key fields | Invariants |
+| --- | --- | --- |
+| `Project` | id, tenantId, name, defaultEnvironment, policies | Tenant boundary enforced |
+| `Story` | id, externalId, projectId, version, acceptanceCriteria | Immutable snapshots |
+| `KnowledgeSource` | id, projectId, kind, version, approvedBy, approvalStatus, effectiveFrom, hash | Source owner approval required |
+| `KnowledgeChunk` | id, sourceId, sourceVersion, chunkIndex, embedding, metadata | ACL and source version inherited |
+| `TestCase` | id, storyId, revision, steps, expected, status, sourceRefs | Approval tied to revision |
+| `TestRun` | id, testCaseRevisionId, environmentId, state, assertions, evidenceIds | Run state independent of case approval |
+| `EvidenceArtifact` | id, runId, kind, objectKey, digest, retentionUntil, classification | Store pointer, not raw bytes in prompt |
+| `DecisionRecord` | id, taskId, kind, provider/model, result, confidence, usage, inputHash, sourceRefs | Recommendation separate from policy outcome |
+| `PolicyEvaluation` | id, actionHash, policyVersion, result, actor, reason | Immutable audit |
+| `ReviewTask` | id, type, subjectId, question, risk, status, reviewer, resolution | Expiry for action approvals |
+| `Approval` | id, reviewId, actionHash, environmentId, approvedBy, expiresAt, revokedAt | Scope and time-bound |
+| `WorkflowTask` | id, correlationId, state, taskType, attempts, idempotencyKey | Retry-safe state transitions |
+| `UsageEvent` | id, workflowId, component, inputTokens, outputTokens, costEstimate, latencyMs | Correlates to decision and run |
+
+For MVP, use normalized relational tables in PostgreSQL and a pgvector index. Use explicit migrations and protect every query by authenticated `tenantId`/`projectId` scope. `KnowledgeSource` revisions should be immutable: update via new version records.
+
+## Example TypeScript domain types
+
+```ts
+export type CaseStatus =
+  | 'DRAFT' | 'NEEDS_CLARIFICATION' | 'IN_REVIEW'
+  | 'APPROVED' | 'REJECTED' | 'RETIRED';
+
+export type RunStatus =
+  | 'QUEUED' | 'POLICY_CHECK' | 'RUNNING'
+  | 'PASSED' | 'FAILED' | 'BLOCKED' | 'INCONCLUSIVE' | 'CANCELLED';
+
+export type ReviewStatus =
+  | 'OPEN' | 'ASSIGNED' | 'NEEDS_INFO'
+  | 'APPROVED' | 'REJECTED' | 'CANCELLED';
+
+export type ActionProposal = {
+  workflowId: string;
+  caseId?: string;
+  actorId: string;
+  projectId: string;
+  environmentId: string;
+  kind: 'DRAFT_TEST' | 'EXECUTE_TEST' | 'DELETE_TEST_DATA' | 'FILE_BUG';
+  parameters: Record<string, unknown>;
+  knowledgeSnapshotId: string;
+};
+```
+
+## Proposed REST endpoints
+
+| Method & path | Purpose | Required authorization |
+| --- | --- | --- |
+| `POST /api/stories` | Create immutable story version | QA or Product role |
+| `POST /api/knowledge/ingestions` | Ingest **approved** source | Source-owner-authorized |
+| `POST /api/test-cases/draft` | Generate draft from story | QA |
+| `POST /api/test-cases/{id}/review` | Approve/reject draft revision | QA with scoped role |
+| `POST /api/test-runs` | Request run (P1) | QA + target environment policy |
+| `GET /api/test-runs/{id}` | Retrieve statuses and evidence links | Project-member RBAC |
+| `GET /api/reviews` | Read scoped review queue | Authorized reviewer |
+| `POST /api/reviews/{id}/resolve` | Resolve a review with reason | Assigned/authorized reviewer |
+| `GET /api/workflows/{id}/usage` | Read token/cost/audit data | QA lead/admin |
+
+Use pagination, schema validation, idempotency keys, rate limits, CSRF protection where applicable, and server-side auth. `GET` returns only data within the caller's tenant/project scope.
+
+## Example test-run response
+
+```json
+{
+  "id": "run_01",
+  "caseRevisionId": "case_001:v2",
+  "status": "INCONCLUSIVE",
+  "environmentId": "staging",
+  "assertions": [
+    { "name": "response-status", "expected": 200, "actual": 200, "passed": true },
+    { "name": "record-exists", "expected": true, "actual": null, "passed": null }
+  ],
+  "evidenceIds": ["evidence_01"],
+  "suspectedCause": "ENVIRONMENT",
+  "suspectedCauseIsVerified": false,
+  "reviewId": "review_01"
+}
+```
+
+Null actual values are not the same as false assertions; preserve this distinction.
+
+## Audit event minimum
+
+`actorId`, `tenantId`, `projectId`, `workflowId`, `actionKind`, `actionHash`, `target`, `policyVersion`, `decisionRecordId`, `approvalId`, `outcome`, `timestamp`. Encrypt sensitive identifiers where appropriate and enforce retention policy.

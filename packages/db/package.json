@@ -1,0 +1,15 @@
+{
+  "name": "@qa/db",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "devDependencies": {
+    "@types/pg": "^8.23.1"
+  },
+  "dependencies": {
+    "@qa/domain": "workspace:*",
+    "@electric-sql/pglite": "0.5.8",
+    "@electric-sql/pglite-pgvector": "^0.0.9",
+    "pg": "^8.23.1"
+  }
+}
