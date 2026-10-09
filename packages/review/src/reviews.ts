@@ -4,7 +4,9 @@ import {
   insertAuditEvent,
   insertReview,
   listReviews,
+  triageByReview,
   updateReviewStatus,
+  verifyTriage,
   type ApprovalRow,
   type Db,
   type ReviewInsert,
@@ -27,6 +29,8 @@ export const REVIEW_KINDS = [
   'MISSING_KNOWLEDGE',
   'PROVIDER_FAILURE',
   'ACTION_APPROVAL',
+  'FAILURE_TRIAGE',
+  'SECURITY_TRIAGE',
 ] as const;
 export type ReviewKind = (typeof REVIEW_KINDS)[number];
 
@@ -37,7 +41,14 @@ const ROUTING: Record<ReviewKind, { role: Role; risk: ReviewRow['risk'] }> = {
   MISSING_KNOWLEDGE: { role: 'QA_ENGINEER', risk: 'MEDIUM' },
   PROVIDER_FAILURE: { role: 'QA_ENGINEER', risk: 'MEDIUM' },
   ACTION_APPROVAL: { role: 'QA_LEAD', risk: 'HIGH' },
+  FAILURE_TRIAGE: { role: 'QA_ENGINEER', risk: 'MEDIUM' },
+  // Security/privacy-sensitive suspected defects: secure review by a lead (docs/06).
+  SECURITY_TRIAGE: { role: 'QA_LEAD', risk: 'HIGH' },
 };
+
+const TRIAGE_KINDS: ReviewKind[] = ['FAILURE_TRIAGE', 'SECURITY_TRIAGE'];
+export const CONFIRMABLE_CAUSES = ['PRODUCT_DEFECT', 'TEST_ISSUE', 'ENVIRONMENT', 'UNKNOWN'] as const;
+export type ConfirmedCause = (typeof CONFIRMABLE_CAUSES)[number];
 
 const KNOWLEDGE_KINDS: ReviewKind[] = ['REQUIREMENT_CLARIFICATION', 'SOURCE_CONFLICT', 'MISSING_KNOWLEDGE'];
 const MAX_APPROVAL_TTL_MS = 24 * 60 * 60 * 1000;
@@ -106,6 +117,8 @@ export type ResolveInput =
       publishSource?: { sourceId: string; version: string; content: string; ruleKeys?: string[] };
       /** Action approvals: lifetime of the grant (default 1h, max 24h). */
       approvalTtlMs?: number;
+      /** Triage reviews: the human-verified cause (may differ from the suggestion). */
+      confirmedCause?: ConfirmedCause;
     };
 
 export type ResolveResult = {
@@ -170,6 +183,14 @@ export async function resolveReview(
       });
     }
 
+    if (TRIAGE_KINDS.includes(review.kind as ReviewKind) && input.action === 'APPROVE') {
+      if (!input.confirmedCause)
+        throw new DomainError('VALIDATION', 'triage approval requires confirmedCause');
+      const triage = await triageByReview(tx, scope, review.id);
+      if (!triage) throw new DomainError('NOT_FOUND', `no triage linked to review ${review.id}`);
+      await verifyTriage(tx, scope, triage.id, input.confirmedCause, actor.id);
+    }
+
     if (input.action === 'APPROVE' && input.publishSource) {
       if (!KNOWLEDGE_KINDS.includes(review.kind as ReviewKind)) {
         throw new DomainError('VALIDATION', `${review.kind} reviews cannot publish knowledge`);
@@ -204,6 +225,7 @@ export async function resolveReview(
         approvalId: approval?.id ?? null,
         publishedSource: publishedSource ? `${publishedSource.sourceId}@${publishedSource.version}` : null,
         publishedTrusted: publishedSource?.trusted ?? null,
+        confirmedCause: 'confirmedCause' in input ? (input.confirmedCause ?? null) : null,
       },
       resolvedBy: ['APPROVED', 'REJECTED', 'CANCELLED'].includes(next) ? actor.id : undefined,
     });

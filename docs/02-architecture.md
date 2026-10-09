@@ -63,6 +63,7 @@ packages/
   observability/           # Structured logging with redaction (implemented)
   execution/               # Playwright executor, constrained steps (implemented; ADR-0008)
   evidence/                # Evidence store port + local-disk adapter (implemented)
+  integrations/            # Jira Cloud bug tracker adapter (implemented; ADR-0009)
 eval/                      # Labeled pilot fixtures
 ```
 

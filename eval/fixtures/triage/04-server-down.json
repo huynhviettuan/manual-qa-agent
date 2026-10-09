@@ -1,0 +1,16 @@
+{
+  "id": "reports-503",
+  "expectedCause": "ENVIRONMENT",
+  "securitySensitive": false,
+  "facts": {
+    "verdict": "INCONCLUSIVE",
+    "reason": "STEP_ERROR:open",
+    "environmentKind": "staging",
+    "stepErrors": ["page.goto: net::ERR_HTTP_RESPONSE_CODE_FAILURE"],
+    "httpErrors": [{ "method": "GET", "path": "/reports", "status": 503 }],
+    "failedRequests": 0,
+    "blockedRequests": 0,
+    "consoleErrors": [],
+    "failingStep": { "id": "open", "description": "navigate /reports", "expected": null, "actual": null }
+  }
+}

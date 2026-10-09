@@ -36,9 +36,11 @@ import {
 } from '@qa/domain';
 import type { EvidenceStore } from '@qa/evidence';
 import type { ExecutionOutcome, Executor, SecretResolver } from '@qa/execution';
+import type { TriageClassifier } from '@qa/llm-adapter';
 import { silentLogger, type Logger } from '@qa/observability';
 import { evaluate, type PolicyResult } from '@qa/policy-engine';
 import { openReview } from '@qa/review';
+import { triageRun } from './triage.ts';
 
 export type RunDeps = {
   db: Db;
@@ -48,6 +50,9 @@ export type RunDeps = {
   logger?: Logger;
   /** Evidence retention in days (default 30). */
   evidenceRetentionDays?: number;
+  /** When set, FAILED/INCONCLUSIVE runs are triaged automatically (ADR-0009). */
+  triager?: TriageClassifier;
+  decisionCacheTtlMs?: number | null;
 };
 
 const AUTHOR_ROLES = ['QA_ENGINEER', 'QA_LEAD', 'ADMIN', 'AI_AGENT'] as const;
@@ -406,6 +411,20 @@ async function executeClaimed(deps: RunDeps, claimed: RunRow, log: Logger): Prom
     policy.approvalId,
   );
   log.info({ runId: claimed.id, verdict: outcome.verdict, reason: outcome.reason }, 'run finished');
+  if (deps.triager && (done.state === 'FAILED' || done.state === 'INCONCLUSIVE')) {
+    // Advisory only: a triage problem is logged and never affects the recorded verdict.
+    await triageRun(
+      {
+        db,
+        store: deps.store,
+        triager: deps.triager,
+        logger: log,
+        decisionCacheTtlMs: deps.decisionCacheTtlMs,
+      },
+      actor,
+      done.id,
+    ).catch((err) => log.error({ err, runId: done.id }, 'automatic triage failed'));
+  }
   return done;
 }
 

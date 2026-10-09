@@ -1,5 +1,5 @@
 import type { DraftContent } from '@qa/domain';
-import type { ReadinessAssessment } from './types.ts';
+import type { ReadinessAssessment, SuspectedCause, TriageFacts } from './types.ts';
 
 /** The decoded `<untrusted_data>` payload every provider receives (see prompts.ts). */
 export type PromptPayload = {
@@ -111,4 +111,31 @@ export function heuristicDecisions(payload: PromptPayload, questionNames: string
     }
   }
   return { readiness: assessment.readiness, confidence: 0.9, yes };
+}
+
+const SECURITY_TERMS =
+  /password|passwd|token|auth|permission|forbidden|account|not found|session|login|sign[ -]?in|credential|unauthori|admin|\brole\b(?!=)|privilege|\baccess\b/i;
+
+/**
+ * Heuristic triage for keyless dev/eval runs (not a model): server errors or infrastructure
+ * reasons -> ENVIRONMENT; step errors / unevaluated assertions -> TEST_ISSUE; an observed
+ * different value -> PRODUCT_DEFECT; otherwise UNKNOWN. Security terms in the failing step escalate.
+ */
+export function heuristicTriage(facts: TriageFacts): {
+  cause: SuspectedCause;
+  securityProbability: number;
+} {
+  const step = facts.failingStep;
+  const text = [step?.description, step?.expected, step?.actual, facts.reason].map(String).join(' ');
+  // An expected 401/403 that did not happen is an authorization check by definition.
+  const authzExpectation = step?.expected === 401 || step?.expected === 403;
+  const securityProbability = SECURITY_TERMS.test(text) || authzExpectation ? 0.8 : 0.05;
+  if (/EVIDENCE_UNAVAILABLE|EXECUTOR_CRASHED|LEASE_LOST/.test(facts.reason) || facts.httpErrors.length > 0) {
+    return { cause: 'ENVIRONMENT', securityProbability };
+  }
+  if (facts.verdict === 'INCONCLUSIVE' || facts.stepErrors.length > 0)
+    return { cause: 'TEST_ISSUE', securityProbability };
+  if (step && step.actual !== null && step.actual !== undefined)
+    return { cause: 'PRODUCT_DEFECT', securityProbability };
+  return { cause: 'UNKNOWN', securityProbability };
 }

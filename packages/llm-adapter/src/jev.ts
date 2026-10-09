@@ -19,14 +19,19 @@ import {
   DECISIONS_PROMPT_VERSION,
   readinessQuestions,
 } from './decision-readiness.ts';
-import { buildPayload, userMessage } from './prompts.ts';
+import { TRIAGE_DECISIONS_PROMPT_VERSION, triageFromDecisions, triageQuestions } from './decision-triage.ts';
+import { buildPayload, buildTriagePayload, userMessage } from './prompts.ts';
 import type {
   CallMeta,
   FailureKind,
+  ProviderFailure,
   ProviderOutcome,
   ReadinessAssessment,
   ReadinessClassifier,
   ReadinessInput,
+  TriageAssessment,
+  TriageClassifier,
+  TriageFacts,
 } from './types.ts';
 
 /**
@@ -71,22 +76,46 @@ function classifyError(err: unknown): { failure: FailureKind; detail: string } {
   };
 }
 
-/** Readiness via TypeSafe Jev `systemOne` (choice + noul questions), readiness only (ADR-0007). */
-export class JevClassifier implements ReadinessClassifier {
+type PlanQuestion =
+  | {
+      kind: 'choice';
+      name: string;
+      instructions: string;
+      choices: Array<{ value: string; description: string }>;
+    }
+  | { kind: 'yesno'; name: string; instructions: string; yes: string; no: string };
+
+/** Readiness and failure triage via TypeSafe Jev `systemOne` (choice + noul questions; ADR-0007/0009). */
+export class JevClassifier implements ReadinessClassifier, TriageClassifier {
   readonly model: string;
   constructor(private readonly config: { client: TypeSafeClient; model?: string; providerLabel?: string }) {
     this.model = config.model ?? DEFAULT_JEV_MODEL;
   }
 
-  async classify(input: ReadinessInput): Promise<ProviderOutcome<ReadinessAssessment>> {
-    const payload = buildPayload(input.story, input.sources);
-    const plan = readinessQuestions(input.story.acceptanceCriteria.length, input.sources.length);
+  private get label() {
+    return this.config.providerLabel ?? 'jev';
+  }
+
+  get readinessCacheId(): string {
+    return `${this.label}|${this.model}|${DECISIONS_PROMPT_VERSION}`;
+  }
+
+  get triageCacheId(): string {
+    return `${this.label}|${this.model}|${TRIAGE_DECISIONS_PROMPT_VERSION}`;
+  }
+
+  /** One systemOne call; returns raw answers by name, or a fail-closed provider failure. */
+  private async ask(
+    plan: PlanQuestion[],
+    payload: unknown,
+    promptVersion: string,
+  ): Promise<{ ok: true; answers: Record<string, unknown>; meta: CallMeta } | ProviderFailure> {
     const meta: CallMeta = {
-      provider: this.config.providerLabel ?? 'jev',
+      provider: this.label,
       requestedModel: this.model,
       model: null,
-      promptVersion: DECISIONS_PROMPT_VERSION,
-      inputHash: sha256(canonicalJson({ promptVersion: DECISIONS_PROMPT_VERSION, payload, plan })),
+      promptVersion,
+      inputHash: sha256(canonicalJson({ promptVersion, payload, plan })),
       usage: null,
       latencyMs: 0,
     };
@@ -114,28 +143,54 @@ export class JevClassifier implements ReadinessClassifier {
         cacheReadTokens: 0,
         cacheWriteTokens: 0,
       };
-
-      const answers = result.answers as Record<string, unknown>;
-      const readiness = ChoiceAnswer.safeParse(answers.readiness);
-      return assessmentFromDecisions(
-        input,
-        {
-          readiness: readiness.success
-            ? { status: 'ok', choice: readiness.data.choice, confidence: readiness.data.confidence }
-            : answers.readiness === undefined
-              ? { status: 'missing', detail: 'no readiness answer' }
-              : { status: 'invalid', detail: 'readiness answer failed validation' },
-          // Missing or invalid noul answers count as "no" (conservative).
-          yes: (name) => {
-            const a = NoulAnswer.safeParse(answers[name]);
-            return a.success ? a.data.noul : 0;
-          },
-        },
-        meta,
-      );
+      return { ok: true, answers: result.answers as Record<string, unknown>, meta };
     } catch (err) {
       meta.latencyMs = performance.now() - started;
       return { ok: false, ...classifyError(err), meta };
     }
+  }
+
+  private static choice(raw: unknown, name: string) {
+    const parsed = ChoiceAnswer.safeParse(raw);
+    if (parsed.success)
+      return { status: 'ok' as const, choice: parsed.data.choice, confidence: parsed.data.confidence };
+    return raw === undefined
+      ? { status: 'missing' as const, detail: `no ${name} answer` }
+      : { status: 'invalid' as const, detail: `${name} answer failed validation` };
+  }
+
+  async classify(input: ReadinessInput): Promise<ProviderOutcome<ReadinessAssessment>> {
+    const res = await this.ask(
+      readinessQuestions(input.story.acceptanceCriteria.length, input.sources.length),
+      buildPayload(input.story, input.sources),
+      DECISIONS_PROMPT_VERSION,
+    );
+    if (!res.ok) return res;
+    return assessmentFromDecisions(
+      input,
+      {
+        readiness: JevClassifier.choice(res.answers.readiness, 'readiness'),
+        // Missing or invalid noul answers count as "no" (conservative).
+        yes: (name) => {
+          const a = NoulAnswer.safeParse(res.answers[name]);
+          return a.success ? a.data.noul : 0;
+        },
+      },
+      res.meta,
+    );
+  }
+
+  async triage(facts: TriageFacts): Promise<ProviderOutcome<TriageAssessment>> {
+    const res = await this.ask(triageQuestions(), buildTriagePayload(facts), TRIAGE_DECISIONS_PROMPT_VERSION);
+    if (!res.ok) return res;
+    const security = NoulAnswer.safeParse(res.answers.security);
+    return triageFromDecisions(
+      {
+        cause: JevClassifier.choice(res.answers.cause, 'cause'),
+        // Missing/invalid -> null -> escalates (fail safe).
+        securityProbability: security.success ? security.data.noul : null,
+      },
+      res.meta,
+    );
   }
 }

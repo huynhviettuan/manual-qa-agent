@@ -46,6 +46,7 @@ import {
   type ResolveResult,
   type ReviewKind,
 } from '@qa/review';
+import { cachedDecision } from './decision-cache.ts';
 
 export type OrchestratorDeps = {
   db: Db;
@@ -56,6 +57,8 @@ export type OrchestratorDeps = {
   workflowTokenBudget?: number;
   /** Optional readiness-confidence floor (downgrade only); see policy-engine. */
   minReadyConfidence?: number | null;
+  /** Decision cache TTL in ms (QA-021); 0/undefined disables caching. */
+  decisionCacheTtlMs?: number | null;
 };
 
 /** `QA_MIN_READY_CONFIDENCE` in (0, 1]; unset means no floor. */
@@ -278,6 +281,7 @@ async function recordCall(
   kind: string,
   out: ProviderOutcome<unknown>,
   retrieval: RetrievalResult,
+  cacheHit = false,
 ): Promise<string> {
   const meta: CallMeta = out.meta;
   const id = await insertDecisionRecord(ctx.deps.db, ctx.scope, {
@@ -294,10 +298,11 @@ async function recordCall(
     result: out.ok ? out.value : { failure: out.failure, detail: out.detail },
     usage: meta.usage,
     latencyMs: meta.latencyMs,
+    cacheHit,
   });
   await insertUsageEvent(ctx.deps.db, ctx.scope, {
     workflowId: ctx.workflowId,
-    component: kind,
+    component: cacheHit ? `${kind}:cache` : kind,
     model: meta.model,
     inputTokens: meta.usage?.inputTokens ?? 0,
     outputTokens: meta.usage?.outputTokens ?? 0,
@@ -386,8 +391,25 @@ async function execute(ctx: Ctx): Promise<WorkflowOutcome> {
 
   // 4. Readiness classification (advisory).
   const classified = await step(ctx, 'classify', async () => {
-    const out = await ctx.deps.classifier.classify({ story: storyInput(story), sources: retrieval.chunks });
-    const decisionRecordId = await recordCall(ctx, 'readiness', out, retrieval);
+    const input = { story: storyInput(story), sources: retrieval.chunks };
+    const { out, cacheHit } = await cachedDecision(
+      ctx.deps.db,
+      ctx.scope,
+      'readiness',
+      ctx.deps.classifier.readinessCacheId,
+      {
+        story: input.story,
+        // Content-addressed sources: new or changed knowledge never reuses an old answer.
+        sources: input.sources.map((c) => ({
+          ref: sourceRef(c.sourceId, c.version),
+          content: c.content,
+          tier: c.trustTier,
+        })),
+      },
+      ctx.deps.decisionCacheTtlMs,
+      () => ctx.deps.classifier.classify(input),
+    );
+    const decisionRecordId = await recordCall(ctx, 'readiness', out, retrieval, cacheHit);
     return { out, decisionRecordId };
   });
   const { out } = classified;
@@ -518,3 +540,7 @@ export async function resolveReviewAndContinue(
   return { ...res, rerun };
 }
 export * from './runs.ts';
+export * from './triage.ts';
+export * from './decision-cache.ts';
+export * from './bugs.ts';
+export * from './metrics.ts';

@@ -4,8 +4,10 @@ import {
   HEURISTIC_MODEL,
   heuristicDecisions,
   heuristicDraft,
+  heuristicTriage,
   type PromptPayload,
 } from './heuristic.ts';
+import type { TriageFacts } from './types.ts';
 
 /**
  * A stand-in for the OpenAI HTTP API (Decisions + Responses), injected into the real SDK client
@@ -102,6 +104,15 @@ export function createFakeOpenAIFetch(
 export const openaiHeuristicResponder: OpenAIResponder = ({ endpoint, payload, questions }) => {
   if (endpoint === 'responses') return responsesReply(heuristicDraft(payload), { model: HEURISTIC_MODEL });
   if (endpoint !== 'decisions') return openaiErrorReply(404, 'not_found');
+  if (questions.some((q) => q.name === 'cause')) {
+    const t = heuristicTriage(payload as unknown as TriageFacts);
+    return decisionReply(
+      [choiceAnswer('cause', t.cause, 0.8), predicateAnswer('security', t.securityProbability)],
+      {
+        model: HEURISTIC_MODEL,
+      },
+    );
+  }
   const h = heuristicDecisions(
     payload,
     questions.map((q) => q.name),

@@ -50,6 +50,9 @@ importers:
       '@qa/execution':
         specifier: workspace:*
         version: link:../../packages/execution
+      '@qa/integrations':
+        specifier: workspace:*
+        version: link:../../packages/integrations
       '@qa/llm-adapter':
         specifier: workspace:*
         version: link:../../packages/llm-adapter
@@ -132,6 +135,9 @@ importers:
       '@qa/execution':
         specifier: workspace:*
         version: link:../../packages/execution
+      '@qa/llm-adapter':
+        specifier: workspace:*
+        version: link:../../packages/llm-adapter
       '@qa/observability':
         specifier: workspace:*
         version: link:../../packages/observability
@@ -186,6 +192,15 @@ importers:
         specifier: workspace:*
         version: link:../../apps/demo-sut
 
+  packages/integrations:
+    dependencies:
+      '@qa/domain':
+        specifier: workspace:*
+        version: link:../domain
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
+
   packages/llm-adapter:
     dependencies:
       '@anthropic-ai/sdk':
@@ -227,6 +242,9 @@ importers:
       '@qa/execution':
         specifier: workspace:*
         version: link:../execution
+      '@qa/integrations':
+        specifier: workspace:*
+        version: link:../integrations
       '@qa/llm-adapter':
         specifier: workspace:*
         version: link:../llm-adapter

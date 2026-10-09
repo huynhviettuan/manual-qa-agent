@@ -1,0 +1,18 @@
+{
+  "id": "ambiguous-locator",
+  "expectedCause": "TEST_ISSUE",
+  "securitySensitive": false,
+  "facts": {
+    "verdict": "INCONCLUSIVE",
+    "reason": "STEP_ERROR:pick",
+    "environmentKind": "staging",
+    "stepErrors": [
+      "locator.click: Error: strict mode violation: getByRole(\"textbox\") resolved to 2 elements"
+    ],
+    "httpErrors": [],
+    "failedRequests": 0,
+    "blockedRequests": 0,
+    "consoleErrors": [],
+    "failingStep": { "id": "pick", "description": "click role=textbox", "expected": null, "actual": null }
+  }
+}

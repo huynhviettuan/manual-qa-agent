@@ -57,6 +57,16 @@
   - production execution is always denied.
 - Kill switch: `QA_EXECUTION_ENABLED=0` stops the worker (and the embedded worker).
 
+## Tracker writes (Phase 3, ADR-0009)
+
+- Jira filing is off by default. When enabled it requires:
+  - a human-verified `PRODUCT_DEFECT` triage;
+  - the `publish_bug` capability (never the AI agent);
+  - a QA-lead approval scoped to the bug's payload hash and tracker target, re-checked at publish time.
+- Credentials (`JIRA_API_TOKEN`) come from the environment or secret manager and are never logged. Tracker error bodies are truncated and redacted before storage.
+- Revert labels and comments the issue (plus an optional transition). Nothing is deleted. Every propose, publish and revert is audited.
+- Triage sees only redacted, bounded facts. A provider failure or a missing security answer escalates to a lead.
+
 ## Security tests required for MVP
 
 - Two projects use same AC identifier: retrieval stays project-isolated.

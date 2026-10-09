@@ -1,0 +1,21 @@
+{
+  "id": "dashboard-heading",
+  "expectedCause": "PRODUCT_DEFECT",
+  "securitySensitive": false,
+  "facts": {
+    "verdict": "FAILED",
+    "reason": "ASSERTION_FAILED:heading",
+    "environmentKind": "staging",
+    "stepErrors": [],
+    "httpErrors": [],
+    "failedRequests": 0,
+    "blockedRequests": 0,
+    "consoleErrors": [],
+    "failingStep": {
+      "id": "heading",
+      "description": "expect role=heading to have text \"Dashboard\"",
+      "expected": "Dashboard",
+      "actual": "Dashbord"
+    }
+  }
+}

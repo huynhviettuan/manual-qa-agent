@@ -3,7 +3,8 @@ import { createDbFromEnv, migrate } from '@qa/db';
 import { createEvidenceStoreFromEnv } from '@qa/evidence';
 import { envSecretResolver, PlaywrightExecutor } from '@qa/execution';
 import { createLogger } from '@qa/observability';
-import { runWorkerLoop } from '@qa/orchestrator';
+import { createProvidersFromEnv } from '@qa/llm-adapter';
+import { decisionCacheTtlFromEnv, runWorkerLoop } from '@qa/orchestrator';
 
 /**
  * Executes QUEUED test runs one at a time (concurrency 1 keeps shared test data predictable).
@@ -30,6 +31,9 @@ await runWorkerLoop(
     executor: new PlaywrightExecutor({ channel: process.env.QA_BROWSER_CHANNEL || undefined }),
     store: createEvidenceStoreFromEnv(),
     secrets: envSecretResolver(),
+    // Advisory triage of FAILED/INCONCLUSIVE runs by the readiness provider (ADR-0009).
+    triager: createProvidersFromEnv().triager,
+    decisionCacheTtlMs: decisionCacheTtlFromEnv(),
     logger,
   },
   {

@@ -3,9 +3,11 @@ import {
   HEURISTIC_MODEL,
   heuristicAssessment,
   heuristicDraft,
+  heuristicTriage,
   type PromptPayload,
 } from './heuristic.ts';
-import { DRAFT_SYSTEM, READINESS_SYSTEM } from './prompts.ts';
+import { DRAFT_SYSTEM, READINESS_SYSTEM, TRIAGE_SYSTEM } from './prompts.ts';
+import type { TriageFacts } from './types.ts';
 
 /**
  * A stand-in for the Anthropic HTTP API, injected into the real SDK client via its `fetch`
@@ -13,7 +15,7 @@ import { DRAFT_SYSTEM, READINESS_SYSTEM } from './prompts.ts';
  */
 
 export type FakeRequest = {
-  kind: 'readiness' | 'draft' | 'unknown';
+  kind: 'readiness' | 'draft' | 'triage' | 'unknown';
   body: Record<string, unknown>;
   payload: PromptPayload;
 };
@@ -69,7 +71,14 @@ export function createFakeAnthropicFetch(responder: Responder): typeof fetch & {
     const system = String(body.system ?? '');
     const messages = (body.messages ?? []) as Array<{ content: string }>;
     const payload = decodePayload(messages[0]?.content ?? '');
-    const kind = system === READINESS_SYSTEM ? 'readiness' : system === DRAFT_SYSTEM ? 'draft' : 'unknown';
+    const kind =
+      system === READINESS_SYSTEM
+        ? 'readiness'
+        : system === DRAFT_SYSTEM
+          ? 'draft'
+          : system === TRIAGE_SYSTEM
+            ? 'triage'
+            : 'unknown';
     const req: FakeRequest = { kind, body, payload };
     calls.push(req);
     return jsonResponse(await responder(req));
@@ -82,5 +91,16 @@ export const heuristicResponder: Responder = ({ kind, payload }) => {
   if (kind === 'readiness')
     return messageReply(heuristicAssessment(payload).assessment, { model: HEURISTIC_MODEL });
   if (kind === 'draft') return messageReply(heuristicDraft(payload), { model: HEURISTIC_MODEL });
+  if (kind === 'triage') {
+    const t = heuristicTriage(payload as unknown as TriageFacts);
+    return messageReply(
+      {
+        suspectedCause: t.cause,
+        securitySensitive: t.securityProbability >= 0.3,
+        rationale: `Heuristic suggestion (${t.cause}).`,
+      },
+      { model: HEURISTIC_MODEL },
+    );
+  }
   return errorReply(400, 'invalid_request_error');
 };

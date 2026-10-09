@@ -1,0 +1,21 @@
+{
+  "id": "admin-permission-leak",
+  "expectedCause": "PRODUCT_DEFECT",
+  "securitySensitive": true,
+  "facts": {
+    "verdict": "FAILED",
+    "reason": "ASSERTION_FAILED:admin-users",
+    "environmentKind": "staging",
+    "stepErrors": [],
+    "httpErrors": [],
+    "failedRequests": 0,
+    "blockedRequests": 0,
+    "consoleErrors": [],
+    "failingStep": {
+      "id": "admin-users",
+      "description": "GET /api/admin/users expect 403",
+      "expected": 403,
+      "actual": 200
+    }
+  }
+}

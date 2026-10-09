@@ -3,7 +3,8 @@ import { createEvidenceStoreFromEnv } from '@qa/evidence';
 import { createProvidersFromEnv } from '@qa/llm-adapter';
 import { createLogger } from '@qa/observability';
 import { envSecretResolver, PlaywrightExecutor } from '@qa/execution';
-import { minReadyConfidenceFromEnv, runWorkerLoop } from '@qa/orchestrator';
+import { createBugTrackerFromEnv } from '@qa/integrations';
+import { decisionCacheTtlFromEnv, minReadyConfidenceFromEnv, runWorkerLoop } from '@qa/orchestrator';
 import { buildApp } from './app.ts';
 
 const logger = createLogger({ name: 'qa-api' });
@@ -16,14 +17,20 @@ logger.info(
 );
 
 const evidenceStore = createEvidenceStoreFromEnv();
+const tracker = createBugTrackerFromEnv();
+const decisionCacheTtlMs = decisionCacheTtlFromEnv();
+logger.info({ jira: tracker ? tracker.target : 'disabled', decisionCacheTtlMs }, 'integrations');
 const app = await buildApp({
   deps: {
     db,
     classifier: providers.classifier,
     generator: providers.generator,
     minReadyConfidence: minReadyConfidenceFromEnv(),
+    decisionCacheTtlMs,
   },
   evidenceStore,
+  triager: providers.triager,
+  tracker,
   logger,
 });
 const port = Number(process.env.PORT ?? 3000);
@@ -40,6 +47,8 @@ if (process.env.QA_EMBEDDED_WORKER === '1' && process.env.QA_EXECUTION_ENABLED !
       executor: new PlaywrightExecutor({ channel: process.env.QA_BROWSER_CHANNEL || undefined }),
       store: evidenceStore,
       secrets: envSecretResolver(),
+      triager: providers.triager,
+      decisionCacheTtlMs,
       logger,
     },
     { workerId: `api-embedded-${process.pid}`, idleMs: 1000, signal: workerAbort.signal },

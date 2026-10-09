@@ -8,6 +8,7 @@
     "@qa/domain": "workspace:*",
     "@qa/evidence": "workspace:*",
     "@qa/execution": "workspace:*",
+    "@qa/llm-adapter": "workspace:*",
     "@qa/observability": "workspace:*",
     "@qa/orchestrator": "workspace:*"
   }

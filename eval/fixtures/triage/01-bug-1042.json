@@ -1,0 +1,21 @@
+{
+  "id": "bug-1042-enumeration",
+  "expectedCause": "PRODUCT_DEFECT",
+  "securitySensitive": true,
+  "facts": {
+    "verdict": "FAILED",
+    "reason": "ASSERTION_FAILED:message",
+    "environmentKind": "staging",
+    "stepErrors": [],
+    "httpErrors": [],
+    "failedRequests": 0,
+    "blockedRequests": 0,
+    "consoleErrors": [],
+    "failingStep": {
+      "id": "message",
+      "description": "expect testId=login-message to have text \"Invalid email or password\"",
+      "expected": "Invalid email or password",
+      "actual": "User not found"
+    }
+  }
+}

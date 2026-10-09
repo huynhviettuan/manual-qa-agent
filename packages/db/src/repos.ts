@@ -739,6 +739,8 @@ export type DecisionRecordInsert = {
   result: unknown;
   usage: unknown;
   latencyMs: number;
+  /** Served from the decision cache (no provider call). */
+  cacheHit?: boolean;
 };
 
 export async function insertDecisionRecord(
@@ -749,8 +751,8 @@ export async function insertDecisionRecord(
   const id = newId('dec');
   await db.query(
     `INSERT INTO decision_records (id, tenant_id, project_id, workflow_id, kind, provider, requested_model, model,
-       prompt_version, input_hash, snapshot_id, source_refs, outcome, result, usage, latency_ms)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14::text::jsonb,$15::text::jsonb,$16)`,
+       prompt_version, input_hash, snapshot_id, source_refs, outcome, result, usage, latency_ms, cache_hit)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14::text::jsonb,$15::text::jsonb,$16,$17)`,
     [
       id,
       scope.tenantId,
@@ -768,6 +770,7 @@ export async function insertDecisionRecord(
       json(d.result),
       json(d.usage),
       Math.round(d.latencyMs),
+      d.cacheHit ?? false,
     ],
   );
   return id;
@@ -897,6 +900,7 @@ export async function workflowUsage(db: Db, scope: TenantScope, workflowId: stri
     db.query(
       `SELECT id, kind, provider, requested_model AS "requestedModel", model, prompt_version AS "promptVersion",
               input_hash AS "inputHash", snapshot_id AS "snapshotId", source_refs AS "sourceRefs", outcome, usage,
+              cache_hit AS "cacheHit",
               latency_ms AS "latencyMs", created_at AS "createdAt"
          FROM decision_records WHERE workflow_id = $1 AND tenant_id = $2 AND project_id = $3 ORDER BY created_at`,
       [workflowId, scope.tenantId, scope.projectId],

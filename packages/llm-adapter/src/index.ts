@@ -10,10 +10,11 @@ import {
   OpenAIDecisionsClassifier,
   OpenAIResponsesDrafter,
 } from './openai.ts';
-import type { DraftGenerator, ReadinessClassifier } from './types.ts';
+import type { DraftGenerator, ReadinessClassifier, TriageClassifier } from './types.ts';
 
 export * from './claude.ts';
 export * from './decision-readiness.ts';
+export * from './decision-triage.ts';
 export * from './fake-anthropic.ts';
 export * from './fake-jev.ts';
 export * from './fake-openai.ts';
@@ -37,6 +38,8 @@ export type DecisionProviders = {
   /** false = deterministic heuristic behind each provider's real SDK (no network, no cost). */
   live: boolean;
   classifier: ReadinessClassifier;
+  /** Failure triage, answered by the readiness provider (ADR-0009). */
+  triager: TriageClassifier;
   generator: DraftGenerator;
   models: { readiness: string; draft: string };
 };
@@ -114,7 +117,7 @@ export function createProvidersFromEnv(env: NodeJS.ProcessEnv = process.env): De
   }
 
   // Readiness.
-  let classifier: ReadinessClassifier;
+  let classifier: ReadinessClassifier & TriageClassifier;
   let readinessModel: string;
   if (readiness === 'anthropic') {
     classifier = claude!;
@@ -143,6 +146,7 @@ export function createProvidersFromEnv(env: NodeJS.ProcessEnv = process.env): De
     providers: { readiness, draft },
     live,
     classifier,
+    triager: classifier,
     generator,
     models: { readiness: readinessModel, draft: draftModel },
   };

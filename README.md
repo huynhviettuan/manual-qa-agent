@@ -61,7 +61,12 @@ Destructive specs come back `BLOCKED` with an approval review. After a QA lead a
 | Deterministic assertions + run lifecycle, worker with leases | `packages/orchestrator`, `apps/worker` | QA-017 | Implemented |
 | Scoped approval for destructive steps, re-checked at execution | `packages/policy-engine`, `packages/orchestrator` | QA-018 | Implemented |
 | Demo system under test + executable specs | `apps/demo-sut` | — | Implemented (pilot/CI only) |
-| Failure triage, Jira/TCMS, dashboards | — | QA-019…022 | Not started |
+| Advisory failure triage (all providers), security escalation, human-verified causes | `packages/llm-adapter`, `packages/orchestrator` | QA-019 | Implemented (ADR-0009) |
+| Deterministic reproduction write-up | `packages/orchestrator` | — | Implemented |
+| Jira Cloud bug filing: verified defect + scoped approval, idempotent, revertible | `packages/integrations`, `packages/orchestrator` | QA-020 | Implemented (off by default; no live Jira test yet) |
+| Decision cache (tenant-scoped, content-addressed) + warm-run benchmark | `packages/orchestrator`, `apps/cli` | QA-021 | Implemented |
+| Metrics + drift alerts (JSON for dashboards) | `packages/orchestrator`, `apps/api` | QA-022 | Implemented (no UI) |
+| Test-management (Kiwi TCMS) sync, reviewer UI | — | — | Not started |
 
 ## North star
 
@@ -109,7 +114,8 @@ Make the agent useful for daily Manual QA work: understand requirements; design 
   - or OpenAI via `openai`: Decisions API for readiness (`gpt-6-luna`), Responses API for drafts.
   - Readiness only, optional: TypeSafe Jev via `@typesafe-ai/sdk` (`jev-1.13.0`, pinned).
 - Execution: Playwright 1.64 via a constrained step format (ADR-0008), a worker with leases, and a local-disk evidence store.
-- Planned, not built: S3-compatible evidence adapter, LLM-proposed executable steps, failure triage, reviewer web UI.
+- Integrations: Jira Cloud REST v3 via plain `fetch` with zod-validated responses (ADR-0009).
+- Planned, not built: S3-compatible evidence adapter, LLM-proposed executable steps, test-management sync, reviewer web UI.
 
 ## Suggested repository workflow
 

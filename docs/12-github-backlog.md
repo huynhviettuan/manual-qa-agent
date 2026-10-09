@@ -43,10 +43,10 @@ Create a project board with fields `Status` (Backlog, Ready, In Progress, In Rev
 
 | Issue | Title | Priority | Definition of done |
 | --- | --- | --- | --- |
-| QA-019 | Failure triage suggestion and review gates | P1 | Verified label metrics; cannot rewrite assertion verdict |
-| QA-020 | Optional test-management/Jira draft adapter | P1 | Minimal scopes; no external writes without authorization |
-| QA-021 | RAG caching and cost optimization | P1 | Same benchmark compares cost and quality |
-| QA-022 | Operational dashboards and drift alerts | P1 | Token/cost, review, safety metrics and errors visible |
+| QA-019 | Failure triage suggestion and review gates | P1 | Verified label metrics; cannot rewrite assertion verdict. **Done (ADR-0009)** |
+| QA-020 | Optional test-management/Jira draft adapter | P1 | Minimal scopes; no external writes without authorization. **Done for Jira** (test-management sync not started) |
+| QA-021 | RAG caching and cost optimization | P1 | Same benchmark compares cost and quality. **Done** (decision cache + warm-run eval) |
+| QA-022 | Operational dashboards and drift alerts | P1 | Token/cost, review, safety metrics and errors visible. **Done** (JSON endpoints; no UI) |
 
 ## Example issue template
 
