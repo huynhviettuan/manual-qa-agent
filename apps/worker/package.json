@@ -1,0 +1,14 @@
+{
+  "name": "@qa/worker",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@qa/db": "workspace:*",
+    "@qa/domain": "workspace:*",
+    "@qa/evidence": "workspace:*",
+    "@qa/execution": "workspace:*",
+    "@qa/observability": "workspace:*",
+    "@qa/orchestrator": "workspace:*"
+  }
+}

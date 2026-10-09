@@ -34,10 +34,10 @@ Create a project board with fields `Status` (Backlog, Ready, In Progress, In Rev
 
 | Issue | Title | Priority | Definition of done |
 | --- | --- | --- | --- |
-| QA-015 | Browser executor adapter and allowlists | P1 | Non-prod test runs; forbidden environment rejected |
-| QA-016 | Evidence capture and private storage | P1 | Screenshots/traces linked; expiry/redaction tested |
-| QA-017 | Deterministic assertions and run lifecycle | P1 | Pass/fail/block/inconclusive independent of model output |
-| QA-018 | Scoped approval for high-impact test actions | P1 | Action hash/environment/expiry/revocation tested |
+| QA-015 | Browser executor adapter and allowlists | P1 | Non-prod test runs; forbidden environment rejected. **Done (ADR-0008)** |
+| QA-016 | Evidence capture and private storage | P1 | Screenshots/traces linked; expiry/redaction tested. **Done** (local store; S3 adapter follow-up; Playwright traces deliberately off because they record filled secret values) |
+| QA-017 | Deterministic assertions and run lifecycle | P1 | Pass/fail/block/inconclusive independent of model output. **Done** |
+| QA-018 | Scoped approval for high-impact test actions | P1 | Action hash/environment/expiry/revocation tested. **Done** |
 
 ## Milestone 3 — Triage and integrations
 

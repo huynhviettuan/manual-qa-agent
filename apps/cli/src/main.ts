@@ -10,7 +10,9 @@ import {
   upsertEnvironment,
   type Db,
 } from '@qa/db';
-import { DomainError, type Role } from '@qa/domain';
+import { DomainError, EnvironmentKind, type Role } from '@qa/domain';
+import { createEvidenceStoreFromEnv } from '@qa/evidence';
+import { purgeExpiredEvidence } from '@qa/orchestrator';
 import { revokeSource } from '@qa/retrieval';
 import { runEval } from './eval.ts';
 import { ingestDirectory } from './ingest-dir.ts';
@@ -25,6 +27,11 @@ const USAGE = `Usage: pnpm qa <command> [options]
   revoke  <sourceId@version> --tenant T --project P --as ACTOR
   eval    <fixturesDir>                     Run the labeled evaluation set (in-memory DB;
                                             mocked provider unless QA_LIVE_LLM=1)
+  env     <id> --tenant T --project P --kind test|staging|production --base-url URL
+          [--actions draft,execute] [--hosts host:port,...]
+                                            Configure an execution environment (admin). Runs may
+                                            only reach the base URL host plus --hosts
+  purge-evidence                            Delete evidence past its retention
 
 Database: DATABASE_URL, or an embedded PGlite database in ./.pglite when unset.`;
 
@@ -32,6 +39,10 @@ const { positionals, values } = parseArgs({
   allowPositionals: true,
   options: {
     tenant: { type: 'string', default: 'local' },
+    kind: { type: 'string' },
+    'base-url': { type: 'string' },
+    actions: { type: 'string', default: 'draft,execute' },
+    hosts: { type: 'string', default: '' },
     project: { type: 'string', default: 'pilot' },
     as: { type: 'string' },
   },
@@ -122,6 +133,51 @@ try {
             : 'Not found or already revoked',
         );
       });
+      break;
+    }
+    case 'env': {
+      if (!arg) throw new DomainError('VALIDATION', 'env needs an environment id');
+      const kind = EnvironmentKind.parse(values.kind);
+      const baseUrl = values['base-url'] ? new URL(values['base-url']) : null;
+      if (baseUrl && !['http:', 'https:'].includes(baseUrl.protocol)) {
+        throw new DomainError('VALIDATION', '--base-url must be http(s)');
+      }
+      const actions = values
+        .actions!.split(',')
+        .map((a) => a.trim())
+        .filter(Boolean);
+      const hosts = [
+        ...new Set([
+          ...(baseUrl ? [baseUrl.host] : []),
+          ...values
+            .hosts!.split(',')
+            .map((h) => h.trim())
+            .filter(Boolean),
+        ]),
+      ];
+      await withDb((db) =>
+        upsertEnvironment(
+          db,
+          { tenantId: values.tenant!, projectId: values.project! },
+          {
+            id: arg,
+            kind,
+            allowedActions: actions,
+            baseUrl: baseUrl?.origin ?? null,
+            allowedHosts: hosts,
+          },
+        ),
+      );
+      console.log(
+        `Environment ${arg} (${kind}): ${baseUrl?.origin ?? 'no target'}; actions=${actions.join(',')}; hosts=${hosts.join(',') || '-'}`,
+      );
+      if (kind === 'production')
+        console.log('Note: policy denies execution in production regardless of this configuration.');
+      break;
+    }
+    case 'purge-evidence': {
+      const purged = await withDb((db) => purgeExpiredEvidence(db, createEvidenceStoreFromEnv()));
+      console.log(`Purged ${purged} expired evidence object(s)`);
       break;
     }
     case 'eval': {

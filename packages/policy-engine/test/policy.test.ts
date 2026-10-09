@@ -51,6 +51,24 @@ describe('decideGate (docs/05)', () => {
     });
   });
 
+  it('executing destructive steps needs a scoped approval; production stays denied regardless', () => {
+    expect(decideGate({ ...base, action: 'execute', destructive: true }).reason).toBe(
+      'SCOPED_APPROVAL_REQUIRED',
+    );
+    expect(decideGate({ ...base, action: 'execute', destructive: true, hasScopedApproval: true }).gate).toBe(
+      'AUTO_PROCEED',
+    );
+    expect(
+      decideGate({
+        ...base,
+        action: 'execute',
+        destructive: true,
+        hasScopedApproval: true,
+        targetEnvironment: 'production',
+      }).gate,
+    ).toBe('DENY');
+  });
+
   it('publish_bug without approval needs review', () => {
     expect(decideGate({ ...base, action: 'publish_bug' }).gate).toBe('NEEDS_HUMAN_REVIEW');
   });

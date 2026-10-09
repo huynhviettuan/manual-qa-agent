@@ -1,0 +1,14 @@
+{
+  "name": "@qa/execution",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@qa/domain": "workspace:*",
+    "@qa/evidence": "workspace:*",
+    "playwright": "1.64.0"
+  },
+  "devDependencies": {
+    "@qa/demo-sut": "workspace:*"
+  }
+}

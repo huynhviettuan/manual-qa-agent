@@ -1,6 +1,6 @@
 # Instructions for coding agents
 
-This repository contains the specification plus a Phase 1 MVP implementation; see "Implementation status" in `README.md`. Anything not listed there as implemented (execution, evidence storage, triage, integrations, UI) is still specification only. Never claim a feature has been implemented until its code and tests exist. Follow `README.md` and the relevant files in `docs/`.
+This repository contains the specification plus Phase 1 (readiness, RAG, review) and Phase 2 (controlled execution and evidence) implementations; see "Implementation status" in `README.md`. Anything not listed there as implemented (failure triage, Jira/TCMS integrations, reviewer UI, S3 evidence adapter) is still specification only. Execution changes must keep ADR-0008: no new step type without validation and tests, and no model in the run-time loop. Never claim a feature has been implemented until its code and tests exist. Follow `README.md` and the relevant files in `docs/`.
 
 Verification commands: `pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm eval`. CI never calls a live model; live smoke tests run only with `QA_LIVE_LLM=1`.
 

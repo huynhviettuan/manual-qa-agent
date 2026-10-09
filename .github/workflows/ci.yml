@@ -22,7 +22,9 @@ jobs:
       - run: pnpm lint
       - run: pnpm format:check
       - run: pnpm typecheck
-      # Unit, mocked-provider contract, policy/tenancy and PGlite integration tests.
+      # Browser for Phase 2 execution tests (real Playwright against the in-repo demo app).
+      - run: pnpm --filter @qa/execution exec playwright install --with-deps chromium
+      # Unit, mocked-provider contract, policy/tenancy, PGlite integration and browser tests.
       - run: pnpm test
       - run: pnpm eval
       - run: pnpm eval

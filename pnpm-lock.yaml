@@ -44,6 +44,12 @@ importers:
       '@qa/domain':
         specifier: workspace:*
         version: link:../../packages/domain
+      '@qa/evidence':
+        specifier: workspace:*
+        version: link:../../packages/evidence
+      '@qa/execution':
+        specifier: workspace:*
+        version: link:../../packages/execution
       '@qa/llm-adapter':
         specifier: workspace:*
         version: link:../../packages/llm-adapter
@@ -65,6 +71,10 @@ importers:
       zod:
         specifier: ^4.6.5
         version: 4.6.5
+    devDependencies:
+      '@qa/demo-sut':
+        specifier: workspace:*
+        version: link:../demo-sut
 
   apps/cli:
     dependencies:
@@ -74,6 +84,9 @@ importers:
       '@qa/domain':
         specifier: workspace:*
         version: link:../../packages/domain
+      '@qa/evidence':
+        specifier: workspace:*
+        version: link:../../packages/evidence
       '@qa/llm-adapter':
         specifier: workspace:*
         version: link:../../packages/llm-adapter
@@ -95,6 +108,36 @@ importers:
       zod:
         specifier: ^4.6.5
         version: 4.6.5
+
+  apps/demo-sut:
+    dependencies:
+      '@qa/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
+      fastify:
+        specifier: ^5.12.5
+        version: 5.12.5
+
+  apps/worker:
+    dependencies:
+      '@qa/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@qa/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
+      '@qa/evidence':
+        specifier: workspace:*
+        version: link:../../packages/evidence
+      '@qa/execution':
+        specifier: workspace:*
+        version: link:../../packages/execution
+      '@qa/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
+      '@qa/orchestrator':
+        specifier: workspace:*
+        version: link:../../packages/orchestrator
 
   packages/db:
     dependencies:
@@ -120,6 +163,28 @@ importers:
       zod:
         specifier: ^4.6.5
         version: 4.6.5
+
+  packages/evidence:
+    dependencies:
+      '@qa/domain':
+        specifier: workspace:*
+        version: link:../domain
+
+  packages/execution:
+    dependencies:
+      '@qa/domain':
+        specifier: workspace:*
+        version: link:../domain
+      '@qa/evidence':
+        specifier: workspace:*
+        version: link:../evidence
+      playwright:
+        specifier: 1.64.0
+        version: 1.64.0
+    devDependencies:
+      '@qa/demo-sut':
+        specifier: workspace:*
+        version: link:../../apps/demo-sut
 
   packages/llm-adapter:
     dependencies:
@@ -156,6 +221,12 @@ importers:
       '@qa/domain':
         specifier: workspace:*
         version: link:../domain
+      '@qa/evidence':
+        specifier: workspace:*
+        version: link:../evidence
+      '@qa/execution':
+        specifier: workspace:*
+        version: link:../execution
       '@qa/llm-adapter':
         specifier: workspace:*
         version: link:../llm-adapter
@@ -171,6 +242,10 @@ importers:
       '@qa/review':
         specifier: workspace:*
         version: link:../review
+    devDependencies:
+      '@qa/demo-sut':
+        specifier: workspace:*
+        version: link:../../apps/demo-sut
 
   packages/policy-engine:
     dependencies:
@@ -1176,6 +1251,16 @@ packages:
 
   pino@10.4.0:
     resolution: {integrity: sha512-bk1ZMTwG/Vymx+zPoa28MhNzucFvXJWp3csrSuxuHPSMeUettaCoQ5Jvg07mtC4JGNpcfTwz41oVCnNgBK9+vA==}
+    hasBin: true
+
+  playwright-core@1.64.0:
+    resolution: {integrity: sha512-T9r+MZkTECl2+oUcZ26YgZzTrYidTsIhYYkJix+6iDOymOb1FB2RLLSOxRGnZGv5DStt+aduIVbt+E8WygXYpg==}
+    engines: {node: '>=20'}
+    hasBin: true
+
+  playwright@1.64.0:
+    resolution: {integrity: sha512-kVzTnYFYEyQ9RGzBjNCd2+yEqWmVbxl3AHPynv3qQ6JTjv4a+kwRcnqQwIpuP3NnrnIrE/Q6wWAIAvMfIE2/Yg==}
+    engines: {node: '>=20'}
     hasBin: true
 
   postcss@8.5.29:
@@ -2314,6 +2399,12 @@ snapshots:
       safe-stable-stringify: 2.5.0
       sonic-boom: 4.2.1
       thread-stream: 4.2.0
+
+  playwright-core@1.64.0: {}
+
+  playwright@1.64.0:
+    dependencies:
+      playwright-core: 1.64.0
 
   postcss@8.5.29:
     dependencies:

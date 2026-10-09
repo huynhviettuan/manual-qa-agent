@@ -6,10 +6,15 @@
   "dependencies": {
     "@qa/db": "workspace:*",
     "@qa/domain": "workspace:*",
+    "@qa/evidence": "workspace:*",
+    "@qa/execution": "workspace:*",
     "@qa/llm-adapter": "workspace:*",
     "@qa/observability": "workspace:*",
     "@qa/policy-engine": "workspace:*",
     "@qa/retrieval": "workspace:*",
     "@qa/review": "workspace:*"
+  },
+  "devDependencies": {
+    "@qa/demo-sut": "workspace:*"
   }
 }

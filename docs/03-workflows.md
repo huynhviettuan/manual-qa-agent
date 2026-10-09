@@ -39,6 +39,8 @@ sequenceDiagram
 
 ## Workflow B — Authorized test execution (P1)
 
+> Implemented in Phase 2 (ADR-0008). The approved case first gets an approved executable spec. Sensitive runs end `BLOCKED` with an `ACTION_APPROVAL` review. After approval, the run is requested again with the `approvalId`, and the worker re-checks it right before executing.
+
 1. QA selects an **approved case** and environment.
 2. Orchestrator checks role, environment/domain allowlist, impact class and test-data policy.
 3. If a sensitive action is proposed, orchestrator creates a review request tied to `actionHash`, `environmentId`, test ID and expiry.

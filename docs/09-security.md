@@ -45,6 +45,18 @@
 5. Record external model provider, region/data terms and data-sharing configuration before onboarding regulated customers. Each selectable provider (`QA_LLM_PROVIDER`, ADR-0006) is a separate data processor and needs its own review before live use. The OpenAI draft path sets `store: false`. TypeSafe Jev (`QA_READINESS_PROVIDER=jev`) is also a processor. Its SDK logs request bodies at `debug`, so the client pins `logLevel: 'warn'` (ADR-0007). Every DecisionRecord stores the provider label and models used.
 6. No raw production data in demo prompts or public GitHub repository.
 
+## Execution controls (Phase 2, ADR-0008)
+
+- Execution targets come only from administrator-managed environments (`base_url`, `allowed_hosts`). Specs use relative paths. Every browser request and WebSocket outside the allowlist is aborted and recorded.
+- Secrets in specs are references (`{ "secret": "NAME" }`) resolved at run time. They never appear in specs, prompts or evidence: they are redacted from logs and masked in screenshots. Playwright traces are off because they would capture filled values.
+- Network evidence keeps method, host, path and status only. Query strings, headers and bodies can carry tokens.
+- Approval chain:
+  - the executable needs a second-person approval;
+  - destructive steps need a QA-lead/admin approval scoped to action hash, environment and expiry;
+  - policy is re-checked in the worker immediately before execution;
+  - production execution is always denied.
+- Kill switch: `QA_EXECUTION_ENABLED=0` stops the worker (and the embedded worker).
+
 ## Security tests required for MVP
 
 - Two projects use same AC identifier: retrieval stays project-isolated.

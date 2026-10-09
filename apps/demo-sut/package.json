@@ -1,0 +1,13 @@
+{
+  "name": "@qa/demo-sut",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./specs": "./src/specs.ts"
+  },
+  "dependencies": {
+    "@qa/domain": "workspace:*",
+    "fastify": "^5.12.5"
+  }
+}

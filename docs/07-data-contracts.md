@@ -1,6 +1,6 @@
 # 07 — Data model and conceptual API contracts
 
-**Status:** Entities and endpoints below are implemented (`packages/db` migrations, `apps/api`), except test runs and evidence (Phase 2). Additional MVP endpoints: `POST /api/knowledge/revocations`, `GET /api/test-cases/{id}`, `POST /api/test-cases/{id}/promote`, `GET /api/reviews/{id}`, `GET /api/workflows/{id}`. Auth is an `x-api-key` header resolved server-side to an actor with database roles. There are no cookies, so CSRF does not apply.
+**Status:** Entities and endpoints below are implemented (`packages/db` migrations, `apps/api`), except test runs and evidence (Phase 2). Additional MVP endpoints: `POST /api/knowledge/revocations`, `GET /api/test-cases/{id}`, `POST /api/test-cases/{id}/promote`, `GET /api/reviews/{id}`, `GET /api/workflows/{id}`. Phase 2 endpoints: `POST /api/test-cases/{id}/executables`, `POST /api/executables/{id}/review`, `POST /api/test-runs` (`Idempotency-Key`; 202 when queued, 200 with `BLOCKED` otherwise), `GET /api/test-runs/{id}`, `GET /api/evidence/{id}` (authenticated, project-scoped, `no-store`, digest header, never served to the AI agent). Entities: `test_case_executables`, `test_runs`, `evidence_artifacts` (migration `0003_execution`). Auth is an `x-api-key` header resolved server-side to an actor with database roles. There are no cookies, so CSRF does not apply.
 
 ## Core entities
 

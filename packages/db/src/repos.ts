@@ -59,20 +59,33 @@ export type EnvironmentRow = {
   id: string;
   kind: 'test' | 'staging' | 'production';
   allowedActions: string[];
+  /** Execution target (Phase 2). Runs may only reach `allowedHosts`. */
+  baseUrl?: string | null;
+  allowedHosts?: string[];
 };
 
 export async function upsertEnvironment(db: Db, scope: TenantScope, e: EnvironmentRow) {
   await db.query(
-    `INSERT INTO environments (id, tenant_id, project_id, kind, allowed_actions) VALUES ($1,$2,$3,$4,$5)
-     ON CONFLICT (tenant_id, project_id, id) DO UPDATE SET kind = EXCLUDED.kind, allowed_actions = EXCLUDED.allowed_actions`,
-    [e.id, scope.tenantId, scope.projectId, e.kind, e.allowedActions],
+    `INSERT INTO environments (id, tenant_id, project_id, kind, allowed_actions, base_url, allowed_hosts)
+     VALUES ($1,$2,$3,$4,$5,$6,$7)
+     ON CONFLICT (tenant_id, project_id, id) DO UPDATE SET kind = EXCLUDED.kind,
+       allowed_actions = EXCLUDED.allowed_actions, base_url = EXCLUDED.base_url, allowed_hosts = EXCLUDED.allowed_hosts`,
+    [
+      e.id,
+      scope.tenantId,
+      scope.projectId,
+      e.kind,
+      e.allowedActions,
+      e.baseUrl ?? null,
+      e.allowedHosts ?? [],
+    ],
   );
 }
 
 export async function getEnvironment(db: Db, scope: TenantScope, id: string): Promise<EnvironmentRow | null> {
   const rows = await db.query<EnvironmentRow>(
-    `SELECT id, kind, allowed_actions AS "allowedActions" FROM environments
-      WHERE id = $1 AND tenant_id = $2 AND project_id = $3`,
+    `SELECT id, kind, allowed_actions AS "allowedActions", base_url AS "baseUrl", allowed_hosts AS "allowedHosts"
+       FROM environments WHERE id = $1 AND tenant_id = $2 AND project_id = $3`,
     [id, scope.tenantId, scope.projectId],
   );
   return rows[0] ?? null;

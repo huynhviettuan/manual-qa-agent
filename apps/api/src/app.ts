@@ -6,7 +6,15 @@ import Fastify, {
 } from 'fastify';
 import rateLimit from '@fastify/rate-limit';
 import { z } from 'zod';
-import { findActorByApiKey, getReview, getWorkflow, listRevisions, workflowUsage, type Db } from '@qa/db';
+import {
+  findActorByApiKey,
+  getEvidence,
+  getReview,
+  getWorkflow,
+  listRevisions,
+  workflowUsage,
+  type Db,
+} from '@qa/db';
 import {
   AcceptanceCriterion,
   type Actor,
@@ -16,9 +24,14 @@ import {
   REVIEW_STATUSES,
   Role,
 } from '@qa/domain';
+import type { EvidenceStore } from '@qa/evidence';
 import { silentLogger, type Logger } from '@qa/observability';
 import {
+  getRunReport,
+  proposeExecutable,
+  requestRun,
   resolveReviewAndContinue,
+  reviewExecutable,
   runStoryWorkflow,
   submitStory,
   type OrchestratorDeps,
@@ -33,7 +46,24 @@ declare module 'fastify' {
   }
 }
 
-export type AppOptions = { deps: OrchestratorDeps; logger?: Logger; rateLimitPerMinute?: number };
+export type AppOptions = {
+  deps: OrchestratorDeps;
+  /** Evidence is served only through authenticated, project-scoped requests. */
+  evidenceStore?: EvidenceStore;
+  logger?: Logger;
+  rateLimitPerMinute?: number;
+};
+
+const ExecutableBody = z.object({ spec: z.unknown() });
+const ExecutableReviewBody = z.object({
+  decision: z.enum(['APPROVE', 'REJECT']),
+  reason: z.string().max(2000).optional(),
+});
+const RunBody = z.object({
+  caseId: z.string().min(1).max(100),
+  environmentId: z.string().min(1).max(100),
+  approvalId: z.string().min(1).max(100).optional(),
+});
 
 const STATUS_BY_CODE: Record<DomainError['code'], number> = {
   VALIDATION: 400,
@@ -229,6 +259,47 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
     if (!(await getWorkflow(db, scope(req), id)))
       throw new DomainError('NOT_FOUND', `workflow ${id} not found`);
     return workflowUsage(db, scope(req), id);
+  });
+
+  // ---------------------------------------------------------------- Phase 2: execution
+
+  app.post('/api/test-cases/:id/executables', async (req, reply) => {
+    const { id } = IdParams.parse(req.params);
+    const body = ExecutableBody.parse(req.body);
+    return reply.code(201).send(await proposeExecutable(db, req.actor, id, body.spec));
+  });
+
+  app.post('/api/executables/:id/review', async (req) => {
+    const { id } = IdParams.parse(req.params);
+    return reviewExecutable(db, req.actor, id, ExecutableReviewBody.parse(req.body));
+  });
+
+  app.post('/api/test-runs', async (req, reply) => {
+    const body = RunBody.parse(req.body);
+    const run = await requestRun({ db }, req.actor, { ...body, idempotencyKey: idempotencyKey(req) });
+    return reply.code(run.state === 'QUEUED' ? 202 : 200).send(await getRunReport(db, scope(req), run.id));
+  });
+
+  app.get('/api/test-runs/:id', async (req) => {
+    const { id } = IdParams.parse(req.params);
+    return getRunReport(db, scope(req), id);
+  });
+
+  app.get('/api/evidence/:id', async (req, reply) => {
+    const { id } = IdParams.parse(req.params);
+    if (hasRole(req.actor, 'AI_AGENT'))
+      throw new DomainError('FORBIDDEN', 'raw evidence is not served to the AI agent');
+    const evidence = await getEvidence(db, scope(req), id);
+    if (!evidence || !opts.evidenceStore) throw new DomainError('NOT_FOUND', `evidence ${id} not found`);
+    const data = await opts.evidenceStore.get(evidence.objectKey);
+    if (!data) throw new DomainError('NOT_FOUND', `evidence ${id} content is no longer retained`);
+    return reply
+      .header('content-type', evidence.contentType)
+      .header('cache-control', 'no-store')
+      .header('x-content-type-options', 'nosniff')
+      .header('content-disposition', `inline; filename="${evidence.name}"`)
+      .header('x-evidence-digest', evidence.digest)
+      .send(data);
   });
 
   return app;

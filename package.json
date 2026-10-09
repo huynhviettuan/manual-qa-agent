@@ -17,6 +17,8 @@
     "seed": "tsx apps/cli/src/main.ts seed",
     "qa": "tsx apps/cli/src/main.ts",
     "api": "tsx apps/api/src/main.ts",
+    "worker": "tsx apps/worker/src/main.ts",
+    "demo:sut": "tsx apps/demo-sut/src/main.ts",
     "eval": "tsx apps/cli/src/main.ts eval eval/fixtures"
   },
   "devDependencies": {
