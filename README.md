@@ -1,91 +1,257 @@
-# Manual QA AI Agent — Architecture & Delivery Blueprint
+# Manual QA AI Agent
 
-> **Status:** Phases 1–3 implemented: readiness, RAG and review; controlled execution and evidence; advisory triage, gated Jira filing, decision cache and metrics. Phase 4, test-management sync and the reviewer UI are specification only (see the table below). · **Version:** 0.3 · **Updated:** 2026-10-14
+An assistant for manual QA teams. It turns user stories into test cases that cite their requirement sources, and asks a person when a requirement is unclear. It runs approved tests in a real browser and keeps the evidence, and it suggests why a test failed. Risky steps always need a deterministic policy check and a human approval.
 
-A specification and a working implementation of a Manual QA AI agent with retrieval-augmented generation (RAG), an AI decision layer (Claude, [ADR-0004](docs/adr/0004-claude-structured-decisions.md)), deterministic policy, human review, and a controlled knowledge feedback loop. There was no pre-existing agent to wrap (OQ-01), so the MVP was built from scratch.
+> **Status:** Phases 1–3 are implemented and tested; Phase 4 is not started ([status](#project-status)). The reviewer workflow is API-only (no web UI yet). · **Version:** 0.3 · **Updated:** 2026-10-14
 
-## Getting started
+**Contents:** [How it works](#how-it-works) · [Quickstart](#quickstart) · [Walkthroughs](#walkthroughs) · [Roles](#roles-and-api-keys) · [Real AI models](#use-a-real-ai-model) · [Configuration](#configuration) · [Production setup](#run-it-like-production) · [Development](#develop-and-test) · [Troubleshooting](#troubleshooting) · [Docs](#documentation)
 
-Requires Node.js 22.12+ and pnpm 9 (`corepack enable`, or `npx pnpm@9`). No Docker or API key is needed for local development:
+## How it works
 
-- Without `DATABASE_URL`, an embedded PostgreSQL (PGlite with pgvector) is stored in `./.pglite`. Use `docker compose up -d` and set `DATABASE_URL` for a real PostgreSQL.
-- Tests use in-memory PGlite. Set `QA_TEST_DATABASE_URL` to run them against a disposable PostgreSQL server instead. CI does both, because only a real server exercises concurrent run claims ([docs/11](docs/11-deployment.md)).
-- `QA_LLM_PROVIDER` selects `anthropic` (default) or `openai` for drafts, and by default also for readiness (ADR-0006). `QA_READINESS_PROVIDER=jev|openai` routes readiness to a typed-decision API: TypeSafe Jev or the OpenAI Decisions API (ADR-0007).
-- Without `QA_LIVE_LLM=1`, a deterministic heuristic stands in for the model behind the selected provider's real SDK code path. Set `QA_LIVE_LLM=1` plus that provider's credentials to call it; those calls are billed. Live OpenAI also requires `QA_LLM_MODEL`, the Responses API model used for drafts. See `env.example`.
+```mermaid
+flowchart LR
+  S["Story + acceptance criteria"] --> R["Find approved,<br/>versioned sources"]
+  R --> D{"Ready to test?"}
+  D -- unclear --> C["Question for the<br/>product owner"] -- answer becomes a source --> R
+  D -- ready --> T["Draft test case<br/>(cites sources)"] --> A["QA approves"]
+  A --> E["Executable steps,<br/>approved by a 2nd person"] --> W["Worker runs it<br/>in a browser"]
+  W --> V["PASSED / FAILED / INCONCLUSIVE<br/>+ screenshots and logs"]
+  V -- failed --> G["Suggested cause"] --> H["Human confirms"] --> J["Jira bug<br/>(QA lead approval)"]
+```
+
+What it guarantees:
+
+- **The AI never decides pass/fail.** Verdicts come only from code assertions (URL, text, HTTP status). The AI reads requirements and suggests causes.
+- **No invented requirements.** Expected results must come from approved, versioned sources. If something is missing or two sources contradict each other, a person is asked.
+- **No unapproved risk.** Destructive steps, production writes and Jira filing need a human approval for that exact action and environment. The approval is re-checked right before the action runs.
+- **Secrets stay out of the model.** Inputs are redacted, test passwords are passed by reference, and the model never sees screenshots or traces.
+- **Everything is auditable.** Every step records the model, prompt and policy versions, the sources used, token cost and who approved what.
+
+## Quickstart
+
+You need about 5 minutes, Node.js 22.12+ and pnpm 9 (`corepack enable`, or use `npx pnpm@9`). You don't need Docker or API keys. Without keys, a deterministic stand-in replaces the AI model behind the real SDK code, so nothing leaves your machine.
+
+> **Windows:** run the commands in **Git Bash** (installed with Git for Windows). For PowerShell, see [Troubleshooting](#troubleshooting).
+
+**1. Install and set up.** Run these once, while the API is **not** running. The embedded database is used by one process at a time, so the API won't see changes a `pnpm qa` command makes while it runs.
 
 ```bash
 pnpm install
-pnpm lint && pnpm typecheck && pnpm test          # unit, mocked-provider contract, policy/tenancy, PGlite integration
-pnpm db:migrate
-pnpm qa seed --project pilot                      # prints one API key per role, once
-pnpm qa ingest eval/fixtures/sources --project pilot --as pilot-po
-pnpm api                                          # http://127.0.0.1:3000, send keys as x-api-key
-pnpm eval                                         # labeled pilot set; fails on any false-ready draft
+pnpm --filter @qa/execution exec playwright install chromium   # browser for test runs
+pnpm db:migrate                                                # creates ./.pglite (embedded database)
+pnpm qa seed --project pilot                                   # prints 4 API keys, once: save them
+pnpm qa ingest eval/fixtures/sources --project pilot --as pilot-po   # sample approved requirements
+pnpm qa env staging --project pilot --kind staging --base-url http://127.0.0.1:4000
 ```
 
-### Phase 2: run an approved test case (local demo)
+The last command registers the demo app as the `staging` test environment. Test runs can only reach the hosts you register.
+
+**2. Start the demo app and the API** in two terminals:
 
 ```bash
-pnpm --filter @qa/execution exec playwright install chromium   # or set QA_BROWSER_CHANNEL=chrome|msedge
-QA_SECRET_DEMO_PASSWORD=<any> pnpm demo:sut                      # demo system under test on :4000
-pnpm qa env staging --project pilot --kind staging --base-url http://127.0.0.1:4000
-QA_EMBEDDED_WORKER=1 QA_SECRET_DEMO_PASSWORD=<same> pnpm api    # API + in-process worker (dev)
+QA_SECRET_DEMO_PASSWORD=demo-password pnpm demo:sut                         # terminal 2: demo app on :4000
+QA_EMBEDDED_WORKER=1 QA_SECRET_DEMO_PASSWORD=demo-password pnpm api         # terminal 3: API on :3000
 ```
 
-Then, through the API:
-1. Approve a case (`POST /api/test-cases/{id}/review`).
-2. Propose an executable spec (`POST /api/test-cases/{id}/executables`). Examples are in `apps/demo-sut/src/specs.ts`.
-3. Have a **different** person approve it (`POST /api/executables/{id}/review`).
-4. Request a run (`POST /api/test-runs`), then read `GET /api/test-runs/{id}` and download evidence from `GET /api/evidence/{id}`.
+The demo app is a small login site, included so you have something safe to test. `QA_SECRET_DEMO_PASSWORD` is its test password. Test steps refer to it as `{ "secret": "DEMO_PASSWORD" }`, so the password never appears in a test case or reaches the model.
 
-Destructive specs come back `BLOCKED` with an approval review. After a QA lead approves it, request the run again with `approvalId`.
+**3. Set the keys from step 1** in the terminal you'll use for the walkthroughs:
 
-> Embedded PGlite is **single-process and development-only**. A hard-killed process can corrupt its data directory. Run the API and `pnpm worker` against PostgreSQL (`DATABASE_URL`, e.g. `docker compose up -d`) for anything shared.
+```bash
+export API=http://127.0.0.1:3000
+export QA_KEY=<pilot-qa key>       # QA engineer
+export LEAD_KEY=<pilot-lead key>   # QA lead
+export PO_KEY=<pilot-po key>       # product owner
+curl -s $API/healthz               # {"ok":true}
+```
 
-### Implementation status
+## Walkthroughs
 
-| Area | Package | Backlog | Status |
-| --- | --- | --- | --- |
-| Domain types and state machines | `packages/domain` | QA-005 | Implemented |
-| Schema, migrations, tenant-scoped repositories | `packages/db` | QA-005 | Implemented |
-| Approved-source registry, ingestion, revocation | `packages/retrieval` | QA-006 | Implemented |
-| Full-text + exact-ID retrieval, contradictions, context budget | `packages/retrieval` | QA-007/008 | Implemented (vectors deferred, ADR-0005) |
-| Readiness + draft providers (Claude; OpenAI Decisions + Responses; TypeSafe Jev for readiness), shared decision plan and grounding checks | `packages/llm-adapter` | QA-009/010 | Implemented (ADR-0004, 0006, 0007) |
-| Deterministic policy gate | `packages/policy-engine` | QA-011 | Implemented |
-| Review queue, approvals, draft lifecycle | `packages/review` | QA-012 | Implemented (API only, no UI) |
-| Approved knowledge feedback | `packages/review`, `packages/orchestrator` | QA-013 | Implemented |
-| Workflow orchestration, telemetry, HTTP API | `packages/orchestrator`, `apps/api` | QA-014 | Implemented |
-| Evaluation harness | `apps/cli`, `eval/fixtures` | QA-002/004 | Sample pilot set; real labels must come from the team |
-| Constrained executable steps, second-person approval (ADR-0008) | `packages/domain`, `packages/orchestrator` | — | Implemented (LLM-proposed steps: follow-up) |
-| Playwright executor: host allowlist, secrets by reference, strict locators | `packages/execution` | QA-015 | Implemented |
-| Evidence capture, immutable store, retention purge, authenticated download | `packages/evidence`, `apps/api` | QA-016 | Implemented (local disk; S3 adapter: follow-up) |
-| Deterministic assertions + run lifecycle, worker with leases | `packages/orchestrator`, `apps/worker` | QA-017 | Implemented |
-| Scoped approval for destructive steps, re-checked at execution | `packages/policy-engine`, `packages/orchestrator` | QA-018 | Implemented |
-| Demo system under test + executable specs | `apps/demo-sut` | — | Implemented (pilot/CI only) |
-| Advisory failure triage (all providers), security escalation, human-verified causes | `packages/llm-adapter`, `packages/orchestrator` | QA-019 | Implemented (ADR-0009) |
-| Deterministic reproduction write-up | `packages/orchestrator` | — | Implemented |
-| Jira Cloud bug filing: verified defect + scoped approval, idempotent, revertible | `packages/integrations`, `packages/orchestrator` | QA-020 | Implemented (off by default; no live Jira test yet) |
-| Decision cache (tenant-scoped, content-addressed) + warm-run benchmark | `packages/orchestrator`, `apps/cli` | QA-021 | Implemented |
-| Metrics + drift alerts (JSON for dashboards) | `packages/orchestrator`, `apps/api` | QA-022 | Implemented (no UI) |
-| Test-management (Kiwi TCMS) sync, reviewer UI | — | — | Not started |
+Each call is a plain `curl` against the API. The request bodies are in [`examples/`](examples/), and a test keeps them working. Responses are JSON: copy the IDs you need into variables, as shown.
 
-## North star
+### 1. Turn a story into a test case
 
-Make the agent useful for daily Manual QA work: understand requirements; design traceable tests; execute approved low-risk flows; record reproducible evidence; triage unclear results; request human approval when necessary; and learn only from reviewed outcomes.
+```bash
+curl -s -X POST $API/api/stories -H "x-api-key: $QA_KEY" -H "content-type: application/json" \
+  -d @examples/story-login-valid.json
+```
 
-**The platform assists QA; it does not autonomously define business requirements, infer product correctness, or authorize dangerous operations.**
+The response says `"route":"DRAFT_CREATED"` and gives a `caseId`, plus the `sourceRefs` the draft cites (`AC-LOGIN@v1`). Read the draft, then approve it as a QA engineer:
 
-## Key engineering principles
+```bash
+export CASE=<caseId>
+curl -s $API/api/test-cases/$CASE -H "x-api-key: $QA_KEY"
+curl -s -X POST $API/api/test-cases/$CASE/review -H "x-api-key: $QA_KEY" -H "content-type: application/json" \
+  -d '{"decision":"APPROVE"}'
+```
 
-1. **Rules before models.** Use code assertions for observable facts (HTTP statuses, SQL values, URLs, UI text). AI helps with interpretation, not redefining pass/fail.
-2. **Retrieve only when needed.** RAG reduces repeated prompt context; it does not automatically reduce total cost. Measure embeddings, retrieval, LLM and decision costs.
-3. **Evidence with provenance.** Any requirement-driven decision references versioned source IDs and a run/evidence ID.
-4. **No silent high-risk changes.** Destructive actions, writes to production, permissions and security-sensitive operations require explicit policy authorization and often human approval.
-5. **Separate lifecycle state.** Test-case definition, test execution and human review are different records.
-6. **Graceful fallback.** When a model, retrieval service or Decisions API is unavailable, enter a safe `INCONCLUSIVE`/`NEEDS_REVIEW` state rather than guessing.
-7. **Start small.** First integrate requirement readiness + human review into the existing agent, then extend to execution and failure triage.
+### 2. When a requirement is unclear
 
-## Documentation map
+"After multiple failed logins the system locks the user out" doesn't say how many attempts, so no test can be written for it yet:
+
+```bash
+curl -s -X POST $API/api/stories -H "x-api-key: $QA_KEY" -H "content-type: application/json" \
+  -d @examples/story-lockout-vague.json
+```
+
+The route is `REVIEW_REQUESTED`, with a `question` and a `reviewId` for the product owner. The product owner sees it in their queue and answers it. The answer is published as a new approved source (`CLAR-LOCKOUT@v1`), and the story re-runs automatically:
+
+```bash
+curl -s $API/api/reviews -H "x-api-key: $PO_KEY"
+curl -s -X POST $API/api/reviews/<reviewId>/resolve -H "x-api-key: $PO_KEY" -H "content-type: application/json" \
+  -d @examples/answer-lockout-clarification.json
+```
+
+The `rerun` part of the response now has a draft whose `sourceRefs` include `CLAR-LOCKOUT@v1`.
+
+### 3. Run the approved test in a browser
+
+A test case is written for people. To run it, you attach **executable steps**: a fixed set of safe step types (navigate, fill, click, expect…) with locators scoped to their parent element. A different person has to approve them.
+
+```bash
+curl -s -X POST $API/api/test-cases/$CASE/executables -H "x-api-key: $QA_KEY" -H "content-type: application/json" \
+  -d @examples/executable-login-valid.json
+export EXE=<id>
+curl -s -X POST $API/api/executables/$EXE/review -H "x-api-key: $LEAD_KEY" -H "content-type: application/json" \
+  -d '{"decision":"APPROVE"}'                       # the proposer approving their own gets 403
+curl -s -X POST $API/api/test-runs -H "x-api-key: $QA_KEY" -H "content-type: application/json" \
+  -d "{\"caseId\":\"$CASE\",\"environmentId\":\"staging\"}"
+```
+
+The run starts as `QUEUED`. After a few seconds, `GET` it until `status` is `PASSED`. The response lists the evidence, which you can download:
+
+```bash
+export RUN=<id>
+curl -s $API/api/test-runs/$RUN -H "x-api-key: $QA_KEY"
+curl -s -o step.png $API/api/evidence/<evidence id> -H "x-api-key: $QA_KEY"
+```
+
+Destructive steps (for example, deleting an account) come back `BLOCKED` with an approval review for a QA lead. Once it is approved, request the run again with `"approvalId"`.
+
+### 4. Triage a failing test
+
+Restart the demo app with a planted bug: its error message now reveals whether an account exists (`DEMO_BUG_1042=1`). Then run the "wrong password" test:
+
+```bash
+DEMO_BUG_1042=1 QA_SECRET_DEMO_PASSWORD=demo-password pnpm demo:sut     # in terminal 2, after Ctrl+C
+```
+
+To run the test, repeat walkthroughs 1 and 3 using `examples/story-login-invalid.json` and `examples/executable-login-invalid.json`. The run ends `FAILED`, and the worker triages it automatically:
+
+```bash
+curl -s $API/api/test-runs/$RUN/triage -H "x-api-key: $QA_KEY"         # suggested cause + security flag
+curl -s $API/api/test-runs/$RUN/reproduction -H "x-api-key: $QA_KEY"   # steps to reproduce (markdown)
+```
+
+The triage is only a suggestion and never changes the verdict. This failure leaks account existence, so it is flagged as security-sensitive and sent to a QA lead. The lead confirms the cause:
+
+```bash
+curl -s $API/api/reviews -H "x-api-key: $LEAD_KEY"                      # find the SECURITY_TRIAGE review
+curl -s -X POST $API/api/reviews/<reviewId>/resolve -H "x-api-key: $LEAD_KEY" -H "content-type: application/json" \
+  -d '{"action":"APPROVE","reason":"Message reveals unknown accounts","confirmedCause":"PRODUCT_DEFECT"}'
+```
+
+To file the confirmed defect in Jira, [configure Jira](#configuration) and restart the API. Until Jira is configured, step 1 below returns `bug tracker integration is disabled (QA_JIRA_ENABLED)`.
+1. `POST /api/test-runs/$RUN/bugs` creates a bug draft and an approval review.
+2. A QA lead approves the review.
+3. `POST /api/bugs/<id>/publish` with that `approvalId` files the issue. It's idempotent, and `POST /api/bugs/<id>/revert` undoes it (audited; no deletes).
+
+## Roles and API keys
+
+`pnpm qa seed` creates one user per role and prints their API keys once (only hashes are stored). Send a key as `x-api-key: <key>` or `Authorization: Bearer <key>`. Roles come only from the server, never from the request.
+
+| User | Role | Can |
+| --- | --- | --- |
+| `pilot-qa` | QA engineer | Submit stories; approve, edit or reject test cases; propose and approve executables (but not their own); request runs; resolve triage and missing-knowledge reviews |
+| `pilot-lead` | QA lead | Everything a QA engineer can, plus: approve destructive actions and bug filing, handle security triage, read metrics and usage |
+| `pilot-po` | Product owner | Submit stories; answer clarifications and source conflicts; publish approved requirement sources |
+| `pilot-admin` | Admin | Everything above |
+
+The AI agent has its own role. It can propose but never approve, and it can't read the review queue.
+
+## Use a real AI model
+
+Set `QA_LIVE_LLM=1` plus one provider's key. Live calls are **billed**.
+
+| Provider | Settings |
+| --- | --- |
+| Claude (default) | `ANTHROPIC_API_KEY`; model `claude-opus-5-5` unless `QA_LLM_MODEL` is set |
+| OpenAI | `QA_LLM_PROVIDER=openai`, `OPENAI_API_KEY`, and `QA_LLM_MODEL` (the Responses API model for drafts) |
+| TypeSafe Jev (readiness only) | `QA_READINESS_PROVIDER=jev`, `TYPESAFE_API_KEY`; drafts still come from `QA_LLM_PROVIDER` |
+
+The provider is recorded with every decision. See [ADR-0004](docs/adr/0004-claude-structured-decisions.md), [0006](docs/adr/0006-provider-neutral-decision-layer.md) and [0007](docs/adr/0007-typesafe-jev-readiness.md).
+
+## Configuration
+
+All settings are environment variables. [`env.example`](env.example) lists every one with an explanation. The most common:
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `DATABASE_URL` | unset → embedded PGlite in `./.pglite` | PostgreSQL connection string |
+| `PORT` / `DEMO_PORT` | `3000` / `4000` | API and demo app ports |
+| `QA_EMBEDDED_WORKER` | off | Run the worker inside the API (development with PGlite) |
+| `QA_SECRET_<NAME>` | — | Secrets used by test steps as `{ "secret": "<NAME>" }` |
+| `QA_BROWSER_CHANNEL` | bundled Chromium | `chrome` or `msedge` to use an installed browser |
+| `QA_EVIDENCE_DIR` | `./.evidence` | Where screenshots and logs are stored |
+| `QA_EXECUTION_ENABLED` | on | `0` stops all test execution (kill switch) |
+| `QA_LIVE_LLM` | off | `1` calls the real AI provider (billed) |
+| `QA_DECISION_CACHE_TTL_HOURS` | `24` | Reuse identical AI decisions; `0` disables |
+| `QA_JIRA_ENABLED` + `JIRA_BASE_URL`, `JIRA_EMAIL`, `JIRA_API_TOKEN`, `JIRA_PROJECT_KEY` | off | Jira Cloud bug filing |
+
+Keep real values in a secret manager or an untracked `.env`. Never commit them.
+
+## Run it like production
+
+The embedded database (PGlite) is for **one process on one machine**. For anything shared, use PostgreSQL and run the worker as its own process. You can run several workers; each test run is claimed by exactly one.
+
+```bash
+docker compose up -d                                                  # PostgreSQL 17 + pgvector on :5432
+export DATABASE_URL=postgres://qa:qa_local_only@127.0.0.1:5432/qa     # local compose only
+pnpm db:migrate && pnpm qa seed --project pilot
+pnpm api                                                              # no QA_EMBEDDED_WORKER
+pnpm worker                                                           # one or more, in other terminals
+```
+
+Deployment and operations guidance is in [docs/11](docs/11-deployment.md).
+
+## Develop and test
+
+```bash
+pnpm lint && pnpm format:check && pnpm typecheck   # static checks
+pnpm test                                          # unit, contract (mocked AI), policy, tenancy, browser tests
+pnpm eval                                          # labeled pilot set; fails on any false "ready" or missed security escalation
+```
+
+- Tests run on in-memory PGlite. To run them against real PostgreSQL, set `QA_TEST_DATABASE_URL` to a disposable server; each test file creates and drops its own database. CI runs both, because only a real server tests concurrent workers.
+- CI never calls a live model. Live smoke tests run only with `QA_LIVE_LLM=1` and a key.
+- Before changing code, read [AGENTS.md](AGENTS.md). It has the non-negotiable safety rules and the merge checklist.
+
+## Troubleshooting
+
+| Problem | Fix |
+| --- | --- |
+| A `pnpm qa …` command reported success, but the API doesn't see the change (for example, a run is `BLOCKED` with `DENIED:UNKNOWN_ENVIRONMENT`) | The embedded database works for one process at a time. A command run while the API is up writes changes the API can't see, and the two processes can corrupt `./.pglite`. Stop the API, run the command again, then restart the API. For several processes, use PostgreSQL. |
+| Errors reading `./.pglite` after a crash or forced kill | Development data only: delete `.pglite` and repeat Quickstart step 1. |
+| `401 UNAUTHENTICATED` | Send the key as `x-api-key`. Keys are printed only by `pnpm qa seed`. |
+| `403 FORBIDDEN` | That role can't do that action (see [Roles](#roles-and-api-keys)). Approving your own executable is always refused. |
+| `429` rate limit | 120 requests per minute per key. Wait for the `retry-after` time. |
+| Port 3000 or 4000 in use | Set `PORT` / `DEMO_PORT`. If you move the demo app, re-run `pnpm qa env staging … --base-url` with the new port. |
+| Run is `BLOCKED` | Read its `reason`. Common causes: a destructive step without an approval, a production environment, an environment with no registered target, or the requester losing permission before the run started. |
+| Browser not found | Run the `playwright install chromium` step, or set `QA_BROWSER_CHANNEL=chrome`. |
+| PowerShell | Set variables with `$env:QA_SECRET_DEMO_PASSWORD="demo-password"; pnpm demo:sut`, and use `curl.exe` (in Windows PowerShell 5.1, plain `curl` is a different command). Git Bash avoids both. |
+
+## Project status
+
+| Phase | What works | Not yet |
+| --- | --- | --- |
+| 1. Requirements and review | Approved-source registry, full-text + exact-ID retrieval, readiness check, cited drafts, review queue, knowledge feedback, evaluation set | Vector search (ADR-0005), reviewer web UI |
+| 2. Execution and evidence | Constrained steps (ADR-0008), Playwright executor with host allowlist, deterministic verdicts, leased workers, immutable evidence with retention | S3 evidence storage, AI-proposed steps |
+| 3. Triage and integration | Advisory triage with security escalation (ADR-0009), reproduction write-up, Jira Cloud filing (off by default), decision cache, metrics and drift alerts | Live Jira verification, test-management sync |
+| 4. Scale | — | Per-project budgets, scheduled runs, more frameworks; only with measured benefit ([docs/08](docs/08-implementation-plan.md)) |
+
+The backlog with per-issue status is in [docs/12](docs/12-github-backlog.md).
+
+## Documentation
 
 | File | Purpose |
 | --- | --- |
@@ -96,42 +262,32 @@ Make the agent useful for daily Manual QA work: understand requirements; design 
 | [docs/04-rag-design.md](docs/04-rag-design.md) | Ingestion, retrieval, context budgets, feedback |
 | [docs/05-decisions-api.md](docs/05-decisions-api.md) | Decision types, typed integration and policy engine |
 | [docs/06-human-review.md](docs/06-human-review.md) | Review triggers, UX, governance and SLAs |
-| [docs/07-data-contracts.md](docs/07-data-contracts.md) | Data entities, schemas and conceptual endpoints |
-| [docs/08-implementation-plan.md](docs/08-implementation-plan.md) | Phased tasks, dependencies, definition of done |
+| [docs/07-data-contracts.md](docs/07-data-contracts.md) | Data entities, schemas and endpoints |
+| [docs/08-implementation-plan.md](docs/08-implementation-plan.md) | Phased roadmap and definition of done |
 | [docs/09-security.md](docs/09-security.md) | Tenant isolation, safety, secrets and privacy |
 | [docs/10-evaluation.md](docs/10-evaluation.md) | Reliability, quality, cost and token benchmarks |
-| [docs/11-deployment.md](docs/11-deployment.md) | Local/CI and operational recommendations |
-| [docs/12-github-backlog.md](docs/12-github-backlog.md) | GitHub milestones, labels and actionable issues |
-| [docs/13-open-questions.md](docs/13-open-questions.md) | Design assumptions to validate |
-| [docs/adr/](docs/adr/) | Architecture decision records (proposed) |
-| [AGENTS.md](AGENTS.md) | Instructions to coding agents implementing the plan |
+| [docs/11-deployment.md](docs/11-deployment.md) | Local, CI and operational guidance |
+| [docs/12-github-backlog.md](docs/12-github-backlog.md) | Backlog and status |
+| [docs/13-open-questions.md](docs/13-open-questions.md) | Assumptions to validate |
+| [docs/adr/](docs/adr/) | Architecture decision records |
+| [AGENTS.md](AGENTS.md) | Rules for coding agents working on this repo |
 
-## Stack
+### Design principles
 
-- API/orchestrator: Node.js + TypeScript (pnpm workspaces), Fastify, zod at every boundary; workflow steps persisted and resumable.
-- Structured data: PostgreSQL (`DATABASE_URL`) or embedded PGlite for dev/tests; `pgvector` column reserved, full-text retrieval first (ADR-0005).
-- AI, behind provider-neutral ports (ADR-0006):
-  - Claude via `@anthropic-ai/sdk` structured outputs (default, `claude-opus-5-5`; ADR-0004);
-  - or OpenAI via `openai`: Decisions API for readiness (`gpt-6-luna`), Responses API for drafts.
-  - Readiness only, optional: TypeSafe Jev via `@typesafe-ai/sdk` (`jev-1.13.0`, pinned).
-- Execution: Playwright 1.64 via a constrained step format (ADR-0008), a worker with leases, and a local-disk evidence store.
-- Integrations: Jira Cloud REST v3 via plain `fetch` with zod-validated responses (ADR-0009).
-- Planned, not built: S3-compatible evidence adapter, LLM-proposed executable steps, test-management sync, reviewer web UI.
+1. **Rules before models.** Code checks observable facts; AI helps interpret, never redefines pass/fail.
+2. **Evidence with provenance.** Every decision references versioned sources and a run or evidence ID.
+3. **No silent high-risk changes.** Destructive, production and security-sensitive actions need policy approval and usually a person.
+4. **Fail safe.** If a model, retrieval or provider fails, the result is `INCONCLUSIVE` or `NEEDS_REVIEW`, never a guess.
+5. **Measure cost.** Every AI call records tokens and latency; identical decisions are cached.
 
-## Suggested repository workflow
+### Stack
 
-1. Create a GitHub repository, for example `manual-qa-ai-agent`.
-2. Copy this entire documentation pack to the repository root.
-3. Open [docs/13-open-questions.md](docs/13-open-questions.md) and resolve essential choices with your team.
-4. Convert [docs/12-github-backlog.md](docs/12-github-backlog.md) into issues and milestones.
-5. Tell the coding agent to read `AGENTS.md` and the relevant feature specification **before** modifying code.
-6. Start with Phase 0 and Phase 1 from the implementation plan; validate outcomes on a labeled QA dataset.
+Node.js + TypeScript (pnpm workspaces), Fastify, zod at every boundary · PostgreSQL + pgvector, or embedded PGlite for development · Claude (`@anthropic-ai/sdk`), OpenAI (`openai`) or TypeSafe Jev (`@typesafe-ai/sdk`) behind provider-neutral ports · Playwright 1.64 · Jira Cloud REST v3.
 
-## Reference documentation (verified 2026-10-09)
+### SDK references (verified 2026-10-09)
 
-- Anthropic TypeScript SDK `@anthropic-ai/sdk` 0.132.x: `client.beta.messages.parse` with `betaZodOutputFormat`, `stop_reason: "refusal"`, server-side refusal fallback (`server-side-fallback-2026-07-01`). Checked against the installed SDK types on 2026-10-09.
-- OpenAI TypeScript SDK `openai` 7.31.x: `client.decisions.create` (beta; `choice` / `predicate` / `score` / `refusal` answers, see `resources/decisions.d.ts`) and `client.responses.parse` with `zodTextFormat`. Checked against the installed SDK types on 2026-10-09.
-- TypeSafe SDK `@typesafe-ai/sdk` 0.6.x: `client.systemOne({ state, questions, model })` with `choice()` / `noul()`, `POST https://api.typesafe.ai/v1/systemone`, `TYPESAFE_API_KEY`. Checked against docs.typesafe.ai and the installed SDK types on 2026-10-09.
-- The original blueprint referenced the OpenAI Decisions API (beta). ADR-0004 replaces it.
+- Anthropic `@anthropic-ai/sdk` 0.132.x: `client.beta.messages.parse` with `betaZodOutputFormat`, `stop_reason: "refusal"`, server-side refusal fallback (`server-side-fallback-2026-07-01`).
+- OpenAI `openai` 7.31.x: `client.decisions.create` (beta; `choice` / `predicate` / `score` / `refusal` answers) and `client.responses.parse` with `zodTextFormat`.
+- TypeSafe `@typesafe-ai/sdk` 0.6.x: `client.systemOne({ state, questions, model })` with `choice()` / `noul()`, `TYPESAFE_API_KEY`.
 
 Recheck model IDs, SDK versions and response shapes when upgrading (docs/12 QA-010).

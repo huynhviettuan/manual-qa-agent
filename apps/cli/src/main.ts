@@ -13,9 +13,8 @@ import {
 import { DomainError, EnvironmentKind, type Role } from '@qa/domain';
 import { createEvidenceStoreFromEnv } from '@qa/evidence';
 import { purgeExpiredEvidence } from '@qa/orchestrator';
-import { revokeSource } from '@qa/retrieval';
+import { ingestDirectory, revokeSource } from '@qa/retrieval';
 import { runEval } from './eval.ts';
-import { ingestDirectory } from './ingest-dir.ts';
 
 const USAGE = `Usage: pnpm qa <command> [options]
 

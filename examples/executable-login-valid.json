@@ -1,0 +1,78 @@
+{
+  "spec": {
+    "steps": [
+      {
+        "id": "open",
+        "type": "navigate",
+        "path": "/login",
+        "sourceRefs": ["AC-LOGIN@v1"]
+      },
+      {
+        "id": "email",
+        "type": "fill",
+        "target": {
+          "by": "label",
+          "label": "Email",
+          "within": {
+            "by": "testId",
+            "testId": "login-form"
+          }
+        },
+        "value": "qa@example.test"
+      },
+      {
+        "id": "password",
+        "type": "fill",
+        "target": {
+          "by": "label",
+          "label": "Password",
+          "within": {
+            "by": "testId",
+            "testId": "login-form"
+          }
+        },
+        "value": {
+          "secret": "DEMO_PASSWORD"
+        }
+      },
+      {
+        "id": "submit",
+        "type": "click",
+        "target": {
+          "by": "role",
+          "role": "button",
+          "name": "Sign in",
+          "within": {
+            "by": "testId",
+            "testId": "login-form"
+          }
+        }
+      },
+      {
+        "id": "on-dashboard",
+        "type": "expectUrl",
+        "path": "/dashboard",
+        "sourceRefs": ["AC-LOGIN@v1"]
+      },
+      {
+        "id": "welcome",
+        "type": "expectText",
+        "target": {
+          "by": "testId",
+          "testId": "welcome"
+        },
+        "text": "Welcome back",
+        "sourceRefs": ["AC-LOGIN@v1"]
+      }
+    ],
+    "teardown": [
+      {
+        "id": "reset",
+        "type": "apiRequest",
+        "method": "POST",
+        "path": "/__test__/reset",
+        "expectStatus": 200
+      }
+    ]
+  }
+}
