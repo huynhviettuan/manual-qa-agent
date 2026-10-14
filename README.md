@@ -1,14 +1,15 @@
 # Manual QA AI Agent — Architecture & Delivery Blueprint
 
-> **Status:** Phase 1 MVP implemented (readiness + RAG + human review + knowledge feedback); execution, triage and integrations are still specification only · **Version:** 0.2 · **Updated:** 2026-10-09
+> **Status:** Phases 1–3 implemented: readiness, RAG and review; controlled execution and evidence; advisory triage, gated Jira filing, decision cache and metrics. Phase 4, test-management sync and the reviewer UI are specification only (see the table below). · **Version:** 0.3 · **Updated:** 2026-10-14
 
-A specification and a working Phase 1 implementation of a Manual QA AI agent with retrieval-augmented generation (RAG), an AI decision layer (Claude, [ADR-0004](docs/adr/0004-claude-structured-decisions.md)), deterministic policy, human review, and a controlled knowledge feedback loop. There was no pre-existing agent to wrap (OQ-01), so the MVP was built from scratch.
+A specification and a working implementation of a Manual QA AI agent with retrieval-augmented generation (RAG), an AI decision layer (Claude, [ADR-0004](docs/adr/0004-claude-structured-decisions.md)), deterministic policy, human review, and a controlled knowledge feedback loop. There was no pre-existing agent to wrap (OQ-01), so the MVP was built from scratch.
 
 ## Getting started
 
 Requires Node.js 22.12+ and pnpm 9 (`corepack enable`, or `npx pnpm@9`). No Docker or API key is needed for local development:
 
 - Without `DATABASE_URL`, an embedded PostgreSQL (PGlite with pgvector) is stored in `./.pglite`. Use `docker compose up -d` and set `DATABASE_URL` for a real PostgreSQL.
+- Tests use in-memory PGlite. Set `QA_TEST_DATABASE_URL` to run them against a disposable PostgreSQL server instead. CI does both, because only a real server exercises concurrent run claims ([docs/11](docs/11-deployment.md)).
 - `QA_LLM_PROVIDER` selects `anthropic` (default) or `openai` for drafts, and by default also for readiness (ADR-0006). `QA_READINESS_PROVIDER=jev|openai` routes readiness to a typed-decision API: TypeSafe Jev or the OpenAI Decisions API (ADR-0007).
 - Without `QA_LIVE_LLM=1`, a deterministic heuristic stands in for the model behind the selected provider's real SDK code path. Set `QA_LIVE_LLM=1` plus that provider's credentials to call it; those calls are billed. Live OpenAI also requires `QA_LLM_MODEL`, the Responses API model used for drafts. See `env.example`.
 
