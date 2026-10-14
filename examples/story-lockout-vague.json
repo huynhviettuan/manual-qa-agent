@@ -1,0 +1,11 @@
+{
+  "externalId": "PILOT-3",
+  "title": "Account lockout",
+  "description": "Protect accounts from brute force.",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-LOGIN-04",
+      "text": "After multiple failed logins the system locks the user out."
+    }
+  ]
+}

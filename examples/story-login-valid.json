@@ -1,0 +1,11 @@
+{
+  "externalId": "PILOT-1",
+  "title": "Sign in with valid credentials",
+  "description": "Registered users can sign in.",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-LOGIN-01",
+      "text": "Valid credentials redirect to the dashboard showing \"Welcome back\"."
+    }
+  ]
+}

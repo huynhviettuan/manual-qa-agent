@@ -2,7 +2,8 @@ import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { Db } from '@qa/db';
 import type { Actor } from '@qa/domain';
-import { ingestSource, parseSourceFile, type IngestResult } from '@qa/retrieval';
+import { ingestSource, type IngestResult } from './ingest.ts';
+import { parseSourceFile } from './source-file.ts';
 
 /** Ingests every .md/.json file in `dir` (sorted, non-recursive). */
 export async function ingestDirectory(db: Db, actor: Actor, dir: string): Promise<IngestResult[]> {

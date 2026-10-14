@@ -1,0 +1,75 @@
+{
+  "spec": {
+    "steps": [
+      {
+        "id": "open",
+        "type": "navigate",
+        "path": "/login"
+      },
+      {
+        "id": "email",
+        "type": "fill",
+        "target": {
+          "by": "label",
+          "label": "Email",
+          "within": {
+            "by": "testId",
+            "testId": "login-form"
+          }
+        },
+        "value": "nobody@example.test"
+      },
+      {
+        "id": "password",
+        "type": "fill",
+        "target": {
+          "by": "label",
+          "label": "Password",
+          "within": {
+            "by": "testId",
+            "testId": "login-form"
+          }
+        },
+        "value": "wrong-password"
+      },
+      {
+        "id": "submit",
+        "type": "click",
+        "target": {
+          "by": "role",
+          "role": "button",
+          "name": "Sign in",
+          "within": {
+            "by": "testId",
+            "testId": "login-form"
+          }
+        }
+      },
+      {
+        "id": "message",
+        "type": "expectText",
+        "target": {
+          "by": "testId",
+          "testId": "login-message"
+        },
+        "text": "Invalid email or password",
+        "match": "exact",
+        "sourceRefs": ["AC-LOGIN@v1"]
+      },
+      {
+        "id": "stays-on-login",
+        "type": "expectUrl",
+        "path": "/login"
+      }
+    ],
+    "teardown": [
+      {
+        "id": "reset",
+        "type": "apiRequest",
+        "method": "POST",
+        "path": "/__test__/reset",
+        "expectStatus": 200
+      }
+    ]
+  }
+}

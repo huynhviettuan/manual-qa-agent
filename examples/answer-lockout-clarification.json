@@ -1,0 +1,9 @@
+{
+  "action": "APPROVE",
+  "reason": "Lockout threshold confirmed by the product owner",
+  "publishSource": {
+    "sourceId": "CLAR-LOCKOUT",
+    "version": "v1",
+    "content": "# AC-LOGIN-04\nAccounts are locked for 15 minutes after 5 consecutive failed sign-in attempts."
+  }
+}

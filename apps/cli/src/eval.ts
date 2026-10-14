@@ -11,7 +11,7 @@ import {
 } from '@qa/llm-adapter';
 import { minReadyConfidenceFromEnv, submitStory, type WorkflowOutcome } from '@qa/orchestrator';
 import type { ReviewKind } from '@qa/review';
-import { ingestDirectory } from './ingest-dir.ts';
+import { ingestDirectory } from '@qa/retrieval';
 
 const Label = z.enum([
   'DRAFT',
