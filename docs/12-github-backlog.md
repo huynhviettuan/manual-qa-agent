@@ -34,19 +34,19 @@ Create a project board with fields `Status` (Backlog, Ready, In Progress, In Rev
 
 | Issue | Title | Priority | Definition of done |
 | --- | --- | --- | --- |
-| QA-015 | Browser executor adapter and allowlists | P1 | Non-prod test runs; forbidden environment rejected |
-| QA-016 | Evidence capture and private storage | P1 | Screenshots/traces linked; expiry/redaction tested |
-| QA-017 | Deterministic assertions and run lifecycle | P1 | Pass/fail/block/inconclusive independent of model output |
-| QA-018 | Scoped approval for high-impact test actions | P1 | Action hash/environment/expiry/revocation tested |
+| QA-015 | Browser executor adapter and allowlists | P1 | Non-prod test runs; forbidden environment rejected. **Done (ADR-0008)** |
+| QA-016 | Evidence capture and private storage | P1 | Screenshots/traces linked; expiry/redaction tested. **Done** (local store; S3 adapter follow-up; Playwright traces deliberately off because they record filled secret values) |
+| QA-017 | Deterministic assertions and run lifecycle | P1 | Pass/fail/block/inconclusive independent of model output. **Done** |
+| QA-018 | Scoped approval for high-impact test actions | P1 | Action hash/environment/expiry/revocation tested. **Done** |
 
 ## Milestone 3 — Triage and integrations
 
 | Issue | Title | Priority | Definition of done |
 | --- | --- | --- | --- |
-| QA-019 | Failure triage suggestion and review gates | P1 | Verified label metrics; cannot rewrite assertion verdict |
-| QA-020 | Optional test-management/Jira draft adapter | P1 | Minimal scopes; no external writes without authorization |
-| QA-021 | RAG caching and cost optimization | P1 | Same benchmark compares cost and quality |
-| QA-022 | Operational dashboards and drift alerts | P1 | Token/cost, review, safety metrics and errors visible |
+| QA-019 | Failure triage suggestion and review gates | P1 | Verified label metrics; cannot rewrite assertion verdict. **Done (ADR-0009)** |
+| QA-020 | Optional test-management/Jira draft adapter | P1 | Minimal scopes; no external writes without authorization. **Done for Jira** (test-management sync not started) |
+| QA-021 | RAG caching and cost optimization | P1 | Same benchmark compares cost and quality. **Done** (decision cache + warm-run eval) |
+| QA-022 | Operational dashboards and drift alerts | P1 | Token/cost, review, safety metrics and errors visible. **Done** (JSON endpoints; no UI) |
 
 ## Example issue template
 

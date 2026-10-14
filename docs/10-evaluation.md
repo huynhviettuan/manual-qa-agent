@@ -66,6 +66,14 @@ Values are **illustrative**, not observed; actual pricing must be read from prov
 - **Quantitative:** QA lead signs off thresholds for false-ready, recall@k, review rate, error recovery and per-task cost based on pilot baseline.
 - Do not release an autonomous capability without a separate evaluated permission/safety test plan.
 
+## Implemented evaluation (`pnpm eval`)
+
+- Readiness: per-class precision/recall, false-ready rate, source attribution, tokens per workflow.
+- Triage (`eval/fixtures/triage`): cause accuracy plus security-escalation recall and precision.
+- Decision cache: a warm re-run of the story set must reproduce identical outcomes. Token savings are reported.
+- Mandatory gates (CI fails otherwise): no false-ready draft, no non-draft action, no cross-project leak, cache consistency, **no missed security escalation**.
+- CI runs the gates for Claude, OpenAI and Jev configurations with deterministic stand-ins. Live runs need `QA_LIVE_LLM=1` and are billed.
+
 ## Monitoring and alerts
 
 Track API availability/429/errors, tool timeouts, retrieval empty rate, confidence distribution drift, source-version conflict rate, review backlog aging, budget overrun, denied actions, and repeated execution failure signatures. Alert on security violations and sudden cost spikes; routine quality issues can go to a weekly QA review.

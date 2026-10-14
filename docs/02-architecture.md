@@ -50,7 +50,8 @@ apps/
   api/                     # HTTP API + API-key auth (implemented)
   cli/                     # migrate, seed, ingest, revoke, eval (implemented)
   reviewer-ui/             # Optional web review queue (planned)
-  worker/                  # Background workflow executor (planned)
+  worker/                  # Test-run worker with leases (implemented)
+  demo-sut/                # Demo system under test + executable specs (pilot/CI only)
 packages/
   domain/                  # Contracts, state machines, redaction (implemented)
   db/                      # Migrations + tenant-scoped repositories, PostgreSQL/PGlite (implemented)
@@ -60,7 +61,9 @@ packages/
   policy-engine/           # Deterministic action gate (implemented)
   review/                  # Human review, approvals, draft lifecycle (implemented)
   observability/           # Structured logging with redaction (implemented)
-  execution/               # Playwright, API, DB adapters (planned)
+  execution/               # Playwright executor, constrained steps (implemented; ADR-0008)
+  evidence/                # Evidence store port + local-disk adapter (implemented)
+  integrations/            # Jira Cloud bug tracker adapter (implemented; ADR-0009)
 eval/                      # Labeled pilot fixtures
 ```
 

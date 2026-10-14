@@ -9,6 +9,9 @@ import {
   DRAFT_SYSTEM,
   READINESS_PROMPT_VERSION,
   READINESS_SYSTEM,
+  TRIAGE_PROMPT_VERSION,
+  TRIAGE_SYSTEM,
+  buildTriagePayload,
   userMessage,
 } from './prompts.ts';
 import type {
@@ -19,8 +22,12 @@ import type {
   ReadinessAssessment,
   ReadinessClassifier,
   ReadinessInput,
+  TriageAssessment,
+  TriageClassifier,
+  TriageFacts,
   Usage,
 } from './types.ts';
+import { SUSPECTED_CAUSES } from './types.ts';
 
 export const DEFAULT_CLAUDE_MODEL = 'claude-opus-5-5';
 const FALLBACK_BETA = 'server-side-fallback-2026-07-01';
@@ -36,6 +43,12 @@ export type ClaudeConfig = {
   /** Recorded as DecisionRecord.provider (e.g. `anthropic-mock` for the keyless heuristic). */
   providerLabel?: string;
 };
+
+const TriageSchema = z.object({
+  suspectedCause: z.enum(SUSPECTED_CAUSES),
+  securitySensitive: z.boolean(),
+  rationale: z.string(),
+});
 
 const ReadinessSchema = z.object({
   readiness: Readiness,
@@ -95,7 +108,7 @@ function classifyError(err: unknown): { failure: 'MALFORMED' | 'UNAVAILABLE'; de
   };
 }
 
-export class ClaudeProvider implements ReadinessClassifier, DraftGenerator {
+export class ClaudeProvider implements ReadinessClassifier, DraftGenerator, TriageClassifier {
   readonly model: string;
   private readonly effort: Effort;
   private readonly fallback: boolean;
@@ -163,6 +176,35 @@ export class ClaudeProvider implements ReadinessClassifier, DraftGenerator {
     );
     // Claude returns no calibrated per-answer confidence (ADR-0004).
     return checkReadiness(input, out.ok ? { ...out, value: { ...out.value, confidence: null } } : out);
+  }
+
+  get readinessCacheId(): string {
+    return `${this.config.providerLabel ?? 'anthropic'}|${this.model}|${READINESS_PROMPT_VERSION}|${this.effort}`;
+  }
+
+  get triageCacheId(): string {
+    return `${this.config.providerLabel ?? 'anthropic'}|${this.model}|${TRIAGE_PROMPT_VERSION}|${this.effort}`;
+  }
+
+  async triage(facts: TriageFacts): Promise<ProviderOutcome<TriageAssessment>> {
+    const out = await this.call(
+      TRIAGE_PROMPT_VERSION,
+      TRIAGE_SYSTEM,
+      buildTriagePayload(facts),
+      TriageSchema,
+      4000,
+    );
+    if (!out.ok) return out;
+    return {
+      ...out,
+      value: {
+        suspectedCause: out.value.suspectedCause,
+        securitySensitive: out.value.securitySensitive,
+        securityProbability: null,
+        rationale: out.value.rationale,
+        confidence: null,
+      },
+    };
   }
 
   async generate(input: DraftInput): Promise<ProviderOutcome<DraftContent>> {

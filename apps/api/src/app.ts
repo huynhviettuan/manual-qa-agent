@@ -6,7 +6,17 @@ import Fastify, {
 } from 'fastify';
 import rateLimit from '@fastify/rate-limit';
 import { z } from 'zod';
-import { findActorByApiKey, getReview, getWorkflow, listRevisions, workflowUsage, type Db } from '@qa/db';
+import {
+  findActorByApiKey,
+  getBug,
+  getEvidence,
+  getReview,
+  latestTriage,
+  getWorkflow,
+  listRevisions,
+  workflowUsage,
+  type Db,
+} from '@qa/db';
 import {
   AcceptanceCriterion,
   type Actor,
@@ -16,15 +26,30 @@ import {
   REVIEW_STATUSES,
   Role,
 } from '@qa/domain';
+import type { EvidenceStore } from '@qa/evidence';
+import type { BugTracker } from '@qa/integrations';
+import type { TriageClassifier } from '@qa/llm-adapter';
 import { silentLogger, type Logger } from '@qa/observability';
 import {
+  buildReproduction,
+  DEFAULT_THRESHOLDS,
+  driftAlerts,
+  getRunReport,
+  projectMetrics,
+  proposeBug,
+  proposeExecutable,
+  publishBug,
+  revertBug,
+  triageRun,
+  requestRun,
   resolveReviewAndContinue,
+  reviewExecutable,
   runStoryWorkflow,
   submitStory,
   type OrchestratorDeps,
 } from '@qa/orchestrator';
 import { ingestSource, revokeSource, SourceMeta } from '@qa/retrieval';
-import { listQueue, promoteToReference, reviewTestCase } from '@qa/review';
+import { CONFIRMABLE_CAUSES, listQueue, promoteToReference, reviewTestCase } from '@qa/review';
 
 declare module 'fastify' {
   interface FastifyRequest {
@@ -33,7 +58,28 @@ declare module 'fastify' {
   }
 }
 
-export type AppOptions = { deps: OrchestratorDeps; logger?: Logger; rateLimitPerMinute?: number };
+export type AppOptions = {
+  deps: OrchestratorDeps;
+  /** Evidence is served only through authenticated, project-scoped requests. */
+  evidenceStore?: EvidenceStore;
+  /** Failure triage provider (ADR-0009); triage endpoints are unavailable without it. */
+  triager?: TriageClassifier;
+  /** External bug tracker; null/undefined = integration disabled. */
+  tracker?: BugTracker | null;
+  logger?: Logger;
+  rateLimitPerMinute?: number;
+};
+
+const ExecutableBody = z.object({ spec: z.unknown() });
+const ExecutableReviewBody = z.object({
+  decision: z.enum(['APPROVE', 'REJECT']),
+  reason: z.string().max(2000).optional(),
+});
+const RunBody = z.object({
+  caseId: z.string().min(1).max(100),
+  environmentId: z.string().min(1).max(100),
+  approvalId: z.string().min(1).max(100).optional(),
+});
 
 const STATUS_BY_CODE: Record<DomainError['code'], number> = {
   VALIDATION: 400,
@@ -79,6 +125,7 @@ const ResolveBody = z.discriminatedUnion('action', [
       })
       .optional(),
     approvalTtlMs: z.number().int().positive().optional(),
+    confirmedCause: z.enum(CONFIRMABLE_CAUSES).optional(),
   }),
 ]);
 const QueueQuery = z.object({
@@ -229,6 +276,126 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
     if (!(await getWorkflow(db, scope(req), id)))
       throw new DomainError('NOT_FOUND', `workflow ${id} not found`);
     return workflowUsage(db, scope(req), id);
+  });
+
+  // ---------------------------------------------------------------- Phase 2: execution
+
+  app.post('/api/test-cases/:id/executables', async (req, reply) => {
+    const { id } = IdParams.parse(req.params);
+    const body = ExecutableBody.parse(req.body);
+    return reply.code(201).send(await proposeExecutable(db, req.actor, id, body.spec));
+  });
+
+  app.post('/api/executables/:id/review', async (req) => {
+    const { id } = IdParams.parse(req.params);
+    return reviewExecutable(db, req.actor, id, ExecutableReviewBody.parse(req.body));
+  });
+
+  app.post('/api/test-runs', async (req, reply) => {
+    const body = RunBody.parse(req.body);
+    const run = await requestRun({ db }, req.actor, { ...body, idempotencyKey: idempotencyKey(req) });
+    return reply.code(run.state === 'QUEUED' ? 202 : 200).send(await getRunReport(db, scope(req), run.id));
+  });
+
+  app.get('/api/test-runs/:id', async (req) => {
+    const { id } = IdParams.parse(req.params);
+    return getRunReport(db, scope(req), id);
+  });
+
+  app.get('/api/evidence/:id', async (req, reply) => {
+    const { id } = IdParams.parse(req.params);
+    if (hasRole(req.actor, 'AI_AGENT'))
+      throw new DomainError('FORBIDDEN', 'raw evidence is not served to the AI agent');
+    const evidence = await getEvidence(db, scope(req), id);
+    if (!evidence || !opts.evidenceStore) throw new DomainError('NOT_FOUND', `evidence ${id} not found`);
+    const data = await opts.evidenceStore.get(evidence.objectKey);
+    if (!data) throw new DomainError('NOT_FOUND', `evidence ${id} content is no longer retained`);
+    return reply
+      .header('content-type', evidence.contentType)
+      .header('cache-control', 'no-store')
+      .header('x-content-type-options', 'nosniff')
+      .header('content-disposition', `inline; filename="${evidence.name}"`)
+      .header('x-evidence-digest', evidence.digest)
+      .send(data);
+  });
+
+  // ---------------------------------------------------------------- Phase 3: triage, bugs, metrics
+
+  const requireStore = () => {
+    if (!opts.evidenceStore) throw new DomainError('VALIDATION', 'evidence store is not configured');
+    return opts.evidenceStore;
+  };
+  const bugDeps = () => ({ db, store: requireStore(), tracker: opts.tracker ?? null });
+  const requireLead = (req: FastifyRequest) => {
+    if (!hasRole(req.actor, 'QA_LEAD', 'ADMIN')) throw new DomainError('FORBIDDEN', 'requires QA lead/admin');
+  };
+
+  app.post('/api/test-runs/:id/triage', async (req, reply) => {
+    const { id } = IdParams.parse(req.params);
+    if (!opts.triager) throw new DomainError('VALIDATION', 'triage provider is not configured');
+    const triage = await triageRun(
+      {
+        db,
+        store: requireStore(),
+        triager: opts.triager,
+        logger: req.log as unknown as Logger,
+        decisionCacheTtlMs: deps.decisionCacheTtlMs,
+      },
+      req.actor,
+      id,
+    );
+    return reply.code(201).send(triage);
+  });
+
+  app.get('/api/test-runs/:id/triage', async (req) => {
+    const { id } = IdParams.parse(req.params);
+    const triage = await latestTriage(db, scope(req), id);
+    if (!triage) throw new DomainError('NOT_FOUND', `run ${id} has no triage`);
+    return triage;
+  });
+
+  app.get('/api/test-runs/:id/reproduction', async (req, reply) => {
+    const { id } = IdParams.parse(req.params);
+    const md = await buildReproduction(db, requireStore(), scope(req), id);
+    return reply
+      .header('content-type', 'text/markdown; charset=utf-8')
+      .header('cache-control', 'no-store')
+      .send(md);
+  });
+
+  app.post('/api/test-runs/:id/bugs', async (req, reply) => {
+    const { id } = IdParams.parse(req.params);
+    return reply.code(201).send(await proposeBug(bugDeps(), req.actor, id));
+  });
+
+  app.get('/api/bugs/:id', async (req) => {
+    const { id } = IdParams.parse(req.params);
+    const bug = await getBug(db, scope(req), id);
+    if (!bug) throw new DomainError('NOT_FOUND', `bug ${id} not found`);
+    return bug;
+  });
+
+  app.post('/api/bugs/:id/publish', async (req) => {
+    const { id } = IdParams.parse(req.params);
+    const { approvalId } = z.object({ approvalId: z.string().min(1).max(100) }).parse(req.body);
+    return publishBug(bugDeps(), req.actor, id, approvalId);
+  });
+
+  app.post('/api/bugs/:id/revert', async (req) => {
+    const { id } = IdParams.parse(req.params);
+    const { reason } = z.object({ reason: z.string().min(1).max(2000) }).parse(req.body);
+    return revertBug(bugDeps(), req.actor, id, reason);
+  });
+
+  app.get('/api/metrics', async (req) => {
+    requireLead(req);
+    const { days } = z.object({ days: z.coerce.number().int().min(1).max(90).default(7) }).parse(req.query);
+    return projectMetrics(db, scope(req), days);
+  });
+
+  app.get('/api/metrics/alerts', async (req) => {
+    requireLead(req);
+    return { alerts: await driftAlerts(db, scope(req), DEFAULT_THRESHOLDS) };
   });
 
   return app;

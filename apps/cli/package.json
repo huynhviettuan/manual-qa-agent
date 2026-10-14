@@ -6,6 +6,7 @@
   "dependencies": {
     "@qa/db": "workspace:*",
     "@qa/domain": "workspace:*",
+    "@qa/evidence": "workspace:*",
     "@qa/llm-adapter": "workspace:*",
     "@qa/observability": "workspace:*",
     "@qa/orchestrator": "workspace:*",

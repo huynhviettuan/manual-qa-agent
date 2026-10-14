@@ -1,6 +1,13 @@
 import type { Fetch } from '@typesafe-ai/sdk';
 import { jsonResponse, type FakeReply } from './fake-anthropic.ts';
-import { decodePayload, HEURISTIC_MODEL, heuristicDecisions, type PromptPayload } from './heuristic.ts';
+import {
+  decodePayload,
+  HEURISTIC_MODEL,
+  heuristicDecisions,
+  heuristicTriage,
+  type PromptPayload,
+} from './heuristic.ts';
+import type { TriageFacts } from './types.ts';
 
 /**
  * A stand-in for the TypeSafe HTTP API (`POST /v1/systemone`), injected into the official SDK
@@ -53,6 +60,13 @@ export function createFakeJevFetch(responder: JevResponder): Fetch & { calls: Je
 /** Keyless dev/eval mode for the Jev readiness provider (see heuristic.ts). */
 export const jevHeuristicResponder: JevResponder = ({ path, payload, questionNames }) => {
   if (!path.endsWith('/v1/systemone')) return jevErrorReply(404, 'not found');
+  if (questionNames.includes('cause')) {
+    const t = heuristicTriage(payload as unknown as TriageFacts);
+    return jevReply(
+      { cause: jevChoice(t.cause, 0.8), security: jevNoul(t.securityProbability) },
+      { model: HEURISTIC_MODEL },
+    );
+  }
   const h = heuristicDecisions(payload, questionNames);
   const answers = Object.fromEntries(
     questionNames.map((name) => [

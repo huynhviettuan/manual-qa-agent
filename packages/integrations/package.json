@@ -1,0 +1,10 @@
+{
+  "name": "@qa/integrations",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@qa/domain": "workspace:*",
+    "zod": "^4.6.5"
+  }
+}

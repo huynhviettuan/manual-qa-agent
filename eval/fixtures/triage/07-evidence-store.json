@@ -1,0 +1,16 @@
+{
+  "id": "evidence-store-down",
+  "expectedCause": "ENVIRONMENT",
+  "securitySensitive": false,
+  "facts": {
+    "verdict": "INCONCLUSIVE",
+    "reason": "EVIDENCE_UNAVAILABLE",
+    "environmentKind": "staging",
+    "stepErrors": [],
+    "httpErrors": [],
+    "failedRequests": 0,
+    "blockedRequests": 0,
+    "consoleErrors": [],
+    "failingStep": null
+  }
+}

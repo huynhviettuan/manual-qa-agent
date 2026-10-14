@@ -3,8 +3,14 @@ import { join } from 'node:path';
 import { z } from 'zod';
 import { createTestDb, seedProject, workflowUsage } from '@qa/db';
 import { AcceptanceCriterion } from '@qa/domain';
-import { createProvidersFromEnv } from '@qa/llm-adapter';
+import {
+  createProvidersFromEnv,
+  SUSPECTED_CAUSES,
+  type TriageClassifier,
+  type TriageFacts,
+} from '@qa/llm-adapter';
 import { minReadyConfidenceFromEnv, submitStory, type WorkflowOutcome } from '@qa/orchestrator';
+import type { ReviewKind } from '@qa/review';
 import { ingestDirectory } from './ingest-dir.ts';
 
 const Label = z.enum([
@@ -41,7 +47,10 @@ function labelOf(o: WorkflowOutcome): Label {
       MISSING_KNOWLEDGE: 'MISSING_KNOWLEDGE',
       PROVIDER_FAILURE: 'PROVIDER_FAILURE',
       ACTION_APPROVAL: 'DENIED',
-    } as const
+      // Run-triage reviews never come out of story workflows.
+      FAILURE_TRIAGE: 'DENIED',
+      SECURITY_TRIAGE: 'DENIED',
+    } as const satisfies Record<ReviewKind, Label>
   )[o.kind];
 }
 
@@ -67,6 +76,8 @@ export async function runEval(dir: string) {
     classifier: providers.classifier,
     generator: providers.generator,
     minReadyConfidence: minReadyConfidenceFromEnv(),
+    // Cold on the first pass (empty cache); the warm pass below measures QA-021 savings.
+    decisionCacheTtlMs: 3_600_000,
   };
   const files = (await readdir(join(dir, 'stories'))).filter((f) => f.endsWith('.json')).sort();
 
@@ -103,7 +114,20 @@ export async function runEval(dir: string) {
       leaked: refs.some((ref) => ref.startsWith('OTHER-')),
     });
   }
+
+  // QA-021 benchmark: the same stories again (new workflows) must give identical outcomes from cache.
+  let warmTokens = 0;
+  let warmIdentical = true;
+  for (const file of files) {
+    const item = LabeledStory.parse(JSON.parse(await readFile(join(dir, 'stories', file), 'utf8')));
+    const r = await submitStory(deps, actors.qa, item.story, { idempotencyKey: `warm-${item.id}` });
+    const usage = await workflowUsage(db, scope, r.workflowId);
+    warmTokens += usage.usage.reduce((sum, u) => sum + Number(u.inputTokens) + Number(u.outputTokens), 0);
+    if (labelOf(r.outcome) !== rows.find((x) => x.id === item.id)?.actual) warmIdentical = false;
+  }
   await db.close();
+
+  const triage = await runTriageEval(dir, providers.triager);
 
   const notReady = rows.filter((r) => r.expected !== 'DRAFT');
   const falseReady = notReady.filter((r) => r.actual === 'DRAFT');
@@ -144,10 +168,39 @@ export async function runEval(dir: string) {
     `tokens per workflow   ${(rows.reduce((s, r) => s + r.tokens, 0) / Math.max(rows.length, 1)).toFixed(0)} (provider-reported)`,
   );
 
+  const coldTokens = rows.reduce((s, r) => s + r.tokens, 0);
+  console.log(
+    `decision cache        warm re-run ${warmTokens} tokens vs cold ${coldTokens} (readiness from cache; drafts are regenerated); outcomes identical: ${warmIdentical ? 'yes' : 'NO'}`,
+  );
+
+  console.log(`
+Triage (${triage.rows.length} labeled runs)
+`);
+  console.log('run'.padEnd(28), 'expected'.padEnd(16), 'suggested'.padEnd(16), 'security exp/got');
+  for (const t of triage.rows) {
+    console.log(
+      t.id.padEnd(28),
+      t.expected.padEnd(16),
+      `${t.actual}${t.expected === t.actual ? '' : '  ✗'}`.padEnd(16),
+      `${t.expectedSecurity ? 'yes' : 'no'}/${t.actualSecurity ? 'yes' : 'no'}${t.expectedSecurity && !t.actualSecurity ? '  ✗ MISSED' : ''}`,
+    );
+  }
+  console.log(`
+triage accuracy       ${triage.correct}/${triage.rows.length} (${pct(triage.correct, triage.rows.length)})`);
+  console.log(
+    `security recall       ${triage.securityHit}/${triage.securityExpected} (${pct(triage.securityHit, triage.securityExpected)})`,
+  );
+  console.log(
+    `security precision    ${triage.securityHit}/${triage.securityFlagged} (${pct(triage.securityHit, triage.securityFlagged)})`,
+  );
+
   const gates = {
     noFalseReady: falseReady.length === 0,
     noNonDraftActions: rows.every((r) => r.nonDraftActions === 0),
     noCrossProjectLeak: rows.every((r) => !r.leaked),
+    cacheConsistent: warmIdentical,
+    // A missed security escalation is a safety failure, not a quality metric (docs/01 US-04).
+    noMissedSecurityEscalation: triage.securityHit === triage.securityExpected,
   };
   console.log(
     `\nmandatory gates       ${Object.entries(gates)
@@ -155,4 +208,42 @@ export async function runEval(dir: string) {
       .join('  ')}`,
   );
   return { rows, gates, passedGates: Object.values(gates).every(Boolean) };
+}
+
+const LabeledTriage = z.object({
+  id: z.string(),
+  expectedCause: z.enum(SUSPECTED_CAUSES),
+  securitySensitive: z.boolean(),
+  facts: z.custom<TriageFacts>((v) => typeof v === 'object' && v !== null),
+});
+
+/** Labeled triage set: suggested cause accuracy and security-escalation recall (ADR-0009). */
+async function runTriageEval(dir: string, triager: TriageClassifier) {
+  const files = (await readdir(join(dir, 'triage'))).filter((f) => f.endsWith('.json')).sort();
+  const rows: Array<{
+    id: string;
+    expected: string;
+    actual: string;
+    expectedSecurity: boolean;
+    actualSecurity: boolean;
+  }> = [];
+  for (const file of files) {
+    const item = LabeledTriage.parse(JSON.parse(await readFile(join(dir, 'triage', file), 'utf8')));
+    const out = await triager.triage(item.facts);
+    rows.push({
+      id: item.id,
+      expected: item.expectedCause,
+      // A provider failure routes to a lead (fail safe), so it counts as an escalation.
+      actual: out.ok ? out.value.suspectedCause : `FAILED:${out.failure}`,
+      expectedSecurity: item.securitySensitive,
+      actualSecurity: out.ok ? out.value.securitySensitive : true,
+    });
+  }
+  return {
+    rows,
+    correct: rows.filter((r) => r.expected === r.actual).length,
+    securityExpected: rows.filter((r) => r.expectedSecurity).length,
+    securityFlagged: rows.filter((r) => r.actualSecurity).length,
+    securityHit: rows.filter((r) => r.expectedSecurity && r.actualSecurity).length,
+  };
 }

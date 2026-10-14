@@ -273,6 +273,147 @@ CREATE TABLE audit_events (
 ALTER TABLE knowledge_sources ADD COLUMN refines text[] NOT NULL DEFAULT '{}';
 `,
   },
+  {
+    id: '0003_execution',
+    sql: /* sql */ `
+-- Administrator-managed execution target. Runs may only reach allowed_hosts.
+ALTER TABLE environments ADD COLUMN base_url text;
+ALTER TABLE environments ADD COLUMN allowed_hosts text[] NOT NULL DEFAULT '{}';
+
+-- Executable versions of an APPROVED test case revision (ADR-0008). Content is immutable;
+-- approval binds to spec_hash and requires a reviewer other than the proposer.
+CREATE TABLE test_case_executables (
+  id text PRIMARY KEY,
+  tenant_id text NOT NULL,
+  project_id text NOT NULL,
+  case_id text NOT NULL REFERENCES test_cases(id),
+  case_revision integer NOT NULL,
+  version integer NOT NULL,
+  spec jsonb NOT NULL,
+  spec_hash text NOT NULL,
+  destructive_steps text[] NOT NULL DEFAULT '{}',
+  status text NOT NULL CHECK (status IN ('PROPOSED','APPROVED','REJECTED','SUPERSEDED')),
+  proposed_by text NOT NULL,
+  reviewed_by text,
+  review_reason text,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  reviewed_at timestamptz,
+  UNIQUE (case_id, version),
+  CHECK (reviewed_by IS NULL OR reviewed_by <> proposed_by)
+);
+
+CREATE TABLE test_runs (
+  id text PRIMARY KEY,
+  tenant_id text NOT NULL,
+  project_id text NOT NULL,
+  case_id text NOT NULL REFERENCES test_cases(id),
+  case_revision integer NOT NULL,
+  executable_id text NOT NULL REFERENCES test_case_executables(id),
+  spec_hash text NOT NULL,
+  environment_id text NOT NULL,
+  state text NOT NULL,
+  reason text,
+  idempotency_key text NOT NULL,
+  requested_by text NOT NULL,
+  approval_id text REFERENCES approvals(id),
+  review_id text REFERENCES review_tasks(id),
+  assertions jsonb NOT NULL DEFAULT '[]',
+  cleanup_failed boolean NOT NULL DEFAULT false,
+  blocked_requests text[] NOT NULL DEFAULT '{}',
+  lease_owner text,
+  lease_until timestamptz,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  started_at timestamptz,
+  finished_at timestamptz,
+  UNIQUE (tenant_id, project_id, idempotency_key)
+);
+CREATE INDEX test_runs_queue_idx ON test_runs (state, created_at);
+
+CREATE TABLE evidence_artifacts (
+  id text PRIMARY KEY,
+  tenant_id text NOT NULL,
+  project_id text NOT NULL,
+  run_id text NOT NULL REFERENCES test_runs(id),
+  kind text NOT NULL,
+  name text NOT NULL,
+  content_type text NOT NULL,
+  object_key text NOT NULL UNIQUE,
+  digest text NOT NULL,
+  size_bytes integer NOT NULL,
+  classification text NOT NULL DEFAULT 'INTERNAL',
+  retention_until timestamptz NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+`,
+  },
+  {
+    id: '0004_triage_bugs_cache',
+    sql: /* sql */ `
+ALTER TABLE decision_records ADD COLUMN cache_hit boolean NOT NULL DEFAULT false;
+
+-- Successful decisions only, keyed by provider identity + exact input; tenant/project scoped.
+CREATE TABLE decision_cache (
+  tenant_id text NOT NULL,
+  project_id text NOT NULL,
+  kind text NOT NULL,
+  cache_key text NOT NULL,
+  result jsonb NOT NULL,
+  provider text NOT NULL,
+  model text,
+  prompt_version text NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  expires_at timestamptz NOT NULL,
+  PRIMARY KEY (tenant_id, project_id, kind, cache_key)
+);
+
+-- Suspected failure cause (never changes the run verdict) and its human verification.
+CREATE TABLE run_triage (
+  id text PRIMARY KEY,
+  tenant_id text NOT NULL,
+  project_id text NOT NULL,
+  run_id text NOT NULL REFERENCES test_runs(id),
+  suspected_cause text NOT NULL CHECK (suspected_cause IN ('PRODUCT_DEFECT','TEST_ISSUE','ENVIRONMENT','UNKNOWN')),
+  security_sensitive boolean NOT NULL,
+  security_probability double precision,
+  confidence double precision,
+  rationale text,
+  outcome text NOT NULL,
+  decision_record_id text REFERENCES decision_records(id),
+  review_id text REFERENCES review_tasks(id),
+  verified_cause text CHECK (verified_cause IN ('PRODUCT_DEFECT','TEST_ISSUE','ENVIRONMENT','UNKNOWN')),
+  verified_by text,
+  verified_at timestamptz,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX run_triage_run_idx ON run_triage (run_id, created_at);
+
+-- Bugs filed to an external tracker only after human confirmation + scoped approval.
+CREATE TABLE bug_reports (
+  id text PRIMARY KEY,
+  tenant_id text NOT NULL,
+  project_id text NOT NULL,
+  run_id text NOT NULL REFERENCES test_runs(id),
+  triage_id text NOT NULL REFERENCES run_triage(id),
+  tracker text NOT NULL,
+  target text NOT NULL,
+  summary text NOT NULL,
+  description text NOT NULL,
+  labels text[] NOT NULL,
+  payload_hash text NOT NULL,
+  status text NOT NULL CHECK (status IN ('DRAFT','PUBLISHING','PUBLISHED','PUBLISH_FAILED','REVERTED')),
+  review_id text REFERENCES review_tasks(id),
+  approval_id text REFERENCES approvals(id),
+  external_key text,
+  external_url text,
+  error text,
+  created_by text NOT NULL,
+  published_by text,
+  reverted_by text,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+`,
+  },
 ];
 
 export async function migrate(db: Db): Promise<string[]> {

@@ -7,17 +7,28 @@ import {
   DECISIONS_PROMPT_VERSION,
   readinessQuestions,
 } from './decision-readiness.ts';
+import { TRIAGE_DECISIONS_PROMPT_VERSION, triageFromDecisions, triageQuestions } from './decision-triage.ts';
 import { checkDraft } from './grounding.ts';
-import { buildPayload, DRAFT_PROMPT_VERSION, DRAFT_SYSTEM, userMessage } from './prompts.ts';
+import {
+  buildPayload,
+  buildTriagePayload,
+  DRAFT_PROMPT_VERSION,
+  DRAFT_SYSTEM,
+  userMessage,
+} from './prompts.ts';
 import type {
   CallMeta,
   DraftGenerator,
   DraftInput,
   FailureKind,
+  ProviderFailure,
   ProviderOutcome,
   ReadinessAssessment,
   ReadinessClassifier,
   ReadinessInput,
+  TriageAssessment,
+  TriageClassifier,
+  TriageFacts,
 } from './types.ts';
 
 /** Only Decisions-capable model per docs/05 (snapshot 2026-10-09); re-verify at upgrade time. */
@@ -69,32 +80,57 @@ function newMeta(
   };
 }
 
-/** Readiness via the OpenAI Decisions API (beta): typed choice + yes/no predicates (ADR-0006). */
-export class OpenAIDecisionsClassifier implements ReadinessClassifier {
+type PlanQuestion =
+  | {
+      kind: 'choice';
+      name: string;
+      instructions: string;
+      choices: Array<{ value: string; description: string }>;
+    }
+  | { kind: 'yesno'; name: string; instructions: string; yes: string; no: string };
+
+type DecisionAnswer = OpenAI.Decision['answers'][number];
+
+/** Readiness and failure triage via the OpenAI Decisions API (beta): typed choice + predicates (ADR-0006/0009). */
+export class OpenAIDecisionsClassifier implements ReadinessClassifier, TriageClassifier {
   readonly model: string;
   constructor(private readonly config: { client: OpenAI; model?: string; providerLabel?: string }) {
     this.model = config.model ?? DEFAULT_DECISIONS_MODEL;
   }
 
-  async classify(input: ReadinessInput): Promise<ProviderOutcome<ReadinessAssessment>> {
-    const payload = buildPayload(input.story, input.sources);
-    const questions = readinessQuestions(input.story.acceptanceCriteria.length, input.sources.length);
-    const meta = newMeta(this.config.providerLabel ?? 'openai', this.model, DECISIONS_PROMPT_VERSION, {
-      payload,
-      questions,
-    });
+  private get label() {
+    return this.config.providerLabel ?? 'openai';
+  }
+
+  get readinessCacheId(): string {
+    return `${this.label}|${this.model}|${DECISIONS_PROMPT_VERSION}`;
+  }
+
+  get triageCacheId(): string {
+    return `${this.label}|${this.model}|${TRIAGE_DECISIONS_PROMPT_VERSION}`;
+  }
+
+  /** One Decisions call; returns answers by name, or a fail-closed provider failure. */
+  private async ask(
+    plan: PlanQuestion[],
+    payload: unknown,
+    promptVersion: string,
+  ): Promise<{ ok: true; byName: Map<string | null, DecisionAnswer>; meta: CallMeta } | ProviderFailure> {
+    const meta = newMeta(this.label, this.model, promptVersion, { payload, plan });
     const started = performance.now();
     try {
       const decision = await this.config.client.decisions.create({
         model: this.model,
         input: userMessage(payload),
-        questions: questions.map((q) =>
+        questions: plan.map((q) =>
           q.kind === 'choice'
             ? { type: 'choice' as const, name: q.name, instructions: q.instructions, choices: q.choices }
             : {
                 type: 'predicate' as const,
                 name: q.name,
-                instructions: `${q.instructions}\nYes: ${q.yes}\nNo: ${q.no}`,
+                instructions: `${q.instructions}
+Yes: ${q.yes}
+No: ${q.no}`,
               },
         ),
       });
@@ -106,31 +142,52 @@ export class OpenAIDecisionsClassifier implements ReadinessClassifier {
         cacheReadTokens: decision.usage.input_tokens_details?.cached_tokens ?? 0,
         cacheWriteTokens: decision.usage.input_tokens_details?.cache_write_tokens ?? 0,
       };
-
-      const byName = new Map(decision.answers.map((a) => [a.name, a]));
-      const r = byName.get('readiness');
-      return assessmentFromDecisions(
-        input,
-        {
-          readiness: !r
-            ? { status: 'missing', detail: 'no readiness answer' }
-            : r.type === 'refusal'
-              ? { status: 'refused' }
-              : r.type === 'choice'
-                ? { status: 'ok', choice: r.choice, confidence: r.confidence }
-                : { status: 'invalid', detail: `readiness answer type ${r.type}` },
-          // A refused or missing predicate counts as "no" (conservative).
-          yes: (name) => {
-            const a = byName.get(name);
-            return a?.type === 'predicate' ? a.probability : 0;
-          },
-        },
-        meta,
-      );
+      return { ok: true, byName: new Map(decision.answers.map((a) => [a.name, a])), meta };
     } catch (err) {
       meta.latencyMs = performance.now() - started;
       return { ok: false, ...classifyError(err), meta };
     }
+  }
+
+  private static choice(a: DecisionAnswer | undefined, name: string) {
+    if (!a) return { status: 'missing' as const, detail: `no ${name} answer` };
+    if (a.type === 'refusal') return { status: 'refused' as const };
+    if (a.type === 'choice') return { status: 'ok' as const, choice: a.choice, confidence: a.confidence };
+    return { status: 'invalid' as const, detail: `${name} answer type ${a.type}` };
+  }
+
+  async classify(input: ReadinessInput): Promise<ProviderOutcome<ReadinessAssessment>> {
+    const res = await this.ask(
+      readinessQuestions(input.story.acceptanceCriteria.length, input.sources.length),
+      buildPayload(input.story, input.sources),
+      DECISIONS_PROMPT_VERSION,
+    );
+    if (!res.ok) return res;
+    return assessmentFromDecisions(
+      input,
+      {
+        readiness: OpenAIDecisionsClassifier.choice(res.byName.get('readiness'), 'readiness'),
+        // A refused or missing predicate counts as "no" (conservative).
+        yes: (name) => {
+          const a = res.byName.get(name);
+          return a?.type === 'predicate' ? a.probability : 0;
+        },
+      },
+      res.meta,
+    );
+  }
+
+  async triage(facts: TriageFacts): Promise<ProviderOutcome<TriageAssessment>> {
+    const res = await this.ask(triageQuestions(), buildTriagePayload(facts), TRIAGE_DECISIONS_PROMPT_VERSION);
+    if (!res.ok) return res;
+    const security = res.byName.get('security');
+    return triageFromDecisions(
+      {
+        cause: OpenAIDecisionsClassifier.choice(res.byName.get('cause'), 'cause'),
+        securityProbability: security?.type === 'predicate' ? security.probability : null,
+      },
+      res.meta,
+    );
   }
 }
 

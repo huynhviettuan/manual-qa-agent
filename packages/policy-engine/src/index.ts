@@ -30,6 +30,8 @@ export type Evaluation = {
    * review; confidence never authorizes anything (ADR-0003). Unset until calibrated on evals.
    */
   minReadyConfidence?: number | null;
+  /** The action contains irreversible steps (e.g. an executable spec's destructive clicks). */
+  destructive?: boolean;
   authorized: boolean;
   hasScopedApproval: boolean;
 };
@@ -42,7 +44,7 @@ export function decideGate(e: Evaluation): { gate: Gate; reason: string } {
   }
   if (e.hasContradiction) return { gate: 'NEEDS_HUMAN_REVIEW', reason: 'SOURCE_CONTRADICTION' };
   if (!e.sourcesTrusted) return { gate: 'RETRIEVE_MORE', reason: 'NO_TRUSTED_SOURCES' };
-  if (e.action === 'delete' || e.action === 'publish_bug') {
+  if (e.action === 'delete' || e.action === 'publish_bug' || e.destructive) {
     return e.hasScopedApproval
       ? { gate: 'AUTO_PROCEED', reason: 'SCOPED_APPROVAL_VALID' }
       : { gate: 'NEEDS_HUMAN_REVIEW', reason: 'SCOPED_APPROVAL_REQUIRED' };
@@ -126,6 +128,7 @@ export type PolicyContext = {
   classifiedReadiness?: Readiness;
   grounded: boolean;
   criteriaCovered?: boolean;
+  destructive?: boolean;
   confidence?: number | null;
   minReadyConfidence?: number | null;
   approval?: ApprovalGrant | null;
@@ -167,6 +170,7 @@ export function evaluate(ctx: PolicyContext): PolicyResult {
     classifiedReadiness: ctx.classifiedReadiness,
     grounded: ctx.grounded,
     criteriaCovered: ctx.criteriaCovered ?? true,
+    destructive: ctx.destructive ?? false,
     confidence: ctx.confidence,
     minReadyConfidence: ctx.minReadyConfidence,
     authorized: isAuthorized(ctx.actor, ctx.proposal.kind),

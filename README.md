@@ -22,6 +22,25 @@ pnpm api                                          # http://127.0.0.1:3000, send 
 pnpm eval                                         # labeled pilot set; fails on any false-ready draft
 ```
 
+### Phase 2: run an approved test case (local demo)
+
+```bash
+pnpm --filter @qa/execution exec playwright install chromium   # or set QA_BROWSER_CHANNEL=chrome|msedge
+QA_SECRET_DEMO_PASSWORD=<any> pnpm demo:sut                      # demo system under test on :4000
+pnpm qa env staging --project pilot --kind staging --base-url http://127.0.0.1:4000
+QA_EMBEDDED_WORKER=1 QA_SECRET_DEMO_PASSWORD=<same> pnpm api    # API + in-process worker (dev)
+```
+
+Then, through the API:
+1. Approve a case (`POST /api/test-cases/{id}/review`).
+2. Propose an executable spec (`POST /api/test-cases/{id}/executables`). Examples are in `apps/demo-sut/src/specs.ts`.
+3. Have a **different** person approve it (`POST /api/executables/{id}/review`).
+4. Request a run (`POST /api/test-runs`), then read `GET /api/test-runs/{id}` and download evidence from `GET /api/evidence/{id}`.
+
+Destructive specs come back `BLOCKED` with an approval review. After a QA lead approves it, request the run again with `approvalId`.
+
+> Embedded PGlite is **single-process and development-only**. A hard-killed process can corrupt its data directory. Run the API and `pnpm worker` against PostgreSQL (`DATABASE_URL`, e.g. `docker compose up -d`) for anything shared.
+
 ### Implementation status
 
 | Area | Package | Backlog | Status |
@@ -36,7 +55,18 @@ pnpm eval                                         # labeled pilot set; fails on 
 | Approved knowledge feedback | `packages/review`, `packages/orchestrator` | QA-013 | Implemented |
 | Workflow orchestration, telemetry, HTTP API | `packages/orchestrator`, `apps/api` | QA-014 | Implemented |
 | Evaluation harness | `apps/cli`, `eval/fixtures` | QA-002/004 | Sample pilot set; real labels must come from the team |
-| Browser execution, evidence store, triage, Jira/TCMS | — | QA-015…022 | Not started |
+| Constrained executable steps, second-person approval (ADR-0008) | `packages/domain`, `packages/orchestrator` | — | Implemented (LLM-proposed steps: follow-up) |
+| Playwright executor: host allowlist, secrets by reference, strict locators | `packages/execution` | QA-015 | Implemented |
+| Evidence capture, immutable store, retention purge, authenticated download | `packages/evidence`, `apps/api` | QA-016 | Implemented (local disk; S3 adapter: follow-up) |
+| Deterministic assertions + run lifecycle, worker with leases | `packages/orchestrator`, `apps/worker` | QA-017 | Implemented |
+| Scoped approval for destructive steps, re-checked at execution | `packages/policy-engine`, `packages/orchestrator` | QA-018 | Implemented |
+| Demo system under test + executable specs | `apps/demo-sut` | — | Implemented (pilot/CI only) |
+| Advisory failure triage (all providers), security escalation, human-verified causes | `packages/llm-adapter`, `packages/orchestrator` | QA-019 | Implemented (ADR-0009) |
+| Deterministic reproduction write-up | `packages/orchestrator` | — | Implemented |
+| Jira Cloud bug filing: verified defect + scoped approval, idempotent, revertible | `packages/integrations`, `packages/orchestrator` | QA-020 | Implemented (off by default; no live Jira test yet) |
+| Decision cache (tenant-scoped, content-addressed) + warm-run benchmark | `packages/orchestrator`, `apps/cli` | QA-021 | Implemented |
+| Metrics + drift alerts (JSON for dashboards) | `packages/orchestrator`, `apps/api` | QA-022 | Implemented (no UI) |
+| Test-management (Kiwi TCMS) sync, reviewer UI | — | — | Not started |
 
 ## North star
 
@@ -83,7 +113,9 @@ Make the agent useful for daily Manual QA work: understand requirements; design 
   - Claude via `@anthropic-ai/sdk` structured outputs (default, `claude-opus-5-5`; ADR-0004);
   - or OpenAI via `openai`: Decisions API for readiness (`gpt-6-luna`), Responses API for drafts.
   - Readiness only, optional: TypeSafe Jev via `@typesafe-ai/sdk` (`jev-1.13.0`, pinned).
-- Planned, not built: Playwright execution adapter, evidence object storage, background worker, reviewer web UI.
+- Execution: Playwright 1.64 via a constrained step format (ADR-0008), a worker with leases, and a local-disk evidence store.
+- Integrations: Jira Cloud REST v3 via plain `fetch` with zod-validated responses (ADR-0009).
+- Planned, not built: S3-compatible evidence adapter, LLM-proposed executable steps, test-management sync, reviewer web UI.
 
 ## Suggested repository workflow
 
