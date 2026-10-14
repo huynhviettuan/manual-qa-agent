@@ -1,7 +1,7 @@
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, onTestFinished } from 'vitest';
 import {
   claimNextRun,
   createActor,
@@ -319,6 +319,26 @@ describe('Workflow B: resilience and isolation', () => {
       reason: 'LEASE_LOST_BEFORE_EXECUTION',
     });
     expect(await getRun(db, S, mid.id)).toMatchObject({ state: 'INCONCLUSIVE', reason: 'LEASE_LOST' });
+  });
+
+  // Meaningful against real PostgreSQL (QA_TEST_DATABASE_URL), where claims use separate connections.
+  it('concurrent workers never claim the same run', async () => {
+    const caseId = await approvedCase(loginValidSpec);
+    const queued = await Promise.all(
+      Array.from({ length: 4 }, () => requestRun(deps, a.qa, { caseId, environmentId: 'staging' })),
+    );
+    const claims = await Promise.all(
+      Array.from({ length: 6 }, (_, i) => claimNextRun(db, `racer-${i}`, 60_000)),
+    );
+    const claimed = claims.filter((c) => c !== null);
+    onTestFinished(async () => {
+      for (const c of claimed) {
+        await updateRunState(db, S, c.id, 'POLICY_CHECK', { state: 'BLOCKED', reason: 'TEST_RELEASED' });
+      }
+    });
+
+    expect(claimed.map((c) => c.id).sort()).toEqual(queued.map((r) => r.id).sort());
+    expect(new Set(claimed.map((c) => c.leaseOwner)).size).toBe(queued.length);
   });
 
   it('run reports are tenant scoped', async () => {

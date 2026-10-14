@@ -1,13 +1,46 @@
+import { randomUUID } from 'node:crypto';
+import pg from 'pg';
 import type { Actor, Role, TenantScope } from '@qa/domain';
-import { createPgliteDb, type Db } from './db.ts';
+import { createPgDb, createPgliteDb, type Db } from './db.ts';
 import { migrate } from './migrations.ts';
 import { createActor, createApiKey, createProject, upsertEnvironment } from './repos.ts';
 
-/** Fresh in-memory, migrated database for a test file. */
-export async function createTestDb(): Promise<Db> {
-  const db = await createPgliteDb();
+/**
+ * Fresh, migrated database for a test file: in-memory PGlite by default, or a throwaway database
+ * on the PostgreSQL server at `QA_TEST_DATABASE_URL` (created here, dropped on close).
+ */
+export async function createTestDb(env: NodeJS.ProcessEnv = process.env): Promise<Db> {
+  const db = env.QA_TEST_DATABASE_URL
+    ? await createThrowawayPgDb(env.QA_TEST_DATABASE_URL)
+    : await createPgliteDb();
   await migrate(db);
   return db;
+}
+
+async function onServer(serverUrl: string, sql: string): Promise<void> {
+  const client = new pg.Client({ connectionString: serverUrl });
+  await client.connect();
+  try {
+    await client.query(sql);
+  } finally {
+    await client.end();
+  }
+}
+
+async function createThrowawayPgDb(serverUrl: string): Promise<Db> {
+  // Generated identifier (hex only), so interpolating it into DDL is safe.
+  const name = `qa_test_${randomUUID().replaceAll('-', '')}`;
+  await onServer(serverUrl, `CREATE DATABASE ${name}`);
+  const url = new URL(serverUrl);
+  url.pathname = `/${name}`;
+  const db = createPgDb(url.toString());
+  return {
+    ...db,
+    async close() {
+      await db.close();
+      await onServer(serverUrl, `DROP DATABASE IF EXISTS ${name} WITH (FORCE)`);
+    },
+  };
 }
 
 export const DEFAULT_ROLES = {
