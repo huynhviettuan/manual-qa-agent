@@ -1,0 +1,11 @@
+{
+  "externalId": "GYM-AC-10",
+  "title": "Gym CRM AC-10",
+  "description": "Acceptance criterion AC-10 of the Gym CRM (milestone M4).",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-10",
+      "text": "Entering any session count gives the right tier unit price, end date, and display name; a price different from the tier flags the contract \"Exception price\" and it cannot be activated until approved."
+    }
+  ]
+}

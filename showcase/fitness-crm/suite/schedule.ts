@@ -1,0 +1,545 @@
+import { auto, headingAt, manual, signIn, WHY, type Module, type SuiteCase } from './helpers.ts';
+
+const SB = 'PT booking';
+const SS = 'Sessions';
+const SC = 'Classes and check-in';
+
+const refused = (
+  id: string,
+  title: string,
+  condition: string,
+  message: string,
+  priority: 'P1' | 'P2' = 'P1',
+): SuiteCase =>
+  manual({
+    id,
+    section: SB,
+    priority,
+    technique: 'Decision table',
+    title,
+    requirement: {
+      id: 'BR-402',
+      statement: `A booking requires an approved, active contract with sessions left, not expired and not frozen, inside the service's hours: ${condition} is refused with "${message}"`,
+    },
+    pre: [condition],
+    steps: [['PT calendar: book a session on it', `Refused: "${message}"; no session created`]],
+    why: WHY.date,
+  });
+
+const cases: SuiteCase[] = [
+  manual({
+    id: 'BKG-01',
+    section: SB,
+    priority: 'P1',
+    technique: 'Decision table',
+    title: 'A booking on an eligible contract is created',
+    requirement: {
+      id: 'BR-402',
+      statement:
+        'A booking on an approved, active contract with sessions left, within its dates and the service hours, is created.',
+    },
+    pre: ['An active contract with sessions left'],
+    steps: [['Book a free cell within the contract dates', "The session appears in the PT's column"]],
+    why: WHY.date,
+  }),
+  refused(
+    'BKG-02',
+    'A contract not yet approved cannot be booked',
+    'a contract still "Chờ duyệt"',
+    'Hợp đồng không ở trạng thái hiệu lực (đang nháp, đã hủy hoặc đã hết hạn).',
+  ),
+  refused(
+    'BKG-03',
+    'An expired contract cannot be booked',
+    'an expired contract (HD000009)',
+    'Hợp đồng không ở trạng thái hiệu lực (đang nháp, đã hủy hoặc đã hết hạn).',
+  ),
+  refused(
+    'BKG-04',
+    'A cancelled contract cannot be booked',
+    'a cancelled contract (HD000010)',
+    'Hợp đồng không ở trạng thái hiệu lực (đang nháp, đã hủy hoặc đã hết hạn).',
+  ),
+  refused(
+    'BKG-05',
+    'A frozen contract cannot be booked',
+    'a contract "Tạm vô hiệu"',
+    'Hợp đồng đang bị khóa. Hãy kích hoạt lại trước.',
+  ),
+  refused(
+    'BKG-06',
+    'A contract with no sessions left cannot be booked',
+    'a contract with 0 sessions left',
+    'Hợp đồng không còn buổi tập nào khả dụng.',
+  ),
+  refused(
+    'BKG-07',
+    'A date outside the contract period is refused',
+    "a date after the contract's end date",
+    'Ngày tập nằm ngoài thời hạn của hợp đồng.',
+    'P2',
+  ),
+  refused(
+    'BKG-08',
+    'A time outside the service hours is refused',
+    "a time outside the service's allowed hours",
+    'Giờ này nằm ngoài khung giờ được dùng dịch vụ.',
+    'P2',
+  ),
+  refused(
+    'BKG-09',
+    'A booking over the daily limit is refused',
+    'a second session in a day for a service limited to one per day',
+    'Dịch vụ không cho thêm buổi nào cho khách trong ngày này.',
+    'P2',
+  ),
+  manual({
+    id: 'BKG-10',
+    section: SB,
+    priority: 'P1',
+    technique: 'Equivalence partitioning',
+    title: 'A trainer cannot have two sessions at once',
+    requirement: {
+      id: 'BR-403',
+      statement: 'A PT cannot have two sessions at once: "Huấn luyện viên đã có lịch trùng giờ này."',
+    },
+    pre: ['Trainer Khoa has a session at 17:00 today'],
+    steps: [['Book another customer with Khoa at 17:00', '"Huấn luyện viên đã có lịch trùng giờ này."']],
+    why: WHY.date,
+  }),
+  manual({
+    id: 'BKG-11',
+    section: SB,
+    priority: 'P1',
+    technique: 'Equivalence partitioning',
+    title: 'A customer cannot have two sessions at once',
+    requirement: {
+      id: 'BR-403',
+      statement: 'A customer cannot have two sessions at once: "Khách đã có buổi tập khác vào giờ này."',
+    },
+    steps: [
+      [
+        'Book the same customer with another PT at an overlapping time',
+        '"Khách đã có buổi tập khác vào giờ này."',
+      ],
+    ],
+    why: WHY.date,
+  }),
+  manual({
+    id: 'BKG-12',
+    section: SB,
+    priority: 'P2',
+    technique: 'Boundary value analysis',
+    title: 'Back-to-back sessions do not overlap',
+    requirement: {
+      id: 'BR-403',
+      statement: 'A session ending at 18:00 and another starting at 18:00 for the same PT do not overlap.',
+    },
+    steps: [
+      ['Book 17:00–18:00 and 18:00–19:00 for one PT', 'Both created'],
+      ['Book 17:30–18:30', 'Refused as an overlap'],
+    ],
+    why: WHY.date,
+  }),
+  manual({
+    id: 'BKG-13',
+    section: SB,
+    priority: 'P2',
+    technique: 'Boundary value analysis',
+    title: 'An end time not after the start is explained before saving',
+    requirement: {
+      id: 'FR-PT-002',
+      statement:
+        'An end time not after the start shows "Giờ kết thúc phải sau giờ bắt đầu." before anything is saved.',
+    },
+    steps: [
+      ['End 17:00, start 17:00', '"Giờ kết thúc phải sau giờ bắt đầu."'],
+      ['End 16:30', 'Same message'],
+    ],
+    why: WHY.date,
+  }),
+  manual({
+    id: 'BKG-14',
+    section: SB,
+    priority: 'P2',
+    technique: 'Boundary value analysis',
+    title: 'Times must be on the hour or half hour',
+    requirement: {
+      id: 'FR-PT-001',
+      statement:
+        'Times are 30-minute cells: 05:15 shows "Chọn giờ tròn hoặc giờ rưỡi, ví dụ 05:00 hoặc 05:30."',
+    },
+    steps: [
+      ['Start 05:15', 'Refused with the half-hour message'],
+      ['05:30', 'Accepted'],
+    ],
+    why: WHY.date,
+  }),
+  manual({
+    id: 'BKG-15',
+    section: SB,
+    priority: 'P2',
+    technique: 'Use case',
+    title: 'A PT can book outside the on-duty shift',
+    requirement: {
+      id: 'AC-24',
+      statement:
+        'A PT can book outside the on-duty shift, and the grid colors in-shift and off-shift time differently.',
+    },
+    steps: [
+      ['Book an off-shift cell', 'Created'],
+      ['Look at the grid', 'Off-shift cells shaded differently'],
+    ],
+    why: WHY.judge,
+  }),
+  manual({
+    id: 'BKG-16',
+    section: SB,
+    priority: 'P1',
+    technique: 'Error guessing',
+    title: 'Two concurrent bookings of the same slot create one',
+    requirement: {
+      id: 'BR-403',
+      statement: 'Overlaps are refused even under concurrent requests (enforced by the database).',
+    },
+    steps: [['Two users book the same trainer slot at the same moment', 'One succeeds, one is refused']],
+    why: WHY.concurrency,
+  }),
+  manual({
+    id: 'BKG-17',
+    section: SB,
+    priority: 'P2',
+    technique: 'Permission matrix',
+    title: 'A trainer sees only their own column',
+    requirement: {
+      id: 'BR-101',
+      statement: 'A PT with data scope own sees and completes only their own sessions.',
+    },
+    steps: [['Open the PT calendar as a trainer', 'Only their column']],
+    why: WHY.setup,
+  }),
+  auto({
+    id: 'BKG-18',
+    section: SB,
+    priority: 'P3',
+    technique: 'Use case',
+    title: 'Reception opens the PT calendar',
+    requirement: { id: 'FR-PT-001', statement: 'Reception opens the PT calendar "Lịch PT".' },
+    steps: [['Open Lịch PT as the receptionist', 'The calendar opens']],
+    spec: [...signIn('receptionist'), ...headingAt('/calendar', 'Lịch PT')],
+  }),
+  // Session status rules
+  manual({
+    id: 'SES-01',
+    section: SS,
+    priority: 'P1',
+    technique: 'State transition',
+    title: 'Booking never consumes a session',
+    requirement: { id: 'BR-401', statement: 'Booking never consumes a session.' },
+    steps: [['Note sessions left; book', 'Unchanged']],
+    why: WHY.chain,
+  }),
+  manual({
+    id: 'SES-02',
+    section: SS,
+    priority: 'P1',
+    technique: 'Decision table',
+    title: '"Đã tập" consumes one session and credits the PT',
+    requirement: { id: 'BR-404', statement: '"Đã tập" consumes a session and credits the PT.' },
+    steps: [['Mark a booked session "Đã tập"', 'Sessions left −1; PT credited 1']],
+    why: WHY.chain,
+  }),
+  manual({
+    id: 'SES-03',
+    section: SS,
+    priority: 'P1',
+    technique: 'Decision table',
+    title: '"Khách không đến" consumes one session and credits the PT',
+    requirement: { id: 'BR-404', statement: '"Khách không đến" consumes a session and credits the PT.' },
+    steps: [['Mark "Khách không đến"', 'Sessions left −1; PT credited']],
+    why: WHY.chain,
+  }),
+  manual({
+    id: 'SES-04',
+    section: SS,
+    priority: 'P1',
+    technique: 'Decision table',
+    title: '"Hủy lịch" neither consumes nor credits',
+    requirement: { id: 'BR-404', statement: '"Hủy lịch" does not consume or credit.' },
+    steps: [['Cancel a booked session', 'Sessions left unchanged; no credit']],
+    why: WHY.chain,
+  }),
+  manual({
+    id: 'SES-05',
+    section: SS,
+    priority: 'P1',
+    technique: 'State transition',
+    title: '"Đã tập" is final',
+    requirement: {
+      id: 'BR-405',
+      statement: '"Đã tập" requires its own permission and is final: its status cannot change.',
+    },
+    steps: [['Try to change a "Đã tập" session', 'No status actions offered']],
+    why: WHY.chain,
+  }),
+  manual({
+    id: 'SES-06',
+    section: SS,
+    priority: 'P1',
+    technique: 'Error guessing',
+    title: 'Repeating a status change never consumes twice',
+    requirement: {
+      id: 'BR-409',
+      statement: 'Repeating a status change never consumes twice, also under concurrent requests.',
+    },
+    steps: [['Send "Đã tập" twice', 'Sessions left −1 only']],
+    why: WHY.concurrency,
+  }),
+  manual({
+    id: 'SES-07',
+    section: SS,
+    priority: 'P1',
+    technique: 'Use case',
+    title: 'Deleting a recorded session refunds exactly one and emails the customer',
+    requirement: {
+      id: 'AC-16',
+      statement:
+        'When admin deletes a "Đã tập" session, the customer gets exactly 1 session back and the PT exactly 1 credit less.',
+    },
+    steps: [
+      ['Delete from the check-in history with a reason', '+1 session; −1 PT credit; one email; in the trash'],
+    ],
+    why: WHY.mutate,
+  }),
+  manual({
+    id: 'SES-08',
+    section: SS,
+    priority: 'P2',
+    technique: 'Use case',
+    title: 'Deleting a session in a paid period adds an adjustment',
+    requirement: {
+      id: 'BR-407',
+      statement:
+        'Deleting a session in a period already paid to the PT keeps the payout and adds a negative adjustment to the next period.',
+    },
+    steps: [['Delete a session from a paid period', 'Next period shows a −1 adjustment line']],
+    why: WHY.mutate,
+  }),
+  manual({
+    id: 'SES-09',
+    section: SS,
+    priority: 'P2',
+    technique: 'Use case',
+    title: 'Burn Show needs a reason and counts like "Đã tập"',
+    requirement: {
+      id: 'BR-408',
+      statement:
+        'Burn Show adds a session by hand with a mandatory reason; it consumes and credits like Đã tập and is marked "added by hand".',
+    },
+    steps: [
+      ['Burn Show without a reason', 'Refused'],
+      ['With a reason', 'Session added by hand; −1 left; PT credited'],
+    ],
+    why: WHY.mutate,
+  }),
+  manual({
+    id: 'SES-10',
+    section: SS,
+    priority: 'P2',
+    technique: 'Use case',
+    title: "Admin confirms a day's sessions in bulk",
+    requirement: {
+      id: 'FR-PT-004',
+      statement: 'Admin confirms many sessions of a day quickly ("Đã tập" in bulk).',
+    },
+    steps: [['Select several checked-in sessions; confirm', 'All "Đã tập"; each consumed once']],
+    why: WHY.mutate,
+  }),
+  manual({
+    id: 'SES-11',
+    section: SS,
+    priority: 'P2',
+    technique: 'Use case',
+    title: 'Each session status shows its configured color',
+    requirement: { id: 'AC-15', statement: 'Each session status shows its color.' },
+    steps: [['Look at the calendar', 'Colors match the status rules']],
+    why: WHY.judge,
+  }),
+  // Classes and check-in
+  manual({
+    id: 'CLS-01',
+    section: SC,
+    priority: 'P1',
+    technique: 'Boundary value analysis',
+    title: 'A full class refuses another enrolment',
+    requirement: {
+      id: 'BR-411',
+      statement: 'Class enrollment is refused when the class is full: "Lớp đã đầy."',
+    },
+    steps: [
+      ['Class capacity 10 with 9 enrolled: enroll one', 'Enrolled'],
+      ['Enroll the 11th', '"Lớp đã đầy."'],
+    ],
+    why: WHY.setup,
+  }),
+  manual({
+    id: 'CLS-02',
+    section: SC,
+    priority: 'P2',
+    technique: 'Decision table',
+    title: 'Enrolment needs a group-class contract with sessions and time left',
+    requirement: {
+      id: 'BR-411',
+      statement: 'Enrollment is refused when the group-class contract is out of sessions or expired.',
+    },
+    steps: [
+      ['Enroll with an expired class contract', 'Refused'],
+      ['With no sessions left', 'Refused'],
+    ],
+    why: WHY.setup,
+  }),
+  manual({
+    id: 'CLS-03',
+    section: SC,
+    priority: 'P2',
+    technique: 'Decision table',
+    title: '"Present" consumes one session and credits the coach',
+    requirement: {
+      id: 'BR-411',
+      statement:
+        '"Present" consumes one session of that contract; each class taught counts as a teaching session for the coach.',
+    },
+    steps: [['Mark a member present', '−1 session; coach credited']],
+    why: WHY.chain,
+  }),
+  manual({
+    id: 'CLS-04',
+    section: SC,
+    priority: 'P3',
+    technique: 'Error guessing',
+    title: 'The same member cannot take two seats in one class',
+    requirement: {
+      id: 'BR-411',
+      statement: 'A second seat for the same member shows "Khách đã có chỗ trong buổi lớp này."',
+    },
+    steps: [['Enroll the same member twice', '"Khách đã có chỗ trong buổi lớp này."']],
+    why: WHY.setup,
+  }),
+  manual({
+    id: 'CHK-01',
+    section: SC,
+    priority: 'P1',
+    technique: 'Boundary value analysis',
+    title: 'Paired scans within 15 minutes complete the session',
+    requirement: {
+      id: 'AC-29',
+      statement:
+        'A customer and the right PT scanning within 15 minutes turns the session to "Đã tập" and triggers the session taken, the PT credit and the email.',
+    },
+    steps: [
+      ['Customer and PT scan 14 minutes apart', '"Đã tập"'],
+      ['16 minutes apart', 'Not paired; session hangs with the reason'],
+    ],
+    why: WHY.external,
+  }),
+  manual({
+    id: 'CHK-02',
+    section: SC,
+    priority: 'P2',
+    technique: 'Equivalence partitioning',
+    title: 'A scan with no booking is an error',
+    requirement: { id: 'AC-29', statement: 'A scan with no booking is an error.' },
+    steps: [['Scan a customer with no session today', 'Error recorded']],
+    why: WHY.external,
+  }),
+  manual({
+    id: 'CHK-03',
+    section: SC,
+    priority: 'P2',
+    technique: 'Use case',
+    title: 'A session without a full check-in is chased',
+    requirement: {
+      id: 'AC-30',
+      statement:
+        'A session without a full check-in is notified to its PT at the end of the day, and to the Studio Manager with a task after 24 hours.',
+    },
+    steps: [['Leave a session half checked-in', 'PT told at day end; manager task after 24 h']],
+    why: WHY.time,
+  }),
+];
+
+export const SCHEDULE: Module = {
+  id: 'SCHED',
+  name: 'PT booking, sessions, classes and check-in',
+  designs: [
+    {
+      technique: 'Decision table',
+      title: 'Can this contract be booked? (BR-402, BR-403)',
+      columns: [
+        'Approved',
+        'Active (not frozen)',
+        'Sessions left',
+        'Within dates',
+        'Within service hours',
+        'Trainer free',
+        'Customer free',
+        'Expected',
+        'Case',
+      ],
+      rows: [
+        ['Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Booked', 'BKG-01'],
+        ['N', '—', '—', '—', '—', '—', '—', 'Không ở trạng thái hiệu lực', 'BKG-02'],
+        ['Y (expired)', '—', '—', 'N', '—', '—', '—', 'Không ở trạng thái hiệu lực', 'BKG-03'],
+        ['Y (cancelled)', '—', '—', '—', '—', '—', '—', 'Không ở trạng thái hiệu lực', 'BKG-04'],
+        ['Y', 'N (frozen)', '—', '—', '—', '—', '—', 'Hợp đồng đang bị khóa', 'BKG-05'],
+        ['Y', 'Y', 'N', '—', '—', '—', '—', 'Không còn buổi tập', 'BKG-06'],
+        ['Y', 'Y', 'Y', 'N', '—', '—', '—', 'Ngoài thời hạn', 'BKG-07'],
+        ['Y', 'Y', 'Y', 'Y', 'N', '—', '—', 'Ngoài khung giờ', 'BKG-08'],
+        ['Y', 'Y', 'Y', 'Y', 'Y', 'N', '—', 'Huấn luyện viên trùng giờ', 'BKG-10'],
+        ['Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'N', 'Khách trùng giờ', 'BKG-11'],
+      ],
+    },
+    {
+      technique: 'Decision table',
+      title: 'Session status rules (BR-404)',
+      columns: ['Status', 'Consumes a session', 'Credits the PT', 'Case'],
+      rows: [
+        ['Đã tập', 'Yes', 'Yes', 'SES-02'],
+        ['Khách không đến', 'Yes', 'Yes', 'SES-03'],
+        ['Hủy lịch', 'No', 'No', 'SES-04'],
+        ['Deleted', 'No (refunded)', 'No (credit removed)', 'SES-07'],
+        ['Burn Show', 'Yes', 'Yes', 'SES-09'],
+      ],
+    },
+    {
+      technique: 'State transition',
+      title: 'Session',
+      columns: ['From', 'Event', 'To', 'Cases'],
+      rows: [
+        ['—', 'Book', 'Booked (nothing consumed)', 'SES-01'],
+        ['Booked', 'Check-in pair', 'Đã tập', 'CHK-01'],
+        ['Booked', 'Mark', 'Đã tập / Khách không đến / Hủy lịch', 'SES-02..04'],
+        ['Đã tập', 'Any change', 'Refused (final)', 'SES-05'],
+        ['Đã tập', 'Admin delete with reason', 'Deleted, refunded', 'SES-07'],
+      ],
+    },
+    {
+      technique: 'Boundary value analysis',
+      title: 'Time boundaries',
+      columns: ['Rule', 'Below', 'At', 'Above', 'Cases'],
+      rows: [
+        [
+          'Overlap (same PT)',
+          '17:00–18:00 + 18:00–19:00 OK',
+          'touching ends OK',
+          '17:30 start refused',
+          'BKG-12',
+        ],
+        ['End after start', 'end < start refused', 'end = start refused', 'end > start OK', 'BKG-13'],
+        ['Scan pairing window', '14 min paired', '15 min paired', '16 min not paired', 'CHK-01'],
+        ['Class capacity 10', '9 → enroll OK', '10 → full', '11th refused', 'CLS-01'],
+      ],
+    },
+  ],
+  cases,
+};

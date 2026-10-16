@@ -32,6 +32,11 @@ const AriaRole = z.enum([
   'region',
   'navigation',
   'form',
+  // Landmark and custom-select roles (Radix/shadcn listboxes) needed to scope real apps' UIs.
+  'main',
+  'listbox',
+  'option',
+  'alertdialog',
 ]);
 
 type LocatorShape =

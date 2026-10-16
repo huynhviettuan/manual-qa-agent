@@ -92,7 +92,10 @@ export async function retrieve(db: Db, scope: TenantScope, input: RetrieveInput)
   });
   const ranked = [...new Map(relevant.map((h) => [h.chunkId, h])).values()].sort(rank);
 
-  // Budget: T1 in rank order first, then T2. A chunk that does not fit is dropped whole.
+  // Budget: T1 in rank order first, then T2. A chunk that does not fit is dropped whole, never cut.
+  // A T1 chunk that names one of the story's identifiers is required: if it cannot fit, the story is
+  // too broad and goes back to a person. A T1 chunk matched only by shared keywords ranks below
+  // every exact match and is dropped with a recorded gap instead (ADR-0010).
   const selected: ChunkHit[] = [];
   let used = 0;
   let budgetExceeded = false;
@@ -100,8 +103,11 @@ export async function retrieve(db: Db, scope: TenantScope, input: RetrieveInput)
   for (const tier of TIERS[input.queryType]) {
     for (const h of ranked.filter((c) => c.trustTier === tier)) {
       if (used + h.tokenEstimate > budget) {
-        if (tier === 'T1') budgetExceeded = true;
-        else gaps.push(`Dropped ${sourceRef(h.sourceId, h.version)} (${tier}) to fit the context budget`);
+        if (tier === 'T1' && h.exactMatch) budgetExceeded = true;
+        else
+          gaps.push(
+            `Dropped ${sourceRef(h.sourceId, h.version)} (${tier}${tier === 'T1' ? ', keyword match only' : ''}) to fit the context budget`,
+          );
         continue;
       }
       selected.push(h);

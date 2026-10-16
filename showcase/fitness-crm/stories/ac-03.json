@@ -1,0 +1,11 @@
+{
+  "externalId": "GYM-AC-03",
+  "title": "Gym CRM AC-03",
+  "description": "Acceptance criterion AC-03 of the Gym CRM (milestone M1, M2).",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-03",
+      "text": "Every consulting step result, checklist item, and reason is a drop-down; admin adds or deactivates an option on screen, the change shows immediately, and old data is unchanged."
+    }
+  ]
+}

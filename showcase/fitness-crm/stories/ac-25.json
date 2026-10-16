@@ -1,0 +1,11 @@
+{
+  "externalId": "GYM-AC-25",
+  "title": "Gym CRM AC-25",
+  "description": "Acceptance criterion AC-25 of the Gym CRM (milestone M2).",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-25",
+      "text": "A lead needs only a name and a channel; the country is chosen from the list of countries and the email goes in the language derived from it (D-057, D-060)."
+    }
+  ]
+}

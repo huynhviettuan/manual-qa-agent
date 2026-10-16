@@ -10,9 +10,14 @@ const PATTERNS: Array<[RegExp, string]> = [
   [/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g, '[REDACTED_EMAIL]'],
 ];
 
+// `[secret:NAME]` is how executable steps refer to a secret by reference; it holds a name, not a
+// value. Only this exact form is spared, so `[password: hunter2]` is still redacted.
+const SECRET_REFERENCE = /\[secret:([A-Z][A-Z0-9_]{1,63})\]/g;
+const REFERENCE_PLACEHOLDER = /\{\{secret-reference:([A-Z][A-Z0-9_]{1,63})\}\}/g;
+
 export function redactSecrets(text: string): { text: string; redactions: number } {
   let redactions = 0;
-  let out = text;
+  let out = text.replace(SECRET_REFERENCE, '{{secret-reference:$1}}');
   for (const [re, replacement] of PATTERNS) {
     out = out.replace(re, (...args) => {
       redactions++;
@@ -20,7 +25,7 @@ export function redactSecrets(text: string): { text: string; redactions: number 
       return replacement.replace(/\$(\d)/g, (_m, i: string) => groups[Number(i) - 1] ?? '');
     });
   }
-  return { text: out, redactions };
+  return { text: out.replace(REFERENCE_PLACEHOLDER, '[secret:$1]'), redactions };
 }
 
 /** Rough token estimate (≈4 chars/token) for budgeting; not a billing figure. */

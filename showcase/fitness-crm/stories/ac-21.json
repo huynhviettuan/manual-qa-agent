@@ -1,0 +1,11 @@
+{
+  "externalId": "GYM-AC-21",
+  "title": "Gym CRM AC-21",
+  "description": "Acceptance criterion AC-21 of the Gym CRM (milestone M7).",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-21",
+      "text": "Choosing Action \"Stop + Escalation\" notifies the manager and Master, and the item stays in the waiting list until handled; the weekly workout dashboard gives the right Flag and Action percentages."
+    }
+  ]
+}

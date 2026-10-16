@@ -1,0 +1,11 @@
+{
+  "externalId": "GYM-AC-28",
+  "title": "Gym CRM AC-28",
+  "description": "Acceptance criterion AC-28 of the Gym CRM (milestone M2, M6).",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-28",
+      "text": "A task is reminded at all three points before its deadline through the bell, email, and phone, and a slow approval past 24 hours is told to the approver's direct manager (D-053, D-056, D-048)."
+    }
+  ]
+}

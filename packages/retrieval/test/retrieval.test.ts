@@ -308,6 +308,29 @@ describe('retrieval', () => {
     expect(r.chunks).toEqual([]);
   });
 
+  it('keeps exact-ID matches and drops lower-ranked keyword-only T1 matches with a recorded gap (ADR-0010)', async () => {
+    await ingestSource(
+      db,
+      poA,
+      doc(
+        { sourceId: 'SPEC-LOCKED-NOTES' },
+        `# Locked accounts notes\nlocked accounts ${'notes '.repeat(400)}`,
+      ),
+    );
+    const r = await retrieve(db, A, {
+      queryType: 'GENERATE_TEST',
+      text: 'locked accounts after failed attempts',
+      identifiers: ['AC-LOGIN-04'],
+      budgetTokens: 300,
+    });
+    expect(r.budgetExceeded).toBe(false);
+    expect(r.chunks.some((c) => c.content.includes('AC-LOGIN-04'))).toBe(true);
+    expect(r.chunks.some((c) => c.sourceId === 'SPEC-LOCKED-NOTES')).toBe(false);
+    expect(r.gaps).toContain(
+      'Dropped SPEC-LOCKED-NOTES@v1 (T1, keyword match only) to fit the context budget',
+    );
+  });
+
   it('a single shared common word does not qualify a source (no spurious context)', async () => {
     await ingestSource(db, poA, doc({ sourceId: 'SPEC-PERF' }, '# Perf\nReports render within 2 seconds.'));
     const r = await retrieve(db, A, {

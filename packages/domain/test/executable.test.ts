@@ -45,6 +45,29 @@ describe('ExecutableSpec', () => {
     expect(ExecutableSpec.safeParse(spec).success).toBe(false);
   });
 
+  it('scopes custom-select options through their listbox and fields through the main landmark', () => {
+    const option = { by: 'role', role: 'option', name: 'Zalo', within: { by: 'role', role: 'listbox' } };
+    const field = { by: 'label', label: 'Email', within: { by: 'role', role: 'main' } };
+    const confirm = {
+      by: 'role',
+      role: 'button',
+      name: 'Merge',
+      within: { by: 'role', role: 'alertdialog' },
+    };
+    const spec = {
+      steps: [
+        { id: 'pick', type: 'click', target: option },
+        { id: 'see', type: 'expectVisible', target: field },
+        { id: 'confirm', type: 'expectVisible', target: confirm },
+      ],
+    };
+    expect(ExecutableSpec.safeParse(spec).success).toBe(true);
+    const unknownRole = {
+      steps: [{ id: 'see', type: 'expectVisible', target: { by: 'role', role: 'iframe' } }],
+    };
+    expect(ExecutableSpec.safeParse(unknownRole).success).toBe(false);
+  });
+
   it('rejects unknown step types (no arbitrary script)', () => {
     const spec = { steps: [{ id: 'x', type: 'evaluate', script: 'document.cookie' }, valid.steps[4]] };
     expect(ExecutableSpec.safeParse(spec).success).toBe(false);

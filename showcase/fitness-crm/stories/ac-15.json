@@ -1,0 +1,11 @@
+{
+  "externalId": "GYM-AC-15",
+  "title": "Gym CRM AC-15",
+  "description": "Acceptance criterion AC-15 of the Gym CRM (milestone M5).",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-15",
+      "text": "\"Đã tập\" and no-show reduce sessions left by exactly 1 and credit the PT; \"Hủy lịch\" and delete do not; each status shows its color; booking is refused when no sessions are left, the contract has expired, or times overlap."
+    }
+  ]
+}

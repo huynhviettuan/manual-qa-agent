@@ -1,0 +1,11 @@
+{
+  "externalId": "GYM-AC-24",
+  "title": "Gym CRM AC-24",
+  "description": "Acceptance criterion AC-24 of the Gym CRM (milestone M5).",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-24",
+      "text": "A PT can book outside the on-duty shift, and the grid colors in-shift and off-shift time differently (D-058)."
+    }
+  ]
+}

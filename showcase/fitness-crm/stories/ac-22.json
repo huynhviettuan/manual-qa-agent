@@ -1,0 +1,11 @@
+{
+  "externalId": "GYM-AC-22",
+  "title": "Gym CRM AC-22",
+  "description": "Acceptance criterion AC-22 of the Gym CRM (milestone M9).",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-22",
+      "text": "Data imported from GymMaster matches the number of customers, contract value, paid amounts, and sessions left."
+    }
+  ]
+}

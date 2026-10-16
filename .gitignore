@@ -6,3 +6,5 @@ coverage/
 !env.example
 .pglite/
 .evidence/
+.showcase-evidence/
+showcase/fitness-crm/results/evidence/

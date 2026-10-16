@@ -1,0 +1,11 @@
+{
+  "externalId": "GYM-AC-11",
+  "title": "Gym CRM AC-11",
+  "description": "Acceptance criterion AC-11 of the Gym CRM (milestone M4, M5).",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-11",
+      "text": "An approved contract cannot be edited, even by admin; a contract not yet approved cannot be booked."
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "externalId": "GYM-AC-30",
+  "title": "Gym CRM AC-30",
+  "description": "Acceptance criterion AC-30 of the Gym CRM (milestone M5, M6).",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-30",
+      "text": "A session without a full check-in is notified to its PT at the end of the day, and to the Studio Manager with a task after 24 hours (D-071)."
+    }
+  ]
+}

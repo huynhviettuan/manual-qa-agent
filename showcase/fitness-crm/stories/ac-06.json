@@ -1,0 +1,11 @@
+{
+  "externalId": "GYM-AC-06",
+  "title": "Gym CRM AC-06",
+  "description": "Acceptance criterion AC-06 of the Gym CRM (milestone M2).",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-06",
+      "text": "A lead created from the form gets the right channel and source, is assigned in the right round-robin order, and the manager is notified."
+    }
+  ]
+}

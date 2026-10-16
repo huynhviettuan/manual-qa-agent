@@ -73,7 +73,7 @@ Example **starting** budget for a single readiness check, subject to measurement
 | Reserve and metadata | 300 |
 | **Illustrative input ceiling** | **3,500** |
 
-Rules: prefer latest authorized exact AC; drop redundant results; trim T2 first; do not truncate business rule definitions in ways that change meaning. If evidence cannot fit, split into separate focused subtasks or ask for review. The budget controls *retrieved context*, not necessarily the complete provider token usage.
+Rules: prefer latest authorized exact AC; drop redundant results; trim T2 first, then T1 chunks matched only by shared keywords (each recorded as a gap, ADR-0010); never truncate inside a chunk. If an exact-ID match cannot fit, split into separate focused subtasks or ask for review. The budget controls *retrieved context*, not necessarily the complete provider token usage.
 
 ## Retrieval interface (proposed)
 

@@ -33,6 +33,8 @@ export type StepLog = {
   description: string;
   status: 'passed' | 'failed' | 'error' | 'skipped';
   error?: string;
+  /** Why optional evidence is missing (e.g. a navigation screenshot taken mid-redirect). */
+  note?: string;
   durationMs: number;
   screenshot?: string;
 };
@@ -72,6 +74,11 @@ export type PlaywrightExecutorOptions = {
   headless?: boolean;
   /** Per-step timeout for auto-waiting actions and assertions. */
   stepTimeoutMs?: number;
+  /**
+   * Browser locale (default `en-US`). Pinned so a spec gets the same page language, and the same
+   * verdict, on every machine; apps that localize from Accept-Language differ otherwise.
+   */
+  locale?: string;
 };
 
 class EvidenceUnavailable extends Error {}
@@ -173,6 +180,7 @@ export class PlaywrightExecutor implements Executor {
         acceptDownloads: false,
         serviceWorkers: 'block',
         viewport: { width: 1280, height: 800 },
+        locale: this.opts.locale ?? 'en-US',
       });
       context.setDefaultTimeout(timeout);
       context.setDefaultNavigationTimeout(timeout);
@@ -240,7 +248,17 @@ export class PlaywrightExecutor implements Executor {
               out.assertions.push(assertion);
               if (assertion.passed !== true) log.status = 'failed';
             }
-            if (assertion || step.type === 'navigate') log.screenshot = await screenshot(step.id);
+            if (assertion) log.screenshot = await screenshot(step.id);
+            else if (step.type === 'navigate') {
+              // Supporting evidence only. An app may redirect on the client at any moment after load
+              // (Gym CRM: /finance -> /finance/payments), so the capture can fail; the next assertion
+              // waits on its real signal and its screenshot (always mandatory) shows the settled page.
+              log.screenshot = await screenshot(step.id).catch((err: unknown) => {
+                if (err instanceof EvidenceUnavailable) throw err;
+                log.note = `screenshot skipped: ${redact(err instanceof Error ? err.message.split('\n')[0]! : String(err)).slice(0, 200)}`;
+                return undefined;
+              });
+            }
             if (assertion?.passed === false && phase === 'steps')
               conclude('FAILED', `ASSERTION_FAILED:${step.id}`);
             if (assertion?.passed === null) conclude('INCONCLUSIVE', `ASSERTION_NOT_EVALUATED:${step.id}`);

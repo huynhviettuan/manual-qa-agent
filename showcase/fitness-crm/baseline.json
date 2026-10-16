@@ -1,0 +1,6 @@
+{
+  "source": "The team's usual numbers, given on 2026-10-16. Change them and run pnpm showcase:gym:report.",
+  "minutesToWriteCase": 30,
+  "minutesToRunCaseManually": 3,
+  "regressionRunsPerMonth": 4.33
+}

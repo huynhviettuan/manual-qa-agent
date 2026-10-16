@@ -414,6 +414,53 @@ CREATE TABLE bug_reports (
 );
 `,
   },
+  {
+    id: '0005_test_suites',
+    sql: /* sql */ `
+-- Test suites group approved cases (by section) so they are managed and run together.
+CREATE TABLE test_suites (
+  id text PRIMARY KEY,
+  tenant_id text NOT NULL,
+  project_id text NOT NULL,
+  name text NOT NULL,
+  description text NOT NULL DEFAULT '',
+  created_by text NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (tenant_id, project_id, name)
+);
+
+CREATE TABLE test_suite_cases (
+  suite_id text NOT NULL REFERENCES test_suites(id),
+  case_id text NOT NULL REFERENCES test_cases(id),
+  section text NOT NULL DEFAULT '',
+  position integer NOT NULL,
+  added_by text NOT NULL,
+  added_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (suite_id, case_id)
+);
+
+-- One suite run = one requested run per automated case; manual cases are listed, never guessed.
+CREATE TABLE suite_runs (
+  id text PRIMARY KEY,
+  tenant_id text NOT NULL,
+  project_id text NOT NULL,
+  suite_id text NOT NULL REFERENCES test_suites(id),
+  environment_id text NOT NULL,
+  requested_by text NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE suite_run_items (
+  suite_run_id text NOT NULL REFERENCES suite_runs(id),
+  case_id text NOT NULL REFERENCES test_cases(id),
+  run_id text REFERENCES test_runs(id),
+  outcome text NOT NULL CHECK (outcome IN ('REQUESTED','NOT_AUTOMATED','NOT_APPROVED')),
+  position integer NOT NULL,
+  PRIMARY KEY (suite_run_id, case_id),
+  CHECK ((outcome = 'REQUESTED') = (run_id IS NOT NULL))
+);
+`,
+  },
 ];
 
 export async function migrate(db: Db): Promise<string[]> {
