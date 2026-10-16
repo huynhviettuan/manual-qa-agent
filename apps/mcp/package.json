@@ -1,0 +1,20 @@
+{
+  "name": "@qa/mcp",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.30.1",
+    "@qa/domain": "workspace:*",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@qa/api": "workspace:*",
+    "@qa/db": "workspace:*",
+    "@qa/demo-sut": "workspace:*",
+    "@qa/evidence": "workspace:*",
+    "@qa/execution": "workspace:*",
+    "@qa/llm-adapter": "workspace:*",
+    "@qa/orchestrator": "workspace:*"
+  }
+}

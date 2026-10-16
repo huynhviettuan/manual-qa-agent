@@ -71,6 +71,8 @@ const ROLES: Record<string, Role[]> = {
   lead: ['QA_LEAD'],
   po: ['PRODUCT_OWNER'],
   admin: ['ADMIN'],
+  // Propose-only identity for AI clients such as the agent tool server (ADR-0011).
+  agent: ['AI_AGENT'],
 };
 
 try {

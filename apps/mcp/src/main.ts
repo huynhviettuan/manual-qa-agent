@@ -1,0 +1,22 @@
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { QaApiClient } from './client.ts';
+import { assertAgentIdentity, createAgentToolServer } from './server.ts';
+
+// Agent tool server over stdio (ADR-0011). stdout carries the MCP protocol, so diagnostics go to stderr only.
+const baseUrl = process.env.QA_API_URL ?? 'http://127.0.0.1:3000';
+const apiKey = process.env.QA_AGENT_KEY;
+if (!apiKey) {
+  console.error('Set QA_AGENT_KEY to an AI_AGENT API key (pnpm qa seed prints one as <project>-agent).');
+  process.exit(1);
+}
+
+const api = new QaApiClient({ baseUrl, apiKey });
+try {
+  const me = await assertAgentIdentity(api);
+  console.error(`qa-agent-tools: ${me.actorId} (${me.tenantId}/${me.projectId}) via ${baseUrl}`);
+} catch (err) {
+  console.error(`qa-agent-tools: ${(err as Error).message}`);
+  process.exit(1);
+}
+
+await createAgentToolServer(api).connect(new StdioServerTransport());

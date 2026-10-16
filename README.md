@@ -2,9 +2,9 @@
 
 An assistant for manual QA teams. It turns user stories into test cases that cite their requirement sources, and asks a person when a requirement is unclear. It runs approved tests in a real browser and keeps the evidence, and it suggests why a test failed. Risky steps always need a deterministic policy check and a human approval.
 
-> **Status:** Phases 1–3 are implemented and tested; Phase 4 is not started ([status](#project-status)). The reviewer workflow is API-only (no web UI yet). · **Version:** 0.3 · **Updated:** 2026-10-14
+> **Status:** Phases 1–3 are implemented and tested; Phase 4 is not started ([status](#project-status)). The reviewer workflow is API-only (no web UI yet). · **Version:** 0.3 · **Updated:** 2026-10-16
 
-**Contents:** [How it works](#how-it-works) · [Quickstart](#quickstart) · [Walkthroughs](#walkthroughs) · [Showcase](#showcase-gym-crm) · [Roles](#roles-and-api-keys) · [Real AI models](#use-a-real-ai-model) · [Configuration](#configuration) · [Production setup](#run-it-like-production) · [Development](#develop-and-test) · [Troubleshooting](#troubleshooting) · [Docs](#documentation)
+**Contents:** [How it works](#how-it-works) · [Quickstart](#quickstart) · [Walkthroughs](#walkthroughs) · [AI assistants](#connect-an-ai-assistant-mcp) · [Showcase](#showcase-gym-crm) · [Roles](#roles-and-api-keys) · [Real AI models](#use-a-real-ai-model) · [Configuration](#configuration) · [Production setup](#run-it-like-production) · [Development](#develop-and-test) · [Troubleshooting](#troubleshooting) · [Docs](#documentation)
 
 ## How it works
 
@@ -39,7 +39,7 @@ You need about 5 minutes, Node.js 22.12+ and pnpm 9 (`corepack enable`, or use `
 pnpm install
 pnpm --filter @qa/execution exec playwright install chromium   # browser for test runs
 pnpm db:migrate                                                # creates ./.pglite (embedded database)
-pnpm qa seed --project pilot                                   # prints 4 API keys, once: save them
+pnpm qa seed --project pilot                                   # prints 5 API keys, once: save them
 pnpm qa ingest eval/fixtures/sources --project pilot --as pilot-po   # sample approved requirements
 pnpm qa env staging --project pilot --kind staging --base-url http://127.0.0.1:4000
 ```
@@ -156,6 +156,26 @@ To file the confirmed defect in Jira, [configure Jira](#configuration) and resta
 2. A QA lead approves the review.
 3. `POST /api/bugs/<id>/publish` with that `approvalId` files the issue. It's idempotent, and `POST /api/bugs/<id>/revert` undoes it (audited; no deletes).
 
+## Connect an AI assistant (MCP)
+
+A coding assistant such as Claude Code can do the agent-side work for you: read an approved case, write and check
+its executable steps, propose them, and run and read the result once a person has approved. It connects through
+`pnpm mcp`, a tool server that only runs with the `pilot-agent` key, so the API refuses anything the AI role
+may not do, whatever the assistant asks for ([ADR-0011](docs/adr/0011-agent-tool-server.md)).
+
+```bash
+claude mcp add qa-agent --env QA_API_URL=http://127.0.0.1:3000 --env QA_AGENT_KEY=<pilot-agent key> \
+  -- pnpm -s --dir /path/to/manual-qa-agent mcp
+```
+
+`-s` matters: the tool server speaks MCP on stdout, and pnpm's script banner would corrupt it.
+
+Tools: `whoami`, `get_test_case`, `check_executable`, `propose_executable`, `request_run`, `get_run`, `get_triage`,
+`get_reproduction`. Approving cases and executables, answering clarifications and filing bugs stay with people;
+there is no tool for them. Stories are also submitted by people for now ([OQ-13](docs/13-open-questions.md)).
+The `manual-qa-agent` and `test-script-writer` skills in [sdet-skills](https://github.com/huynhviettuan/sdet-skills)
+teach an assistant this workflow and the executable-step format.
+
 ## Showcase: Gym CRM
 
 The agent tested a real product end to end: the Gym CRM sample (a gym management web app) with its fictional *Demo Gym* data, running as a separate local copy. **Report:** https://claude.ai/artifact/5NU9478WKjcSdzTi3wzmKN (private; also [results/report.html](showcase/fitness-crm/results/report.html)) · **Tester workbook:** [gym-crm-test-suite.xlsx](showcase/fitness-crm/results/gym-crm-test-suite.xlsx) · **Code and how to reproduce:** [showcase/fitness-crm](showcase/fitness-crm/README.md)
@@ -206,8 +226,9 @@ The showcase also found and fixed four agent issues: the locale-dependent login 
 | `pilot-lead` | QA lead | Everything a QA engineer can, plus: approve destructive actions and bug filing, handle security triage, read metrics and usage |
 | `pilot-po` | Product owner | Submit stories; answer clarifications and source conflicts; publish approved requirement sources |
 | `pilot-admin` | Admin | Everything above |
+| `pilot-agent` | AI agent | Read cases; propose executables; request runs; read runs, triage and reproductions. Never approves, resolves reviews, files bugs, reads the review queue or downloads evidence |
 
-The AI agent has its own role. It can propose but never approve, and it can't read the review queue.
+The AI agent has its own role. It can propose but never approve, and it can't read the review queue. Use its key only with the [agent tool server](#connect-an-ai-assistant-mcp).
 
 ## Use a real AI model
 
@@ -286,7 +307,7 @@ pnpm eval                                          # labeled pilot set; fails on
 | --- | --- | --- |
 | 1. Requirements and review | Approved-source registry, full-text + exact-ID retrieval, readiness check, cited drafts, review queue, knowledge feedback, evaluation set | Vector search (ADR-0005), reviewer web UI |
 | 2. Execution and evidence | Constrained steps (ADR-0008), Playwright executor with host allowlist and pinned locale, deterministic verdicts, leased workers, immutable evidence with retention, test suites (sections, suite runs, per-case report) | S3 evidence storage, AI-proposed steps, date-relative inputs, values carried between steps |
-| 3. Triage and integration | Advisory triage with security escalation (ADR-0009), reproduction write-up, Jira Cloud filing (off by default), decision cache, metrics and drift alerts | Live Jira verification, test-management sync |
+| 3. Triage and integration | Advisory triage with security escalation (ADR-0009), reproduction write-up, Jira Cloud filing (off by default), decision cache, metrics and drift alerts, propose-only MCP tool server for AI assistants (ADR-0011) | Live Jira verification, test-management sync |
 | 4. Scale | — | Per-project budgets, scheduled runs, more frameworks; only with measured benefit ([docs/08](docs/08-implementation-plan.md)) |
 
 The backlog with per-issue status is in [docs/12](docs/12-github-backlog.md).
