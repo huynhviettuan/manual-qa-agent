@@ -36,7 +36,7 @@ import {
 } from '../../packages/orchestrator/src/index.ts';
 import { ingestDirectory } from '../../packages/retrieval/src/index.ts';
 import { reviewTestCase } from '../../packages/review/src/index.ts';
-import { CASES, SUITE_NAME } from './suite-definition.ts';
+import { CASES, SUITE_NAME } from './suite/index.ts';
 
 const HERE = 'showcase/fitness-crm';
 const OUT = join(HERE, 'results');
@@ -121,7 +121,9 @@ for (const c of CASES) {
   const draftMs = Math.round(performance.now() - started);
   const entry: Record<string, unknown> = {
     id: c.id,
+    module: c.module,
     section: c.section,
+    technique: c.technique,
     priority: c.priority,
     title: c.title,
     requirement: c.requirement,
@@ -171,7 +173,8 @@ console.error(`cases: ${cases.filter((c) => c.caseId).length}/${CASES.length} dr
 // --- 3. Suite management
 const suite = await createSuite(db, a.qa, {
   name: SUITE_NAME,
-  description: 'Core Gym CRM flows: sign-in and access, leads, customers and contracts, PT booking, money.',
+  description:
+    'Every documented Gym CRM module, designed with equivalence partitioning, boundary values, decision tables, state transitions, use cases, a permission matrix and error guessing.',
 });
 await addSuiteCases(
   db,
@@ -194,9 +197,22 @@ const runDeps: RunDeps = {
   secrets: (name) => (name === 'GYM_PASSWORD' ? password : undefined),
   triager: providers.triager,
 };
+// Gym CRM's sign-in limit (Better Auth, 20 per 60 s per IP) resets only after 60 s without a
+// successful sign-in, so a steady stream is blocked after 20. Each automated case signs in once:
+// after every 18 runs the worker pauses 62 s. The wait is recorded apart from execution time.
+const BURST = 18;
+const QUIET_MS = 62_000;
+let pacedMs = 0;
+let sinceQuiet = 0;
 const drain = async () => {
-  while (await workOnce(runDeps, 'showcase-worker')) {
-    /* one run per iteration */
+  for (;;) {
+    if (sinceQuiet >= BURST) {
+      await new Promise((resolve) => setTimeout(resolve, QUIET_MS));
+      pacedMs += QUIET_MS;
+      sinceQuiet = 0;
+    }
+    if (!(await workOnce(runDeps, 'showcase-worker'))) break;
+    sinceQuiet++;
   }
 };
 const idOf = new Map(cases.filter((c) => c.caseId).map((c) => [c.caseId as string, c.id as string]));
@@ -240,25 +256,37 @@ async function runDetail(runId: string, label: string, keepScreenshots: boolean)
 
 const suiteRuns = [];
 for (let i = 1; i <= 2; i++) {
-  // Gym CRM allows 20 sign-ins per minute per IP (by design); each automated case signs in once, so
-  // each suite run starts after that window has passed instead of sharing one session.
-  await new Promise((resolve) => setTimeout(resolve, 65_000));
+  // Start each suite run with a fresh sign-in window (see BURST above).
+  await new Promise((resolve) => setTimeout(resolve, QUIET_MS));
+  sinceQuiet = 0;
   const started = Date.now();
+  pacedMs = 0;
   const requested = await runSuite(runDeps, a.qa, suite.id, { environmentId: 'staging' });
   await drain();
   const wallMs = Date.now() - started;
+  const pacingMs = pacedMs;
   const report = await getSuiteRunReport(db, scope, requested.id);
   const items = [];
   for (const item of report.items) {
     const detail = item.runId ? await runDetail(item.runId, idOf.get(item.caseId)!, i === 2) : null;
     items.push({ ...item, tc: idOf.get(item.caseId), detail });
   }
-  suiteRuns.push({ id: report.id, wallMs, totals: report.totals, complete: report.complete, items });
+  const executionMs = items.reduce((sum, i) => sum + (i.durationMs ?? 0), 0);
+  suiteRuns.push({
+    id: report.id,
+    wallMs,
+    pacingMs,
+    executionMs,
+    totals: report.totals,
+    complete: report.complete,
+    items,
+  });
   console.error(`suite run ${i}: ${JSON.stringify(report.totals)} in ${Math.round(wallMs / 1000)}s`);
 }
 
 // --- 5. Safety gates and a labeled staged failure
-const sample = cases.find((c) => c.id === 'TC-10' && c.caseId) ?? cases.find((c) => c.automated && c.caseId);
+const sample =
+  cases.find((c) => c.id === 'LEAD-01' && c.caseId) ?? cases.find((c) => c.automated && c.caseId);
 const gates: Array<Record<string, unknown>> = [];
 let staged = null;
 if (sample) {

@@ -110,6 +110,19 @@ for (const [heading, body] of ruleSections) {
   );
 }
 
+// Functional requirements: one block per FR-XXX-NNN item, keeping its module heading.
+const frBlocks: string[] = [];
+for (const [heading, body] of sections(doc('06_FUNCTIONAL_REQUIREMENTS.md'))) {
+  for (const line of body.split('\n')) {
+    const fr = /^- \*\*(FR-[A-Z]+-\d+)\*\* (.*)$/.exec(line);
+    if (fr) frBlocks.push(`# ${fr[1]} (${heading})\n${fr[2]}\n`);
+  }
+}
+writeFileSync(
+  join(here, 'sources', 'gym-functional-requirements.md'),
+  frontMatter('GYM-FR', 'SPECIFICATION', 'gym-crm') + frBlocks.join('\n'),
+);
+
 // Acceptance criteria: the table rows become one `# AC-xx` block each (same text).
 const rows = [...doc('14_ACCEPTANCE_CRITERIA.md').matchAll(/^\| (AC-\d+) \| (.+?) \| (.+?) \|$/gm)].map(
   ([, id, text, milestone]) => ({ id: id!, text: text!.trim(), milestone: milestone!.trim() }),
@@ -137,4 +150,4 @@ for (const r of rows) {
   };
   writeFileSync(join(here, 'stories', `${r.id.toLowerCase()}.json`), JSON.stringify(story, null, 2) + '\n');
 }
-console.error(`sources: ${ruleSections.length + 2}, stories: ${rows.length}`);
+console.error(`sources: ${ruleSections.length + 3}, stories: ${rows.length}`);

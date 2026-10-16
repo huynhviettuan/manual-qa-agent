@@ -1,9 +1,14 @@
 {
   "agent": [
     {
-      "title": "Keyword retrieval blocks narrow permission questions",
-      "detail": "For 3 of 30 cases (TC-05, TC-08, TC-09) and 5 of 31 requirement stories, full-text retrieval matched 15 to 20 loosely related permission rows, because role names and words like \"permission\" appear throughout the permissions document. The total exceeded the 1,800-token budget and the agent refused instead of truncating approved sources, even after the statement was narrowed. Refusing is the safe behavior, but it blocks drafting. Recommendation: rank by relevance and keep exact-ID matches plus the strongest hits within the budget (vector ranking, deferred in ADR-0005), as a reviewed design change.",
-      "status": "Open"
+      "title": "Keyword retrieval refused 40% of a large suite",
+      "detail": "With the full 261-case suite, 109 cases were refused because loosely related permission rows (matched only by shared keywords) did not fit the context budget, even though the requirement each story names did. The budget now keeps every exact-ID match and drops lower-ranked keyword-only matches with a recorded gap (ADR-0010, with a test). Drafted cases rose from 152 to 216 with the same sources; the evaluation gates still pass.",
+      "status": "Fixed (ADR-0010)"
+    },
+    {
+      "title": "The functional requirements were missing from the sources",
+      "detail": "27 cases cite functional requirements (FR-LEAD-006, FR-CUS-003, …) from Gym CRM's 06_FUNCTIONAL_REQUIREMENTS.md, which was not loaded. The agent correctly refused them (\"unsupported\" or \"no trusted context\") instead of inventing support. Adding the document (76 FR rules, one block each) brought drafted cases to 259 of 261.",
+      "status": "Fixed in the source preparation"
     },
     {
       "title": "Test results depended on the machine's language",
@@ -43,9 +48,29 @@
   ],
   "product": [
     {
-      "title": "All 17 automated checks pass, twice",
-      "detail": "Sign-in and access per role, lead rules (AC-04, AC-25, BR-202), the Kanban board, locked and derived contract values (BR-305, BR-602) and expired contracts behave as the requirements say, in two consecutive runs.",
+      "title": "Price preview shows a raw English validation message (CON-07)",
+      "detail": "Found by boundary-value analysis on the contract form. Typing 1001 sessions makes the live price panel show \"Too big: expected number to be <=1000\", an untranslated developer message, in the Vietnamese UI. Gym CRM's own catalog has the right text (\"Nhập một số nguyên từ 1 đến 1000.\"), which the form does show on save, and 0 shows the normal placeholder. Low severity: nothing is saved. Reproduced in both suite runs.",
+      "kind": "Defect"
+    },
+    {
+      "title": "The not-found page has two main landmarks (SEC-01)",
+      "detail": "Opening a record id that does not exist renders one <main> nested inside another, both holding \"Không tìm thấy\". A page should have a single main landmark for assistive technology. The automated check came back INCONCLUSIVE because its strict locator refused to guess between them; asserting the \"Không tìm thấy\" heading instead would let it run.",
+      "kind": "Accessibility"
+    },
+    {
+      "title": "128 of 130 automated checks pass, identically in two runs",
+      "detail": "Sign-in, every page of the permission matrix (60 checks across 30 pages and 6 roles, all matching docs/09), lead validation and boundaries, duplicates, search, customer standings, contract pricing boundaries, locked and derived contract values, finance access and API refusals behave as the requirements say.",
       "kind": "Confirmed"
+    },
+    {
+      "title": "Two definitions of \"ending soon\"",
+      "detail": "The customer badge \"Sắp hết hạn\" follows decision A-131: only the end date (within 30 days). The dashboard's \"contracts ending soon\" uses 30 days or 3 sessions or fewer, and the demo seed calls a customer with 2 sessions left \"ending soon\". Both behave as their own rule says, but the two rules disagree; worth a product owner decision.",
+      "kind": "Requirement inconsistency"
+    },
+    {
+      "title": "The sign-in limit is not \"20 per minute\"",
+      "detail": "Gym CRM configures Better Auth with 20 sign-ins per 60 seconds per IP, and its comment says the limit must let a whole shift sign in from the gym's one shared IP. Better Auth (1.7.7) resets the counter only after 60 seconds without a successful sign-in, and every successful sign-in restarts that wait. So after 20 sign-ins with gaps under a minute, everyone behind the gym's IP is refused (HTTP 429) until a full quiet minute passes. Observed: blocks after 20 sign-ins at about 11 per minute. Worth a sliding window or a higher limit for the shared IP.",
+      "kind": "Configuration risk"
     },
     {
       "title": "AC-04 is enforced on the server",
@@ -56,11 +81,6 @@
       "title": "Duplicate phones get a clear merge prompt",
       "detail": "Entering an existing customer's phone opens \"Số điện thoại đã có hồ sơ\", names the record (KH000001 · Nguyễn Văn An) and offers \"Gộp vào hồ sơ này\" or \"Quay lại sửa\".",
       "kind": "Confirmed"
-    },
-    {
-      "title": "Sign-in is rate limited",
-      "detail": "Gym CRM allows 20 sign-ins per minute per IP, by design. Back-to-back suite runs hit it (sign-in returned HTTP 429), so runs are spaced a minute apart. Reusing one session per role would remove the wait.",
-      "kind": "Observation"
     },
     {
       "title": "The sidebar is not a navigation landmark",

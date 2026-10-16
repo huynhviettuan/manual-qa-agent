@@ -4,14 +4,15 @@ The agent tested the Gym CRM sample (`D:\fitness-crm`, fictional *Demo Gym* data
 
 | Path | Contents |
 | --- | --- |
-| `build-sources.ts` | Turns the Gym CRM docs into agent sources (one block per BR rule, AC and permission row) and one story per acceptance criterion |
+| `build-sources.ts` | Turns the Gym CRM docs (05 business rules, 06 functional requirements, 09 roles, 14 acceptance criteria) into agent sources, one block per rule, requirement, criterion and permission row, plus one story per acceptance criterion |
 | `sources/`, `stories/` | Generated from the Gym CRM docs, word for word |
 | `stories-followup/` | Stories a QA engineer split after the agent asked for it (AC-01 part 1) |
-| `suite-definition.ts` | The 30-case regression suite: requirement, steps and, for 20 cases, executable steps written against the real UI (manual cases record why) |
+| `suite/` | The full regression suite: one file per module (access, leads, contracts, schedule, operations), each with its test-design artifacts and the cases derived from them; 130 cases have executable steps written against the real UI, the rest record why they are manual |
 | `baseline.json` | Your team's manual numbers used by the agent-versus-manual analysis |
 | `findings.json` | What the showcase found, in the agent and in Gym CRM |
 | `run-showcase.ts` | Requirements review, case drafting and approval, the suite (created, run twice), safety gates and triage; writes `results/` |
-| `build-report.ts` | Renders `results/report.html`; screenshots in `results/evidence/` are published with the report, not committed |
+| `build-report.ts` | Renders `results/report.html` and `results/suite.json`; screenshots in `results/evidence/` are published with the report, not committed |
+| `export_xlsx.py` | Writes `results/gym-crm-test-suite.xlsx` for testers: one sheet per module, traceability, test design, live summary formulas (`python showcase/fitness-crm/export_xlsx.py`) |
 
 ## Reproduce
 

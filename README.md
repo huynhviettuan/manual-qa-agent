@@ -158,7 +158,7 @@ To file the confirmed defect in Jira, [configure Jira](#configuration) and resta
 
 ## Showcase: Gym CRM
 
-The agent tested a real product: the Gym CRM sample with its fictional Demo Gym data. A 30-case regression suite, traced to the Gym CRM requirements, is managed in the agent; 17 cases are automated and passed in two consecutive runs (27 s unattended, against 51 min by hand), 10 stay manual with reasons, and 3 were blocked at drafting by a retrieval limitation the report explains. The report also compares the agent with manual testing on the team's own numbers. See [showcase/fitness-crm](showcase/fitness-crm/README.md) to reproduce it; the report is published privately at https://claude.ai/artifact/5NU9478WKjcSdzTi3wzmKN.
+The agent tested a real product: the Gym CRM sample with its fictional Demo Gym data. A 261-case regression suite covers every documented module, designed with seven manual techniques (equivalence partitioning, boundary values, decision tables, state transitions, use cases, a permission matrix, error guessing) and traced to 96 requirements. 130 cases are automated: 128 passed identically in two runs, one found a real defect (a raw English validation message in the contract price preview) and one exposed nested main landmarks. The rest are managed as manual cases with the reason they are not automated. The report also compares the agent with manual testing on the team's own numbers, and the suite is exported as an Excel workbook for testers. See [showcase/fitness-crm](showcase/fitness-crm/README.md); the report is published privately at https://claude.ai/artifact/5NU9478WKjcSdzTi3wzmKN.
 
 ## Roles and API keys
 
