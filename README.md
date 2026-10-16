@@ -158,7 +158,43 @@ To file the confirmed defect in Jira, [configure Jira](#configuration) and resta
 
 ## Showcase: Gym CRM
 
-The agent tested a real product: the Gym CRM sample with its fictional Demo Gym data. A 261-case regression suite covers every documented module, designed with seven manual techniques (equivalence partitioning, boundary values, decision tables, state transitions, use cases, a permission matrix, error guessing) and traced to 96 requirements. 130 cases are automated: 128 passed identically in two runs, one found a real defect (a raw English validation message in the contract price preview) and one exposed nested main landmarks. The rest are managed as manual cases with the reason they are not automated. The report also compares the agent with manual testing on the team's own numbers, and the suite is exported as an Excel workbook for testers. See [showcase/fitness-crm](showcase/fitness-crm/README.md); the report is published privately at https://claude.ai/artifact/5NU9478WKjcSdzTi3wzmKN.
+The agent tested a real product end to end: the Gym CRM sample (a gym management web app) with its fictional *Demo Gym* data, running as a separate local copy. **Report:** https://claude.ai/artifact/5NU9478WKjcSdzTi3wzmKN (private; also [results/report.html](showcase/fitness-crm/results/report.html)) · **Tester workbook:** [gym-crm-test-suite.xlsx](showcase/fitness-crm/results/gym-crm-test-suite.xlsx) · **Code and how to reproduce:** [showcase/fitness-crm](showcase/fitness-crm/README.md)
+
+What happened, in the order the agent works:
+
+1. **Requirements in.** The Gym CRM docs (business rules, functional requirements, role permissions, acceptance criteria) became 10 approved sources. The agent reviewed 30 acceptance-criteria stories and asked for one to be split instead of guessing.
+2. **Test design.** A 261-case regression suite covers every documented module, traced to 96 requirements. Each module carries its design artifacts (partition, boundary and decision tables, state models), and every case names the technique it comes from.
+3. **Draft and approve.** The agent drafted 259 cases from the sources, with citations. A QA engineer revised each one and a QA lead approved it; the agent cannot approve its own work. Two cases were left undrafted: one needs clarification, and one requirement has no source.
+4. **Execute.** 130 approved cases have executable steps and ran in a real browser, twice, with identical results. Verdicts come only from code assertions, never from the model.
+5. **Triage and safety.** Failures got an advisory cause. Production runs, destructive steps, other hosts and self-approval were all refused.
+
+| Module | Cases | Automated |
+| --- | ---: | ---: |
+| Sign-in, sessions, roles and permissions | 79 | 70 |
+| Leads and consulting | 43 | 27 |
+| Customers and contracts | 45 | 23 |
+| PT booking, sessions, classes and check-in | 36 | 1 |
+| Money, approvals, configuration, tasks, workouts, reports, security | 58 | 9 |
+| **Total** | **261** | **130** |
+
+Techniques used: permission matrix (77 cases), use case (46), boundary value analysis (35), equivalence partitioning (34), decision table (28), error guessing (21), state transition (20).
+
+**Results.** 128 passed, 1 failed and 1 was inconclusive.
+- **CON-07 failed:** a real defect. Entering 1001 sessions on a new contract shows the raw English message "Too big: expected number to be <=1000" in the Vietnamese price preview.
+- **SEC-01 was inconclusive:** the not-found page nests two `main` landmarks, so the check refused to guess which one was meant.
+
+The 131 manual cases each record why they are not automated: date-relative values, two users in sequence, a controllable clock, email, and so on. Together these reasons form the executor's backlog.
+
+**Compared with manual testing**, on the team's numbers (3 min to run a case by hand, weekly regression):
+
+| | Manual | With the agent |
+| --- | ---: | ---: |
+| One regression run | 13 h 03 min (261 × 3 min) | 6 h 36 min (131 cases by hand + 3 min 15 s of browser time) |
+| Per year | 678 h | 343 h (about 335 h saved) |
+
+The 130 automated cases took about 3 min 15 s of browser time in total. Gym CRM limits sign-ins to 20 per minute, so the run waited about 7 minutes on top of that; reusing one session per role would remove the wait. Writing the executable specs was a one-time cost that was not timed. The report shows the payback.
+
+The showcase also found and fixed four agent issues: the locale-dependent login labels, a screenshot race on client redirects, secret placeholders being redacted, and the context budget dropping exact requirement matches ([ADR-0010](docs/adr/0010-budget-keeps-exact-matches.md)). This run used the keyless stand-in model. To repeat it with live Claude (billed), use `QA_LIVE_LLM=1 pnpm showcase:gym`.
 
 ## Roles and API keys
 
