@@ -1,7 +1,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { destructiveSteps, ExecutableSpec, referencedSecrets, specHash } from '@qa/domain';
-import { ApiError, type CaseRevision, type QaApiClient } from './client.ts';
+import { ApiError, type CaseRevision, type Me, type QaApiClient } from './client.ts';
 
 // Agent tool server (ADR-0011): exposes the propose / run / read part of the QA API as MCP tools for AI clients.
 // It deliberately has no tool for approving, resolving reviews, filing bugs, ingesting sources or downloading
@@ -275,13 +275,18 @@ export function createAgentToolServer(api: QaApiClient, info = { name: 'qa-agent
   return server;
 }
 
+/** Why a key may not be used for the tool server, or null when it is a pure AI_AGENT key. */
+export function agentKeyProblem(me: Me): string | null {
+  if (me.roles.length === 1 && me.roles[0] === 'AI_AGENT') return null;
+  return `the agent tool server needs an AI_AGENT key; this key belongs to ${me.actorId} with roles ${me.roles.join(',') || '(none)'}`;
+}
+
 /** Refuses to serve tools with anything but a pure AI_AGENT key, so the API enforces propose-only. */
 export async function assertAgentIdentity(api: QaApiClient) {
   const me = await api.me();
-  if (me.roles.length !== 1 || me.roles[0] !== 'AI_AGENT') {
-    throw new Error(
-      `the agent tool server needs an AI_AGENT key; this key belongs to ${me.actorId} with roles ${me.roles.join(',') || '(none)'}`,
-    );
+  const problem = agentKeyProblem(me);
+  if (problem) {
+    throw new Error(problem);
   }
   return me;
 }

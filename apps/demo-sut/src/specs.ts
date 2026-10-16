@@ -91,7 +91,7 @@ export const lockoutSpec = {
       target: { by: 'testId', testId: 'login-message' },
       text: 'Account locked. Try again in 15 minutes.',
       match: 'exact',
-      sourceRefs: ['CLAR-LOGIN-LOCKOUT@v1'],
+      sourceRefs: ['CLAR-LOCKOUT@v1'],
     },
   ],
   teardown: [...reset],

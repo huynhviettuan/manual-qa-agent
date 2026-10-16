@@ -48,6 +48,7 @@ Create a project board with fields `Status` (Backlog, Ready, In Progress, In Rev
 | QA-021 | RAG caching and cost optimization | P1 | Same benchmark compares cost and quality. **Done** (decision cache + warm-run eval) |
 | QA-022 | Operational dashboards and drift alerts | P1 | Token/cost, review, safety metrics and errors visible. **Done** (JSON endpoints; no UI) |
 | QA-023 | Propose-only tool server for AI clients | P1 | MCP tools to read cases, check and propose executables, request and read runs; starts only with an `AI_AGENT` key; no approve/resolve/file tools. **Done (ADR-0011)** |
+| QA-024 | Tool server over Streamable HTTP | P2 | Per-request AI_AGENT key checked via /api/me; 401/403 for missing, unknown or human keys; stateless. **Done (ADR-0013)** |
 
 ## Example issue template
 
