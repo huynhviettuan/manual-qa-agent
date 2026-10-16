@@ -48,10 +48,17 @@ describe('ExecutableSpec', () => {
   it('scopes custom-select options through their listbox and fields through the main landmark', () => {
     const option = { by: 'role', role: 'option', name: 'Zalo', within: { by: 'role', role: 'listbox' } };
     const field = { by: 'label', label: 'Email', within: { by: 'role', role: 'main' } };
+    const confirm = {
+      by: 'role',
+      role: 'button',
+      name: 'Merge',
+      within: { by: 'role', role: 'alertdialog' },
+    };
     const spec = {
       steps: [
         { id: 'pick', type: 'click', target: option },
         { id: 'see', type: 'expectVisible', target: field },
+        { id: 'confirm', type: 'expectVisible', target: confirm },
       ],
     };
     expect(ExecutableSpec.safeParse(spec).success).toBe(true);

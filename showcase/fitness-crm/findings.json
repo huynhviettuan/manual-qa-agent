@@ -1,6 +1,11 @@
 {
   "agent": [
     {
+      "title": "Keyword retrieval blocks narrow permission questions",
+      "detail": "For 3 of 30 cases (TC-05, TC-08, TC-09) and 5 of 31 requirement stories, full-text retrieval matched 15 to 20 loosely related permission rows, because role names and words like \"permission\" appear throughout the permissions document. The total exceeded the 1,800-token budget and the agent refused instead of truncating approved sources, even after the statement was narrowed. Refusing is the safe behavior, but it blocks drafting. Recommendation: rank by relevance and keep exact-ID matches plus the strongest hits within the budget (vector ranking, deferred in ADR-0005), as a reviewed design change.",
+      "status": "Open"
+    },
+    {
       "title": "Test results depended on the machine's language",
       "detail": "The executor did not pin a browser locale, so Gym CRM rendered its login page in Vietnamese on one machine and English on another, and the same spec failed on one of them. The executor now pins en-US by default (configurable), with a test.",
       "status": "Fixed"
@@ -16,36 +21,56 @@
       "status": "Fixed"
     },
     {
-      "title": "Locators could not scope Gym CRM's dropdowns",
-      "detail": "Gym CRM uses custom dropdowns (a listbox of options) and only a main landmark on some pages. The allowed ARIA roles gained main, listbox and option. No new step type was added (ADR-0008).",
+      "title": "Locators could not reach Gym CRM's dropdowns and dialogs",
+      "detail": "Gym CRM uses custom dropdowns (a listbox of options), a main landmark, and an alert dialog for the duplicate-phone warning. The allowed ARIA roles gained main, listbox, option and alertdialog. No new step type was added (ADR-0008).",
       "status": "Fixed"
     },
     {
-      "title": "Large requirement sections overflowed the context budget",
-      "detail": "With whole business-rule sections as sources, 28 of 30 criteria hit the 1,800-token budget and the agent refused them rather than truncating. Sources now hold one block per rule (BR-xxx) and per permission row. Six long criteria still exceed it; the agent asks for them to be split.",
-      "status": "Fixed in the source preparation"
+      "title": "No test suites",
+      "detail": "The agent managed single cases and runs only. It now has test suites: named sets of cases in sections, run together, with a suite-run report of per-case verdicts, durations, evidence and traceability (migration 0005, API, tests). Manual and unapproved cases are listed in every run, never counted as passed.",
+      "status": "Added"
+    },
+    {
+      "title": "Failure text and matching use different views of the page",
+      "detail": "expectText matches an element's text content, but a failure reports its rendered text. On Gym CRM the two differ (\"Còn lại21\" versus \"Còn lại\" and \"21\" on separate lines; amounts end in a non-breaking space before ₫), which made one assertion harder to write. Worth documenting or reporting both views.",
+      "status": "Open"
+    },
+    {
+      "title": "Sources needed careful preparation",
+      "detail": "Whole business-rule sections overflowed the budget (28 of 30 criteria refused), so sources hold one block per rule and per permission row, the latter restated as \"granted to\" lists. Preparing sources is part of the setup cost.",
+      "status": "Done in the source preparation"
     }
   ],
   "product": [
+    {
+      "title": "All 17 automated checks pass, twice",
+      "detail": "Sign-in and access per role, lead rules (AC-04, AC-25, BR-202), the Kanban board, locked and derived contract values (BR-305, BR-602) and expired contracts behave as the requirements say, in two consecutive runs.",
+      "kind": "Confirmed"
+    },
     {
       "title": "AC-04 is enforced on the server",
       "detail": "Saving a lead with channel \"Khác\" and no note is refused by the server, not only by the form: the field shows \"Đã chọn \\\"Khác\\\" thì phải ghi rõ\" and a toast reports invalid data.",
       "kind": "Confirmed"
     },
     {
+      "title": "Duplicate phones get a clear merge prompt",
+      "detail": "Entering an existing customer's phone opens \"Số điện thoại đã có hồ sơ\", names the record (KH000001 · Nguyễn Văn An) and offers \"Gộp vào hồ sơ này\" or \"Quay lại sửa\".",
+      "kind": "Confirmed"
+    },
+    {
       "title": "Sign-in is rate limited",
-      "detail": "25 sign-ins within about a minute produced HTTP 429 for some attempts. This is brute-force protection working; it means test suites should sign in once per role and reuse the session.",
+      "detail": "Gym CRM allows 20 sign-ins per minute per IP, by design. Back-to-back suite runs hit it (sign-in returned HTTP 429), so runs are spaced a minute apart. Reusing one session per role would remove the wait.",
       "kind": "Observation"
     },
     {
       "title": "The sidebar is not a navigation landmark",
-      "detail": "The main menu has no <nav> element, ARIA navigation role or test ids, so assistive technology cannot jump to it and tests cannot scope menu links to it. The trainer check therefore asserts that \"Tài chính\" appears nowhere on the page.",
+      "detail": "The main menu has no <nav> element, ARIA navigation role or test ids, so assistive technology cannot jump to it and tests cannot scope menu links to it.",
       "kind": "Accessibility"
     },
     {
-      "title": "Two channel dropdowns on one page",
-      "detail": "The leads page has a \"Kênh liên hệ\" filter and a \"Kênh liên hệ\" field in the add-lead dialog. Page-wide locators would be ambiguous; every step is scoped to its dialog.",
-      "kind": "Observation"
+      "title": "The demo data's draft contract is approved",
+      "detail": "The demo seed describes Bùi Thanh Tâm's contract (HD000008) as \"a draft, not activated yet\", but it shows \"Đang hiệu lực\", approved by Admin, likely because the seed approves every pending request afterwards. The demo therefore has no pending contract for booking tests.",
+      "kind": "Demo data"
     }
   ]
 }

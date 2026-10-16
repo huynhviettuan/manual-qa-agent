@@ -51,7 +51,31 @@ function ruleBlocks(heading: string, body: string): string {
   return blocks.length > 0 ? blocks.join('\n') : `# Business rules: ${heading}\n\n${body}\n`;
 }
 
-/** Markdown tables become one block per row, each keeping the header so the row stays readable. */
+const cells = (line: string) =>
+  line
+    .split('|')
+    .slice(1, -1)
+    .map((c) => c.trim());
+
+/**
+ * A permission-matrix row ("Capability | Admin | ... ") is restated as "<capability>: granted to
+ * <roles>", keeping each cell's detail (✓, own, walk-in) and leaving out roles marked "—". Repeating
+ * the header in every row made every row match every role name, which overflowed the context budget.
+ * Other tables keep their header with each row.
+ */
+function rowText(headerLine: string, line: string): string {
+  const head = cells(headerLine);
+  const row = cells(line);
+  if (head[0] !== 'Capability') return `${headerLine}\n${line}`;
+  const granted = head
+    .slice(1)
+    .map((role, i) => [role, row[i + 1] ?? '—'] as const)
+    .filter(([, v]) => v !== '—')
+    .map(([role, v]) => (v === '✓' ? role : `${role} (${v.replace('✓', '').trim() || 'yes'})`));
+  return `${row[0]}: granted to ${granted.length > 0 ? granted.join(', ') : 'no role'}; every other role: not granted.`;
+}
+
+/** Markdown tables become one block per row (see rowText). */
 function tableBlocks(heading: string, body: string): string {
   const rows: string[] = [];
   const prose: string[] = [];
@@ -62,7 +86,7 @@ function tableBlocks(heading: string, body: string): string {
       if (line.trim()) prose.push(line);
     } else if (header.length === 0) header = [line];
     else if (/^\|[\s:|-]+\|$/.test(line)) header.push(line);
-    else rows.push(`# ${heading}: ${line.split('|')[1]!.trim()}\n${header.join('\n')}\n${line}\n`);
+    else rows.push(`# ${heading}: ${line.split('|')[1]!.trim()}\n${rowText(header[0]!, line)}\n`);
   }
   const intro = prose.length > 0 ? [`# Roles and permissions: ${heading}\n\n${prose.join('\n')}\n`] : [];
   return [...intro, ...rows].join('\n');

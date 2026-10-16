@@ -544,3 +544,4 @@ export * from './triage.ts';
 export * from './decision-cache.ts';
 export * from './bugs.ts';
 export * from './metrics.ts';
+export * from './suites.ts';

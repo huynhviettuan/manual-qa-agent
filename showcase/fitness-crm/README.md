@@ -7,10 +7,11 @@ The agent tested the Gym CRM sample (`D:\fitness-crm`, fictional *Demo Gym* data
 | `build-sources.ts` | Turns the Gym CRM docs into agent sources (one block per BR rule, AC and permission row) and one story per acceptance criterion |
 | `sources/`, `stories/` | Generated from the Gym CRM docs, word for word |
 | `stories-followup/` | Stories a QA engineer split after the agent asked for it (AC-01 part 1) |
-| `specs/` | Executable steps for AC-01, AC-04 and AC-25, written against the real UI |
+| `suite-definition.ts` | The 30-case regression suite: requirement, steps and, for 20 cases, executable steps written against the real UI (manual cases record why) |
+| `baseline.json` | Your team's manual numbers used by the agent-versus-manual analysis |
 | `findings.json` | What the showcase found, in the agent and in Gym CRM |
-| `run-showcase.ts` | Readiness for every story, browser runs, safety gates and triage; writes `results/` |
-| `build-report.ts` | Renders `results/report.html` |
+| `run-showcase.ts` | Requirements review, case drafting and approval, the suite (created, run twice), safety gates and triage; writes `results/` |
+| `build-report.ts` | Renders `results/report.html`; screenshots in `results/evidence/` are published with the report, not committed |
 
 ## Reproduce
 

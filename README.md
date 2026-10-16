@@ -158,7 +158,7 @@ To file the confirmed defect in Jira, [configure Jira](#configuration) and resta
 
 ## Showcase: Gym CRM
 
-The agent tested a real product: the Gym CRM sample with its fictional Demo Gym data. It checked all 30 acceptance criteria for readiness, ran approved tests for AC-01 (permissions), AC-04 ("Khác" needs a note) and AC-25 (minimal lead) in a browser, and tried four unsafe actions, all of which were stopped. The run also found and fixed five problems in the agent itself. See [showcase/fitness-crm](showcase/fitness-crm/README.md) to reproduce it; the report is published privately at https://claude.ai/artifact/5NU9478WKjcSdzTi3wzmKN.
+The agent tested a real product: the Gym CRM sample with its fictional Demo Gym data. A 30-case regression suite, traced to the Gym CRM requirements, is managed in the agent; 17 cases are automated and passed in two consecutive runs (27 s unattended, against 51 min by hand), 10 stay manual with reasons, and 3 were blocked at drafting by a retrieval limitation the report explains. The report also compares the agent with manual testing on the team's own numbers. See [showcase/fitness-crm](showcase/fitness-crm/README.md) to reproduce it; the report is published privately at https://claude.ai/artifact/5NU9478WKjcSdzTi3wzmKN.
 
 ## Roles and API keys
 
@@ -249,7 +249,7 @@ pnpm eval                                          # labeled pilot set; fails on
 | Phase | What works | Not yet |
 | --- | --- | --- |
 | 1. Requirements and review | Approved-source registry, full-text + exact-ID retrieval, readiness check, cited drafts, review queue, knowledge feedback, evaluation set | Vector search (ADR-0005), reviewer web UI |
-| 2. Execution and evidence | Constrained steps (ADR-0008), Playwright executor with host allowlist, deterministic verdicts, leased workers, immutable evidence with retention | S3 evidence storage, AI-proposed steps |
+| 2. Execution and evidence | Constrained steps (ADR-0008), Playwright executor with host allowlist and pinned locale, deterministic verdicts, leased workers, immutable evidence with retention, test suites (sections, suite runs, per-case report) | S3 evidence storage, AI-proposed steps, date-relative inputs, values carried between steps |
 | 3. Triage and integration | Advisory triage with security escalation (ADR-0009), reproduction write-up, Jira Cloud filing (off by default), decision cache, metrics and drift alerts | Live Jira verification, test-management sync |
 | 4. Scale | — | Per-project budgets, scheduled runs, more frameworks; only with measured benefit ([docs/08](docs/08-implementation-plan.md)) |
 

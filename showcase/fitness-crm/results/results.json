@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-16T03:34:42.333Z",
+  "generatedAt": "2026-10-16T04:20:04.754Z",
   "target": {
     "url": "http://localhost:3410",
     "product": "Gym CRM (fitness-crm sample, demo data)"
@@ -65,7 +65,6 @@
       "ac": "AC-01",
       "criterion": "An account without permission for a module does not see its menu and cannot reach it by direct URL; a role with phone numbers hidden never sees them on any screen or export.",
       "route": "REVIEW_REQUESTED",
-      "caseId": null,
       "sourceRefs": [
         "GYM-AC@v1",
         "GYM-RBAC@v1",
@@ -73,25 +72,22 @@
         "GYM-RBAC@v1",
         "GYM-RBAC@v1",
         "GYM-RBAC@v1",
+        "GYM-RBAC@v1",
+        "GYM-AC@v1",
         "GYM-AC@v1",
         "GYM-AC@v1",
         "GYM-AC@v1",
         "GYM-RBAC@v1",
         "GYM-AC@v1",
-        "GYM-AC@v1",
-        "GYM-AC@v1",
         "GYM-RBAC@v1",
         "GYM-AC@v1",
-        "GYM-RBAC@v1",
+        "GYM-AC@v1",
         "GYM-RBAC@v1",
         "GYM-RBAC@v1",
         "GYM-RBAC@v1"
       ],
       "question": "Relevant sources exceed the context budget; split the story or narrow its acceptance criteria.",
-      "reviewKind": "MISSING_KNOWLEDGE",
       "reason": "CONTEXT_BUDGET_EXCEEDED",
-      "draft": null,
-      "models": [],
       "tokens": 0
     },
     {
@@ -100,7 +96,6 @@
       "ac": "AC-02",
       "criterion": "Admin changes permissions, approval thresholds, price tiers, timers, and session status rules on screen; changes take effect immediately, with no developer.",
       "route": "REVIEW_REQUESTED",
-      "caseId": null,
       "sourceRefs": [
         "GYM-AC@v1",
         "GYM-RBAC@v1",
@@ -120,13 +115,12 @@
         "GYM-AC@v1",
         "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
         "GYM-AC@v1",
+        "GYM-AC@v1",
+        "GYM-BR-PLATFORM@v1",
         "GYM-AC@v1"
       ],
       "question": "Relevant sources exceed the context budget; split the story or narrow its acceptance criteria.",
-      "reviewKind": "MISSING_KNOWLEDGE",
       "reason": "CONTEXT_BUDGET_EXCEEDED",
-      "draft": null,
-      "models": [],
       "tokens": 0
     },
     {
@@ -134,29 +128,33 @@
       "followUp": null,
       "ac": "AC-03",
       "criterion": "Every consulting step result, checklist item, and reason is a drop-down; admin adds or deactivates an option on screen, the change shows immediately, and old data is unchanged.",
-      "route": "DRAFT_CREATED",
-      "caseId": "case_a0e3304f383d4564a61ce8220df2fde1",
-      "sourceRefs": ["GYM-AC@v1"],
-      "question": null,
-      "reviewKind": null,
-      "reason": null,
-      "draft": {
-        "steps": [
-          {
-            "action": "Exercise AC-03: Every consulting step result, checklist item, and reason is a drop-down; admin adds or deactivates an option on screen, the change shows immediately, and old data is unchanged.",
-            "expected": "Every consulting step result, checklist item, and reason is a drop-down; admin adds or deactivates an option on screen, the change shows immediately, and old data is unchanged. (milestone M1, M2)",
-            "sourceRefs": ["GYM-AC@v1"]
-          }
-        ],
-        "title": "Verify Gym CRM AC-03",
-        "priority": "P1",
-        "testData": ["Synthetic test user"],
-        "assumptions": [],
-        "preconditions": ["Test account exists in the target environment"],
-        "missingRequirements": []
-      },
-      "models": ["mock-heuristic-v1"],
-      "tokens": 1040
+      "route": "REVIEW_REQUESTED",
+      "sourceRefs": [
+        "GYM-AC@v1",
+        "GYM-RBAC@v1",
+        "GYM-BR-LEADS-AND-CUSTOMERS@v1",
+        "GYM-AC@v1",
+        "GYM-BR-PLATFORM@v1",
+        "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+        "GYM-AC@v1",
+        "GYM-AC@v1",
+        "GYM-RBAC@v1",
+        "GYM-RBAC@v1",
+        "GYM-RBAC@v1",
+        "GYM-RBAC@v1",
+        "GYM-AC@v1",
+        "GYM-AC@v1",
+        "GYM-BR-LEADS-AND-CUSTOMERS@v1",
+        "GYM-AC@v1",
+        "GYM-AC@v1",
+        "GYM-AC@v1",
+        "GYM-RBAC@v1",
+        "GYM-RBAC@v1",
+        "GYM-RBAC@v1"
+      ],
+      "question": "Relevant sources exceed the context budget; split the story or narrow its acceptance criteria.",
+      "reason": "CONTEXT_BUDGET_EXCEEDED",
+      "tokens": 0
     },
     {
       "story": "GYM-AC-04",
@@ -164,27 +162,9 @@
       "ac": "AC-04",
       "criterion": "Choosing \"Khác\" in any drop-down cannot be saved without a note.",
       "route": "DRAFT_CREATED",
-      "caseId": "case_db872faa356d424ea98294c1a9586601",
       "sourceRefs": ["GYM-AC@v1"],
       "question": null,
-      "reviewKind": null,
       "reason": null,
-      "draft": {
-        "steps": [
-          {
-            "action": "Exercise AC-04: Choosing \"Khác\" in any drop-down cannot be saved without a note.",
-            "expected": "Choosing \"Khác\" in any drop-down cannot be saved without a note. (milestone M1)",
-            "sourceRefs": ["GYM-AC@v1"]
-          }
-        ],
-        "title": "Verify Gym CRM AC-04",
-        "priority": "P1",
-        "testData": ["Synthetic test user"],
-        "assumptions": [],
-        "preconditions": ["Test account exists in the target environment"],
-        "missingRequirements": []
-      },
-      "models": ["mock-heuristic-v1"],
       "tokens": 1040
     },
     {
@@ -193,7 +173,6 @@
       "ac": "AC-05",
       "criterion": "Actions in approval groups have no effect until approved; the submitter cannot approve them; admin switches approval on or off and changes approvers per action type on screen.",
       "route": "REVIEW_REQUESTED",
-      "caseId": null,
       "sourceRefs": [
         "GYM-AC@v1",
         "GYM-RBAC@v1",
@@ -214,15 +193,10 @@
         "GYM-RBAC@v1",
         "GYM-AC@v1",
         "GYM-AC@v1",
-        "GYM-RBAC@v1",
-        "GYM-RBAC@v1",
-        "GYM-BR-SERVICES-PRICES-CONTRACTS@v1"
+        "GYM-RBAC@v1"
       ],
       "question": "Relevant sources exceed the context budget; split the story or narrow its acceptance criteria.",
-      "reviewKind": "MISSING_KNOWLEDGE",
       "reason": "CONTEXT_BUDGET_EXCEEDED",
-      "draft": null,
-      "models": [],
       "tokens": 0
     },
     {
@@ -231,27 +205,9 @@
       "ac": "AC-06",
       "criterion": "A lead created from the form gets the right channel and source, is assigned in the right round-robin order, and the manager is notified.",
       "route": "DRAFT_CREATED",
-      "caseId": "case_84e99c4c407e4b80a468135336bed632",
       "sourceRefs": ["GYM-AC@v1"],
       "question": null,
-      "reviewKind": null,
       "reason": null,
-      "draft": {
-        "steps": [
-          {
-            "action": "Exercise AC-06: A lead created from the form gets the right channel and source, is assigned in the right round-robin order, and the manager is notified.",
-            "expected": "A lead created from the form gets the right channel and source, is assigned in the right round-robin order, and the manager is notified. (milestone M2)",
-            "sourceRefs": ["GYM-AC@v1"]
-          }
-        ],
-        "title": "Verify Gym CRM AC-06",
-        "priority": "P1",
-        "testData": ["Synthetic test user"],
-        "assumptions": [],
-        "preconditions": ["Test account exists in the target environment"],
-        "missingRequirements": []
-      },
-      "models": ["mock-heuristic-v1"],
       "tokens": 1040
     },
     {
@@ -260,7 +216,6 @@
       "ac": "AC-07",
       "criterion": "Reminder steps at 60 minutes, 24 hours, 3 hours and 60 minutes before the visit, and 15 days are created at the right time; overdue steps appear in \"Today's tasks\" and count as late in the audit; the \"Báo Studio\" step creates a task for the coach manager.",
       "route": "REVIEW_REQUESTED",
-      "caseId": null,
       "sourceRefs": [
         "GYM-AC@v1",
         "GYM-AC@v1",
@@ -284,10 +239,7 @@
         "GYM-RBAC@v1"
       ],
       "question": "Relevant sources exceed the context budget; split the story or narrow its acceptance criteria.",
-      "reviewKind": "MISSING_KNOWLEDGE",
       "reason": "CONTEXT_BUDGET_EXCEEDED",
-      "draft": null,
-      "models": [],
       "tokens": 0
     },
     {
@@ -296,27 +248,9 @@
       "ac": "AC-08",
       "criterion": "The consulting dashboard gives the right lead counts, booking rate, and show rate per consultant when compared with the Excel files of September and October 2026.",
       "route": "DRAFT_CREATED",
-      "caseId": "case_be335ab3c60342709f0cf424e23427ee",
       "sourceRefs": ["GYM-AC@v1"],
       "question": null,
-      "reviewKind": null,
       "reason": null,
-      "draft": {
-        "steps": [
-          {
-            "action": "Exercise AC-08: The consulting dashboard gives the right lead counts, booking rate, and show rate per consultant when compared with the Excel files of September and October 2026.",
-            "expected": "The consulting dashboard gives the right lead counts, booking rate, and show rate per consultant when compared with the Excel files of September and October 2026. (milestone M3)",
-            "sourceRefs": ["GYM-AC@v1"]
-          }
-        ],
-        "title": "Verify Gym CRM AC-08",
-        "priority": "P1",
-        "testData": ["Synthetic test user"],
-        "assumptions": [],
-        "preconditions": ["Test account exists in the target environment"],
-        "missingRequirements": []
-      },
-      "models": ["mock-heuristic-v1"],
       "tokens": 1040
     },
     {
@@ -325,27 +259,9 @@
       "ac": "AC-09",
       "criterion": "One person goes through lead → appointment → show → contract → session with a single record.",
       "route": "DRAFT_CREATED",
-      "caseId": "case_06faff0046884411acef7a58526744c7",
       "sourceRefs": ["GYM-AC@v1"],
       "question": null,
-      "reviewKind": null,
       "reason": null,
-      "draft": {
-        "steps": [
-          {
-            "action": "Exercise AC-09: One person goes through lead → appointment → show → contract → session with a single record.",
-            "expected": "One person goes through lead → appointment → show → contract → session with a single record. (milestone M2, M4, M5)",
-            "sourceRefs": ["GYM-AC@v1"]
-          }
-        ],
-        "title": "Verify Gym CRM AC-09",
-        "priority": "P1",
-        "testData": ["Synthetic test user"],
-        "assumptions": [],
-        "preconditions": ["Test account exists in the target environment"],
-        "missingRequirements": []
-      },
-      "models": ["mock-heuristic-v1"],
       "tokens": 1040
     },
     {
@@ -354,27 +270,9 @@
       "ac": "AC-10",
       "criterion": "Entering any session count gives the right tier unit price, end date, and display name; a price different from the tier flags the contract \"Exception price\" and it cannot be activated until approved.",
       "route": "DRAFT_CREATED",
-      "caseId": "case_77bb069d76c147e599c1b89ab1396dd5",
       "sourceRefs": ["GYM-AC@v1"],
       "question": null,
-      "reviewKind": null,
       "reason": null,
-      "draft": {
-        "steps": [
-          {
-            "action": "Exercise AC-10: Entering any session count gives the right tier unit price, end date, and display name; a price different from the tier flags the contract \"Exception price\" and it cannot be activated until approved.",
-            "expected": "Entering any session count gives the right tier unit price, end date, and display name; a price different from the tier flags the contract \"Exception price\" and it cannot be activated until approved. (milestone M4)",
-            "sourceRefs": ["GYM-AC@v1"]
-          }
-        ],
-        "title": "Verify Gym CRM AC-10",
-        "priority": "P1",
-        "testData": ["Synthetic test user"],
-        "assumptions": [],
-        "preconditions": ["Test account exists in the target environment"],
-        "missingRequirements": []
-      },
-      "models": ["mock-heuristic-v1"],
       "tokens": 1040
     },
     {
@@ -383,27 +281,9 @@
       "ac": "AC-11",
       "criterion": "An approved contract cannot be edited, even by admin; a contract not yet approved cannot be booked.",
       "route": "DRAFT_CREATED",
-      "caseId": "case_82bec376febf4444904930fbf7d57502",
       "sourceRefs": ["GYM-AC@v1"],
       "question": null,
-      "reviewKind": null,
       "reason": null,
-      "draft": {
-        "steps": [
-          {
-            "action": "Exercise AC-11: An approved contract cannot be edited, even by admin; a contract not yet approved cannot be booked.",
-            "expected": "An approved contract cannot be edited, even by admin; a contract not yet approved cannot be booked. (milestone M4, M5)",
-            "sourceRefs": ["GYM-AC@v1"]
-          }
-        ],
-        "title": "Verify Gym CRM AC-11",
-        "priority": "P1",
-        "testData": ["Synthetic test user"],
-        "assumptions": [],
-        "preconditions": ["Test account exists in the target environment"],
-        "missingRequirements": []
-      },
-      "models": ["mock-heuristic-v1"],
       "tokens": 1040
     },
     {
@@ -412,27 +292,9 @@
       "ac": "AC-12",
       "criterion": "Deleting a contract with receipts is blocked and the receipts to delete first are listed; after deleting in the right order, total receipts and revenue fall by exactly the deleted amounts.",
       "route": "DRAFT_CREATED",
-      "caseId": "case_3d7dd303062f4c08bcd7f4044d13b824",
       "sourceRefs": ["GYM-AC@v1"],
       "question": null,
-      "reviewKind": null,
       "reason": null,
-      "draft": {
-        "steps": [
-          {
-            "action": "Exercise AC-12: Deleting a contract with receipts is blocked and the receipts to delete first are listed; after deleting in the right order, total receipts and revenue fall by exactly the deleted amounts.",
-            "expected": "Deleting a contract with receipts is blocked and the receipts to delete first are listed; after deleting in the right order, total receipts and revenue fall by exactly the deleted amounts. (milestone M4)",
-            "sourceRefs": ["GYM-AC@v1"]
-          }
-        ],
-        "title": "Verify Gym CRM AC-12",
-        "priority": "P1",
-        "testData": ["Synthetic test user"],
-        "assumptions": [],
-        "preconditions": ["Test account exists in the target environment"],
-        "missingRequirements": []
-      },
-      "models": ["mock-heuristic-v1"],
       "tokens": 1040
     },
     {
@@ -441,27 +303,9 @@
       "ac": "AC-13",
       "criterion": "Deleted data is in the trash with its reason, viewable only by management, and cannot be deleted.",
       "route": "DRAFT_CREATED",
-      "caseId": "case_fd021191a2c843cfa3d01bda32bfdaa7",
       "sourceRefs": ["GYM-AC@v1"],
       "question": null,
-      "reviewKind": null,
       "reason": null,
-      "draft": {
-        "steps": [
-          {
-            "action": "Exercise AC-13: Deleted data is in the trash with its reason, viewable only by management, and cannot be deleted.",
-            "expected": "Deleted data is in the trash with its reason, viewable only by management, and cannot be deleted. (milestone M1, M4)",
-            "sourceRefs": ["GYM-AC@v1"]
-          }
-        ],
-        "title": "Verify Gym CRM AC-13",
-        "priority": "P1",
-        "testData": ["Synthetic test user"],
-        "assumptions": [],
-        "preconditions": ["Test account exists in the target environment"],
-        "missingRequirements": []
-      },
-      "models": ["mock-heuristic-v1"],
       "tokens": 1040
     },
     {
@@ -469,37 +313,11 @@
       "followUp": null,
       "ac": "AC-14",
       "criterion": "A frozen contract cannot be booked or checked in; reactivation shows the frozen days and the proposed new end date; the end date changes only after admin confirms and is never extended twice; a freeze over 10 days reminds the manager.",
-      "route": "REVIEW_REQUESTED",
-      "caseId": null,
-      "sourceRefs": [
-        "GYM-AC@v1",
-        "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
-        "GYM-AC@v1",
-        "GYM-BR-SESSIONS-AND-CLASSES@v1",
-        "GYM-AC@v1",
-        "GYM-AC@v1",
-        "GYM-RBAC@v1",
-        "GYM-BR-LEADS-AND-CUSTOMERS@v1",
-        "GYM-AC@v1",
-        "GYM-AC@v1",
-        "GYM-AC@v1",
-        "GYM-AC@v1",
-        "GYM-AC@v1",
-        "GYM-RBAC@v1",
-        "GYM-RBAC@v1",
-        "GYM-RBAC@v1",
-        "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
-        "GYM-RBAC@v1",
-        "GYM-AC@v1",
-        "GYM-AC@v1",
-        "GYM-AC@v1"
-      ],
-      "question": "Relevant sources exceed the context budget; split the story or narrow its acceptance criteria.",
-      "reviewKind": "MISSING_KNOWLEDGE",
-      "reason": "CONTEXT_BUDGET_EXCEEDED",
-      "draft": null,
-      "models": [],
-      "tokens": 0
+      "route": "DRAFT_CREATED",
+      "sourceRefs": ["GYM-AC@v1"],
+      "question": null,
+      "reason": null,
+      "tokens": 1040
     },
     {
       "story": "GYM-AC-15",
@@ -507,27 +325,9 @@
       "ac": "AC-15",
       "criterion": "\"Đã tập\" and no-show reduce sessions left by exactly 1 and credit the PT; \"Hủy lịch\" and delete do not; each status shows its color; booking is refused when no sessions are left, the contract has expired, or times overlap.",
       "route": "DRAFT_CREATED",
-      "caseId": "case_0c479684ccdf4b44b5661583301d93d8",
       "sourceRefs": ["GYM-AC@v1"],
       "question": null,
-      "reviewKind": null,
       "reason": null,
-      "draft": {
-        "steps": [
-          {
-            "action": "Exercise AC-15: \"Đã tập\" and no-show reduce sessions left by exactly 1 and credit the PT; \"Hủy lịch\" and delete do not; each status shows its color; booking is refused when no sessions are left, the contract has expired, or times overlap.",
-            "expected": "\"Đã tập\" and no-show reduce sessions left by exactly 1 and credit the PT; \"Hủy lịch\" and delete do not; each status shows its color; booking is refused when no sessions are left, the contract has expired, or times overlap. (milestone M5)",
-            "sourceRefs": ["GYM-AC@v1"]
-          }
-        ],
-        "title": "Verify Gym CRM AC-15",
-        "priority": "P1",
-        "testData": ["Synthetic test user"],
-        "assumptions": [],
-        "preconditions": ["Test account exists in the target environment"],
-        "missingRequirements": []
-      },
-      "models": ["mock-heuristic-v1"],
       "tokens": 1040
     },
     {
@@ -535,40 +335,11 @@
       "followUp": null,
       "ac": "AC-16",
       "criterion": "A session in \"Đã tập\" cannot change status; when admin deletes it, the customer gets exactly 1 session back and the PT exactly 1 credit less; if its period was already paid, the next period has an adjustment line.",
-      "route": "REVIEW_REQUESTED",
-      "caseId": null,
-      "sourceRefs": [
-        "GYM-AC@v1",
-        "GYM-BR-SESSIONS-AND-CLASSES@v1",
-        "GYM-AC@v1",
-        "GYM-AC@v1",
-        "GYM-RBAC@v1",
-        "GYM-AC@v1",
-        "GYM-AC@v1",
-        "GYM-AC@v1",
-        "GYM-AC@v1",
-        "GYM-BR-NOTIFICATIONS-AND-TASKS@v1",
-        "GYM-AC@v1",
-        "GYM-BR-SESSIONS-AND-CLASSES@v1",
-        "GYM-AC@v1",
-        "GYM-BR-SESSIONS-AND-CLASSES@v1",
-        "GYM-BR-SESSIONS-AND-CLASSES@v1",
-        "GYM-AC@v1",
-        "GYM-AC@v1",
-        "GYM-AC@v1",
-        "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
-        "GYM-AC@v1",
-        "GYM-AC@v1",
-        "GYM-AC@v1",
-        "GYM-RBAC@v1",
-        "GYM-BR-MONEY@v1"
-      ],
-      "question": "Relevant sources exceed the context budget; split the story or narrow its acceptance criteria.",
-      "reviewKind": "MISSING_KNOWLEDGE",
-      "reason": "CONTEXT_BUDGET_EXCEEDED",
-      "draft": null,
-      "models": [],
-      "tokens": 0
+      "route": "DRAFT_CREATED",
+      "sourceRefs": ["GYM-AC@v1"],
+      "question": null,
+      "reason": null,
+      "tokens": 1040
     },
     {
       "story": "GYM-AC-17",
@@ -576,27 +347,9 @@
       "ac": "AC-17",
       "criterion": "Every credited or refunded session sends exactly one email to the customer, from the template and in the right language, with its sending status stored in the customer profile.",
       "route": "DRAFT_CREATED",
-      "caseId": "case_caee3c90c4d74b52a7d96454a1b2ee48",
       "sourceRefs": ["GYM-AC@v1"],
       "question": null,
-      "reviewKind": null,
       "reason": null,
-      "draft": {
-        "steps": [
-          {
-            "action": "Exercise AC-17: Every credited or refunded session sends exactly one email to the customer, from the template and in the right language, with its sending status stored in the customer profile.",
-            "expected": "Every credited or refunded session sends exactly one email to the customer, from the template and in the right language, with its sending status stored in the customer profile. (milestone M6)",
-            "sourceRefs": ["GYM-AC@v1"]
-          }
-        ],
-        "title": "Verify Gym CRM AC-17",
-        "priority": "P1",
-        "testData": ["Synthetic test user"],
-        "assumptions": [],
-        "preconditions": ["Test account exists in the target environment"],
-        "missingRequirements": []
-      },
-      "models": ["mock-heuristic-v1"],
       "tokens": 1040
     },
     {
@@ -605,27 +358,9 @@
       "ac": "AC-18",
       "criterion": "The PT revenue allocation report matches GymMaster's export on the same data; PT payout vouchers never pay a session twice.",
       "route": "DRAFT_CREATED",
-      "caseId": "case_4a25a047205a43999e2b01b5d413592e",
       "sourceRefs": ["GYM-AC@v1"],
       "question": null,
-      "reviewKind": null,
       "reason": null,
-      "draft": {
-        "steps": [
-          {
-            "action": "Exercise AC-18: The PT revenue allocation report matches GymMaster's export on the same data; PT payout vouchers never pay a session twice.",
-            "expected": "The PT revenue allocation report matches GymMaster's export on the same data; PT payout vouchers never pay a session twice. (milestone M5)",
-            "sourceRefs": ["GYM-AC@v1"]
-          }
-        ],
-        "title": "Verify Gym CRM AC-18",
-        "priority": "P1",
-        "testData": ["Synthetic test user"],
-        "assumptions": [],
-        "preconditions": ["Test account exists in the target environment"],
-        "missingRequirements": []
-      },
-      "models": ["mock-heuristic-v1"],
       "tokens": 1040
     },
     {
@@ -634,27 +369,9 @@
       "ac": "AC-19",
       "criterion": "Each contract's paid amount and debt always equal the sum of its valid receipts; cash book closing balance equals opening balance plus receipts minus expenses.",
       "route": "DRAFT_CREATED",
-      "caseId": "case_cb43381231464653b8545488ba3a4e39",
       "sourceRefs": ["GYM-AC@v1"],
       "question": null,
-      "reviewKind": null,
       "reason": null,
-      "draft": {
-        "steps": [
-          {
-            "action": "Exercise AC-19: Each contract's paid amount and debt always equal the sum of its valid receipts; cash book closing balance equals opening balance plus receipts minus expenses.",
-            "expected": "Each contract's paid amount and debt always equal the sum of its valid receipts; cash book closing balance equals opening balance plus receipts minus expenses. (milestone M4)",
-            "sourceRefs": ["GYM-AC@v1"]
-          }
-        ],
-        "title": "Verify Gym CRM AC-19",
-        "priority": "P1",
-        "testData": ["Synthetic test user"],
-        "assumptions": [],
-        "preconditions": ["Test account exists in the target environment"],
-        "missingRequirements": []
-      },
-      "models": ["mock-heuristic-v1"],
       "tokens": 1040
     },
     {
@@ -663,27 +380,9 @@
       "ac": "AC-20",
       "criterion": "A customer's plans and every session log are visible in their profile, with plan and actual on the same row; choosing a Cardio exercise shows time, speed, and heart rate.",
       "route": "DRAFT_CREATED",
-      "caseId": "case_1acf9a2ad7734d7a93fbd3d792954cfb",
       "sourceRefs": ["GYM-AC@v1"],
       "question": null,
-      "reviewKind": null,
       "reason": null,
-      "draft": {
-        "steps": [
-          {
-            "action": "Exercise AC-20: A customer's plans and every session log are visible in their profile, with plan and actual on the same row; choosing a Cardio exercise shows time, speed, and heart rate.",
-            "expected": "A customer's plans and every session log are visible in their profile, with plan and actual on the same row; choosing a Cardio exercise shows time, speed, and heart rate. (milestone M7)",
-            "sourceRefs": ["GYM-AC@v1"]
-          }
-        ],
-        "title": "Verify Gym CRM AC-20",
-        "priority": "P1",
-        "testData": ["Synthetic test user"],
-        "assumptions": [],
-        "preconditions": ["Test account exists in the target environment"],
-        "missingRequirements": []
-      },
-      "models": ["mock-heuristic-v1"],
       "tokens": 1040
     },
     {
@@ -692,27 +391,9 @@
       "ac": "AC-21",
       "criterion": "Choosing Action \"Stop + Escalation\" notifies the manager and Master, and the item stays in the waiting list until handled; the weekly workout dashboard gives the right Flag and Action percentages.",
       "route": "DRAFT_CREATED",
-      "caseId": "case_fb717409134d4bfeafc326c7b454f39f",
       "sourceRefs": ["GYM-AC@v1"],
       "question": null,
-      "reviewKind": null,
       "reason": null,
-      "draft": {
-        "steps": [
-          {
-            "action": "Exercise AC-21: Choosing Action \"Stop + Escalation\" notifies the manager and Master, and the item stays in the waiting list until handled; the weekly workout dashboard gives the right Flag and Action percentages.",
-            "expected": "Choosing Action \"Stop + Escalation\" notifies the manager and Master, and the item stays in the waiting list until handled; the weekly workout dashboard gives the right Flag and Action percentages. (milestone M7)",
-            "sourceRefs": ["GYM-AC@v1"]
-          }
-        ],
-        "title": "Verify Gym CRM AC-21",
-        "priority": "P1",
-        "testData": ["Synthetic test user"],
-        "assumptions": [],
-        "preconditions": ["Test account exists in the target environment"],
-        "missingRequirements": []
-      },
-      "models": ["mock-heuristic-v1"],
       "tokens": 1040
     },
     {
@@ -721,27 +402,9 @@
       "ac": "AC-22",
       "criterion": "Data imported from GymMaster matches the number of customers, contract value, paid amounts, and sessions left.",
       "route": "DRAFT_CREATED",
-      "caseId": "case_38cf81519bc44f828dfd17905fe3c639",
       "sourceRefs": ["GYM-AC@v1"],
       "question": null,
-      "reviewKind": null,
       "reason": null,
-      "draft": {
-        "steps": [
-          {
-            "action": "Exercise AC-22: Data imported from GymMaster matches the number of customers, contract value, paid amounts, and sessions left.",
-            "expected": "Data imported from GymMaster matches the number of customers, contract value, paid amounts, and sessions left. (milestone M9)",
-            "sourceRefs": ["GYM-AC@v1"]
-          }
-        ],
-        "title": "Verify Gym CRM AC-22",
-        "priority": "P1",
-        "testData": ["Synthetic test user"],
-        "assumptions": [],
-        "preconditions": ["Test account exists in the target environment"],
-        "missingRequirements": []
-      },
-      "models": ["mock-heuristic-v1"],
       "tokens": 1040
     },
     {
@@ -750,27 +413,9 @@
       "ac": "AC-23",
       "criterion": "The lead, PT calendar, and session log screens work on a phone.",
       "route": "DRAFT_CREATED",
-      "caseId": "case_0f2bdc18691a4c43b9202301c8a7ab22",
       "sourceRefs": ["GYM-AC@v1"],
       "question": null,
-      "reviewKind": null,
       "reason": null,
-      "draft": {
-        "steps": [
-          {
-            "action": "Exercise AC-23: The lead, PT calendar, and session log screens work on a phone.",
-            "expected": "The lead, PT calendar, and session log screens work on a phone. (milestone M2, M5, M7)",
-            "sourceRefs": ["GYM-AC@v1"]
-          }
-        ],
-        "title": "Verify Gym CRM AC-23",
-        "priority": "P1",
-        "testData": ["Synthetic test user"],
-        "assumptions": [],
-        "preconditions": ["Test account exists in the target environment"],
-        "missingRequirements": []
-      },
-      "models": ["mock-heuristic-v1"],
       "tokens": 1040
     },
     {
@@ -779,27 +424,9 @@
       "ac": "AC-24",
       "criterion": "A PT can book outside the on-duty shift, and the grid colors in-shift and off-shift time differently (D-058).",
       "route": "DRAFT_CREATED",
-      "caseId": "case_dc61c18810364a67bd3e3080b48e5356",
       "sourceRefs": ["GYM-AC@v1"],
       "question": null,
-      "reviewKind": null,
       "reason": null,
-      "draft": {
-        "steps": [
-          {
-            "action": "Exercise AC-24: A PT can book outside the on-duty shift, and the grid colors in-shift and off-shift time differently (D-058).",
-            "expected": "A PT can book outside the on-duty shift, and the grid colors in-shift and off-shift time differently (D-058). (milestone M5)",
-            "sourceRefs": ["GYM-AC@v1"]
-          }
-        ],
-        "title": "Verify Gym CRM AC-24",
-        "priority": "P1",
-        "testData": ["Synthetic test user"],
-        "assumptions": [],
-        "preconditions": ["Test account exists in the target environment"],
-        "missingRequirements": []
-      },
-      "models": ["mock-heuristic-v1"],
       "tokens": 1040
     },
     {
@@ -808,27 +435,9 @@
       "ac": "AC-25",
       "criterion": "A lead needs only a name and a channel; the country is chosen from the list of countries and the email goes in the language derived from it (D-057, D-060).",
       "route": "DRAFT_CREATED",
-      "caseId": "case_79edc1243e1f4edf909988fd5f4fd57e",
       "sourceRefs": ["GYM-AC@v1"],
       "question": null,
-      "reviewKind": null,
       "reason": null,
-      "draft": {
-        "steps": [
-          {
-            "action": "Exercise AC-25: A lead needs only a name and a channel; the country is chosen from the list of countries and the email goes in the language derived from it (D-057, D-060).",
-            "expected": "A lead needs only a name and a channel; the country is chosen from the list of countries and the email goes in the language derived from it (D-057, D-060). (milestone M2)",
-            "sourceRefs": ["GYM-AC@v1"]
-          }
-        ],
-        "title": "Verify Gym CRM AC-25",
-        "priority": "P1",
-        "testData": ["Synthetic test user"],
-        "assumptions": [],
-        "preconditions": ["Test account exists in the target environment"],
-        "missingRequirements": []
-      },
-      "models": ["mock-heuristic-v1"],
       "tokens": 1040
     },
     {
@@ -837,27 +446,9 @@
       "ac": "AC-26",
       "criterion": "Leads are shared by turn weight; a lead not taken care of after 1 working hour moves on, never outside 08:30–20:30, and each move is in the history and the dashboard (D-050, D-052).",
       "route": "DRAFT_CREATED",
-      "caseId": "case_a171d93500ae4777a37b7187ab01d625",
       "sourceRefs": ["GYM-AC@v1"],
       "question": null,
-      "reviewKind": null,
       "reason": null,
-      "draft": {
-        "steps": [
-          {
-            "action": "Exercise AC-26: Leads are shared by turn weight; a lead not taken care of after 1 working hour moves on, never outside 08:30–20:30, and each move is in the history and the dashboard (D-050, D-052).",
-            "expected": "Leads are shared by turn weight; a lead not taken care of after 1 working hour moves on, never outside 08:30–20:30, and each move is in the history and the dashboard (D-050, D-052). (milestone M2)",
-            "sourceRefs": ["GYM-AC@v1"]
-          }
-        ],
-        "title": "Verify Gym CRM AC-26",
-        "priority": "P1",
-        "testData": ["Synthetic test user"],
-        "assumptions": [],
-        "preconditions": ["Test account exists in the target environment"],
-        "missingRequirements": []
-      },
-      "models": ["mock-heuristic-v1"],
       "tokens": 1040
     },
     {
@@ -866,27 +457,9 @@
       "ac": "AC-27",
       "criterion": "A ticked checklist step cannot be unticked; an overdue step past its grace period locks as \"Không thực hiện\" and cannot be ticked late (D-054).",
       "route": "DRAFT_CREATED",
-      "caseId": "case_704fc1bda8574cc7b71fd135209d9bcd",
       "sourceRefs": ["GYM-AC@v1"],
       "question": null,
-      "reviewKind": null,
       "reason": null,
-      "draft": {
-        "steps": [
-          {
-            "action": "Exercise AC-27: A ticked checklist step cannot be unticked; an overdue step past its grace period locks as \"Không thực hiện\" and cannot be ticked late (D-054).",
-            "expected": "A ticked checklist step cannot be unticked; an overdue step past its grace period locks as \"Không thực hiện\" and cannot be ticked late (D-054). (milestone M2)",
-            "sourceRefs": ["GYM-AC@v1"]
-          }
-        ],
-        "title": "Verify Gym CRM AC-27",
-        "priority": "P1",
-        "testData": ["Synthetic test user"],
-        "assumptions": [],
-        "preconditions": ["Test account exists in the target environment"],
-        "missingRequirements": []
-      },
-      "models": ["mock-heuristic-v1"],
       "tokens": 1040
     },
     {
@@ -895,27 +468,9 @@
       "ac": "AC-28",
       "criterion": "A task is reminded at all three points before its deadline through the bell, email, and phone, and a slow approval past 24 hours is told to the approver's direct manager (D-053, D-056, D-048).",
       "route": "DRAFT_CREATED",
-      "caseId": "case_447d00aa96054f20bbc5d8d089f2dadb",
       "sourceRefs": ["GYM-AC@v1"],
       "question": null,
-      "reviewKind": null,
       "reason": null,
-      "draft": {
-        "steps": [
-          {
-            "action": "Exercise AC-28: A task is reminded at all three points before its deadline through the bell, email, and phone, and a slow approval past 24 hours is told to the approver's direct manager (D-053, D-056, D-048).",
-            "expected": "A task is reminded at all three points before its deadline through the bell, email, and phone, and a slow approval past 24 hours is told to the approver's direct manager (D-053, D-056, D-048). (milestone M2, M6)",
-            "sourceRefs": ["GYM-AC@v1"]
-          }
-        ],
-        "title": "Verify Gym CRM AC-28",
-        "priority": "P1",
-        "testData": ["Synthetic test user"],
-        "assumptions": [],
-        "preconditions": ["Test account exists in the target environment"],
-        "missingRequirements": []
-      },
-      "models": ["mock-heuristic-v1"],
       "tokens": 1040
     },
     {
@@ -924,27 +479,9 @@
       "ac": "AC-29",
       "criterion": "Simulated scans through the API: a pair of the customer and the right PT within 15 minutes and the pairing window turns the session to *Đã tập* and triggers the session taken, the PT credit, and the email; a missing side hangs the session with the right reason; a scan with no booking is an error; a customer training twice with two PTs needs a pair for each (D-069, D-070).",
       "route": "DRAFT_CREATED",
-      "caseId": "case_5b84711ea77b41f990a1cc9f4339defe",
       "sourceRefs": ["GYM-AC@v1"],
       "question": null,
-      "reviewKind": null,
       "reason": null,
-      "draft": {
-        "steps": [
-          {
-            "action": "Exercise AC-29: Simulated scans through the API: a pair of the customer and the right PT within 15 minutes and the pairing window turns the session to *Đã tập* and triggers the session taken, the PT credit, and the email; a missing side hangs the session with the right reason; a scan with no booking is an error; a customer training twice with two PTs needs a pair for each (D-069, D-070).",
-            "expected": "Simulated scans through the API: a pair of the customer and the right PT within 15 minutes and the pairing window turns the session to *Đã tập* and triggers the session taken, the PT credit, and the email; a missing side hangs the session with the right reason; a scan with no booking is an error; a customer training twice with two PTs needs a pair for each (D-069, D-070). (milestone M5)",
-            "sourceRefs": ["GYM-AC@v1"]
-          }
-        ],
-        "title": "Verify Gym CRM AC-29",
-        "priority": "P1",
-        "testData": ["Synthetic test user"],
-        "assumptions": [],
-        "preconditions": ["Test account exists in the target environment"],
-        "missingRequirements": []
-      },
-      "models": ["mock-heuristic-v1"],
       "tokens": 1040
     },
     {
@@ -953,27 +490,9 @@
       "ac": "AC-30",
       "criterion": "A session without a full check-in is notified to its PT at the end of the day, and to the Studio Manager with a task after 24 hours (D-071).",
       "route": "DRAFT_CREATED",
-      "caseId": "case_135ab29a2d974775b83abf151ef0e7cf",
       "sourceRefs": ["GYM-AC@v1"],
       "question": null,
-      "reviewKind": null,
       "reason": null,
-      "draft": {
-        "steps": [
-          {
-            "action": "Exercise AC-30: A session without a full check-in is notified to its PT at the end of the day, and to the Studio Manager with a task after 24 hours (D-071).",
-            "expected": "A session without a full check-in is notified to its PT at the end of the day, and to the Studio Manager with a task after 24 hours (D-071). (milestone M5, M6)",
-            "sourceRefs": ["GYM-AC@v1"]
-          }
-        ],
-        "title": "Verify Gym CRM AC-30",
-        "priority": "P1",
-        "testData": ["Synthetic test user"],
-        "assumptions": [],
-        "preconditions": ["Test account exists in the target environment"],
-        "missingRequirements": []
-      },
-      "models": ["mock-heuristic-v1"],
       "tokens": 1040
     },
     {
@@ -982,12 +501,134 @@
       "ac": "AC-01",
       "criterion": "An account without permission for a module does not see its menu and cannot reach it by direct URL.",
       "route": "DRAFT_CREATED",
-      "caseId": "case_117855b341044a2ea76b09faa6a3c993",
       "sourceRefs": ["GYM-AC@v1"],
       "question": null,
-      "reviewKind": null,
       "reason": null,
-      "draft": {
+      "tokens": 1040
+    }
+  ],
+  "cases": [
+    {
+      "id": "TC-01",
+      "section": "Sign-in and access",
+      "priority": "P1",
+      "title": "A manager signs in with email and password and reaches the dashboard",
+      "requirement": {
+        "id": "BR-107",
+        "statement": "A user with valid credentials signs in with email and password and lands on the dashboard \"Tổng quan\"."
+      },
+      "automated": true,
+      "manualReason": null,
+      "draftMs": 15,
+      "tokens": 1040,
+      "agentRoute": "DRAFT_CREATED",
+      "agentAskedFirst": null,
+      "narrowedStatement": null,
+      "caseId": "case_f9c9c0cbb699436aac627cac6bd345ff",
+      "sourceRefs": ["GYM-BR-PLATFORM@v1"],
+      "agentDraft": {
+        "steps": [
+          {
+            "action": "Exercise BR-107: A user with valid credentials signs in with email and password and lands on the dashboard \"Tổng quan\".",
+            "expected": "Accounts can sign in only within their allowed hours and days; sign-ins are recorded with device and IP (D-017).",
+            "sourceRefs": ["GYM-BR-PLATFORM@v1"]
+          }
+        ],
+        "title": "Verify A manager signs in with email and password and reaches the dashboard",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      }
+    },
+    {
+      "id": "TC-02",
+      "section": "Sign-in and access",
+      "priority": "P1",
+      "title": "A wrong password shows one generic message and stays on the login page",
+      "requirement": {
+        "id": "BR-107",
+        "statement": "A wrong password is refused with the message \"The email or password is wrong, or the account is disabled.\" and the user stays on /login."
+      },
+      "automated": true,
+      "manualReason": null,
+      "draftMs": 15,
+      "tokens": 1040,
+      "agentRoute": "DRAFT_CREATED",
+      "agentAskedFirst": null,
+      "narrowedStatement": null,
+      "caseId": "case_7fcd2d01605a4bd9b81ff1e147decdf3",
+      "sourceRefs": ["GYM-BR-PLATFORM@v1"],
+      "agentDraft": {
+        "steps": [
+          {
+            "action": "Exercise BR-107: A wrong password is refused with the message \"The email or password is wrong, or the account is disabled.\" and the user stays on /login.",
+            "expected": "Accounts can sign in only within their allowed hours and days; sign-ins are recorded with device and IP (D-017).",
+            "sourceRefs": ["GYM-BR-PLATFORM@v1"]
+          }
+        ],
+        "title": "Verify A wrong password shows one generic message and stays on the login page",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      }
+    },
+    {
+      "id": "TC-03",
+      "section": "Sign-in and access",
+      "priority": "P1",
+      "title": "A signed-out visitor who opens the dashboard is sent to the login page",
+      "requirement": {
+        "id": "AC-01",
+        "statement": "A visitor who is not signed in and opens /dashboard by direct URL is sent to /login."
+      },
+      "automated": true,
+      "manualReason": null,
+      "draftMs": 16,
+      "tokens": 1040,
+      "agentRoute": "DRAFT_CREATED",
+      "agentAskedFirst": null,
+      "narrowedStatement": null,
+      "caseId": "case_71a28e4c1eca486a88093cdc0dc6c61c",
+      "sourceRefs": ["GYM-AC@v1"],
+      "agentDraft": {
+        "steps": [
+          {
+            "action": "Exercise AC-01: A visitor who is not signed in and opens /dashboard by direct URL is sent to /login.",
+            "expected": "An account without permission for a module does not see its menu and cannot reach it by direct URL; a role with phone numbers hidden never sees them on any screen or export. (milestone M1)",
+            "sourceRefs": ["GYM-AC@v1"]
+          }
+        ],
+        "title": "Verify A signed-out visitor who opens the dashboard is sent to the login page",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      }
+    },
+    {
+      "id": "TC-04",
+      "section": "Sign-in and access",
+      "priority": "P1",
+      "title": "A trainer has no Finance menu and cannot open /finance directly",
+      "requirement": {
+        "id": "AC-01",
+        "statement": "An account without permission for a module does not see its menu and cannot reach it by direct URL."
+      },
+      "automated": true,
+      "manualReason": null,
+      "draftMs": 16,
+      "tokens": 1040,
+      "agentRoute": "DRAFT_CREATED",
+      "agentAskedFirst": null,
+      "narrowedStatement": null,
+      "caseId": "case_d8cd5a138d784b768770d22e0c17bf7f",
+      "sourceRefs": ["GYM-AC@v1"],
+      "agentDraft": {
         "steps": [
           {
             "action": "Exercise AC-01: An account without permission for a module does not see its menu and cannot reach it by direct URL.",
@@ -995,241 +636,3037 @@
             "sourceRefs": ["GYM-AC@v1"]
           }
         ],
-        "title": "Verify Gym CRM AC-01 (part 1: module access)",
+        "title": "Verify A trainer has no Finance menu and cannot open /finance directly",
         "priority": "P1",
         "testData": ["Synthetic test user"],
         "assumptions": [],
         "preconditions": ["Test account exists in the target environment"],
         "missingRequirements": []
+      }
+    },
+    {
+      "id": "TC-05",
+      "section": "Sign-in and access",
+      "priority": "P2",
+      "title": "A trainer cannot open the leads list",
+      "requirement": {
+        "id": "AC-01",
+        "statement": "A trainer (PT role, no lead permissions) who opens /leads by direct URL sees \"Bạn không có quyền xem trang này\"."
       },
-      "models": ["mock-heuristic-v1"],
-      "tokens": 1040
+      "automated": true,
+      "manualReason": null,
+      "draftMs": 9,
+      "tokens": 0,
+      "agentRoute": "REVIEW_REQUESTED",
+      "agentAskedFirst": "Relevant sources exceed the context budget; split the story or narrow its acceptance criteria.",
+      "narrowedStatement": null,
+      "agentQuestion": "Relevant sources exceed the context budget; split the story or narrow its acceptance criteria."
+    },
+    {
+      "id": "TC-06",
+      "section": "Sign-in and access",
+      "priority": "P2",
+      "title": "A receptionist cannot open income and expenses",
+      "requirement": {
+        "id": "AC-01",
+        "statement": "A receptionist, who has payments and debt but not income and expenses, sees \"Bạn không có quyền xem trang này\" at /finance/cash."
+      },
+      "automated": true,
+      "manualReason": null,
+      "draftMs": 15,
+      "tokens": 1040,
+      "agentRoute": "DRAFT_CREATED",
+      "agentAskedFirst": null,
+      "narrowedStatement": null,
+      "caseId": "case_3021820d27a34b59bf696a3e5db8ff31",
+      "sourceRefs": ["GYM-AC@v1"],
+      "agentDraft": {
+        "steps": [
+          {
+            "action": "Exercise AC-01: A receptionist, who has payments and debt but not income and expenses, sees \"Bạn không có quyền xem trang này\" at /finance/cash.",
+            "expected": "An account without permission for a module does not see its menu and cannot reach it by direct URL; a role with phone numbers hidden never sees them on any screen or export. (milestone M1)",
+            "sourceRefs": ["GYM-AC@v1"]
+          }
+        ],
+        "title": "Verify A receptionist cannot open income and expenses",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      }
+    },
+    {
+      "id": "TC-07",
+      "section": "Sign-in and access",
+      "priority": "P2",
+      "title": "A receptionist can open payments",
+      "requirement": {
+        "id": "AC-01",
+        "statement": "A receptionist opens /finance/payments and sees \"Thanh toán\" but no \"Thu / Chi\" (income and expenses)."
+      },
+      "automated": true,
+      "manualReason": null,
+      "draftMs": 15,
+      "tokens": 1040,
+      "agentRoute": "DRAFT_CREATED",
+      "agentAskedFirst": null,
+      "narrowedStatement": null,
+      "caseId": "case_fb4f436f636e4e7a9e67b1eefdea5bb2",
+      "sourceRefs": ["GYM-AC@v1"],
+      "agentDraft": {
+        "steps": [
+          {
+            "action": "Exercise AC-01: A receptionist opens /finance/payments and sees \"Thanh toán\" but no \"Thu / Chi\" (income and expenses).",
+            "expected": "An account without permission for a module does not see its menu and cannot reach it by direct URL; a role with phone numbers hidden never sees them on any screen or export. (milestone M1)",
+            "sourceRefs": ["GYM-AC@v1"]
+          }
+        ],
+        "title": "Verify A receptionist can open payments",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      }
+    },
+    {
+      "id": "TC-08",
+      "section": "Sign-in and access",
+      "priority": "P2",
+      "title": "Only management can open the trash",
+      "requirement": {
+        "id": "AC-13",
+        "statement": "Deleted data in the trash is viewable only by management: a receptionist at /admin/trash sees \"Bạn không có quyền xem trang này\"."
+      },
+      "automated": true,
+      "manualReason": null,
+      "draftMs": 17,
+      "tokens": 0,
+      "agentRoute": "REVIEW_REQUESTED",
+      "agentAskedFirst": "Relevant sources exceed the context budget; split the story or narrow its acceptance criteria.",
+      "narrowedStatement": "Opening /admin/trash as a receptionist shows \"Bạn không có quyền xem trang này\".",
+      "agentQuestion": "Relevant sources exceed the context budget; split the story or narrow its acceptance criteria."
+    },
+    {
+      "id": "TC-09",
+      "section": "Sign-in and access",
+      "priority": "P3",
+      "title": "A manager sees the Finance menu (positive control for TC-04)",
+      "requirement": {
+        "id": "AC-01",
+        "statement": "An account with finance permission, the Fitness Manager, sees the menu entry \"Tài chính\"."
+      },
+      "automated": true,
+      "manualReason": null,
+      "draftMs": 16,
+      "tokens": 0,
+      "agentRoute": "REVIEW_REQUESTED",
+      "agentAskedFirst": "Relevant sources exceed the context budget; split the story or narrow its acceptance criteria.",
+      "narrowedStatement": "The Fitness Manager sees the menu entry \"Tài chính\".",
+      "agentQuestion": "Relevant sources exceed the context budget; split the story or narrow its acceptance criteria."
+    },
+    {
+      "id": "TC-10",
+      "section": "Leads",
+      "priority": "P1",
+      "title": "A lead is saved with only a name and a channel",
+      "requirement": {
+        "id": "AC-25",
+        "statement": "A lead needs only a name and a channel: saving with name \"QA TC-10\" and channel \"Zalo\" opens the new lead."
+      },
+      "automated": true,
+      "manualReason": null,
+      "draftMs": 14,
+      "tokens": 1040,
+      "agentRoute": "DRAFT_CREATED",
+      "agentAskedFirst": null,
+      "narrowedStatement": null,
+      "caseId": "case_ce8fc547a62f47f0b9456238476719f2",
+      "sourceRefs": ["GYM-AC@v1"],
+      "agentDraft": {
+        "steps": [
+          {
+            "action": "Exercise AC-25: A lead needs only a name and a channel: saving with name \"QA TC-10\" and channel \"Zalo\" opens the new lead.",
+            "expected": "A lead needs only a name and a channel; the country is chosen from the list of countries and the email goes in the language derived from it (D-057, D-060). (milestone M2)",
+            "sourceRefs": ["GYM-AC@v1"]
+          }
+        ],
+        "title": "Verify A lead is saved with only a name and a channel",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      }
+    },
+    {
+      "id": "TC-11",
+      "section": "Leads",
+      "priority": "P1",
+      "title": "Choosing \"Khác\" without a note cannot be saved",
+      "requirement": {
+        "id": "AC-04",
+        "statement": "Choosing \"Khác\" in any drop-down cannot be saved without a note."
+      },
+      "automated": true,
+      "manualReason": null,
+      "draftMs": 15,
+      "tokens": 1040,
+      "agentRoute": "DRAFT_CREATED",
+      "agentAskedFirst": null,
+      "narrowedStatement": null,
+      "caseId": "case_aebe3bdb2b6d450cb88f4e9d00e3d5d4",
+      "sourceRefs": ["GYM-AC@v1"],
+      "agentDraft": {
+        "steps": [
+          {
+            "action": "Exercise AC-04: Choosing \"Khác\" in any drop-down cannot be saved without a note.",
+            "expected": "Choosing \"Khác\" in any drop-down cannot be saved without a note. (milestone M1)",
+            "sourceRefs": ["GYM-AC@v1"]
+          }
+        ],
+        "title": "Verify Choosing \"Khác\" without a note cannot be saved",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      }
+    },
+    {
+      "id": "TC-12",
+      "section": "Leads",
+      "priority": "P2",
+      "title": "Choosing \"Khác\" with a note is saved",
+      "requirement": {
+        "id": "AC-04",
+        "statement": "Choosing \"Khác\" with a note in \"Ghi rõ\" saves the lead."
+      },
+      "automated": true,
+      "manualReason": null,
+      "draftMs": 15,
+      "tokens": 1040,
+      "agentRoute": "DRAFT_CREATED",
+      "agentAskedFirst": null,
+      "narrowedStatement": null,
+      "caseId": "case_055ed05b78944e3b86f065c2a164b7b4",
+      "sourceRefs": ["GYM-AC@v1"],
+      "agentDraft": {
+        "steps": [
+          {
+            "action": "Exercise AC-04: Choosing \"Khác\" with a note in \"Ghi rõ\" saves the lead.",
+            "expected": "Choosing \"Khác\" in any drop-down cannot be saved without a note. (milestone M1)",
+            "sourceRefs": ["GYM-AC@v1"]
+          }
+        ],
+        "title": "Verify Choosing \"Khác\" with a note is saved",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      }
+    },
+    {
+      "id": "TC-13",
+      "section": "Leads",
+      "priority": "P2",
+      "title": "A lead without a name is refused",
+      "requirement": {
+        "id": "AC-25",
+        "statement": "A lead needs a name: saving with a channel but no name shows \"Bắt buộc nhập.\" and saves nothing."
+      },
+      "automated": true,
+      "manualReason": null,
+      "draftMs": 15,
+      "tokens": 1040,
+      "agentRoute": "DRAFT_CREATED",
+      "agentAskedFirst": null,
+      "narrowedStatement": null,
+      "caseId": "case_50fe37066ba247cf962de9a6a88286fa",
+      "sourceRefs": ["GYM-AC@v1"],
+      "agentDraft": {
+        "steps": [
+          {
+            "action": "Exercise AC-25: A lead needs a name: saving with a channel but no name shows \"Bắt buộc nhập.\" and saves nothing.",
+            "expected": "A lead needs only a name and a channel; the country is chosen from the list of countries and the email goes in the language derived from it (D-057, D-060). (milestone M2)",
+            "sourceRefs": ["GYM-AC@v1"]
+          }
+        ],
+        "title": "Verify A lead without a name is refused",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      }
+    },
+    {
+      "id": "TC-14",
+      "section": "Leads",
+      "priority": "P1",
+      "title": "A phone number already in use warns and offers a merge instead of a second record",
+      "requirement": {
+        "id": "BR-202",
+        "statement": "A new lead with a phone number already in use triggers the duplicate warning \"Số điện thoại đã có hồ sơ\" naming the existing record and offers \"Gộp vào hồ sơ này\"; no second record is created."
+      },
+      "automated": true,
+      "manualReason": null,
+      "draftMs": 18,
+      "tokens": 1040,
+      "agentRoute": "DRAFT_CREATED",
+      "agentAskedFirst": null,
+      "narrowedStatement": null,
+      "caseId": "case_d9fe49ed91564733a5ca9b0750fa53fd",
+      "sourceRefs": ["GYM-BR-LEADS-AND-CUSTOMERS@v1"],
+      "agentDraft": {
+        "steps": [
+          {
+            "action": "Exercise BR-202: A new lead with a phone number already in use triggers the duplicate warning \"Số điện thoại đã có hồ sơ\" naming the existing record and offers \"Gộp vào hồ sơ này\"; no second record is created.",
+            "expected": "A new lead or contact with a phone number already in use triggers a duplicate warning and a merge proposal; no second record is created (D-019). Built (M2 slice 5): the quick form answers `DUPLICATE_PHONE`; \"Gộp vào hồ sơ này\" adds the new inquiry to the existing lead or customer; managers merge two existing records (A-063 to A-068).",
+            "sourceRefs": ["GYM-BR-LEADS-AND-CUSTOMERS@v1"]
+          }
+        ],
+        "title": "Verify A phone number already in use warns and offers a merge instead of a second record",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      }
+    },
+    {
+      "id": "TC-15",
+      "section": "Leads",
+      "priority": "P3",
+      "title": "Searching leads by phone finds the matching lead only",
+      "requirement": {
+        "id": "BR-202",
+        "statement": "Searching the lead list for phone 0901234508 lists lead \"Tạ Thu Uyên\" and not \"Kiều Quốc Việt\"."
+      },
+      "automated": true,
+      "manualReason": null,
+      "draftMs": 18,
+      "tokens": 1040,
+      "agentRoute": "DRAFT_CREATED",
+      "agentAskedFirst": null,
+      "narrowedStatement": null,
+      "caseId": "case_ff0a6b76e86846c397d2e8aa9124700a",
+      "sourceRefs": ["GYM-BR-LEADS-AND-CUSTOMERS@v1"],
+      "agentDraft": {
+        "steps": [
+          {
+            "action": "Exercise BR-202: Searching the lead list for phone 0901234508 lists lead \"Tạ Thu Uyên\" and not \"Kiều Quốc Việt\".",
+            "expected": "A new lead or contact with a phone number already in use triggers a duplicate warning and a merge proposal; no second record is created (D-019). Built (M2 slice 5): the quick form answers `DUPLICATE_PHONE`; \"Gộp vào hồ sơ này\" adds the new inquiry to the existing lead or customer; managers merge two existing records (A-063 to A-068).",
+            "sourceRefs": ["GYM-BR-LEADS-AND-CUSTOMERS@v1"]
+          }
+        ],
+        "title": "Verify Searching leads by phone finds the matching lead only",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      }
+    },
+    {
+      "id": "TC-16",
+      "section": "Leads",
+      "priority": "P2",
+      "title": "Marking a lead Refused requires a reason and puts it in the re-care queue",
+      "requirement": {
+        "id": "BR-204",
+        "statement": "Setting a lead to \"Từ chối\" requires a reason; the lead enters the re-care queue with a contact-again date 15 days later."
+      },
+      "automated": false,
+      "manualReason": "The 15-day contact-again date depends on today's date and the status dialog needs a chosen reason from a configurable list; checked by a person until date-relative assertions exist.",
+      "draftMs": 16,
+      "tokens": 1040,
+      "agentRoute": "DRAFT_CREATED",
+      "agentAskedFirst": null,
+      "narrowedStatement": null,
+      "caseId": "case_125dad18d03a43ebb55966d82603901f",
+      "sourceRefs": ["GYM-BR-LEADS-AND-CUSTOMERS@v1"],
+      "agentDraft": {
+        "steps": [
+          {
+            "action": "Exercise BR-204: Setting a lead to \"Từ chối\" requires a reason; the lead enters the re-care queue with a contact-again date 15 days later.",
+            "expected": "Refused requires a reason. Refused, No response, and No show leads enter the re-care queue with a contact-again date (initially 15 days) and are never closed (D-020, OQ-018). The next contact-again day is `recareDays` after today every time (A-062); the lead stays with its consultant, who and the managers are notified (M2 slice 5).",
+            "sourceRefs": ["GYM-BR-LEADS-AND-CUSTOMERS@v1"]
+          }
+        ],
+        "title": "Verify Marking a lead Refused requires a reason and puts it in the re-care queue",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      }
+    },
+    {
+      "id": "TC-17",
+      "section": "Leads",
+      "priority": "P3",
+      "title": "The Kanban board shows one column per lead status",
+      "requirement": {
+        "id": "AC-03",
+        "statement": "The lead Kanban board shows the status columns \"Mới\", \"Đang tư vấn\" and \"Từ chối\"."
+      },
+      "automated": true,
+      "manualReason": null,
+      "draftMs": 16,
+      "tokens": 1040,
+      "agentRoute": "DRAFT_CREATED",
+      "agentAskedFirst": null,
+      "narrowedStatement": null,
+      "caseId": "case_0f799744ba7445c385001727dabafea7",
+      "sourceRefs": ["GYM-AC@v1"],
+      "agentDraft": {
+        "steps": [
+          {
+            "action": "Exercise AC-03: The lead Kanban board shows the status columns \"Mới\", \"Đang tư vấn\" and \"Từ chối\".",
+            "expected": "Every consulting step result, checklist item, and reason is a drop-down; admin adds or deactivates an option on screen, the change shows immediately, and old data is unchanged. (milestone M1, M2)",
+            "sourceRefs": ["GYM-AC@v1"]
+          }
+        ],
+        "title": "Verify The Kanban board shows one column per lead status",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      }
+    },
+    {
+      "id": "TC-18",
+      "section": "Leads",
+      "priority": "P2",
+      "title": "New leads are shared round-robin among active consultants",
+      "requirement": {
+        "id": "BR-203",
+        "statement": "Leads are assigned round-robin to active consultants of the branch."
+      },
+      "automated": false,
+      "manualReason": "The expected consultant depends on the current turn order and weights, which earlier runs change; needs a reset hook or an API read of the turn state.",
+      "draftMs": 15,
+      "tokens": 1040,
+      "agentRoute": "DRAFT_CREATED",
+      "agentAskedFirst": null,
+      "narrowedStatement": null,
+      "caseId": "case_a99d2fafea7b48299f36453490fda0d6",
+      "sourceRefs": ["GYM-BR-LEADS-AND-CUSTOMERS@v1"],
+      "agentDraft": {
+        "steps": [
+          {
+            "action": "Exercise BR-203: Leads are assigned round-robin to active consultants of the branch.",
+            "expected": "Leads are assigned round-robin to active consultants of the branch; managers may reassign (D-020, OQ-017).",
+            "sourceRefs": ["GYM-BR-LEADS-AND-CUSTOMERS@v1"]
+          }
+        ],
+        "title": "Verify New leads are shared round-robin among active consultants",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      }
+    },
+    {
+      "id": "TC-19",
+      "section": "Customers and contracts",
+      "priority": "P1",
+      "title": "An approved contract has no Edit action",
+      "requirement": {
+        "id": "BR-305",
+        "statement": "An approved contract \"Đang hiệu lực\" is never edited, even by admin: its page has no \"Sửa hợp đồng\" action."
+      },
+      "automated": true,
+      "manualReason": null,
+      "draftMs": 16,
+      "tokens": 1040,
+      "agentRoute": "DRAFT_CREATED",
+      "agentAskedFirst": null,
+      "narrowedStatement": null,
+      "caseId": "case_14c10d46a71f4ad2adfd6b84512de4da",
+      "sourceRefs": ["GYM-BR-SERVICES-PRICES-CONTRACTS@v1"],
+      "agentDraft": {
+        "steps": [
+          {
+            "action": "Exercise BR-305: An approved contract \"Đang hiệu lực\" is never edited, even by admin: its page has no \"Sửa hợp đồng\" action.",
+            "expected": "An approved contract is never edited, even by admin. Changes go through change vouchers (D-022, D-024).",
+            "sourceRefs": ["GYM-BR-SERVICES-PRICES-CONTRACTS@v1"]
+          }
+        ],
+        "title": "Verify An approved contract has no Edit action",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      }
+    },
+    {
+      "id": "TC-20",
+      "section": "Customers and contracts",
+      "priority": "P2",
+      "title": "Sessions left and debt are derived, not typed",
+      "requirement": {
+        "id": "BR-602",
+        "statement": "Contract HD000007 (24 sessions, 3 completed, no receipts) shows \"Còn lại\" 21 and \"Còn nợ\" 12.000.000 ₫."
+      },
+      "automated": true,
+      "manualReason": null,
+      "draftMs": 16,
+      "tokens": 1040,
+      "agentRoute": "DRAFT_CREATED",
+      "agentAskedFirst": null,
+      "narrowedStatement": null,
+      "caseId": "case_f9b41772d22b439297af20d0352e6eb6",
+      "sourceRefs": ["GYM-BR-MONEY@v1"],
+      "agentDraft": {
+        "steps": [
+          {
+            "action": "Exercise BR-602: Contract HD000007 (24 sessions, 3 completed, no receipts) shows \"Còn lại\" 21 and \"Còn nợ\" 12.000.000 ₫.",
+            "expected": "Paid amount, debt, and payment status are computed only from valid receipts (approved, not deleted) plus the opening paid amount (D-034, D-011).",
+            "sourceRefs": ["GYM-BR-MONEY@v1"]
+          }
+        ],
+        "title": "Verify Sessions left and debt are derived, not typed",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      }
+    },
+    {
+      "id": "TC-21",
+      "section": "Customers and contracts",
+      "priority": "P2",
+      "title": "An expired contract is shown as expired",
+      "requirement": {
+        "id": "BR-402",
+        "statement": "Contract HD000009 (Ngô Gia Bảo) ended 10 days ago and shows status \"Hết hạn\"; an expired contract cannot be booked."
+      },
+      "automated": true,
+      "manualReason": null,
+      "draftMs": 15,
+      "tokens": 1040,
+      "agentRoute": "DRAFT_CREATED",
+      "agentAskedFirst": null,
+      "narrowedStatement": null,
+      "caseId": "case_7bb21c61ff984c38b39ef3b9d37a4bd7",
+      "sourceRefs": ["GYM-BR-SESSIONS-AND-CLASSES@v1"],
+      "agentDraft": {
+        "steps": [
+          {
+            "action": "Exercise BR-402: Contract HD000009 (Ngô Gia Bảo) ended 10 days ago and shows status \"Hết hạn\"; an expired contract cannot be booked.",
+            "expected": "A booking requires an approved, active contract with sessions left, not expired and not frozen, and inside the service's hours and limits (A-149). A PT's shift never limits it (D-058; OQ-001 interim: the session's day is within the contract dates, A-017).",
+            "sourceRefs": ["GYM-BR-SESSIONS-AND-CLASSES@v1"]
+          }
+        ],
+        "title": "Verify An expired contract is shown as expired",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      }
+    },
+    {
+      "id": "TC-22",
+      "section": "Customers and contracts",
+      "priority": "P2",
+      "title": "A receptionist sees a contract but cannot cancel it",
+      "requirement": {
+        "id": "AC-01",
+        "statement": "A receptionist sees contracts but cannot add, edit, activate or cancel them: contract HD000007 shows no \"Hủy hợp đồng\"."
+      },
+      "automated": true,
+      "manualReason": null,
+      "draftMs": 15,
+      "tokens": 1040,
+      "agentRoute": "DRAFT_CREATED",
+      "agentAskedFirst": null,
+      "narrowedStatement": null,
+      "caseId": "case_1918cc49650b4d2a88cf1277bb316fa5",
+      "sourceRefs": ["GYM-AC@v1"],
+      "agentDraft": {
+        "steps": [
+          {
+            "action": "Exercise AC-01: A receptionist sees contracts but cannot add, edit, activate or cancel them: contract HD000007 shows no \"Hủy hợp đồng\".",
+            "expected": "An account without permission for a module does not see its menu and cannot reach it by direct URL; a role with phone numbers hidden never sees them on any screen or export. (milestone M1)",
+            "sourceRefs": ["GYM-AC@v1"]
+          }
+        ],
+        "title": "Verify A receptionist sees a contract but cannot cancel it",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      }
+    },
+    {
+      "id": "TC-23",
+      "section": "Customers and contracts",
+      "priority": "P1",
+      "title": "A new contract takes its price and end date from the tier",
+      "requirement": {
+        "id": "AC-10",
+        "statement": "Entering any session count gives the right tier unit price, end date, and display name."
+      },
+      "automated": false,
+      "manualReason": "Creates a contract through a multi-field form whose expected end date depends on today; automation needs date-relative assertions and data cleanup.",
+      "draftMs": 16,
+      "tokens": 1040,
+      "agentRoute": "DRAFT_CREATED",
+      "agentAskedFirst": null,
+      "narrowedStatement": null,
+      "caseId": "case_fe3c072b334a4d769260c5e5a49bf52c",
+      "sourceRefs": ["GYM-AC@v1"],
+      "agentDraft": {
+        "steps": [
+          {
+            "action": "Exercise AC-10: Entering any session count gives the right tier unit price, end date, and display name.",
+            "expected": "Entering any session count gives the right tier unit price, end date, and display name; a price different from the tier flags the contract \"Exception price\" and it cannot be activated until approved. (milestone M4)",
+            "sourceRefs": ["GYM-AC@v1"]
+          }
+        ],
+        "title": "Verify A new contract takes its price and end date from the tier",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      }
+    },
+    {
+      "id": "TC-24",
+      "section": "Customers and contracts",
+      "priority": "P1",
+      "title": "A new contract waits for approval and its creator cannot approve it",
+      "requirement": {
+        "id": "BR-304",
+        "statement": "A contract is created Pending approval (\"Chờ duyệt\"); actions in the approval matrix take effect only after approval by someone other than the submitter."
+      },
+      "automated": false,
+      "manualReason": "Needs a freshly created contract (the demo data has no pending one) and two sign-ins; the executor cannot pass the new contract id between steps yet.",
+      "draftMs": 15,
+      "tokens": 1040,
+      "agentRoute": "DRAFT_CREATED",
+      "agentAskedFirst": null,
+      "narrowedStatement": null,
+      "caseId": "case_541bc046784d4b30b0f91ab414c33bef",
+      "sourceRefs": ["GYM-BR-SERVICES-PRICES-CONTRACTS@v1"],
+      "agentDraft": {
+        "steps": [
+          {
+            "action": "Exercise BR-304: A contract is created Pending approval (\"Chờ duyệt\"); actions in the approval matrix take effect only after approval by someone other than the submitter.",
+            "expected": "A contract is created *Pending approval* and can be edited only while pending. Only an approved contract can be activated and booked (D-022). A contract the approver rejects is *Rejected* and has no effect; an approved one can be sent back to pending only with no receipts or sessions (A-121, A-124).",
+            "sourceRefs": ["GYM-BR-SERVICES-PRICES-CONTRACTS@v1"]
+          }
+        ],
+        "title": "Verify A new contract waits for approval and its creator cannot approve it",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      }
+    },
+    {
+      "id": "TC-25",
+      "section": "PT booking",
+      "priority": "P1",
+      "title": "A booking that overlaps the trainer's session is refused",
+      "requirement": {
+        "id": "BR-403",
+        "statement": "A PT cannot have two sessions at once: booking a trainer at a time already booked shows \"Huấn luyện viên đã có lịch trùng giờ này.\""
+      },
+      "automated": false,
+      "manualReason": "The calendar booking form uses date and time pickers relative to today; not automatable with the current step types without date-relative input.",
+      "draftMs": 16,
+      "tokens": 1040,
+      "agentRoute": "DRAFT_CREATED",
+      "agentAskedFirst": null,
+      "narrowedStatement": null,
+      "caseId": "case_39a9e9ec2f614acd85a607440645d19c",
+      "sourceRefs": ["GYM-BR-SESSIONS-AND-CLASSES@v1"],
+      "agentDraft": {
+        "steps": [
+          {
+            "action": "Exercise BR-403: A PT cannot have two sessions at once: booking a trainer at a time already booked shows \"Huấn luyện viên đã có lịch trùng giờ này.\"",
+            "expected": "A PT cannot have two sessions at once, and a customer cannot have two sessions at once, while the statuses hold the slot (A-024). Enforced by the database (T-014).",
+            "sourceRefs": ["GYM-BR-SESSIONS-AND-CLASSES@v1"]
+          }
+        ],
+        "title": "Verify A booking that overlaps the trainer's session is refused",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      }
+    },
+    {
+      "id": "TC-26",
+      "section": "PT booking",
+      "priority": "P1",
+      "title": "A contract with no sessions left cannot be booked",
+      "requirement": {
+        "id": "AC-15",
+        "statement": "Booking is refused when no sessions are left, the contract has expired, or times overlap."
+      },
+      "automated": false,
+      "manualReason": "The demo data has no contract with 0 sessions left; setting one up needs bookings created and completed first.",
+      "draftMs": 15,
+      "tokens": 1040,
+      "agentRoute": "DRAFT_CREATED",
+      "agentAskedFirst": null,
+      "narrowedStatement": null,
+      "caseId": "case_010b5706206044bbafae3fc61d100247",
+      "sourceRefs": ["GYM-AC@v1"],
+      "agentDraft": {
+        "steps": [
+          {
+            "action": "Exercise AC-15: Booking is refused when no sessions are left, the contract has expired, or times overlap.",
+            "expected": "\"Đã tập\" and no-show reduce sessions left by exactly 1 and credit the PT; \"Hủy lịch\" and delete do not; each status shows its color; booking is refused when no sessions are left, the contract has expired, or times overlap. (milestone M5)",
+            "sourceRefs": ["GYM-AC@v1"]
+          }
+        ],
+        "title": "Verify A contract with no sessions left cannot be booked",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      }
+    },
+    {
+      "id": "TC-27",
+      "section": "PT booking",
+      "priority": "P1",
+      "title": "A contract not yet approved cannot be booked",
+      "requirement": {
+        "id": "AC-11",
+        "statement": "A contract not yet approved cannot be booked."
+      },
+      "automated": false,
+      "manualReason": "Depends on TC-24's freshly created pending contract.",
+      "draftMs": 16,
+      "tokens": 1040,
+      "agentRoute": "DRAFT_CREATED",
+      "agentAskedFirst": null,
+      "narrowedStatement": null,
+      "caseId": "case_1398acb539054674b57995a3deb4b196",
+      "sourceRefs": ["GYM-AC@v1"],
+      "agentDraft": {
+        "steps": [
+          {
+            "action": "Exercise AC-11: A contract not yet approved cannot be booked.",
+            "expected": "An approved contract cannot be edited, even by admin; a contract not yet approved cannot be booked. (milestone M4, M5)",
+            "sourceRefs": ["GYM-AC@v1"]
+          }
+        ],
+        "title": "Verify A contract not yet approved cannot be booked",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      }
+    },
+    {
+      "id": "TC-28",
+      "section": "PT booking",
+      "priority": "P2",
+      "title": "Booking does not consume a session",
+      "requirement": {
+        "id": "BR-401",
+        "statement": "Booking never consumes a session: sessions left are unchanged after a booking is created."
+      },
+      "automated": false,
+      "manualReason": "Needs the calendar booking form (see TC-25) and a before/after comparison of a value.",
+      "draftMs": 16,
+      "tokens": 1040,
+      "agentRoute": "DRAFT_CREATED",
+      "agentAskedFirst": null,
+      "narrowedStatement": null,
+      "caseId": "case_98f9b63d1a6244489e4d2f53a0515e5f",
+      "sourceRefs": ["GYM-BR-SESSIONS-AND-CLASSES@v1"],
+      "agentDraft": {
+        "steps": [
+          {
+            "action": "Exercise BR-401: Booking never consumes a session: sessions left are unchanged after a booking is created.",
+            "expected": "Booking never consumes a session (D-004, D-025).",
+            "sourceRefs": ["GYM-BR-SESSIONS-AND-CLASSES@v1"]
+          }
+        ],
+        "title": "Verify Booking does not consume a session",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      }
+    },
+    {
+      "id": "TC-29",
+      "section": "Money",
+      "priority": "P1",
+      "title": "A payment above what is still owed is refused",
+      "requirement": {
+        "id": "BR-604",
+        "statement": "A receipt may not take the paid amount above the contract value: \"Khoản thanh toán làm tổng đã trả vượt giá trị hợp đồng.\""
+      },
+      "automated": false,
+      "manualReason": "A refused payment changes nothing, but a mistake in the steps would record real money in the instance; kept manual until a scoped approval for payment steps is set up.",
+      "draftMs": 16,
+      "tokens": 1040,
+      "agentRoute": "DRAFT_CREATED",
+      "agentAskedFirst": null,
+      "narrowedStatement": null,
+      "caseId": "case_d7ebe0c4624b4e6888fc7e5ace24b2de",
+      "sourceRefs": ["GYM-BR-MONEY@v1"],
+      "agentDraft": {
+        "steps": [
+          {
+            "action": "Exercise BR-604: A receipt may not take the paid amount above the contract value: \"Khoản thanh toán làm tổng đã trả vượt giá trị hợp đồng.\"",
+            "expected": "A receipt may not take the paid amount above the contract value (OQ-003 interim).",
+            "sourceRefs": ["GYM-BR-MONEY@v1"]
+          }
+        ],
+        "title": "Verify A payment above what is still owed is refused",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      }
+    },
+    {
+      "id": "TC-30",
+      "section": "Money",
+      "priority": "P2",
+      "title": "The cash book balances",
+      "requirement": {
+        "id": "AC-19",
+        "statement": "Cash book closing balance equals opening balance plus receipts minus expenses."
+      },
+      "automated": false,
+      "manualReason": "Needs arithmetic across several displayed amounts; the executor compares observed text with expected text and does not compute values.",
+      "draftMs": 17,
+      "tokens": 1040,
+      "agentRoute": "DRAFT_CREATED",
+      "agentAskedFirst": null,
+      "narrowedStatement": null,
+      "caseId": "case_34b7cef6ddf94a7a8fb1ae78857167e8",
+      "sourceRefs": ["GYM-AC@v1"],
+      "agentDraft": {
+        "steps": [
+          {
+            "action": "Exercise AC-19: Cash book closing balance equals opening balance plus receipts minus expenses.",
+            "expected": "Each contract's paid amount and debt always equal the sum of its valid receipts; cash book closing balance equals opening balance plus receipts minus expenses. (milestone M4)",
+            "sourceRefs": ["GYM-AC@v1"]
+          }
+        ],
+        "title": "Verify The cash book balances",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      }
     }
   ],
-  "runs": [
+  "suite": {
+    "id": "suite_3bcc74ecfb464392978b36b55bf3c0e2",
+    "name": "Gym CRM regression",
+    "description": "Core Gym CRM flows: sign-in and access, leads, customers and contracts, PT booking, money.",
+    "createdBy": "gym-qa",
+    "createdAt": "2026-10-16T04:16:49.016Z",
+    "cases": [
+      {
+        "caseId": "case_f9c9c0cbb699436aac627cac6bd345ff",
+        "section": "Sign-in and access",
+        "title": "TC-01 A manager signs in with email and password and reaches the dashboard",
+        "status": "APPROVED",
+        "revision": 2,
+        "sourceRefs": ["GYM-BR-PLATFORM@v1"],
+        "automated": true
+      },
+      {
+        "caseId": "case_7fcd2d01605a4bd9b81ff1e147decdf3",
+        "section": "Sign-in and access",
+        "title": "TC-02 A wrong password shows one generic message and stays on the login page",
+        "status": "APPROVED",
+        "revision": 2,
+        "sourceRefs": ["GYM-BR-PLATFORM@v1"],
+        "automated": true
+      },
+      {
+        "caseId": "case_71a28e4c1eca486a88093cdc0dc6c61c",
+        "section": "Sign-in and access",
+        "title": "TC-03 A signed-out visitor who opens the dashboard is sent to the login page",
+        "status": "APPROVED",
+        "revision": 2,
+        "sourceRefs": ["GYM-AC@v1"],
+        "automated": true
+      },
+      {
+        "caseId": "case_d8cd5a138d784b768770d22e0c17bf7f",
+        "section": "Sign-in and access",
+        "title": "TC-04 A trainer has no Finance menu and cannot open /finance directly",
+        "status": "APPROVED",
+        "revision": 2,
+        "sourceRefs": ["GYM-AC@v1"],
+        "automated": true
+      },
+      {
+        "caseId": "case_3021820d27a34b59bf696a3e5db8ff31",
+        "section": "Sign-in and access",
+        "title": "TC-06 A receptionist cannot open income and expenses",
+        "status": "APPROVED",
+        "revision": 2,
+        "sourceRefs": ["GYM-AC@v1"],
+        "automated": true
+      },
+      {
+        "caseId": "case_fb4f436f636e4e7a9e67b1eefdea5bb2",
+        "section": "Sign-in and access",
+        "title": "TC-07 A receptionist can open payments",
+        "status": "APPROVED",
+        "revision": 2,
+        "sourceRefs": ["GYM-AC@v1"],
+        "automated": true
+      },
+      {
+        "caseId": "case_ce8fc547a62f47f0b9456238476719f2",
+        "section": "Leads",
+        "title": "TC-10 A lead is saved with only a name and a channel",
+        "status": "APPROVED",
+        "revision": 2,
+        "sourceRefs": ["GYM-AC@v1"],
+        "automated": true
+      },
+      {
+        "caseId": "case_aebe3bdb2b6d450cb88f4e9d00e3d5d4",
+        "section": "Leads",
+        "title": "TC-11 Choosing \"Khác\" without a note cannot be saved",
+        "status": "APPROVED",
+        "revision": 2,
+        "sourceRefs": ["GYM-AC@v1"],
+        "automated": true
+      },
+      {
+        "caseId": "case_055ed05b78944e3b86f065c2a164b7b4",
+        "section": "Leads",
+        "title": "TC-12 Choosing \"Khác\" with a note is saved",
+        "status": "APPROVED",
+        "revision": 2,
+        "sourceRefs": ["GYM-AC@v1"],
+        "automated": true
+      },
+      {
+        "caseId": "case_50fe37066ba247cf962de9a6a88286fa",
+        "section": "Leads",
+        "title": "TC-13 A lead without a name is refused",
+        "status": "APPROVED",
+        "revision": 2,
+        "sourceRefs": ["GYM-AC@v1"],
+        "automated": true
+      },
+      {
+        "caseId": "case_d9fe49ed91564733a5ca9b0750fa53fd",
+        "section": "Leads",
+        "title": "TC-14 A phone number already in use warns and offers a merge instead of a second record",
+        "status": "APPROVED",
+        "revision": 2,
+        "sourceRefs": ["GYM-BR-LEADS-AND-CUSTOMERS@v1"],
+        "automated": true
+      },
+      {
+        "caseId": "case_ff0a6b76e86846c397d2e8aa9124700a",
+        "section": "Leads",
+        "title": "TC-15 Searching leads by phone finds the matching lead only",
+        "status": "APPROVED",
+        "revision": 2,
+        "sourceRefs": ["GYM-BR-LEADS-AND-CUSTOMERS@v1"],
+        "automated": true
+      },
+      {
+        "caseId": "case_125dad18d03a43ebb55966d82603901f",
+        "section": "Leads",
+        "title": "TC-16 Marking a lead Refused requires a reason and puts it in the re-care queue",
+        "status": "APPROVED",
+        "revision": 2,
+        "sourceRefs": ["GYM-BR-LEADS-AND-CUSTOMERS@v1"],
+        "automated": false
+      },
+      {
+        "caseId": "case_0f799744ba7445c385001727dabafea7",
+        "section": "Leads",
+        "title": "TC-17 The Kanban board shows one column per lead status",
+        "status": "APPROVED",
+        "revision": 2,
+        "sourceRefs": ["GYM-AC@v1"],
+        "automated": true
+      },
+      {
+        "caseId": "case_a99d2fafea7b48299f36453490fda0d6",
+        "section": "Leads",
+        "title": "TC-18 New leads are shared round-robin among active consultants",
+        "status": "APPROVED",
+        "revision": 2,
+        "sourceRefs": ["GYM-BR-LEADS-AND-CUSTOMERS@v1"],
+        "automated": false
+      },
+      {
+        "caseId": "case_14c10d46a71f4ad2adfd6b84512de4da",
+        "section": "Customers and contracts",
+        "title": "TC-19 An approved contract has no Edit action",
+        "status": "APPROVED",
+        "revision": 2,
+        "sourceRefs": ["GYM-BR-SERVICES-PRICES-CONTRACTS@v1"],
+        "automated": true
+      },
+      {
+        "caseId": "case_f9b41772d22b439297af20d0352e6eb6",
+        "section": "Customers and contracts",
+        "title": "TC-20 Sessions left and debt are derived, not typed",
+        "status": "APPROVED",
+        "revision": 2,
+        "sourceRefs": ["GYM-BR-MONEY@v1"],
+        "automated": true
+      },
+      {
+        "caseId": "case_7bb21c61ff984c38b39ef3b9d37a4bd7",
+        "section": "Customers and contracts",
+        "title": "TC-21 An expired contract is shown as expired",
+        "status": "APPROVED",
+        "revision": 2,
+        "sourceRefs": ["GYM-BR-SESSIONS-AND-CLASSES@v1"],
+        "automated": true
+      },
+      {
+        "caseId": "case_1918cc49650b4d2a88cf1277bb316fa5",
+        "section": "Customers and contracts",
+        "title": "TC-22 A receptionist sees a contract but cannot cancel it",
+        "status": "APPROVED",
+        "revision": 2,
+        "sourceRefs": ["GYM-AC@v1"],
+        "automated": true
+      },
+      {
+        "caseId": "case_fe3c072b334a4d769260c5e5a49bf52c",
+        "section": "Customers and contracts",
+        "title": "TC-23 A new contract takes its price and end date from the tier",
+        "status": "APPROVED",
+        "revision": 2,
+        "sourceRefs": ["GYM-AC@v1"],
+        "automated": false
+      },
+      {
+        "caseId": "case_541bc046784d4b30b0f91ab414c33bef",
+        "section": "Customers and contracts",
+        "title": "TC-24 A new contract waits for approval and its creator cannot approve it",
+        "status": "APPROVED",
+        "revision": 2,
+        "sourceRefs": ["GYM-BR-SERVICES-PRICES-CONTRACTS@v1"],
+        "automated": false
+      },
+      {
+        "caseId": "case_39a9e9ec2f614acd85a607440645d19c",
+        "section": "PT booking",
+        "title": "TC-25 A booking that overlaps the trainer's session is refused",
+        "status": "APPROVED",
+        "revision": 2,
+        "sourceRefs": ["GYM-BR-SESSIONS-AND-CLASSES@v1"],
+        "automated": false
+      },
+      {
+        "caseId": "case_010b5706206044bbafae3fc61d100247",
+        "section": "PT booking",
+        "title": "TC-26 A contract with no sessions left cannot be booked",
+        "status": "APPROVED",
+        "revision": 2,
+        "sourceRefs": ["GYM-AC@v1"],
+        "automated": false
+      },
+      {
+        "caseId": "case_1398acb539054674b57995a3deb4b196",
+        "section": "PT booking",
+        "title": "TC-27 A contract not yet approved cannot be booked",
+        "status": "APPROVED",
+        "revision": 2,
+        "sourceRefs": ["GYM-AC@v1"],
+        "automated": false
+      },
+      {
+        "caseId": "case_98f9b63d1a6244489e4d2f53a0515e5f",
+        "section": "PT booking",
+        "title": "TC-28 Booking does not consume a session",
+        "status": "APPROVED",
+        "revision": 2,
+        "sourceRefs": ["GYM-BR-SESSIONS-AND-CLASSES@v1"],
+        "automated": false
+      },
+      {
+        "caseId": "case_d7ebe0c4624b4e6888fc7e5ace24b2de",
+        "section": "Money",
+        "title": "TC-29 A payment above what is still owed is refused",
+        "status": "APPROVED",
+        "revision": 2,
+        "sourceRefs": ["GYM-BR-MONEY@v1"],
+        "automated": false
+      },
+      {
+        "caseId": "case_34b7cef6ddf94a7a8fb1ae78857167e8",
+        "section": "Money",
+        "title": "TC-30 The cash book balances",
+        "status": "APPROVED",
+        "revision": 2,
+        "sourceRefs": ["GYM-AC@v1"],
+        "automated": false
+      }
+    ]
+  },
+  "suiteRuns": [
     {
-      "label": "ac-01-trainer-no-finance",
-      "ac": "AC-01",
-      "environmentId": "staging",
-      "runId": "run_b21b45548e1d4535b28b6c9c2a0b58cf",
-      "status": "PASSED",
-      "reason": "ALL_ASSERTIONS_PASSED",
-      "assertions": [
+      "id": "suiterun_5bc2409de7554170853d041f06573aac",
+      "wallMs": 26446,
+      "totals": {
+        "cases": 27,
+        "passed": 17,
+        "failed": 0,
+        "inconclusive": 0,
+        "blocked": 0,
+        "pending": 0,
+        "notAutomated": 10,
+        "notApproved": 0
+      },
+      "complete": true,
+      "items": [
         {
-          "name": "expectUrl",
-          "actual": "/dashboard",
-          "passed": true,
-          "stepId": "signed-in",
-          "expected": "/dashboard"
+          "caseId": "case_f9c9c0cbb699436aac627cac6bd345ff",
+          "section": "Sign-in and access",
+          "title": "TC-01 A manager signs in with email and password and reaches the dashboard",
+          "sourceRefs": ["GYM-BR-PLATFORM@v1"],
+          "status": "PASSED",
+          "reason": "ALL_ASSERTIONS_PASSED",
+          "runId": "run_828de6d49eac4090a61704802111dced",
+          "durationMs": 1016,
+          "evidence": 5,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-01",
+          "detail": {
+            "runId": "run_828de6d49eac4090a61704802111dced",
+            "status": "PASSED",
+            "reason": "ALL_ASSERTIONS_PASSED",
+            "assertions": [
+              {
+                "name": "expectUrl",
+                "actual": "/dashboard",
+                "passed": true,
+                "stepId": "signed-in",
+                "expected": "/dashboard"
+              },
+              {
+                "name": "expectVisible",
+                "actual": "visible",
+                "passed": true,
+                "stepId": "dashboard-heading",
+                "expected": "visible"
+              }
+            ],
+            "evidenceCount": 5,
+            "screenshots": [],
+            "triage": null,
+            "reproduction": null
+          }
         },
         {
-          "name": "expectHidden",
-          "actual": "hidden",
-          "passed": true,
-          "stepId": "no-finance-menu",
-          "expected": "hidden"
+          "caseId": "case_7fcd2d01605a4bd9b81ff1e147decdf3",
+          "section": "Sign-in and access",
+          "title": "TC-02 A wrong password shows one generic message and stays on the login page",
+          "sourceRefs": ["GYM-BR-PLATFORM@v1"],
+          "status": "PASSED",
+          "reason": "ALL_ASSERTIONS_PASSED",
+          "runId": "run_102924a945a54f14ad4f524bc1a935ad",
+          "durationMs": 652,
+          "evidence": 5,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-02",
+          "detail": {
+            "runId": "run_102924a945a54f14ad4f524bc1a935ad",
+            "status": "PASSED",
+            "reason": "ALL_ASSERTIONS_PASSED",
+            "assertions": [
+              {
+                "name": "expectText",
+                "actual": "The email or password is wrong, or the account is disabled.",
+                "passed": true,
+                "stepId": "generic-error",
+                "expected": "The email or password is wrong, or the account is disabled."
+              },
+              {
+                "name": "expectUrl",
+                "actual": "/login",
+                "passed": true,
+                "stepId": "stays-on-login",
+                "expected": "/login"
+              }
+            ],
+            "evidenceCount": 5,
+            "screenshots": [],
+            "triage": null,
+            "reproduction": null
+          }
         },
         {
-          "name": "expectText",
-          "actual": "Bạn không có quyền xem trang này",
-          "passed": true,
-          "stepId": "finance-refused",
-          "expected": "Bạn không có quyền xem trang này"
+          "caseId": "case_71a28e4c1eca486a88093cdc0dc6c61c",
+          "section": "Sign-in and access",
+          "title": "TC-03 A signed-out visitor who opens the dashboard is sent to the login page",
+          "sourceRefs": ["GYM-AC@v1"],
+          "status": "PASSED",
+          "reason": "ALL_ASSERTIONS_PASSED",
+          "runId": "run_60a0a03b37ae448ab1d646e6ad71d973",
+          "durationMs": 332,
+          "evidence": 4,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-03",
+          "detail": {
+            "runId": "run_60a0a03b37ae448ab1d646e6ad71d973",
+            "status": "PASSED",
+            "reason": "ALL_ASSERTIONS_PASSED",
+            "assertions": [
+              {
+                "name": "expectUrl",
+                "actual": "/login",
+                "passed": true,
+                "stepId": "sent-to-login",
+                "expected": "/login"
+              }
+            ],
+            "evidenceCount": 4,
+            "screenshots": [],
+            "triage": null,
+            "reproduction": null
+          }
+        },
+        {
+          "caseId": "case_d8cd5a138d784b768770d22e0c17bf7f",
+          "section": "Sign-in and access",
+          "title": "TC-04 A trainer has no Finance menu and cannot open /finance directly",
+          "sourceRefs": ["GYM-AC@v1"],
+          "status": "PASSED",
+          "reason": "ALL_ASSERTIONS_PASSED",
+          "runId": "run_b2ee0baab1ae4b34bd55452cfb10d047",
+          "durationMs": 1146,
+          "evidence": 6,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-04",
+          "detail": {
+            "runId": "run_b2ee0baab1ae4b34bd55452cfb10d047",
+            "status": "PASSED",
+            "reason": "ALL_ASSERTIONS_PASSED",
+            "assertions": [
+              {
+                "name": "expectUrl",
+                "actual": "/dashboard",
+                "passed": true,
+                "stepId": "signed-in",
+                "expected": "/dashboard"
+              },
+              {
+                "name": "expectHidden",
+                "actual": "hidden",
+                "passed": true,
+                "stepId": "no-finance-menu",
+                "expected": "hidden"
+              },
+              {
+                "name": "expectText",
+                "actual": "Bạn không có quyền xem trang này",
+                "passed": true,
+                "stepId": "refused",
+                "expected": "Bạn không có quyền xem trang này"
+              }
+            ],
+            "evidenceCount": 6,
+            "screenshots": [],
+            "triage": null,
+            "reproduction": null
+          }
+        },
+        {
+          "caseId": "case_3021820d27a34b59bf696a3e5db8ff31",
+          "section": "Sign-in and access",
+          "title": "TC-06 A receptionist cannot open income and expenses",
+          "sourceRefs": ["GYM-AC@v1"],
+          "status": "PASSED",
+          "reason": "ALL_ASSERTIONS_PASSED",
+          "runId": "run_d747e5fc49f84dcf8c5d2f14ad0775c5",
+          "durationMs": 1088,
+          "evidence": 6,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-06",
+          "detail": {
+            "runId": "run_d747e5fc49f84dcf8c5d2f14ad0775c5",
+            "status": "PASSED",
+            "reason": "ALL_ASSERTIONS_PASSED",
+            "assertions": [
+              {
+                "name": "expectUrl",
+                "actual": "/dashboard",
+                "passed": true,
+                "stepId": "signed-in",
+                "expected": "/dashboard"
+              },
+              {
+                "name": "expectText",
+                "actual": "Bạn không có quyền xem trang này",
+                "passed": true,
+                "stepId": "refused",
+                "expected": "Bạn không có quyền xem trang này"
+              }
+            ],
+            "evidenceCount": 6,
+            "screenshots": [],
+            "triage": null,
+            "reproduction": null
+          }
+        },
+        {
+          "caseId": "case_fb4f436f636e4e7a9e67b1eefdea5bb2",
+          "section": "Sign-in and access",
+          "title": "TC-07 A receptionist can open payments",
+          "sourceRefs": ["GYM-AC@v1"],
+          "status": "PASSED",
+          "reason": "ALL_ASSERTIONS_PASSED",
+          "runId": "run_a9b45a6ef3b34a52a544e70ba21385d0",
+          "durationMs": 1403,
+          "evidence": 8,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-07",
+          "detail": {
+            "runId": "run_a9b45a6ef3b34a52a544e70ba21385d0",
+            "status": "PASSED",
+            "reason": "ALL_ASSERTIONS_PASSED",
+            "assertions": [
+              {
+                "name": "expectUrl",
+                "actual": "/dashboard",
+                "passed": true,
+                "stepId": "signed-in",
+                "expected": "/dashboard"
+              },
+              {
+                "name": "expectVisible",
+                "actual": "visible",
+                "passed": true,
+                "stepId": "finance-heading",
+                "expected": "visible"
+              },
+              {
+                "name": "expectVisible",
+                "actual": "visible",
+                "passed": true,
+                "stepId": "payments-tab",
+                "expected": "visible"
+              },
+              {
+                "name": "expectHidden",
+                "actual": "hidden",
+                "passed": true,
+                "stepId": "no-income-expenses",
+                "expected": "hidden"
+              }
+            ],
+            "evidenceCount": 8,
+            "screenshots": [],
+            "triage": null,
+            "reproduction": null
+          }
+        },
+        {
+          "caseId": "case_ce8fc547a62f47f0b9456238476719f2",
+          "section": "Leads",
+          "title": "TC-10 A lead is saved with only a name and a channel",
+          "sourceRefs": ["GYM-AC@v1"],
+          "status": "PASSED",
+          "reason": "ALL_ASSERTIONS_PASSED",
+          "runId": "run_67127b0f2bd8470fb9ff4329fcd97804",
+          "durationMs": 2261,
+          "evidence": 7,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-10",
+          "detail": {
+            "runId": "run_67127b0f2bd8470fb9ff4329fcd97804",
+            "status": "PASSED",
+            "reason": "ALL_ASSERTIONS_PASSED",
+            "assertions": [
+              {
+                "name": "expectUrl",
+                "actual": "/dashboard",
+                "passed": true,
+                "stepId": "signed-in",
+                "expected": "/dashboard"
+              },
+              {
+                "name": "expectUrl",
+                "actual": "/leads/",
+                "passed": true,
+                "stepId": "on-lead-page",
+                "expected": "/leads/"
+              },
+              {
+                "name": "expectVisible",
+                "actual": "visible",
+                "passed": true,
+                "stepId": "lead-heading",
+                "expected": "visible"
+              }
+            ],
+            "evidenceCount": 7,
+            "screenshots": [],
+            "triage": null,
+            "reproduction": null
+          }
+        },
+        {
+          "caseId": "case_aebe3bdb2b6d450cb88f4e9d00e3d5d4",
+          "section": "Leads",
+          "title": "TC-11 Choosing \"Khác\" without a note cannot be saved",
+          "sourceRefs": ["GYM-AC@v1"],
+          "status": "PASSED",
+          "reason": "ALL_ASSERTIONS_PASSED",
+          "runId": "run_d5474d4b0ab14f8a8434368e5cea87e8",
+          "durationMs": 2129,
+          "evidence": 7,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-11",
+          "detail": {
+            "runId": "run_d5474d4b0ab14f8a8434368e5cea87e8",
+            "status": "PASSED",
+            "reason": "ALL_ASSERTIONS_PASSED",
+            "assertions": [
+              {
+                "name": "expectUrl",
+                "actual": "/dashboard",
+                "passed": true,
+                "stepId": "signed-in",
+                "expected": "/dashboard"
+              },
+              {
+                "name": "expectText",
+                "actual": "Đã chọn \"Khác\" thì phải ghi rõ",
+                "passed": true,
+                "stepId": "note-required",
+                "expected": "Đã chọn \"Khác\" thì phải ghi rõ"
+              },
+              {
+                "name": "expectVisible",
+                "actual": "visible",
+                "passed": true,
+                "stepId": "still-open",
+                "expected": "visible"
+              }
+            ],
+            "evidenceCount": 7,
+            "screenshots": [],
+            "triage": null,
+            "reproduction": null
+          }
+        },
+        {
+          "caseId": "case_055ed05b78944e3b86f065c2a164b7b4",
+          "section": "Leads",
+          "title": "TC-12 Choosing \"Khác\" with a note is saved",
+          "sourceRefs": ["GYM-AC@v1"],
+          "status": "PASSED",
+          "reason": "ALL_ASSERTIONS_PASSED",
+          "runId": "run_45e711cf0b4a4a10a839871d844c7b28",
+          "durationMs": 2223,
+          "evidence": 7,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-12",
+          "detail": {
+            "runId": "run_45e711cf0b4a4a10a839871d844c7b28",
+            "status": "PASSED",
+            "reason": "ALL_ASSERTIONS_PASSED",
+            "assertions": [
+              {
+                "name": "expectUrl",
+                "actual": "/dashboard",
+                "passed": true,
+                "stepId": "signed-in",
+                "expected": "/dashboard"
+              },
+              {
+                "name": "expectUrl",
+                "actual": "/leads/",
+                "passed": true,
+                "stepId": "on-lead-page",
+                "expected": "/leads/"
+              },
+              {
+                "name": "expectVisible",
+                "actual": "visible",
+                "passed": true,
+                "stepId": "lead-heading",
+                "expected": "visible"
+              }
+            ],
+            "evidenceCount": 7,
+            "screenshots": [],
+            "triage": null,
+            "reproduction": null
+          }
+        },
+        {
+          "caseId": "case_50fe37066ba247cf962de9a6a88286fa",
+          "section": "Leads",
+          "title": "TC-13 A lead without a name is refused",
+          "sourceRefs": ["GYM-AC@v1"],
+          "status": "PASSED",
+          "reason": "ALL_ASSERTIONS_PASSED",
+          "runId": "run_3ad91a9452954470be98357c05d35fab",
+          "durationMs": 2091,
+          "evidence": 7,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-13",
+          "detail": {
+            "runId": "run_3ad91a9452954470be98357c05d35fab",
+            "status": "PASSED",
+            "reason": "ALL_ASSERTIONS_PASSED",
+            "assertions": [
+              {
+                "name": "expectUrl",
+                "actual": "/dashboard",
+                "passed": true,
+                "stepId": "signed-in",
+                "expected": "/dashboard"
+              },
+              {
+                "name": "expectText",
+                "actual": "Bắt buộc nhập",
+                "passed": true,
+                "stepId": "name-required",
+                "expected": "Bắt buộc nhập"
+              },
+              {
+                "name": "expectVisible",
+                "actual": "visible",
+                "passed": true,
+                "stepId": "still-open",
+                "expected": "visible"
+              }
+            ],
+            "evidenceCount": 7,
+            "screenshots": [],
+            "triage": null,
+            "reproduction": null
+          }
+        },
+        {
+          "caseId": "case_d9fe49ed91564733a5ca9b0750fa53fd",
+          "section": "Leads",
+          "title": "TC-14 A phone number already in use warns and offers a merge instead of a second record",
+          "sourceRefs": ["GYM-BR-LEADS-AND-CUSTOMERS@v1"],
+          "status": "PASSED",
+          "reason": "ALL_ASSERTIONS_PASSED",
+          "runId": "run_204a7759113b47538ded7c26d9d161d4",
+          "durationMs": 2077,
+          "evidence": 7,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-14",
+          "detail": {
+            "runId": "run_204a7759113b47538ded7c26d9d161d4",
+            "status": "PASSED",
+            "reason": "ALL_ASSERTIONS_PASSED",
+            "assertions": [
+              {
+                "name": "expectUrl",
+                "actual": "/dashboard",
+                "passed": true,
+                "stepId": "signed-in",
+                "expected": "/dashboard"
+              },
+              {
+                "name": "expectText",
+                "actual": "KH000001 · Nguyễn Văn An",
+                "passed": true,
+                "stepId": "duplicate-warning",
+                "expected": "KH000001 · Nguyễn Văn An"
+              },
+              {
+                "name": "expectVisible",
+                "actual": "visible",
+                "passed": true,
+                "stepId": "merge-offered",
+                "expected": "visible"
+              }
+            ],
+            "evidenceCount": 7,
+            "screenshots": [],
+            "triage": null,
+            "reproduction": null
+          }
+        },
+        {
+          "caseId": "case_ff0a6b76e86846c397d2e8aa9124700a",
+          "section": "Leads",
+          "title": "TC-15 Searching leads by phone finds the matching lead only",
+          "sourceRefs": ["GYM-BR-LEADS-AND-CUSTOMERS@v1"],
+          "status": "PASSED",
+          "reason": "ALL_ASSERTIONS_PASSED",
+          "runId": "run_d56a0c57af4b4e95a84ffb780deaa7f8",
+          "durationMs": 1359,
+          "evidence": 7,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-15",
+          "detail": {
+            "runId": "run_d56a0c57af4b4e95a84ffb780deaa7f8",
+            "status": "PASSED",
+            "reason": "ALL_ASSERTIONS_PASSED",
+            "assertions": [
+              {
+                "name": "expectUrl",
+                "actual": "/dashboard",
+                "passed": true,
+                "stepId": "signed-in",
+                "expected": "/dashboard"
+              },
+              {
+                "name": "expectVisible",
+                "actual": "visible",
+                "passed": true,
+                "stepId": "match-listed",
+                "expected": "visible"
+              },
+              {
+                "name": "expectHidden",
+                "actual": "hidden",
+                "passed": true,
+                "stepId": "other-not-listed",
+                "expected": "hidden"
+              }
+            ],
+            "evidenceCount": 7,
+            "screenshots": [],
+            "triage": null,
+            "reproduction": null
+          }
+        },
+        {
+          "caseId": "case_125dad18d03a43ebb55966d82603901f",
+          "section": "Leads",
+          "title": "TC-16 Marking a lead Refused requires a reason and puts it in the re-care queue",
+          "sourceRefs": ["GYM-BR-LEADS-AND-CUSTOMERS@v1"],
+          "status": "NOT_AUTOMATED",
+          "reason": null,
+          "runId": null,
+          "durationMs": null,
+          "evidence": 0,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-16",
+          "detail": null
+        },
+        {
+          "caseId": "case_0f799744ba7445c385001727dabafea7",
+          "section": "Leads",
+          "title": "TC-17 The Kanban board shows one column per lead status",
+          "sourceRefs": ["GYM-AC@v1"],
+          "status": "PASSED",
+          "reason": "ALL_ASSERTIONS_PASSED",
+          "runId": "run_a12e5e8c02ff42d69bfa89b1897688ba",
+          "durationMs": 1713,
+          "evidence": 8,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-17",
+          "detail": {
+            "runId": "run_a12e5e8c02ff42d69bfa89b1897688ba",
+            "status": "PASSED",
+            "reason": "ALL_ASSERTIONS_PASSED",
+            "assertions": [
+              {
+                "name": "expectUrl",
+                "actual": "/dashboard",
+                "passed": true,
+                "stepId": "signed-in",
+                "expected": "/dashboard"
+              },
+              {
+                "name": "expectVisible",
+                "actual": "visible",
+                "passed": true,
+                "stepId": "column-new",
+                "expected": "visible"
+              },
+              {
+                "name": "expectVisible",
+                "actual": "visible",
+                "passed": true,
+                "stepId": "column-consulting",
+                "expected": "visible"
+              },
+              {
+                "name": "expectVisible",
+                "actual": "visible",
+                "passed": true,
+                "stepId": "column-refused",
+                "expected": "visible"
+              }
+            ],
+            "evidenceCount": 8,
+            "screenshots": [],
+            "triage": null,
+            "reproduction": null
+          }
+        },
+        {
+          "caseId": "case_a99d2fafea7b48299f36453490fda0d6",
+          "section": "Leads",
+          "title": "TC-18 New leads are shared round-robin among active consultants",
+          "sourceRefs": ["GYM-BR-LEADS-AND-CUSTOMERS@v1"],
+          "status": "NOT_AUTOMATED",
+          "reason": null,
+          "runId": null,
+          "durationMs": null,
+          "evidence": 0,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-18",
+          "detail": null
+        },
+        {
+          "caseId": "case_14c10d46a71f4ad2adfd6b84512de4da",
+          "section": "Customers and contracts",
+          "title": "TC-19 An approved contract has no Edit action",
+          "sourceRefs": ["GYM-BR-SERVICES-PRICES-CONTRACTS@v1"],
+          "status": "PASSED",
+          "reason": "ALL_ASSERTIONS_PASSED",
+          "runId": "run_586c917679924c8ea1d3a3bc09c4cc63",
+          "durationMs": 1745,
+          "evidence": 8,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-19",
+          "detail": {
+            "runId": "run_586c917679924c8ea1d3a3bc09c4cc63",
+            "status": "PASSED",
+            "reason": "ALL_ASSERTIONS_PASSED",
+            "assertions": [
+              {
+                "name": "expectUrl",
+                "actual": "/dashboard",
+                "passed": true,
+                "stepId": "signed-in",
+                "expected": "/dashboard"
+              },
+              {
+                "name": "expectUrl",
+                "actual": "/contracts/",
+                "passed": true,
+                "stepId": "on-contract",
+                "expected": "/contracts/"
+              },
+              {
+                "name": "expectText",
+                "actual": "Đang hiệu lực",
+                "passed": true,
+                "stepId": "active",
+                "expected": "Đang hiệu lực"
+              },
+              {
+                "name": "expectHidden",
+                "actual": "hidden",
+                "passed": true,
+                "stepId": "no-edit",
+                "expected": "hidden"
+              }
+            ],
+            "evidenceCount": 8,
+            "screenshots": [],
+            "triage": null,
+            "reproduction": null
+          }
+        },
+        {
+          "caseId": "case_f9b41772d22b439297af20d0352e6eb6",
+          "section": "Customers and contracts",
+          "title": "TC-20 Sessions left and debt are derived, not typed",
+          "sourceRefs": ["GYM-BR-MONEY@v1"],
+          "status": "PASSED",
+          "reason": "ALL_ASSERTIONS_PASSED",
+          "runId": "run_b9a70ad1c6bd4d8fac167fc06257d338",
+          "durationMs": 1696,
+          "evidence": 8,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-20",
+          "detail": {
+            "runId": "run_b9a70ad1c6bd4d8fac167fc06257d338",
+            "status": "PASSED",
+            "reason": "ALL_ASSERTIONS_PASSED",
+            "assertions": [
+              {
+                "name": "expectUrl",
+                "actual": "/dashboard",
+                "passed": true,
+                "stepId": "signed-in",
+                "expected": "/dashboard"
+              },
+              {
+                "name": "expectUrl",
+                "actual": "/contracts/",
+                "passed": true,
+                "stepId": "on-contract",
+                "expected": "/contracts/"
+              },
+              {
+                "name": "expectText",
+                "actual": "Còn lại21",
+                "passed": true,
+                "stepId": "sessions-left",
+                "expected": "Còn lại21"
+              },
+              {
+                "name": "expectText",
+                "actual": "Còn nợ12.000.000",
+                "passed": true,
+                "stepId": "debt",
+                "expected": "Còn nợ12.000.000"
+              }
+            ],
+            "evidenceCount": 8,
+            "screenshots": [],
+            "triage": null,
+            "reproduction": null
+          }
+        },
+        {
+          "caseId": "case_7bb21c61ff984c38b39ef3b9d37a4bd7",
+          "section": "Customers and contracts",
+          "title": "TC-21 An expired contract is shown as expired",
+          "sourceRefs": ["GYM-BR-SESSIONS-AND-CLASSES@v1"],
+          "status": "PASSED",
+          "reason": "ALL_ASSERTIONS_PASSED",
+          "runId": "run_8ca626e5d6584b0fa46b0a753d43607f",
+          "durationMs": 1658,
+          "evidence": 7,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-21",
+          "detail": {
+            "runId": "run_8ca626e5d6584b0fa46b0a753d43607f",
+            "status": "PASSED",
+            "reason": "ALL_ASSERTIONS_PASSED",
+            "assertions": [
+              {
+                "name": "expectUrl",
+                "actual": "/dashboard",
+                "passed": true,
+                "stepId": "signed-in",
+                "expected": "/dashboard"
+              },
+              {
+                "name": "expectUrl",
+                "actual": "/contracts/",
+                "passed": true,
+                "stepId": "on-contract",
+                "expected": "/contracts/"
+              },
+              {
+                "name": "expectText",
+                "actual": "Hết hạn",
+                "passed": true,
+                "stepId": "expired",
+                "expected": "Hết hạn"
+              }
+            ],
+            "evidenceCount": 7,
+            "screenshots": [],
+            "triage": null,
+            "reproduction": null
+          }
+        },
+        {
+          "caseId": "case_1918cc49650b4d2a88cf1277bb316fa5",
+          "section": "Customers and contracts",
+          "title": "TC-22 A receptionist sees a contract but cannot cancel it",
+          "sourceRefs": ["GYM-AC@v1"],
+          "status": "PASSED",
+          "reason": "ALL_ASSERTIONS_PASSED",
+          "runId": "run_8c423425bed34855818d0a681be9975e",
+          "durationMs": 1659,
+          "evidence": 8,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-22",
+          "detail": {
+            "runId": "run_8c423425bed34855818d0a681be9975e",
+            "status": "PASSED",
+            "reason": "ALL_ASSERTIONS_PASSED",
+            "assertions": [
+              {
+                "name": "expectUrl",
+                "actual": "/dashboard",
+                "passed": true,
+                "stepId": "signed-in",
+                "expected": "/dashboard"
+              },
+              {
+                "name": "expectUrl",
+                "actual": "/contracts/",
+                "passed": true,
+                "stepId": "on-contract",
+                "expected": "/contracts/"
+              },
+              {
+                "name": "expectText",
+                "actual": "Đang hiệu lực",
+                "passed": true,
+                "stepId": "visible",
+                "expected": "Đang hiệu lực"
+              },
+              {
+                "name": "expectHidden",
+                "actual": "hidden",
+                "passed": true,
+                "stepId": "no-cancel",
+                "expected": "hidden"
+              }
+            ],
+            "evidenceCount": 8,
+            "screenshots": [],
+            "triage": null,
+            "reproduction": null
+          }
+        },
+        {
+          "caseId": "case_fe3c072b334a4d769260c5e5a49bf52c",
+          "section": "Customers and contracts",
+          "title": "TC-23 A new contract takes its price and end date from the tier",
+          "sourceRefs": ["GYM-AC@v1"],
+          "status": "NOT_AUTOMATED",
+          "reason": null,
+          "runId": null,
+          "durationMs": null,
+          "evidence": 0,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-23",
+          "detail": null
+        },
+        {
+          "caseId": "case_541bc046784d4b30b0f91ab414c33bef",
+          "section": "Customers and contracts",
+          "title": "TC-24 A new contract waits for approval and its creator cannot approve it",
+          "sourceRefs": ["GYM-BR-SERVICES-PRICES-CONTRACTS@v1"],
+          "status": "NOT_AUTOMATED",
+          "reason": null,
+          "runId": null,
+          "durationMs": null,
+          "evidence": 0,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-24",
+          "detail": null
+        },
+        {
+          "caseId": "case_39a9e9ec2f614acd85a607440645d19c",
+          "section": "PT booking",
+          "title": "TC-25 A booking that overlaps the trainer's session is refused",
+          "sourceRefs": ["GYM-BR-SESSIONS-AND-CLASSES@v1"],
+          "status": "NOT_AUTOMATED",
+          "reason": null,
+          "runId": null,
+          "durationMs": null,
+          "evidence": 0,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-25",
+          "detail": null
+        },
+        {
+          "caseId": "case_010b5706206044bbafae3fc61d100247",
+          "section": "PT booking",
+          "title": "TC-26 A contract with no sessions left cannot be booked",
+          "sourceRefs": ["GYM-AC@v1"],
+          "status": "NOT_AUTOMATED",
+          "reason": null,
+          "runId": null,
+          "durationMs": null,
+          "evidence": 0,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-26",
+          "detail": null
+        },
+        {
+          "caseId": "case_1398acb539054674b57995a3deb4b196",
+          "section": "PT booking",
+          "title": "TC-27 A contract not yet approved cannot be booked",
+          "sourceRefs": ["GYM-AC@v1"],
+          "status": "NOT_AUTOMATED",
+          "reason": null,
+          "runId": null,
+          "durationMs": null,
+          "evidence": 0,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-27",
+          "detail": null
+        },
+        {
+          "caseId": "case_98f9b63d1a6244489e4d2f53a0515e5f",
+          "section": "PT booking",
+          "title": "TC-28 Booking does not consume a session",
+          "sourceRefs": ["GYM-BR-SESSIONS-AND-CLASSES@v1"],
+          "status": "NOT_AUTOMATED",
+          "reason": null,
+          "runId": null,
+          "durationMs": null,
+          "evidence": 0,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-28",
+          "detail": null
+        },
+        {
+          "caseId": "case_d7ebe0c4624b4e6888fc7e5ace24b2de",
+          "section": "Money",
+          "title": "TC-29 A payment above what is still owed is refused",
+          "sourceRefs": ["GYM-BR-MONEY@v1"],
+          "status": "NOT_AUTOMATED",
+          "reason": null,
+          "runId": null,
+          "durationMs": null,
+          "evidence": 0,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-29",
+          "detail": null
+        },
+        {
+          "caseId": "case_34b7cef6ddf94a7a8fb1ae78857167e8",
+          "section": "Money",
+          "title": "TC-30 The cash book balances",
+          "sourceRefs": ["GYM-AC@v1"],
+          "status": "NOT_AUTOMATED",
+          "reason": null,
+          "runId": null,
+          "durationMs": null,
+          "evidence": 0,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-30",
+          "detail": null
         }
-      ],
-      "blockedRequests": [],
-      "evidence": [
-        {
-          "kind": "screenshot",
-          "name": "001-open-login.png",
-          "digest": "f0c75dcbedbb85b3fe95f22350c57676d77c253bc2396247557c4ada657ee018"
-        },
-        {
-          "kind": "screenshot",
-          "name": "002-signed-in.png",
-          "digest": "739207d5ee031515be1fe8e4d8a187f6c6d262493d7d33f39d5f527f5d8e8ac5"
-        },
-        {
-          "kind": "screenshot",
-          "name": "003-no-finance-menu.png",
-          "digest": "739207d5ee031515be1fe8e4d8a187f6c6d262493d7d33f39d5f527f5d8e8ac5"
-        },
-        {
-          "kind": "screenshot",
-          "name": "005-finance-refused.png",
-          "digest": "308833ecd897ad94bb099b917c45abf9cdd320013673ff510a4b16aa9cde7dcd"
-        },
-        {
-          "kind": "network-log",
-          "name": "network.json",
-          "digest": "a8ca16d77dc182975bd04d647d9e1b6256634a9f97b1fa74442ca52af1d273c5"
-        },
-        {
-          "kind": "step-log",
-          "name": "steps.json",
-          "digest": "a97759c1ee968e9119a60862060036a8dd1eb33604ef1524bdcbea7898ed89a6"
-        }
-      ],
-      "triage": null,
-      "reproduction": null
+      ]
     },
     {
-      "label": "ac-04-khac-needs-note",
-      "ac": "AC-04",
-      "environmentId": "staging",
-      "runId": "run_0964257dee8c4f44827307fef0d2fb79",
-      "status": "PASSED",
-      "reason": "ALL_ASSERTIONS_PASSED",
-      "assertions": [
+      "id": "suiterun_55ab0addae40423ba650f65f722e983b",
+      "wallMs": 26713,
+      "totals": {
+        "cases": 27,
+        "passed": 17,
+        "failed": 0,
+        "inconclusive": 0,
+        "blocked": 0,
+        "pending": 0,
+        "notAutomated": 10,
+        "notApproved": 0
+      },
+      "complete": true,
+      "items": [
         {
-          "name": "expectUrl",
-          "actual": "/dashboard",
-          "passed": true,
-          "stepId": "signed-in",
-          "expected": "/dashboard"
+          "caseId": "case_f9c9c0cbb699436aac627cac6bd345ff",
+          "section": "Sign-in and access",
+          "title": "TC-01 A manager signs in with email and password and reaches the dashboard",
+          "sourceRefs": ["GYM-BR-PLATFORM@v1"],
+          "status": "PASSED",
+          "reason": "ALL_ASSERTIONS_PASSED",
+          "runId": "run_9a234ed1748b4dc285cca4c407fc9b52",
+          "durationMs": 969,
+          "evidence": 5,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-01",
+          "detail": {
+            "runId": "run_9a234ed1748b4dc285cca4c407fc9b52",
+            "status": "PASSED",
+            "reason": "ALL_ASSERTIONS_PASSED",
+            "assertions": [
+              {
+                "name": "expectUrl",
+                "actual": "/dashboard",
+                "passed": true,
+                "stepId": "signed-in",
+                "expected": "/dashboard"
+              },
+              {
+                "name": "expectVisible",
+                "actual": "visible",
+                "passed": true,
+                "stepId": "dashboard-heading",
+                "expected": "visible"
+              }
+            ],
+            "evidenceCount": 5,
+            "screenshots": ["002-signed-in.png", "003-dashboard-heading.png"],
+            "triage": null,
+            "reproduction": null
+          }
         },
         {
-          "name": "expectText",
-          "actual": "Đã chọn \"Khác\" thì phải ghi rõ",
-          "passed": true,
-          "stepId": "note-required",
-          "expected": "Đã chọn \"Khác\" thì phải ghi rõ"
+          "caseId": "case_7fcd2d01605a4bd9b81ff1e147decdf3",
+          "section": "Sign-in and access",
+          "title": "TC-02 A wrong password shows one generic message and stays on the login page",
+          "sourceRefs": ["GYM-BR-PLATFORM@v1"],
+          "status": "PASSED",
+          "reason": "ALL_ASSERTIONS_PASSED",
+          "runId": "run_599e9bdfa0704743ae31d7cf8f1dc02b",
+          "durationMs": 664,
+          "evidence": 5,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-02",
+          "detail": {
+            "runId": "run_599e9bdfa0704743ae31d7cf8f1dc02b",
+            "status": "PASSED",
+            "reason": "ALL_ASSERTIONS_PASSED",
+            "assertions": [
+              {
+                "name": "expectText",
+                "actual": "The email or password is wrong, or the account is disabled.",
+                "passed": true,
+                "stepId": "generic-error",
+                "expected": "The email or password is wrong, or the account is disabled."
+              },
+              {
+                "name": "expectUrl",
+                "actual": "/login",
+                "passed": true,
+                "stepId": "stays-on-login",
+                "expected": "/login"
+              }
+            ],
+            "evidenceCount": 5,
+            "screenshots": ["002-generic-error.png", "003-stays-on-login.png"],
+            "triage": null,
+            "reproduction": null
+          }
         },
         {
-          "name": "expectVisible",
-          "actual": "visible",
-          "passed": true,
-          "stepId": "still-open",
-          "expected": "visible"
+          "caseId": "case_71a28e4c1eca486a88093cdc0dc6c61c",
+          "section": "Sign-in and access",
+          "title": "TC-03 A signed-out visitor who opens the dashboard is sent to the login page",
+          "sourceRefs": ["GYM-AC@v1"],
+          "status": "PASSED",
+          "reason": "ALL_ASSERTIONS_PASSED",
+          "runId": "run_41b914f5c1e540bea1130cead94f8232",
+          "durationMs": 353,
+          "evidence": 4,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-03",
+          "detail": {
+            "runId": "run_41b914f5c1e540bea1130cead94f8232",
+            "status": "PASSED",
+            "reason": "ALL_ASSERTIONS_PASSED",
+            "assertions": [
+              {
+                "name": "expectUrl",
+                "actual": "/login",
+                "passed": true,
+                "stepId": "sent-to-login",
+                "expected": "/login"
+              }
+            ],
+            "evidenceCount": 4,
+            "screenshots": ["002-sent-to-login.png"],
+            "triage": null,
+            "reproduction": null
+          }
+        },
+        {
+          "caseId": "case_d8cd5a138d784b768770d22e0c17bf7f",
+          "section": "Sign-in and access",
+          "title": "TC-04 A trainer has no Finance menu and cannot open /finance directly",
+          "sourceRefs": ["GYM-AC@v1"],
+          "status": "PASSED",
+          "reason": "ALL_ASSERTIONS_PASSED",
+          "runId": "run_e31474aa9aeb46ceb32f847004a015da",
+          "durationMs": 1144,
+          "evidence": 6,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-04",
+          "detail": {
+            "runId": "run_e31474aa9aeb46ceb32f847004a015da",
+            "status": "PASSED",
+            "reason": "ALL_ASSERTIONS_PASSED",
+            "assertions": [
+              {
+                "name": "expectUrl",
+                "actual": "/dashboard",
+                "passed": true,
+                "stepId": "signed-in",
+                "expected": "/dashboard"
+              },
+              {
+                "name": "expectHidden",
+                "actual": "hidden",
+                "passed": true,
+                "stepId": "no-finance-menu",
+                "expected": "hidden"
+              },
+              {
+                "name": "expectText",
+                "actual": "Bạn không có quyền xem trang này",
+                "passed": true,
+                "stepId": "refused",
+                "expected": "Bạn không có quyền xem trang này"
+              }
+            ],
+            "evidenceCount": 6,
+            "screenshots": ["002-signed-in.png", "003-no-finance-menu.png", "005-refused.png"],
+            "triage": null,
+            "reproduction": null
+          }
+        },
+        {
+          "caseId": "case_3021820d27a34b59bf696a3e5db8ff31",
+          "section": "Sign-in and access",
+          "title": "TC-06 A receptionist cannot open income and expenses",
+          "sourceRefs": ["GYM-AC@v1"],
+          "status": "PASSED",
+          "reason": "ALL_ASSERTIONS_PASSED",
+          "runId": "run_64c241b4647d4cb9b83495d232867cc0",
+          "durationMs": 1112,
+          "evidence": 6,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-06",
+          "detail": {
+            "runId": "run_64c241b4647d4cb9b83495d232867cc0",
+            "status": "PASSED",
+            "reason": "ALL_ASSERTIONS_PASSED",
+            "assertions": [
+              {
+                "name": "expectUrl",
+                "actual": "/dashboard",
+                "passed": true,
+                "stepId": "signed-in",
+                "expected": "/dashboard"
+              },
+              {
+                "name": "expectText",
+                "actual": "Bạn không có quyền xem trang này",
+                "passed": true,
+                "stepId": "refused",
+                "expected": "Bạn không có quyền xem trang này"
+              }
+            ],
+            "evidenceCount": 6,
+            "screenshots": ["002-signed-in.png", "004-refused.png"],
+            "triage": null,
+            "reproduction": null
+          }
+        },
+        {
+          "caseId": "case_fb4f436f636e4e7a9e67b1eefdea5bb2",
+          "section": "Sign-in and access",
+          "title": "TC-07 A receptionist can open payments",
+          "sourceRefs": ["GYM-AC@v1"],
+          "status": "PASSED",
+          "reason": "ALL_ASSERTIONS_PASSED",
+          "runId": "run_0b2f0e2cd577411f9acccd4ecd9ab797",
+          "durationMs": 1417,
+          "evidence": 8,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-07",
+          "detail": {
+            "runId": "run_0b2f0e2cd577411f9acccd4ecd9ab797",
+            "status": "PASSED",
+            "reason": "ALL_ASSERTIONS_PASSED",
+            "assertions": [
+              {
+                "name": "expectUrl",
+                "actual": "/dashboard",
+                "passed": true,
+                "stepId": "signed-in",
+                "expected": "/dashboard"
+              },
+              {
+                "name": "expectVisible",
+                "actual": "visible",
+                "passed": true,
+                "stepId": "finance-heading",
+                "expected": "visible"
+              },
+              {
+                "name": "expectVisible",
+                "actual": "visible",
+                "passed": true,
+                "stepId": "payments-tab",
+                "expected": "visible"
+              },
+              {
+                "name": "expectHidden",
+                "actual": "hidden",
+                "passed": true,
+                "stepId": "no-income-expenses",
+                "expected": "hidden"
+              }
+            ],
+            "evidenceCount": 8,
+            "screenshots": [
+              "002-signed-in.png",
+              "004-finance-heading.png",
+              "005-payments-tab.png",
+              "006-no-income-expenses.png"
+            ],
+            "triage": null,
+            "reproduction": null
+          }
+        },
+        {
+          "caseId": "case_ce8fc547a62f47f0b9456238476719f2",
+          "section": "Leads",
+          "title": "TC-10 A lead is saved with only a name and a channel",
+          "sourceRefs": ["GYM-AC@v1"],
+          "status": "PASSED",
+          "reason": "ALL_ASSERTIONS_PASSED",
+          "runId": "run_5aeefdc34c214880a8f69062decfe844",
+          "durationMs": 2210,
+          "evidence": 7,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-10",
+          "detail": {
+            "runId": "run_5aeefdc34c214880a8f69062decfe844",
+            "status": "PASSED",
+            "reason": "ALL_ASSERTIONS_PASSED",
+            "assertions": [
+              {
+                "name": "expectUrl",
+                "actual": "/dashboard",
+                "passed": true,
+                "stepId": "signed-in",
+                "expected": "/dashboard"
+              },
+              {
+                "name": "expectUrl",
+                "actual": "/leads/",
+                "passed": true,
+                "stepId": "on-lead-page",
+                "expected": "/leads/"
+              },
+              {
+                "name": "expectVisible",
+                "actual": "visible",
+                "passed": true,
+                "stepId": "lead-heading",
+                "expected": "visible"
+              }
+            ],
+            "evidenceCount": 7,
+            "screenshots": ["002-signed-in.png", "004-on-lead-page.png", "005-lead-heading.png"],
+            "triage": null,
+            "reproduction": null
+          }
+        },
+        {
+          "caseId": "case_aebe3bdb2b6d450cb88f4e9d00e3d5d4",
+          "section": "Leads",
+          "title": "TC-11 Choosing \"Khác\" without a note cannot be saved",
+          "sourceRefs": ["GYM-AC@v1"],
+          "status": "PASSED",
+          "reason": "ALL_ASSERTIONS_PASSED",
+          "runId": "run_56cee086886042ba976afedb2f780e75",
+          "durationMs": 2182,
+          "evidence": 7,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-11",
+          "detail": {
+            "runId": "run_56cee086886042ba976afedb2f780e75",
+            "status": "PASSED",
+            "reason": "ALL_ASSERTIONS_PASSED",
+            "assertions": [
+              {
+                "name": "expectUrl",
+                "actual": "/dashboard",
+                "passed": true,
+                "stepId": "signed-in",
+                "expected": "/dashboard"
+              },
+              {
+                "name": "expectText",
+                "actual": "Đã chọn \"Khác\" thì phải ghi rõ",
+                "passed": true,
+                "stepId": "note-required",
+                "expected": "Đã chọn \"Khác\" thì phải ghi rõ"
+              },
+              {
+                "name": "expectVisible",
+                "actual": "visible",
+                "passed": true,
+                "stepId": "still-open",
+                "expected": "visible"
+              }
+            ],
+            "evidenceCount": 7,
+            "screenshots": ["002-signed-in.png", "004-note-required.png", "005-still-open.png"],
+            "triage": null,
+            "reproduction": null
+          }
+        },
+        {
+          "caseId": "case_055ed05b78944e3b86f065c2a164b7b4",
+          "section": "Leads",
+          "title": "TC-12 Choosing \"Khác\" with a note is saved",
+          "sourceRefs": ["GYM-AC@v1"],
+          "status": "PASSED",
+          "reason": "ALL_ASSERTIONS_PASSED",
+          "runId": "run_64237b8bbbd54ba6b98114d3a51e658f",
+          "durationMs": 2370,
+          "evidence": 7,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-12",
+          "detail": {
+            "runId": "run_64237b8bbbd54ba6b98114d3a51e658f",
+            "status": "PASSED",
+            "reason": "ALL_ASSERTIONS_PASSED",
+            "assertions": [
+              {
+                "name": "expectUrl",
+                "actual": "/dashboard",
+                "passed": true,
+                "stepId": "signed-in",
+                "expected": "/dashboard"
+              },
+              {
+                "name": "expectUrl",
+                "actual": "/leads/",
+                "passed": true,
+                "stepId": "on-lead-page",
+                "expected": "/leads/"
+              },
+              {
+                "name": "expectVisible",
+                "actual": "visible",
+                "passed": true,
+                "stepId": "lead-heading",
+                "expected": "visible"
+              }
+            ],
+            "evidenceCount": 7,
+            "screenshots": ["002-signed-in.png", "004-on-lead-page.png", "005-lead-heading.png"],
+            "triage": null,
+            "reproduction": null
+          }
+        },
+        {
+          "caseId": "case_50fe37066ba247cf962de9a6a88286fa",
+          "section": "Leads",
+          "title": "TC-13 A lead without a name is refused",
+          "sourceRefs": ["GYM-AC@v1"],
+          "status": "PASSED",
+          "reason": "ALL_ASSERTIONS_PASSED",
+          "runId": "run_4fdf5e1cc7ad490e8c2f56ef90d1df66",
+          "durationMs": 2116,
+          "evidence": 7,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-13",
+          "detail": {
+            "runId": "run_4fdf5e1cc7ad490e8c2f56ef90d1df66",
+            "status": "PASSED",
+            "reason": "ALL_ASSERTIONS_PASSED",
+            "assertions": [
+              {
+                "name": "expectUrl",
+                "actual": "/dashboard",
+                "passed": true,
+                "stepId": "signed-in",
+                "expected": "/dashboard"
+              },
+              {
+                "name": "expectText",
+                "actual": "Bắt buộc nhập",
+                "passed": true,
+                "stepId": "name-required",
+                "expected": "Bắt buộc nhập"
+              },
+              {
+                "name": "expectVisible",
+                "actual": "visible",
+                "passed": true,
+                "stepId": "still-open",
+                "expected": "visible"
+              }
+            ],
+            "evidenceCount": 7,
+            "screenshots": ["002-signed-in.png", "004-name-required.png", "005-still-open.png"],
+            "triage": null,
+            "reproduction": null
+          }
+        },
+        {
+          "caseId": "case_d9fe49ed91564733a5ca9b0750fa53fd",
+          "section": "Leads",
+          "title": "TC-14 A phone number already in use warns and offers a merge instead of a second record",
+          "sourceRefs": ["GYM-BR-LEADS-AND-CUSTOMERS@v1"],
+          "status": "PASSED",
+          "reason": "ALL_ASSERTIONS_PASSED",
+          "runId": "run_971375bb8fca42a68770b1f9d532a0a2",
+          "durationMs": 2270,
+          "evidence": 7,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-14",
+          "detail": {
+            "runId": "run_971375bb8fca42a68770b1f9d532a0a2",
+            "status": "PASSED",
+            "reason": "ALL_ASSERTIONS_PASSED",
+            "assertions": [
+              {
+                "name": "expectUrl",
+                "actual": "/dashboard",
+                "passed": true,
+                "stepId": "signed-in",
+                "expected": "/dashboard"
+              },
+              {
+                "name": "expectText",
+                "actual": "KH000001 · Nguyễn Văn An",
+                "passed": true,
+                "stepId": "duplicate-warning",
+                "expected": "KH000001 · Nguyễn Văn An"
+              },
+              {
+                "name": "expectVisible",
+                "actual": "visible",
+                "passed": true,
+                "stepId": "merge-offered",
+                "expected": "visible"
+              }
+            ],
+            "evidenceCount": 7,
+            "screenshots": ["002-signed-in.png", "004-duplicate-warning.png", "005-merge-offered.png"],
+            "triage": null,
+            "reproduction": null
+          }
+        },
+        {
+          "caseId": "case_ff0a6b76e86846c397d2e8aa9124700a",
+          "section": "Leads",
+          "title": "TC-15 Searching leads by phone finds the matching lead only",
+          "sourceRefs": ["GYM-BR-LEADS-AND-CUSTOMERS@v1"],
+          "status": "PASSED",
+          "reason": "ALL_ASSERTIONS_PASSED",
+          "runId": "run_6f2bbabd4bdf43ea93dde676f9fb52ad",
+          "durationMs": 1336,
+          "evidence": 7,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-15",
+          "detail": {
+            "runId": "run_6f2bbabd4bdf43ea93dde676f9fb52ad",
+            "status": "PASSED",
+            "reason": "ALL_ASSERTIONS_PASSED",
+            "assertions": [
+              {
+                "name": "expectUrl",
+                "actual": "/dashboard",
+                "passed": true,
+                "stepId": "signed-in",
+                "expected": "/dashboard"
+              },
+              {
+                "name": "expectVisible",
+                "actual": "visible",
+                "passed": true,
+                "stepId": "match-listed",
+                "expected": "visible"
+              },
+              {
+                "name": "expectHidden",
+                "actual": "hidden",
+                "passed": true,
+                "stepId": "other-not-listed",
+                "expected": "hidden"
+              }
+            ],
+            "evidenceCount": 7,
+            "screenshots": ["002-signed-in.png", "004-match-listed.png", "005-other-not-listed.png"],
+            "triage": null,
+            "reproduction": null
+          }
+        },
+        {
+          "caseId": "case_125dad18d03a43ebb55966d82603901f",
+          "section": "Leads",
+          "title": "TC-16 Marking a lead Refused requires a reason and puts it in the re-care queue",
+          "sourceRefs": ["GYM-BR-LEADS-AND-CUSTOMERS@v1"],
+          "status": "NOT_AUTOMATED",
+          "reason": null,
+          "runId": null,
+          "durationMs": null,
+          "evidence": 0,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-16",
+          "detail": null
+        },
+        {
+          "caseId": "case_0f799744ba7445c385001727dabafea7",
+          "section": "Leads",
+          "title": "TC-17 The Kanban board shows one column per lead status",
+          "sourceRefs": ["GYM-AC@v1"],
+          "status": "PASSED",
+          "reason": "ALL_ASSERTIONS_PASSED",
+          "runId": "run_ab34adfe83304c8590fbaba81806ea40",
+          "durationMs": 1694,
+          "evidence": 8,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-17",
+          "detail": {
+            "runId": "run_ab34adfe83304c8590fbaba81806ea40",
+            "status": "PASSED",
+            "reason": "ALL_ASSERTIONS_PASSED",
+            "assertions": [
+              {
+                "name": "expectUrl",
+                "actual": "/dashboard",
+                "passed": true,
+                "stepId": "signed-in",
+                "expected": "/dashboard"
+              },
+              {
+                "name": "expectVisible",
+                "actual": "visible",
+                "passed": true,
+                "stepId": "column-new",
+                "expected": "visible"
+              },
+              {
+                "name": "expectVisible",
+                "actual": "visible",
+                "passed": true,
+                "stepId": "column-consulting",
+                "expected": "visible"
+              },
+              {
+                "name": "expectVisible",
+                "actual": "visible",
+                "passed": true,
+                "stepId": "column-refused",
+                "expected": "visible"
+              }
+            ],
+            "evidenceCount": 8,
+            "screenshots": [
+              "002-signed-in.png",
+              "004-column-new.png",
+              "005-column-consulting.png",
+              "006-column-refused.png"
+            ],
+            "triage": null,
+            "reproduction": null
+          }
+        },
+        {
+          "caseId": "case_a99d2fafea7b48299f36453490fda0d6",
+          "section": "Leads",
+          "title": "TC-18 New leads are shared round-robin among active consultants",
+          "sourceRefs": ["GYM-BR-LEADS-AND-CUSTOMERS@v1"],
+          "status": "NOT_AUTOMATED",
+          "reason": null,
+          "runId": null,
+          "durationMs": null,
+          "evidence": 0,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-18",
+          "detail": null
+        },
+        {
+          "caseId": "case_14c10d46a71f4ad2adfd6b84512de4da",
+          "section": "Customers and contracts",
+          "title": "TC-19 An approved contract has no Edit action",
+          "sourceRefs": ["GYM-BR-SERVICES-PRICES-CONTRACTS@v1"],
+          "status": "PASSED",
+          "reason": "ALL_ASSERTIONS_PASSED",
+          "runId": "run_89472f51cbb642279223c3657c6245cd",
+          "durationMs": 1721,
+          "evidence": 8,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-19",
+          "detail": {
+            "runId": "run_89472f51cbb642279223c3657c6245cd",
+            "status": "PASSED",
+            "reason": "ALL_ASSERTIONS_PASSED",
+            "assertions": [
+              {
+                "name": "expectUrl",
+                "actual": "/dashboard",
+                "passed": true,
+                "stepId": "signed-in",
+                "expected": "/dashboard"
+              },
+              {
+                "name": "expectUrl",
+                "actual": "/contracts/",
+                "passed": true,
+                "stepId": "on-contract",
+                "expected": "/contracts/"
+              },
+              {
+                "name": "expectText",
+                "actual": "Đang hiệu lực",
+                "passed": true,
+                "stepId": "active",
+                "expected": "Đang hiệu lực"
+              },
+              {
+                "name": "expectHidden",
+                "actual": "hidden",
+                "passed": true,
+                "stepId": "no-edit",
+                "expected": "hidden"
+              }
+            ],
+            "evidenceCount": 8,
+            "screenshots": ["002-signed-in.png", "004-on-contract.png", "005-active.png", "006-no-edit.png"],
+            "triage": null,
+            "reproduction": null
+          }
+        },
+        {
+          "caseId": "case_f9b41772d22b439297af20d0352e6eb6",
+          "section": "Customers and contracts",
+          "title": "TC-20 Sessions left and debt are derived, not typed",
+          "sourceRefs": ["GYM-BR-MONEY@v1"],
+          "status": "PASSED",
+          "reason": "ALL_ASSERTIONS_PASSED",
+          "runId": "run_6d8a4224a1f04aa3abf317abab0f8897",
+          "durationMs": 1667,
+          "evidence": 8,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-20",
+          "detail": {
+            "runId": "run_6d8a4224a1f04aa3abf317abab0f8897",
+            "status": "PASSED",
+            "reason": "ALL_ASSERTIONS_PASSED",
+            "assertions": [
+              {
+                "name": "expectUrl",
+                "actual": "/dashboard",
+                "passed": true,
+                "stepId": "signed-in",
+                "expected": "/dashboard"
+              },
+              {
+                "name": "expectUrl",
+                "actual": "/contracts/",
+                "passed": true,
+                "stepId": "on-contract",
+                "expected": "/contracts/"
+              },
+              {
+                "name": "expectText",
+                "actual": "Còn lại21",
+                "passed": true,
+                "stepId": "sessions-left",
+                "expected": "Còn lại21"
+              },
+              {
+                "name": "expectText",
+                "actual": "Còn nợ12.000.000",
+                "passed": true,
+                "stepId": "debt",
+                "expected": "Còn nợ12.000.000"
+              }
+            ],
+            "evidenceCount": 8,
+            "screenshots": [
+              "002-signed-in.png",
+              "004-on-contract.png",
+              "005-sessions-left.png",
+              "006-debt.png"
+            ],
+            "triage": null,
+            "reproduction": null
+          }
+        },
+        {
+          "caseId": "case_7bb21c61ff984c38b39ef3b9d37a4bd7",
+          "section": "Customers and contracts",
+          "title": "TC-21 An expired contract is shown as expired",
+          "sourceRefs": ["GYM-BR-SESSIONS-AND-CLASSES@v1"],
+          "status": "PASSED",
+          "reason": "ALL_ASSERTIONS_PASSED",
+          "runId": "run_0a79204e828941e28d1d31a809f1ef6f",
+          "durationMs": 1625,
+          "evidence": 7,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-21",
+          "detail": {
+            "runId": "run_0a79204e828941e28d1d31a809f1ef6f",
+            "status": "PASSED",
+            "reason": "ALL_ASSERTIONS_PASSED",
+            "assertions": [
+              {
+                "name": "expectUrl",
+                "actual": "/dashboard",
+                "passed": true,
+                "stepId": "signed-in",
+                "expected": "/dashboard"
+              },
+              {
+                "name": "expectUrl",
+                "actual": "/contracts/",
+                "passed": true,
+                "stepId": "on-contract",
+                "expected": "/contracts/"
+              },
+              {
+                "name": "expectText",
+                "actual": "Hết hạn",
+                "passed": true,
+                "stepId": "expired",
+                "expected": "Hết hạn"
+              }
+            ],
+            "evidenceCount": 7,
+            "screenshots": ["002-signed-in.png", "004-on-contract.png", "005-expired.png"],
+            "triage": null,
+            "reproduction": null
+          }
+        },
+        {
+          "caseId": "case_1918cc49650b4d2a88cf1277bb316fa5",
+          "section": "Customers and contracts",
+          "title": "TC-22 A receptionist sees a contract but cannot cancel it",
+          "sourceRefs": ["GYM-AC@v1"],
+          "status": "PASSED",
+          "reason": "ALL_ASSERTIONS_PASSED",
+          "runId": "run_0643c03de2dc482f9a7251095f915844",
+          "durationMs": 1649,
+          "evidence": 8,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-22",
+          "detail": {
+            "runId": "run_0643c03de2dc482f9a7251095f915844",
+            "status": "PASSED",
+            "reason": "ALL_ASSERTIONS_PASSED",
+            "assertions": [
+              {
+                "name": "expectUrl",
+                "actual": "/dashboard",
+                "passed": true,
+                "stepId": "signed-in",
+                "expected": "/dashboard"
+              },
+              {
+                "name": "expectUrl",
+                "actual": "/contracts/",
+                "passed": true,
+                "stepId": "on-contract",
+                "expected": "/contracts/"
+              },
+              {
+                "name": "expectText",
+                "actual": "Đang hiệu lực",
+                "passed": true,
+                "stepId": "visible",
+                "expected": "Đang hiệu lực"
+              },
+              {
+                "name": "expectHidden",
+                "actual": "hidden",
+                "passed": true,
+                "stepId": "no-cancel",
+                "expected": "hidden"
+              }
+            ],
+            "evidenceCount": 8,
+            "screenshots": [
+              "002-signed-in.png",
+              "004-on-contract.png",
+              "005-visible.png",
+              "006-no-cancel.png"
+            ],
+            "triage": null,
+            "reproduction": null
+          }
+        },
+        {
+          "caseId": "case_fe3c072b334a4d769260c5e5a49bf52c",
+          "section": "Customers and contracts",
+          "title": "TC-23 A new contract takes its price and end date from the tier",
+          "sourceRefs": ["GYM-AC@v1"],
+          "status": "NOT_AUTOMATED",
+          "reason": null,
+          "runId": null,
+          "durationMs": null,
+          "evidence": 0,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-23",
+          "detail": null
+        },
+        {
+          "caseId": "case_541bc046784d4b30b0f91ab414c33bef",
+          "section": "Customers and contracts",
+          "title": "TC-24 A new contract waits for approval and its creator cannot approve it",
+          "sourceRefs": ["GYM-BR-SERVICES-PRICES-CONTRACTS@v1"],
+          "status": "NOT_AUTOMATED",
+          "reason": null,
+          "runId": null,
+          "durationMs": null,
+          "evidence": 0,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-24",
+          "detail": null
+        },
+        {
+          "caseId": "case_39a9e9ec2f614acd85a607440645d19c",
+          "section": "PT booking",
+          "title": "TC-25 A booking that overlaps the trainer's session is refused",
+          "sourceRefs": ["GYM-BR-SESSIONS-AND-CLASSES@v1"],
+          "status": "NOT_AUTOMATED",
+          "reason": null,
+          "runId": null,
+          "durationMs": null,
+          "evidence": 0,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-25",
+          "detail": null
+        },
+        {
+          "caseId": "case_010b5706206044bbafae3fc61d100247",
+          "section": "PT booking",
+          "title": "TC-26 A contract with no sessions left cannot be booked",
+          "sourceRefs": ["GYM-AC@v1"],
+          "status": "NOT_AUTOMATED",
+          "reason": null,
+          "runId": null,
+          "durationMs": null,
+          "evidence": 0,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-26",
+          "detail": null
+        },
+        {
+          "caseId": "case_1398acb539054674b57995a3deb4b196",
+          "section": "PT booking",
+          "title": "TC-27 A contract not yet approved cannot be booked",
+          "sourceRefs": ["GYM-AC@v1"],
+          "status": "NOT_AUTOMATED",
+          "reason": null,
+          "runId": null,
+          "durationMs": null,
+          "evidence": 0,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-27",
+          "detail": null
+        },
+        {
+          "caseId": "case_98f9b63d1a6244489e4d2f53a0515e5f",
+          "section": "PT booking",
+          "title": "TC-28 Booking does not consume a session",
+          "sourceRefs": ["GYM-BR-SESSIONS-AND-CLASSES@v1"],
+          "status": "NOT_AUTOMATED",
+          "reason": null,
+          "runId": null,
+          "durationMs": null,
+          "evidence": 0,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-28",
+          "detail": null
+        },
+        {
+          "caseId": "case_d7ebe0c4624b4e6888fc7e5ace24b2de",
+          "section": "Money",
+          "title": "TC-29 A payment above what is still owed is refused",
+          "sourceRefs": ["GYM-BR-MONEY@v1"],
+          "status": "NOT_AUTOMATED",
+          "reason": null,
+          "runId": null,
+          "durationMs": null,
+          "evidence": 0,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-29",
+          "detail": null
+        },
+        {
+          "caseId": "case_34b7cef6ddf94a7a8fb1ae78857167e8",
+          "section": "Money",
+          "title": "TC-30 The cash book balances",
+          "sourceRefs": ["GYM-AC@v1"],
+          "status": "NOT_AUTOMATED",
+          "reason": null,
+          "runId": null,
+          "durationMs": null,
+          "evidence": 0,
+          "suspectedCause": null,
+          "suspectedCauseIsVerified": false,
+          "tc": "TC-30",
+          "detail": null
         }
-      ],
-      "blockedRequests": [],
-      "evidence": [
-        {
-          "kind": "screenshot",
-          "name": "001-open-login.png",
-          "digest": "f0c75dcbedbb85b3fe95f22350c57676d77c253bc2396247557c4ada657ee018"
-        },
-        {
-          "kind": "screenshot",
-          "name": "002-signed-in.png",
-          "digest": "07f25454df67712634c37f3c6170d95e436e0ce40bc069aec5066ccaf2054bae"
-        },
-        {
-          "kind": "screenshot",
-          "name": "003-open-leads.png",
-          "digest": "b0b3f667fbf0121a909887b39ba606cd7c49216330f80cc4ff4be67f8b8da2b3"
-        },
-        {
-          "kind": "screenshot",
-          "name": "004-note-required.png",
-          "digest": "644ec19bc711dd364250f559c13f66732b0a593da20cf6c25b39ff4c1b28636b"
-        },
-        {
-          "kind": "screenshot",
-          "name": "005-still-open.png",
-          "digest": "644ec19bc711dd364250f559c13f66732b0a593da20cf6c25b39ff4c1b28636b"
-        },
-        {
-          "kind": "network-log",
-          "name": "network.json",
-          "digest": "6633e3a9ce9da9855c7d8c0e61553c636c6a842d01db191293a55cb44958aa5f"
-        },
-        {
-          "kind": "step-log",
-          "name": "steps.json",
-          "digest": "5b0a3acb008ccd42daada37b5abd28f023723f63f4bc94014dabf425807aed18"
-        }
-      ],
-      "triage": null,
-      "reproduction": null
-    },
-    {
-      "label": "ac-25-lead-name-and-channel",
-      "ac": "AC-25",
-      "environmentId": "staging",
-      "runId": "run_ca54ee527f0c46558d40d51718fc4ff0",
-      "status": "PASSED",
-      "reason": "ALL_ASSERTIONS_PASSED",
-      "assertions": [
-        {
-          "name": "expectUrl",
-          "actual": "/dashboard",
-          "passed": true,
-          "stepId": "signed-in",
-          "expected": "/dashboard"
-        },
-        {
-          "name": "expectUrl",
-          "actual": "/leads/",
-          "passed": true,
-          "stepId": "on-lead-page",
-          "expected": "/leads/"
-        },
-        {
-          "name": "expectVisible",
-          "actual": "visible",
-          "passed": true,
-          "stepId": "lead-heading",
-          "expected": "visible"
-        }
-      ],
-      "blockedRequests": [],
-      "evidence": [
-        {
-          "kind": "screenshot",
-          "name": "001-open-login.png",
-          "digest": "f0c75dcbedbb85b3fe95f22350c57676d77c253bc2396247557c4ada657ee018"
-        },
-        {
-          "kind": "screenshot",
-          "name": "002-signed-in.png",
-          "digest": "07f25454df67712634c37f3c6170d95e436e0ce40bc069aec5066ccaf2054bae"
-        },
-        {
-          "kind": "screenshot",
-          "name": "003-open-leads.png",
-          "digest": "b0b3f667fbf0121a909887b39ba606cd7c49216330f80cc4ff4be67f8b8da2b3"
-        },
-        {
-          "kind": "screenshot",
-          "name": "004-on-lead-page.png",
-          "digest": "ff6596e2dc63fa212c1739cf1ff8ce00c02851758789d1a88f37fd56aaafa392"
-        },
-        {
-          "kind": "screenshot",
-          "name": "005-lead-heading.png",
-          "digest": "ff6596e2dc63fa212c1739cf1ff8ce00c02851758789d1a88f37fd56aaafa392"
-        },
-        {
-          "kind": "step-log",
-          "name": "steps.json",
-          "digest": "6815a3834818718b6bac801a8fbeff9d7e7f640a83af5b565afad5610d9264b6"
-        },
-        {
-          "kind": "network-log",
-          "name": "network.json",
-          "digest": "9a557add367f19ba52413ccc66373afad88f4da7d8ca7a2d304c65667657b195"
-        }
-      ],
-      "triage": null,
-      "reproduction": null
+      ]
     }
   ],
   "gates": [
     {
-      "gate": "Same approved test against the production environment",
+      "gate": "TC-10 against the production environment",
       "outcome": {
         "status": "BLOCKED",
         "reason": "DENIED:PRODUCTION_WRITE_DISABLED"
       }
     },
     {
-      "gate": "A destructive step without a scoped approval",
+      "gate": "TC-10 with a destructive step and no scoped approval",
       "outcome": {
         "status": "BLOCKED",
         "reason": "REVIEW_REQUIRED:SCOPED_APPROVAL_REQUIRED",
-        "approvalReview": "review_cd20bdf9a800440f81a902445e1c31c7"
+        "approvalReview": "review_40cc98972ade46aaaa41b914a15bdfb8"
       }
     },
     {
@@ -1242,11 +3679,9 @@
     }
   ],
   "staged": {
-    "note": "STAGED: ac-01-trainer-no-finance with a deliberately wrong expectation",
-    "label": "staged-ac-01-trainer-no-finance",
-    "ac": "AC-01",
-    "environmentId": "staging",
-    "runId": "run_38346a45f4fb469981ebbfb2984fa5f4",
+    "note": "STAGED: TC-10 with a deliberately wrong expectation",
+    "tc": "TC-10",
+    "runId": "run_f6f6e37684ab4e0394d908f960c5387f",
     "status": "FAILED",
     "reason": "ASSERTION_FAILED:staged-wrong-expectation",
     "assertions": [
@@ -1258,79 +3693,42 @@
         "expected": "/dashboard"
       },
       {
-        "name": "expectHidden",
-        "actual": "hidden",
+        "name": "expectUrl",
+        "actual": "/leads/",
         "passed": true,
-        "stepId": "no-finance-menu",
-        "expected": "hidden"
+        "stepId": "on-lead-page",
+        "expected": "/leads/"
       },
       {
         "name": "expectText",
-        "actual": "Bạn không có quyền xem trang này\n\nHãy liên hệ quản trị viên nếu bạn cần quyền truy cập.",
+        "actual": "QA TC-10",
         "passed": false,
         "stepId": "staged-wrong-expectation",
         "expected": "This text is deliberately not on the page (staged failure)"
       }
     ],
-    "blockedRequests": [],
-    "evidence": [
-      {
-        "kind": "screenshot",
-        "name": "001-open-login.png",
-        "digest": "f0c75dcbedbb85b3fe95f22350c57676d77c253bc2396247557c4ada657ee018"
-      },
-      {
-        "kind": "screenshot",
-        "name": "002-signed-in.png",
-        "digest": "739207d5ee031515be1fe8e4d8a187f6c6d262493d7d33f39d5f527f5d8e8ac5"
-      },
-      {
-        "kind": "screenshot",
-        "name": "003-no-finance-menu.png",
-        "digest": "739207d5ee031515be1fe8e4d8a187f6c6d262493d7d33f39d5f527f5d8e8ac5"
-      },
-      {
-        "kind": "screenshot",
-        "name": "004-open-finance-directly.png",
-        "digest": "915abeee8c7069c5078a2d4b36553c29db0161c8879d5dd63052246a26c1e165"
-      },
-      {
-        "kind": "screenshot",
-        "name": "005-staged-wrong-expectation.png",
-        "digest": "308833ecd897ad94bb099b917c45abf9cdd320013673ff510a4b16aa9cde7dcd"
-      },
-      {
-        "kind": "network-log",
-        "name": "network.json",
-        "digest": "2167d6c382db2d51bd55b9c7ee0a4cd518a6c1e2df2719da1991a33a85f4aaec"
-      },
-      {
-        "kind": "step-log",
-        "name": "steps.json",
-        "digest": "bc2a72a435525ac50c9a95707b8d6e9fa6d8cdc044a1822bac8d3906ae935ff8"
-      }
-    ],
+    "evidenceCount": 7,
+    "screenshots": ["002-signed-in.png", "004-on-lead-page.png", "005-staged-wrong-expectation.png"],
     "triage": {
       "suspectedCause": "PRODUCT_DEFECT",
       "securitySensitive": false,
-      "rationale": "Heuristic suggestion (PRODUCT_DEFECT).",
-      "reviewId": "review_9ba17a6a030b4ae6a8b6d5b767b1dd80"
+      "rationale": "Heuristic suggestion (PRODUCT_DEFECT)."
     },
-    "reproduction": "# Reproduction: Verify Gym CRM AC-01 (part 1: module access)\n\n- Run: run_38346a45f4fb469981ebbfb2984fa5f4 (FAILED: ASSERTION_FAILED:staged-wrong-expectation)\n- Test case: case_117855b341044a2ea76b09faa6a3c993 revision 1; executable v4 (spec 3dddd79ff8ee)\n- Environment: staging (staging) http://localhost:3410\n- Triage: PRODUCT_DEFECT (suggested, unverified)\n- Executed: 2026-10-16T03:34:30.616Z\n\n## Steps\n\n1. navigate /login\n2. fill role=main >> label=\"Email\" with \"[REDACTED_EMAIL]\"\n3. fill role=main >> label=\"Password\" with [secret:GYM_PASSWORD]\n4. click role=main >> role=button[name=\"Sign in\"]\n5. expect URL exact /dashboard\n6. expect role=link[name=\"Tài chính\"] hidden\n7. navigate /finance\n8. expect role=main to contain \"This text is deliberately not on the page (staged failure)\"  <- FAILED: expected \"This text is deliberately not on the page (staged failure)\" but was \"Bạn không có quyền xem trang này\\n\\nHãy liên hệ quản trị viên nếu bạn cần quyền truy cập.\"\n\n## Evidence (authenticated access via the QA API)\n\n- screenshot 001-open-login.png: id evd_ba815b9e13d445f98ec7c6003366fc93, sha256 f0c75dcbedbb85b3...\n- screenshot 002-signed-in.png: id evd_be8d1ee6ed794d4ea6d5714b58650ac0, sha256 739207d5ee031515...\n- screenshot 003-no-finance-menu.png: id evd_6f4907796d234db89274b1b997d9454d, sha256 739207d5ee031515...\n- screenshot 004-open-finance-directly.png: id evd_c2c127f9db15439299892972d16d2bad, sha256 915abeee8c7069c5...\n- screenshot 005-staged-wrong-expectation.png: id evd_64570faade6d43dd84f9a63ee37cf6d7, sha256 308833ecd897ad94...\n- network-log network.json: id evd_903874bfaaea4a168b7c0b185a8c4403, sha256 2167d6c382db2d51...\n- step-log steps.json: id evd_920f9599c9694d9b8dbdaae1dacd5329, sha256 bc2a72a435525ac5...\n\nSecrets are shown as [secret:NAME] and never included. Verdicts come from deterministic assertions;\nany cause above marked \"suggested\" is a model suggestion, not a finding."
+    "reproduction": "# Reproduction: TC-10 A lead is saved with only a name and a channel\n\n- Run: run_f6f6e37684ab4e0394d908f960c5387f (FAILED: ASSERTION_FAILED:staged-wrong-expectation)\n- Test case: case_ce8fc547a62f47f0b9456238476719f2 revision 2; executable v5 (spec 0175304978e7)\n- Environment: staging (staging) http://localhost:3410\n- Triage: PRODUCT_DEFECT (suggested, unverified)\n- Executed: 2026-10-16T04:19:52.434Z\n\n## Steps\n\n1. navigate /login\n2. fill role=main >> label=\"Email\" with \"[REDACTED_EMAIL]\"\n3. fill role=main >> label=\"Password\" with [secret:GYM_PASSWORD]\n4. click role=main >> role=button[name=\"Sign in\"]\n5. expect URL exact /dashboard\n6. navigate /leads\n7. click role=main >> role=button[name=\"Thêm lead\"]\n8. fill role=dialog[name=\"Thêm lead\"] >> label=\"Họ và tên\" with \"QA TC-10\"\n9. click role=dialog[name=\"Thêm lead\"] >> label=\"Kênh liên hệ\"\n10. click role=listbox >> role=option[name=\"Zalo\"]\n11. click role=dialog[name=\"Thêm lead\"] >> role=button[name=\"Lưu\"]\n12. expect URL prefix /leads/\n13. expect role=main >> role=heading[name=\"QA TC-10\"] to contain \"This text is deliberately not on the page (staged failure)\"  <- FAILED: expected \"This text is deliberately not on the page (staged failure)\" but was \"QA TC-10\"\n\n## Evidence (authenticated access via the QA API)\n\n- screenshot 001-open-login.png: id evd_b105cce5fd554c54bf2c678696adc716, sha256 f0c75dcbedbb85b3...\n- screenshot 002-signed-in.png: id evd_c64c19bdbe93469b8d1ed2cf38ae745d, sha256 e9ce18e38255a380...\n- screenshot 003-open-leads.png: id evd_787f34b286464807963e51cb4a8583e1, sha256 b0b3f667fbf0121a...\n- screenshot 004-on-lead-page.png: id evd_46bca38884414e8095b53ac32495935d, sha256 eb6a8f59af8a1bb8...\n- screenshot 005-staged-wrong-expectation.png: id evd_a5a63dfab8c840e39c59ace736357b85, sha256 6a7fe27b7f59a723...\n- step-log steps.json: id evd_91f18b33296143689b1208e85ce4ca1d, sha256 24bc149ccd6c2bef...\n- network-log network.json: id evd_1430e078165344959d7225d8d8f7e6d0, sha256 a41a653f8fc2c8d7...\n\nSecrets are shown as [secret:NAME] and never included. Verdicts come from deterministic assertions;\nany cause above marked \"suggested\" is a model suggestion, not a finding."
   },
   "metrics": {
     "window": {
       "days": 7
     },
     "workflows": {
-      "total": 31,
+      "total": 63,
       "byRoute": {
-        "DRAFT_CREATED": 25,
-        "REVIEW_REQUESTED": 6
+        "DRAFT_CREATED": 53,
+        "REVIEW_REQUESTED": 10
       }
     },
     "decisions": {
-      "total": 51,
+      "total": 107,
       "failureRate": 0,
       "cacheHitRate": 0,
       "byKindOutcome": [
@@ -1338,13 +3736,13 @@
           "kind": "draft",
           "outcome": "OK",
           "cacheHit": false,
-          "count": 25
+          "count": 53
         },
         {
           "kind": "readiness",
           "outcome": "OK",
           "cacheHit": false,
-          "count": 25
+          "count": 53
         },
         {
           "kind": "triage",
@@ -1355,13 +3753,13 @@
       ]
     },
     "tokens": {
-      "input": 20400,
-      "output": 6120,
+      "input": 42800,
+      "output": 12840,
       "byModel": [
         {
           "model": "mock-heuristic-v1",
-          "input": 20400,
-          "output": 6120
+          "input": 42800,
+          "output": 12840
         },
         {
           "model": "none",
@@ -1374,15 +3772,15 @@
       "openByKind": {
         "ACTION_APPROVAL": 1,
         "FAILURE_TRIAGE": 1,
-        "MISSING_KNOWLEDGE": 6
+        "MISSING_KNOWLEDGE": 10
       },
-      "oldestOpenHours": 0.005335555555555555
+      "oldestOpenHours": 0.05472916666666667
     },
     "runs": {
       "byState": {
         "BLOCKED": 2,
         "FAILED": 1,
-        "PASSED": 3
+        "PASSED": 34
       }
     },
     "policy": {

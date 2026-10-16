@@ -14,6 +14,7 @@ import {
   latestTriage,
   getWorkflow,
   listRevisions,
+  listSuites,
   workflowUsage,
   type Db,
 } from '@qa/db';
@@ -31,8 +32,13 @@ import type { BugTracker } from '@qa/integrations';
 import type { TriageClassifier } from '@qa/llm-adapter';
 import { silentLogger, type Logger } from '@qa/observability';
 import {
+  addSuiteCases,
   buildReproduction,
+  createSuite,
   DEFAULT_THRESHOLDS,
+  getSuiteDetail,
+  getSuiteRunReport,
+  runSuite,
   driftAlerts,
   getRunReport,
   projectMetrics,
@@ -396,6 +402,45 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
   app.get('/api/metrics/alerts', async (req) => {
     requireLead(req);
     return { alerts: await driftAlerts(db, scope(req), DEFAULT_THRESHOLDS) };
+  });
+
+  // Test suites: managed sets of cases, run together (docs/07).
+  app.post('/api/suites', async (req, reply) => {
+    const body = z
+      .object({ name: z.string().min(1).max(200), description: z.string().max(2000).optional() })
+      .parse(req.body);
+    return reply.code(201).send(await createSuite(db, req.actor, body));
+  });
+
+  app.get('/api/suites', async (req) => ({ items: await listSuites(db, scope(req)) }));
+
+  app.get('/api/suites/:id', async (req) => {
+    const { id } = IdParams.parse(req.params);
+    return getSuiteDetail(db, scope(req), id);
+  });
+
+  app.post('/api/suites/:id/cases', async (req) => {
+    const { id } = IdParams.parse(req.params);
+    const { cases } = z
+      .object({
+        cases: z
+          .array(z.object({ caseId: z.string().min(1).max(100), section: z.string().max(200).optional() }))
+          .min(1)
+          .max(500),
+      })
+      .parse(req.body);
+    return addSuiteCases(db, req.actor, id, cases);
+  });
+
+  app.post('/api/suites/:id/runs', async (req, reply) => {
+    const { id } = IdParams.parse(req.params);
+    const { environmentId } = z.object({ environmentId: z.string().min(1).max(100) }).parse(req.body);
+    return reply.code(202).send(await runSuite({ db }, req.actor, id, { environmentId }));
+  });
+
+  app.get('/api/suite-runs/:id', async (req) => {
+    const { id } = IdParams.parse(req.params);
+    return getSuiteRunReport(db, scope(req), id);
   });
 
   return app;

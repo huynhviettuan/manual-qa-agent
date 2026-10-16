@@ -36,6 +36,7 @@ const AriaRole = z.enum([
   'main',
   'listbox',
   'option',
+  'alertdialog',
 ]);
 
 type LocatorShape =
