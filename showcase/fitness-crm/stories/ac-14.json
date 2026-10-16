@@ -1,0 +1,11 @@
+{
+  "externalId": "GYM-AC-14",
+  "title": "Gym CRM AC-14",
+  "description": "Acceptance criterion AC-14 of the Gym CRM (milestone M4).",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-14",
+      "text": "A frozen contract cannot be booked or checked in; reactivation shows the frozen days and the proposed new end date; the end date changes only after admin confirms and is never extended twice; a freeze over 10 days reminds the manager."
+    }
+  ]
+}

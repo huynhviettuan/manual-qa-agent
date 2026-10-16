@@ -1,0 +1,1219 @@
+<title>Gym CRM QA Showcase</title>
+<meta name="claude:viewport-fit-sides" content="cover" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+/>
+<style>
+  /* Layout: a single reading column of report sections; runs as wide cards with a screenshot strip. */
+  :root {
+    --bg: #f6f7f5;
+    --surface: #ffffff;
+    --ink: #18211f;
+    --muted: #5d6965;
+    --line: #d9dfdc;
+    --accent: #0f6b5c;
+    --ok: #1d7a43;
+    --ok-bg: #e3f3e8;
+    --bad: #b42318;
+    --bad-bg: #fbe7e5;
+    --warn: #9a5b00;
+    --warn-bg: #fdf0d9;
+    --mutedpill-bg: #eceeed;
+    --display: 'IBM Plex Sans Condensed', 'Arial Narrow', system-ui, sans-serif;
+    --body: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+      --bg: #101614;
+      --surface: #17201d;
+      --ink: #e4ebe8;
+      --muted: #9aa8a3;
+      --line: #2a3632;
+      --accent: #5cc4ae;
+      --ok: #6fd394;
+      --ok-bg: #133022;
+      --bad: #ff8a7d;
+      --bad-bg: #3a1714;
+      --warn: #f2b85c;
+      --warn-bg: #36270f;
+      --mutedpill-bg: #24302c;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme='dark'] {
+    --bg: #101614;
+    --surface: #17201d;
+    --ink: #e4ebe8;
+    --muted: #9aa8a3;
+    --line: #2a3632;
+    --accent: #5cc4ae;
+    --ok: #6fd394;
+    --ok-bg: #133022;
+    --bad: #ff8a7d;
+    --bad-bg: #3a1714;
+    --warn: #f2b85c;
+    --warn-bg: #36270f;
+    --mutedpill-bg: #24302c;
+    color-scheme: dark;
+  }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font: 15px/1.55 var(--body);
+  }
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding-block: 40px 64px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    display: grid;
+    gap: 48px;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--display);
+    text-wrap: balance;
+    margin: 0;
+    line-height: 1.2;
+  }
+  h1 {
+    font-size: 2.2rem;
+    font-weight: 600;
+  }
+  h2 {
+    font-size: 1.45rem;
+    font-weight: 600;
+  }
+  h3 {
+    font-size: 1.05rem;
+    font-weight: 500;
+    font-family: var(--body);
+  }
+  p {
+    margin: 0;
+    max-width: 72ch;
+  }
+  code,
+  .mono {
+    font-family: var(--mono);
+    font-size: 0.85em;
+  }
+  .eyebrow,
+  .label {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  section {
+    display: grid;
+    gap: 16px;
+  }
+  .intro {
+    display: grid;
+    gap: 14px;
+  }
+  .banner {
+    border: 1px solid var(--warn);
+    background: var(--warn-bg);
+    color: var(--ink);
+    padding: 12px 14px;
+    border-radius: 6px;
+  }
+  .banner.live {
+    border-color: var(--ok);
+    background: var(--ok-bg);
+  }
+  .tally {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 12px;
+  }
+  .tally div {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 14px;
+    display: grid;
+    gap: 4px;
+  }
+  .tally strong {
+    font-family: var(--display);
+    font-size: 1.8rem;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .tally span {
+    color: var(--muted);
+    font-size: 0.88rem;
+  }
+  .pill {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .pill.ok {
+    background: var(--ok-bg);
+    color: var(--ok);
+  }
+  .pill.bad {
+    background: var(--bad-bg);
+    color: var(--bad);
+  }
+  .pill.warn {
+    background: var(--warn-bg);
+    color: var(--warn);
+  }
+  .pill.muted {
+    background: var(--mutedpill-bg);
+    color: var(--muted);
+  }
+  .run {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 18px;
+    display: grid;
+    gap: 14px;
+    min-width: 0;
+  }
+  .run-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .run-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  .col {
+    min-width: 0;
+    display: grid;
+    gap: 8px;
+    align-content: start;
+  }
+  .steps {
+    margin: 0;
+    padding-left: 1.4em;
+    display: grid;
+    gap: 2px;
+    font-size: 0.86rem;
+  }
+  .steps code {
+    overflow-wrap: anywhere;
+  }
+  .note {
+    color: var(--muted);
+  }
+  .shots {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+  }
+  .shots figure {
+    margin: 0;
+    flex: 0 0 260px;
+    display: grid;
+    gap: 4px;
+  }
+  .shots img {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    display: block;
+  }
+  .shots figcaption {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+  }
+  .tablebox {
+    overflow-x: auto;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.86rem;
+  }
+  th,
+  td {
+    text-align: left;
+    vertical-align: top;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  th {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  tr:last-child td {
+    border-bottom: 0;
+  }
+  .mini {
+    font-size: 0.82rem;
+  }
+  .mini td {
+    overflow-wrap: anywhere;
+  }
+  .readiness td:first-child {
+    white-space: nowrap;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+  }
+  .readiness .crit {
+    min-width: 260px;
+  }
+  .readiness .detail {
+    color: var(--muted);
+    min-width: 220px;
+  }
+  .findings {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  .findings ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 12px;
+  }
+  .findings li {
+    display: grid;
+    gap: 4px;
+    padding-left: 12px;
+    border-left: 2px solid var(--line);
+  }
+  .findings li strong {
+    font-weight: 600;
+  }
+  .findings li .pill {
+    justify-self: start;
+  }
+  .findings li p {
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  pre {
+    margin: 0;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px;
+    overflow-x: auto;
+    font: 0.8rem/1.5 var(--mono);
+    white-space: pre;
+  }
+  a {
+    color: var(--accent);
+  }
+  a:focus-visible,
+  .shots:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  @media (max-width: 760px) {
+    .run-body,
+    .findings {
+      grid-template-columns: 1fr;
+    }
+    h1 {
+      font-size: 1.7rem;
+    }
+  }
+</style>
+<main class="wrap">
+  <header class="intro">
+    <p class="eyebrow">Manual QA AI Agent · showcase · 2026-10-16</p>
+    <h1>Gym CRM QA Showcase</h1>
+    <p>
+      The agent read the Gym CRM requirements (business rules BR-101 to BR-702, acceptance criteria AC-01 to
+      AC-30, roles and permissions), judged which criteria are testable, drafted cited test cases, and ran
+      approved tests in a real browser against a separate copy of Gym CRM with its fictional
+      <em>Demo Gym</em> data. Verdicts come only from code assertions; every suggestion from the AI is labeled
+      as one.
+    </p>
+    <p class="banner">
+      AI: keyless stand-in. Readiness verdicts, drafts and triage suggestions below come from a simple
+      deterministic heuristic, not a model, so read them as pipeline output, not AI judgment. Browser
+      verdicts, safety gates and findings do not depend on the AI. A run with live Claude replaces these
+      results.
+    </p>
+  </header>
+
+  <section aria-labelledby="sum">
+    <h2 id="sum">Summary</h2>
+    <div class="tally">
+      <div>
+        <strong>31</strong><span>stories checked for readiness (30 criteria + 1 split follow-up)</span>
+      </div>
+      <div><strong>25</strong><span>cited test drafts; 6 sent back to people</span></div>
+      <div><strong>3 / 3</strong><span>browser tests passed against Gym CRM</span></div>
+      <div><strong>4 / 4</strong><span>safety gates held</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="findings">
+    <h2 id="findings">What the showcase found</h2>
+    <div class="findings">
+      <div>
+        <p class="label">In the agent (found and fixed during this showcase)</p>
+        <ul>
+          <li>
+            <strong>Test results depended on the machine&#39;s language</strong>
+            <span class="pill ok">Fixed</span>
+            <p>
+              The executor did not pin a browser locale, so Gym CRM rendered its login page in Vietnamese on
+              one machine and English on another, and the same spec failed on one of them. The executor now
+              pins en-US by default (configurable), with a test.
+            </p>
+          </li>
+          <li>
+            <strong>A redirect could make a passing test inconclusive</strong>
+            <span class="pill ok">Fixed</span>
+            <p>
+              Gym CRM redirects /finance to /finance/payments on the client at an unpredictable moment after
+              load. The screenshot taken after the navigation step sometimes raced it (3 of 25 runs).
+              Navigation screenshots are now supporting evidence: if one cannot be captured, the step log says
+              why and the run continues. Assertion screenshots stay mandatory. After the fix: 0 inconclusive
+              runs in 50.
+            </p>
+          </li>
+          <li>
+            <strong>Redaction mangled secret names in reproduction notes</strong>
+            <span class="pill ok">Fixed</span>
+            <p>
+              The reproduction write-up showed the password step as [secret:[REDACTED] because the redactor
+              treated the reference name as a value. The secret was never exposed. References of the exact
+              form [secret:NAME] are now kept; real values in brackets are still redacted. Test added.
+            </p>
+          </li>
+          <li>
+            <strong>Locators could not scope Gym CRM&#39;s dropdowns</strong>
+            <span class="pill ok">Fixed</span>
+            <p>
+              Gym CRM uses custom dropdowns (a listbox of options) and only a main landmark on some pages. The
+              allowed ARIA roles gained main, listbox and option. No new step type was added (ADR-0008).
+            </p>
+          </li>
+          <li>
+            <strong>Large requirement sections overflowed the context budget</strong>
+            <span class="pill ok">Fixed in the source preparation</span>
+            <p>
+              With whole business-rule sections as sources, 28 of 30 criteria hit the 1,800-token budget and
+              the agent refused them rather than truncating. Sources now hold one block per rule (BR-xxx) and
+              per permission row. Six long criteria still exceed it; the agent asks for them to be split.
+            </p>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <p class="label">About Gym CRM</p>
+        <ul>
+          <li>
+            <strong>AC-04 is enforced on the server</strong> <span class="pill muted">Confirmed</span>
+            <p>
+              Saving a lead with channel &quot;Khác&quot; and no note is refused by the server, not only by
+              the form: the field shows &quot;Đã chọn \&quot;Khác\&quot; thì phải ghi rõ&quot; and a toast
+              reports invalid data.
+            </p>
+          </li>
+          <li>
+            <strong>Sign-in is rate limited</strong> <span class="pill muted">Observation</span>
+            <p>
+              25 sign-ins within about a minute produced HTTP 429 for some attempts. This is brute-force
+              protection working; it means test suites should sign in once per role and reuse the session.
+            </p>
+          </li>
+          <li>
+            <strong>The sidebar is not a navigation landmark</strong>
+            <span class="pill muted">Accessibility</span>
+            <p>
+              The main menu has no &lt;nav&gt; element, ARIA navigation role or test ids, so assistive
+              technology cannot jump to it and tests cannot scope menu links to it. The trainer check
+              therefore asserts that &quot;Tài chính&quot; appears nowhere on the page.
+            </p>
+          </li>
+          <li>
+            <strong>Two channel dropdowns on one page</strong> <span class="pill muted">Observation</span>
+            <p>
+              The leads page has a &quot;Kênh liên hệ&quot; filter and a &quot;Kênh liên hệ&quot; field in the
+              add-lead dialog. Page-wide locators would be ambiguous; every step is scoped to its dialog.
+            </p>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="runs">
+    <h2 id="runs">Browser runs</h2>
+    <p>
+      Each test signs in through the real login page; the password is passed by reference and masked in
+      screenshots. A QA engineer proposed the steps and a QA lead approved them before anything ran.
+    </p>
+    <article class="run">
+      <header class="run-head">
+        <div>
+          <p class="eyebrow">AC-01 · ac-01-trainer-no-finance</p>
+          <h3>
+            An account without permission for a module does not see its menu and cannot reach it by direct
+            URL.
+          </h3>
+        </div>
+        <span class="pill ok">PASSED</span>
+      </header>
+
+      <div class="run-body">
+        <div class="col">
+          <p class="label">Executable steps (approved by a second person)</p>
+          <ol class="steps">
+            <li><code>navigate /login</code></li>
+            <li><code>fill Email ← &quot;demo-trainer@fitness-crm.test&quot;</code></li>
+            <li><code>fill Password ← [secret]</code></li>
+            <li><code>click Sign in</code></li>
+            <li><code>expectUrl /dashboard</code></li>
+            <li><code>expectHidden Tài chính</code></li>
+            <li><code>navigate /finance</code></li>
+            <li><code>expectText main contains &quot;Bạn không có quyền xem trang này&quot;</code></li>
+          </ol>
+        </div>
+        <div class="col">
+          <p class="label">Assertions (these decide the verdict)</p>
+          <table class="mini">
+            <thead>
+              <tr>
+                <th>Step</th>
+                <th>Expected</th>
+                <th>Observed</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>signed-in</code></td>
+                <td>/dashboard</td>
+                <td>/dashboard</td>
+                <td><span class="pill ok">pass</span></td>
+              </tr>
+              <tr>
+                <td><code>no-finance-menu</code></td>
+                <td>hidden</td>
+                <td>hidden</td>
+                <td><span class="pill ok">pass</span></td>
+              </tr>
+              <tr>
+                <td><code>finance-refused</code></td>
+                <td>Bạn không có quyền xem trang này</td>
+                <td>Bạn không có quyền xem trang này</td>
+                <td><span class="pill ok">pass</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="shots" role="list">
+        <figure role="listitem">
+          <img
+            loading="lazy"
+            src="evidence/ac-01-trainer-no-finance/001-open-login.png"
+            alt="Screenshot 001-open-login.png of ac-01-trainer-no-finance"
+          />
+          <figcaption>001-open-login.png</figcaption>
+        </figure>
+        <figure role="listitem">
+          <img
+            loading="lazy"
+            src="evidence/ac-01-trainer-no-finance/002-signed-in.png"
+            alt="Screenshot 002-signed-in.png of ac-01-trainer-no-finance"
+          />
+          <figcaption>002-signed-in.png</figcaption>
+        </figure>
+        <figure role="listitem">
+          <img
+            loading="lazy"
+            src="evidence/ac-01-trainer-no-finance/003-no-finance-menu.png"
+            alt="Screenshot 003-no-finance-menu.png of ac-01-trainer-no-finance"
+          />
+          <figcaption>003-no-finance-menu.png</figcaption>
+        </figure>
+        <figure role="listitem">
+          <img
+            loading="lazy"
+            src="evidence/ac-01-trainer-no-finance/005-finance-refused.png"
+            alt="Screenshot 005-finance-refused.png of ac-01-trainer-no-finance"
+          />
+          <figcaption>005-finance-refused.png</figcaption>
+        </figure>
+      </div>
+    </article>
+    <article class="run">
+      <header class="run-head">
+        <div>
+          <p class="eyebrow">AC-04 · ac-04-khac-needs-note</p>
+          <h3>Choosing &quot;Khác&quot; in any drop-down cannot be saved without a note.</h3>
+        </div>
+        <span class="pill ok">PASSED</span>
+      </header>
+
+      <div class="run-body">
+        <div class="col">
+          <p class="label">Executable steps (approved by a second person)</p>
+          <ol class="steps">
+            <li><code>navigate /login</code></li>
+            <li><code>fill Email ← &quot;demo-manager@fitness-crm.test&quot;</code></li>
+            <li><code>fill Password ← [secret]</code></li>
+            <li><code>click Sign in</code></li>
+            <li><code>expectUrl /dashboard</code></li>
+            <li><code>navigate /leads</code></li>
+            <li><code>click Thêm lead</code></li>
+            <li><code>fill Họ và tên ← &quot;QA Showcase AC-04&quot;</code></li>
+            <li><code>click Kênh liên hệ</code></li>
+            <li><code>click Khác</code></li>
+            <li><code>click Lưu</code></li>
+            <li>
+              <code>expectText Thêm lead contains &quot;Đã chọn &quot;Khác&quot; thì phải ghi rõ&quot;</code>
+            </li>
+            <li><code>expectVisible Thêm lead</code></li>
+          </ol>
+        </div>
+        <div class="col">
+          <p class="label">Assertions (these decide the verdict)</p>
+          <table class="mini">
+            <thead>
+              <tr>
+                <th>Step</th>
+                <th>Expected</th>
+                <th>Observed</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>signed-in</code></td>
+                <td>/dashboard</td>
+                <td>/dashboard</td>
+                <td><span class="pill ok">pass</span></td>
+              </tr>
+              <tr>
+                <td><code>note-required</code></td>
+                <td>Đã chọn &quot;Khác&quot; thì phải ghi rõ</td>
+                <td>Đã chọn &quot;Khác&quot; thì phải ghi rõ</td>
+                <td><span class="pill ok">pass</span></td>
+              </tr>
+              <tr>
+                <td><code>still-open</code></td>
+                <td>visible</td>
+                <td>visible</td>
+                <td><span class="pill ok">pass</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="shots" role="list">
+        <figure role="listitem">
+          <img
+            loading="lazy"
+            src="evidence/ac-04-khac-needs-note/001-open-login.png"
+            alt="Screenshot 001-open-login.png of ac-04-khac-needs-note"
+          />
+          <figcaption>001-open-login.png</figcaption>
+        </figure>
+        <figure role="listitem">
+          <img
+            loading="lazy"
+            src="evidence/ac-04-khac-needs-note/002-signed-in.png"
+            alt="Screenshot 002-signed-in.png of ac-04-khac-needs-note"
+          />
+          <figcaption>002-signed-in.png</figcaption>
+        </figure>
+        <figure role="listitem">
+          <img
+            loading="lazy"
+            src="evidence/ac-04-khac-needs-note/003-open-leads.png"
+            alt="Screenshot 003-open-leads.png of ac-04-khac-needs-note"
+          />
+          <figcaption>003-open-leads.png</figcaption>
+        </figure>
+        <figure role="listitem">
+          <img
+            loading="lazy"
+            src="evidence/ac-04-khac-needs-note/004-note-required.png"
+            alt="Screenshot 004-note-required.png of ac-04-khac-needs-note"
+          />
+          <figcaption>004-note-required.png</figcaption>
+        </figure>
+        <figure role="listitem">
+          <img
+            loading="lazy"
+            src="evidence/ac-04-khac-needs-note/005-still-open.png"
+            alt="Screenshot 005-still-open.png of ac-04-khac-needs-note"
+          />
+          <figcaption>005-still-open.png</figcaption>
+        </figure>
+      </div>
+    </article>
+    <article class="run">
+      <header class="run-head">
+        <div>
+          <p class="eyebrow">AC-25 · ac-25-lead-name-and-channel</p>
+          <h3>
+            A lead needs only a name and a channel; the country is chosen from the list of countries and the
+            email goes in the language derived from it (D-057, D-060).
+          </h3>
+        </div>
+        <span class="pill ok">PASSED</span>
+      </header>
+
+      <div class="run-body">
+        <div class="col">
+          <p class="label">Executable steps (approved by a second person)</p>
+          <ol class="steps">
+            <li><code>navigate /login</code></li>
+            <li><code>fill Email ← &quot;demo-manager@fitness-crm.test&quot;</code></li>
+            <li><code>fill Password ← [secret]</code></li>
+            <li><code>click Sign in</code></li>
+            <li><code>expectUrl /dashboard</code></li>
+            <li><code>navigate /leads</code></li>
+            <li><code>click Thêm lead</code></li>
+            <li><code>fill Họ và tên ← &quot;QA Showcase AC-25&quot;</code></li>
+            <li><code>click Kênh liên hệ</code></li>
+            <li><code>click Zalo</code></li>
+            <li><code>click Lưu</code></li>
+            <li><code>expectUrl /leads/</code></li>
+            <li><code>expectVisible QA Showcase AC-25</code></li>
+          </ol>
+        </div>
+        <div class="col">
+          <p class="label">Assertions (these decide the verdict)</p>
+          <table class="mini">
+            <thead>
+              <tr>
+                <th>Step</th>
+                <th>Expected</th>
+                <th>Observed</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>signed-in</code></td>
+                <td>/dashboard</td>
+                <td>/dashboard</td>
+                <td><span class="pill ok">pass</span></td>
+              </tr>
+              <tr>
+                <td><code>on-lead-page</code></td>
+                <td>/leads/</td>
+                <td>/leads/</td>
+                <td><span class="pill ok">pass</span></td>
+              </tr>
+              <tr>
+                <td><code>lead-heading</code></td>
+                <td>visible</td>
+                <td>visible</td>
+                <td><span class="pill ok">pass</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="shots" role="list">
+        <figure role="listitem">
+          <img
+            loading="lazy"
+            src="evidence/ac-25-lead-name-and-channel/001-open-login.png"
+            alt="Screenshot 001-open-login.png of ac-25-lead-name-and-channel"
+          />
+          <figcaption>001-open-login.png</figcaption>
+        </figure>
+        <figure role="listitem">
+          <img
+            loading="lazy"
+            src="evidence/ac-25-lead-name-and-channel/002-signed-in.png"
+            alt="Screenshot 002-signed-in.png of ac-25-lead-name-and-channel"
+          />
+          <figcaption>002-signed-in.png</figcaption>
+        </figure>
+        <figure role="listitem">
+          <img
+            loading="lazy"
+            src="evidence/ac-25-lead-name-and-channel/003-open-leads.png"
+            alt="Screenshot 003-open-leads.png of ac-25-lead-name-and-channel"
+          />
+          <figcaption>003-open-leads.png</figcaption>
+        </figure>
+        <figure role="listitem">
+          <img
+            loading="lazy"
+            src="evidence/ac-25-lead-name-and-channel/004-on-lead-page.png"
+            alt="Screenshot 004-on-lead-page.png of ac-25-lead-name-and-channel"
+          />
+          <figcaption>004-on-lead-page.png</figcaption>
+        </figure>
+        <figure role="listitem">
+          <img
+            loading="lazy"
+            src="evidence/ac-25-lead-name-and-channel/005-lead-heading.png"
+            alt="Screenshot 005-lead-heading.png of ac-25-lead-name-and-channel"
+          />
+          <figcaption>005-lead-heading.png</figcaption>
+        </figure>
+      </div>
+    </article>
+  </section>
+
+  <section aria-labelledby="gates">
+    <h2 id="gates">Safety gates</h2>
+    <div class="tablebox">
+      <table>
+        <thead>
+          <tr>
+            <th>Attempt</th>
+            <th>Outcome</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Same approved test against the production environment</td>
+            <td><span class="pill ok">BLOCKED</span> <code>DENIED:PRODUCTION_WRITE_DISABLED</code></td>
+          </tr>
+          <tr>
+            <td>A destructive step without a scoped approval</td>
+            <td>
+              <span class="pill ok">BLOCKED</span> <code>REVIEW_REQUIRED:SCOPED_APPROVAL_REQUIRED</code>
+            </td>
+          </tr>
+          <tr>
+            <td>A step navigating to another host</td>
+            <td><span class="pill ok">refused</span> <code>VALIDATION invalid executable spec: [</code></td>
+          </tr>
+          <tr>
+            <td>The proposer approving their own executable</td>
+            <td>
+              <span class="pill ok">refused</span>
+              <code>FORBIDDEN the proposer cannot review their own executable</code>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">
+      "Refused" and "BLOCKED" are the expected, safe outcomes here. The destructive run never started; it
+      waits for a QA lead's approval tied to that exact action and environment.
+    </p>
+  </section>
+
+  <section aria-labelledby="triage">
+    <h2 id="triage">Triage of a staged failure</h2>
+    <p>
+      All real tests passed, so one test was run with a deliberately wrong expectation to show what happens on
+      failure. <span class="pill warn">STAGED</span>
+    </p>
+    <div class="tally">
+      <div>
+        <strong>FAILED</strong
+        ><span>verdict, from the assertion (<code>ASSERTION_FAILED:staged-wrong-expectation</code>)</span>
+      </div>
+      <div>
+        <strong>PRODUCT_DEFECT</strong
+        ><span>suggested cause (stand-in heuristic); the true cause is a test issue</span>
+      </div>
+    </div>
+    <p>
+      The suggestion is wrong, and that is the point of the design: a suggested cause never changes the
+      verdict, and nothing is filed in Jira until a person confirms the cause and a QA lead approves the
+      filing. The deterministic reproduction write-up below is built from the step log, with no model
+      involved.
+    </p>
+    <pre>
+# Reproduction: Verify Gym CRM AC-01 (part 1: module access)
+
+- Run: run_38346a45f4fb469981ebbfb2984fa5f4 (FAILED: ASSERTION_FAILED:staged-wrong-expectation)
+- Test case: case_117855b341044a2ea76b09faa6a3c993 revision 1; executable v4 (spec 3dddd79ff8ee)
+- Environment: staging (staging) http://localhost:3410
+- Triage: PRODUCT_DEFECT (suggested, unverified)
+- Executed: 2026-10-16T03:34:30.616Z
+
+## Steps
+
+1. navigate /login
+2. fill role=main &gt;&gt; label=&quot;Email&quot; with &quot;[REDACTED_EMAIL]&quot;
+3. fill role=main &gt;&gt; label=&quot;Password&quot; with [secret:GYM_PASSWORD]
+4. click role=main &gt;&gt; role=button[name=&quot;Sign in&quot;]
+5. expect URL exact /dashboard
+6. expect role=link[name=&quot;Tài chính&quot;] hidden
+7. navigate /finance
+8. expect role=main to contain &quot;This text is deliberately not on the page (staged failure)&quot;  &lt;- FAILED: expected &quot;This text is deliberately not on the page (staged failure)&quot; but was &quot;Bạn không có quyền xem trang này\n\nHãy liên hệ quản trị viên nếu bạn cần quyền truy cập.&quot;
+
+## Evidence (authenticated access via the QA API)
+
+- screenshot 001-open-login.png: id evd_ba815b9e13d445f98ec7c6003366fc93, sha256 f0c75dcbedbb85b3...
+- screenshot 002-signed-in.png: id evd_be8d1ee6ed794d4ea6d5714b58650ac0, sha256 739207d5ee031515...
+- screenshot 003-no-finance-menu.png: id evd_6f4907796d234db89274b1b997d9454d, sha256 739207d5ee031515...
+- screenshot 004-open-finance-directly.png: id evd_c2c127f9db15439299892972d16d2bad, sha256 915abeee8c7069c5...
+- screenshot 005-staged-wrong-expectation.png: id evd_64570faade6d43dd84f9a63ee37cf6d7, sha256 308833ecd897ad94...
+- network-log network.json: id evd_903874bfaaea4a168b7c0b185a8c4403, sha256 2167d6c382db2d51...
+- step-log steps.json: id evd_920f9599c9694d9b8dbdaae1dacd5329, sha256 bc2a72a435525ac5...
+
+Secrets are shown as [secret:NAME] and never included. Verdicts come from deterministic assertions;
+any cause above marked &quot;suggested&quot; is a model suggestion, not a finding.</pre>
+  </section>
+
+  <section aria-labelledby="ready">
+    <h2 id="ready">Readiness of every acceptance criterion</h2>
+    <div class="tablebox">
+      <table class="readiness">
+        <thead>
+          <tr>
+            <th>Story</th>
+            <th>Criterion</th>
+            <th>Outcome</th>
+            <th>Sources cited or question asked</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>GYM-AC-01</td>
+            <td class="crit">
+              An account without permission for a module does not see its menu and cannot reach it by direct
+              URL; a role with phone numbers hidden never sees them on any screen or export.
+            </td>
+            <td><span class="pill warn">needs people</span></td>
+            <td class="detail">
+              Relevant sources exceed the context budget; split the story or narrow its acceptance criteria.
+            </td>
+          </tr>
+          <tr>
+            <td>GYM-AC-02</td>
+            <td class="crit">
+              Admin changes permissions, approval thresholds, price tiers, timers, and session status rules on
+              screen; changes take effect immediately, with no developer.
+            </td>
+            <td><span class="pill warn">needs people</span></td>
+            <td class="detail">
+              Relevant sources exceed the context budget; split the story or narrow its acceptance criteria.
+            </td>
+          </tr>
+          <tr>
+            <td>GYM-AC-03</td>
+            <td class="crit">
+              Every consulting step result, checklist item, and reason is a drop-down; admin adds or
+              deactivates an option on screen, the change shows immediately, and old data is unchanged.
+            </td>
+            <td><span class="pill ok">draft</span></td>
+            <td class="detail">GYM-AC@v1</td>
+          </tr>
+          <tr>
+            <td>GYM-AC-04</td>
+            <td class="crit">Choosing &quot;Khác&quot; in any drop-down cannot be saved without a note.</td>
+            <td><span class="pill ok">draft</span></td>
+            <td class="detail">GYM-AC@v1</td>
+          </tr>
+          <tr>
+            <td>GYM-AC-05</td>
+            <td class="crit">
+              Actions in approval groups have no effect until approved; the submitter cannot approve them;
+              admin switches approval on or off and changes approvers per action type on screen.
+            </td>
+            <td><span class="pill warn">needs people</span></td>
+            <td class="detail">
+              Relevant sources exceed the context budget; split the story or narrow its acceptance criteria.
+            </td>
+          </tr>
+          <tr>
+            <td>GYM-AC-06</td>
+            <td class="crit">
+              A lead created from the form gets the right channel and source, is assigned in the right
+              round-robin order, and the manager is notified.
+            </td>
+            <td><span class="pill ok">draft</span></td>
+            <td class="detail">GYM-AC@v1</td>
+          </tr>
+          <tr>
+            <td>GYM-AC-07</td>
+            <td class="crit">
+              Reminder steps at 60 minutes, 24 hours, 3 hours and 60 minutes before the visit, and 15 days are
+              created at the right time; overdue steps appear in &quot;Today&#39;s tasks&quot; and count as
+              late in the audit; the &quot;Báo Studio&quot; step creates a task for the coach manager.
+            </td>
+            <td><span class="pill warn">needs people</span></td>
+            <td class="detail">
+              Relevant sources exceed the context budget; split the story or narrow its acceptance criteria.
+            </td>
+          </tr>
+          <tr>
+            <td>GYM-AC-08</td>
+            <td class="crit">
+              The consulting dashboard gives the right lead counts, booking rate, and show rate per consultant
+              when compared with the Excel files of September and October 2026.
+            </td>
+            <td><span class="pill ok">draft</span></td>
+            <td class="detail">GYM-AC@v1</td>
+          </tr>
+          <tr>
+            <td>GYM-AC-09</td>
+            <td class="crit">
+              One person goes through lead → appointment → show → contract → session with a single record.
+            </td>
+            <td><span class="pill ok">draft</span></td>
+            <td class="detail">GYM-AC@v1</td>
+          </tr>
+          <tr>
+            <td>GYM-AC-10</td>
+            <td class="crit">
+              Entering any session count gives the right tier unit price, end date, and display name; a price
+              different from the tier flags the contract &quot;Exception price&quot; and it cannot be
+              activated until approved.
+            </td>
+            <td><span class="pill ok">draft</span></td>
+            <td class="detail">GYM-AC@v1</td>
+          </tr>
+          <tr>
+            <td>GYM-AC-11</td>
+            <td class="crit">
+              An approved contract cannot be edited, even by admin; a contract not yet approved cannot be
+              booked.
+            </td>
+            <td><span class="pill ok">draft</span></td>
+            <td class="detail">GYM-AC@v1</td>
+          </tr>
+          <tr>
+            <td>GYM-AC-12</td>
+            <td class="crit">
+              Deleting a contract with receipts is blocked and the receipts to delete first are listed; after
+              deleting in the right order, total receipts and revenue fall by exactly the deleted amounts.
+            </td>
+            <td><span class="pill ok">draft</span></td>
+            <td class="detail">GYM-AC@v1</td>
+          </tr>
+          <tr>
+            <td>GYM-AC-13</td>
+            <td class="crit">
+              Deleted data is in the trash with its reason, viewable only by management, and cannot be
+              deleted.
+            </td>
+            <td><span class="pill ok">draft</span></td>
+            <td class="detail">GYM-AC@v1</td>
+          </tr>
+          <tr>
+            <td>GYM-AC-14</td>
+            <td class="crit">
+              A frozen contract cannot be booked or checked in; reactivation shows the frozen days and the
+              proposed new end date; the end date changes only after admin confirms and is never extended
+              twice; a freeze over 10 days reminds the manager.
+            </td>
+            <td><span class="pill warn">needs people</span></td>
+            <td class="detail">
+              Relevant sources exceed the context budget; split the story or narrow its acceptance criteria.
+            </td>
+          </tr>
+          <tr>
+            <td>GYM-AC-15</td>
+            <td class="crit">
+              &quot;Đã tập&quot; and no-show reduce sessions left by exactly 1 and credit the PT; &quot;Hủy
+              lịch&quot; and delete do not; each status shows its color; booking is refused when no sessions
+              are left, the contract has expired, or times overlap.
+            </td>
+            <td><span class="pill ok">draft</span></td>
+            <td class="detail">GYM-AC@v1</td>
+          </tr>
+          <tr>
+            <td>GYM-AC-16</td>
+            <td class="crit">
+              A session in &quot;Đã tập&quot; cannot change status; when admin deletes it, the customer gets
+              exactly 1 session back and the PT exactly 1 credit less; if its period was already paid, the
+              next period has an adjustment line.
+            </td>
+            <td><span class="pill warn">needs people</span></td>
+            <td class="detail">
+              Relevant sources exceed the context budget; split the story or narrow its acceptance criteria.
+            </td>
+          </tr>
+          <tr>
+            <td>GYM-AC-17</td>
+            <td class="crit">
+              Every credited or refunded session sends exactly one email to the customer, from the template
+              and in the right language, with its sending status stored in the customer profile.
+            </td>
+            <td><span class="pill ok">draft</span></td>
+            <td class="detail">GYM-AC@v1</td>
+          </tr>
+          <tr>
+            <td>GYM-AC-18</td>
+            <td class="crit">
+              The PT revenue allocation report matches GymMaster&#39;s export on the same data; PT payout
+              vouchers never pay a session twice.
+            </td>
+            <td><span class="pill ok">draft</span></td>
+            <td class="detail">GYM-AC@v1</td>
+          </tr>
+          <tr>
+            <td>GYM-AC-19</td>
+            <td class="crit">
+              Each contract&#39;s paid amount and debt always equal the sum of its valid receipts; cash book
+              closing balance equals opening balance plus receipts minus expenses.
+            </td>
+            <td><span class="pill ok">draft</span></td>
+            <td class="detail">GYM-AC@v1</td>
+          </tr>
+          <tr>
+            <td>GYM-AC-20</td>
+            <td class="crit">
+              A customer&#39;s plans and every session log are visible in their profile, with plan and actual
+              on the same row; choosing a Cardio exercise shows time, speed, and heart rate.
+            </td>
+            <td><span class="pill ok">draft</span></td>
+            <td class="detail">GYM-AC@v1</td>
+          </tr>
+          <tr>
+            <td>GYM-AC-21</td>
+            <td class="crit">
+              Choosing Action &quot;Stop + Escalation&quot; notifies the manager and Master, and the item
+              stays in the waiting list until handled; the weekly workout dashboard gives the right Flag and
+              Action percentages.
+            </td>
+            <td><span class="pill ok">draft</span></td>
+            <td class="detail">GYM-AC@v1</td>
+          </tr>
+          <tr>
+            <td>GYM-AC-22</td>
+            <td class="crit">
+              Data imported from GymMaster matches the number of customers, contract value, paid amounts, and
+              sessions left.
+            </td>
+            <td><span class="pill ok">draft</span></td>
+            <td class="detail">GYM-AC@v1</td>
+          </tr>
+          <tr>
+            <td>GYM-AC-23</td>
+            <td class="crit">The lead, PT calendar, and session log screens work on a phone.</td>
+            <td><span class="pill ok">draft</span></td>
+            <td class="detail">GYM-AC@v1</td>
+          </tr>
+          <tr>
+            <td>GYM-AC-24</td>
+            <td class="crit">
+              A PT can book outside the on-duty shift, and the grid colors in-shift and off-shift time
+              differently (D-058).
+            </td>
+            <td><span class="pill ok">draft</span></td>
+            <td class="detail">GYM-AC@v1</td>
+          </tr>
+          <tr>
+            <td>GYM-AC-25</td>
+            <td class="crit">
+              A lead needs only a name and a channel; the country is chosen from the list of countries and the
+              email goes in the language derived from it (D-057, D-060).
+            </td>
+            <td><span class="pill ok">draft</span></td>
+            <td class="detail">GYM-AC@v1</td>
+          </tr>
+          <tr>
+            <td>GYM-AC-26</td>
+            <td class="crit">
+              Leads are shared by turn weight; a lead not taken care of after 1 working hour moves on, never
+              outside 08:30–20:30, and each move is in the history and the dashboard (D-050, D-052).
+            </td>
+            <td><span class="pill ok">draft</span></td>
+            <td class="detail">GYM-AC@v1</td>
+          </tr>
+          <tr>
+            <td>GYM-AC-27</td>
+            <td class="crit">
+              A ticked checklist step cannot be unticked; an overdue step past its grace period locks as
+              &quot;Không thực hiện&quot; and cannot be ticked late (D-054).
+            </td>
+            <td><span class="pill ok">draft</span></td>
+            <td class="detail">GYM-AC@v1</td>
+          </tr>
+          <tr>
+            <td>GYM-AC-28</td>
+            <td class="crit">
+              A task is reminded at all three points before its deadline through the bell, email, and phone,
+              and a slow approval past 24 hours is told to the approver&#39;s direct manager (D-053, D-056,
+              D-048).
+            </td>
+            <td><span class="pill ok">draft</span></td>
+            <td class="detail">GYM-AC@v1</td>
+          </tr>
+          <tr>
+            <td>GYM-AC-29</td>
+            <td class="crit">
+              Simulated scans through the API: a pair of the customer and the right PT within 15 minutes and
+              the pairing window turns the session to *Đã tập* and triggers the session taken, the PT credit,
+              and the email; a missing side hangs the session with the right reason; a scan with no booking is
+              an error; a customer training twice with two PTs needs a pair for each (D-069, D-070).
+            </td>
+            <td><span class="pill ok">draft</span></td>
+            <td class="detail">GYM-AC@v1</td>
+          </tr>
+          <tr>
+            <td>GYM-AC-30</td>
+            <td class="crit">
+              A session without a full check-in is notified to its PT at the end of the day, and to the Studio
+              Manager with a task after 24 hours (D-071).
+            </td>
+            <td><span class="pill ok">draft</span></td>
+            <td class="detail">GYM-AC@v1</td>
+          </tr>
+          <tr>
+            <td>GYM-AC-01-PART-1</td>
+            <td class="crit">
+              An account without permission for a module does not see its menu and cannot reach it by direct
+              URL.<br /><span class="note"
+                >Split from AC-01 after the agent reported it exceeds the context budget and advised splitting
+                the story. Part 2 (hidden phone numbers) is a separate story.</span
+              >
+            </td>
+            <td><span class="pill ok">draft</span></td>
+            <td class="detail">GYM-AC@v1</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="cost">
+    <h2 id="cost">Audit and cost</h2>
+    <div class="tally">
+      <div>
+        <strong>51</strong><span>AI decisions recorded, each with model, prompt version and sources</span>
+      </div>
+      <div><strong>26,520</strong><span>tokens (counted by the stand-in; nothing billed)</span></div>
+      <div>
+        <strong>8</strong><span>open reviews: 1 action approval, 1 failure triage, 6 missing knowledge</span>
+      </div>
+    </div>
+  </section>
+
+  <footer class="note">
+    <p>
+      Reproduce: start a Gym CRM instance, then <code>QA_SECRET_GYM_PASSWORD=… pnpm showcase:gym</code> and
+      <code>pnpm showcase:gym:report</code>. Sources, stories and specs are in
+      <code>showcase/fitness-crm/</code> of the agent repository.
+    </p>
+  </footer>
+</main>

@@ -1,0 +1,11 @@
+{
+  "externalId": "GYM-AC-18",
+  "title": "Gym CRM AC-18",
+  "description": "Acceptance criterion AC-18 of the Gym CRM (milestone M5).",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-18",
+      "text": "The PT revenue allocation report matches GymMaster's export on the same data; PT payout vouchers never pay a session twice."
+    }
+  ]
+}

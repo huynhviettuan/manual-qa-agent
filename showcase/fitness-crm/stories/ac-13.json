@@ -1,0 +1,11 @@
+{
+  "externalId": "GYM-AC-13",
+  "title": "Gym CRM AC-13",
+  "description": "Acceptance criterion AC-13 of the Gym CRM (milestone M1, M4).",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-13",
+      "text": "Deleted data is in the trash with its reason, viewable only by management, and cannot be deleted."
+    }
+  ]
+}

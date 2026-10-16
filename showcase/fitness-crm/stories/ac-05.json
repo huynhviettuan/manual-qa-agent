@@ -1,0 +1,11 @@
+{
+  "externalId": "GYM-AC-05",
+  "title": "Gym CRM AC-05",
+  "description": "Acceptance criterion AC-05 of the Gym CRM (milestone M1, M4).",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-05",
+      "text": "Actions in approval groups have no effect until approved; the submitter cannot approve them; admin switches approval on or off and changes approvers per action type on screen."
+    }
+  ]
+}

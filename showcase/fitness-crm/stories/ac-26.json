@@ -1,0 +1,11 @@
+{
+  "externalId": "GYM-AC-26",
+  "title": "Gym CRM AC-26",
+  "description": "Acceptance criterion AC-26 of the Gym CRM (milestone M2).",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-26",
+      "text": "Leads are shared by turn weight; a lead not taken care of after 1 working hour moves on, never outside 08:30–20:30, and each move is in the history and the dashboard (D-050, D-052)."
+    }
+  ]
+}

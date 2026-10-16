@@ -1,0 +1,11 @@
+{
+  "externalId": "GYM-AC-16",
+  "title": "Gym CRM AC-16",
+  "description": "Acceptance criterion AC-16 of the Gym CRM (milestone M5).",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-16",
+      "text": "A session in \"Đã tập\" cannot change status; when admin deletes it, the customer gets exactly 1 session back and the PT exactly 1 credit less; if its period was already paid, the next period has an adjustment line."
+    }
+  ]
+}

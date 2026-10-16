@@ -1,0 +1,11 @@
+{
+  "externalId": "GYM-AC-07",
+  "title": "Gym CRM AC-07",
+  "description": "Acceptance criterion AC-07 of the Gym CRM (milestone M2).",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-07",
+      "text": "Reminder steps at 60 minutes, 24 hours, 3 hours and 60 minutes before the visit, and 15 days are created at the right time; overdue steps appear in \"Today's tasks\" and count as late in the audit; the \"Báo Studio\" step creates a task for the coach manager."
+    }
+  ]
+}

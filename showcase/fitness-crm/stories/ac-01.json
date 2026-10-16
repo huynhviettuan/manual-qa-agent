@@ -1,0 +1,11 @@
+{
+  "externalId": "GYM-AC-01",
+  "title": "Gym CRM AC-01",
+  "description": "Acceptance criterion AC-01 of the Gym CRM (milestone M1).",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-01",
+      "text": "An account without permission for a module does not see its menu and cannot reach it by direct URL; a role with phone numbers hidden never sees them on any screen or export."
+    }
+  ]
+}

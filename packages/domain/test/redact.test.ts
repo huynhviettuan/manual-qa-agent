@@ -21,6 +21,13 @@ describe('redactSecrets', () => {
     expect(redactSecrets('password: hunter2').text).toBe('password: [REDACTED]');
   });
 
+  it('keeps secret references by name but still redacts bracketed values', () => {
+    const step = 'fill label="Password" with [secret:GYM_PASSWORD]';
+    expect(redactSecrets(step)).toEqual({ text: step, redactions: 0 });
+    expect(redactSecrets('[password: hunter2]').text).not.toContain('hunter2');
+    expect(redactSecrets('[secret:not-a-name]').text).toBe('[secret:[REDACTED]');
+  });
+
   it('leaves ordinary requirement text untouched', () => {
     const text = 'AC-LOGIN-04: after 5 failed attempts the account is locked for 15 minutes.';
     expect(redactSecrets(text)).toEqual({ text, redactions: 0 });

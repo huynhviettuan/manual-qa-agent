@@ -1,0 +1,1402 @@
+{
+  "generatedAt": "2026-10-16T03:34:42.333Z",
+  "target": {
+    "url": "http://localhost:3410",
+    "product": "Gym CRM (fitness-crm sample, demo data)"
+  },
+  "ai": {
+    "live": false,
+    "models": {
+      "readiness": "claude-opus-5-5",
+      "draft": "claude-opus-5-5"
+    }
+  },
+  "sources": [
+    {
+      "source": "GYM-AC@v1",
+      "trusted": true,
+      "chunks": 30
+    },
+    {
+      "source": "GYM-BR-LEADS-AND-CUSTOMERS@v1",
+      "trusted": true,
+      "chunks": 7
+    },
+    {
+      "source": "GYM-BR-MONEY@v1",
+      "trusted": true,
+      "chunks": 9
+    },
+    {
+      "source": "GYM-BR-NOTIFICATIONS-AND-TASKS@v1",
+      "trusted": true,
+      "chunks": 2
+    },
+    {
+      "source": "GYM-BR-PLATFORM@v1",
+      "trusted": true,
+      "chunks": 7
+    },
+    {
+      "source": "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+      "trusted": true,
+      "chunks": 9
+    },
+    {
+      "source": "GYM-BR-SESSIONS-AND-CLASSES@v1",
+      "trusted": true,
+      "chunks": 11
+    },
+    {
+      "source": "GYM-BR-WORKOUTS@v1",
+      "trusted": true,
+      "chunks": 4
+    },
+    {
+      "source": "GYM-RBAC@v1",
+      "trusted": true,
+      "chunks": 97
+    }
+  ],
+  "readiness": [
+    {
+      "story": "GYM-AC-01",
+      "followUp": null,
+      "ac": "AC-01",
+      "criterion": "An account without permission for a module does not see its menu and cannot reach it by direct URL; a role with phone numbers hidden never sees them on any screen or export.",
+      "route": "REVIEW_REQUESTED",
+      "caseId": null,
+      "sourceRefs": [
+        "GYM-AC@v1",
+        "GYM-RBAC@v1",
+        "GYM-RBAC@v1",
+        "GYM-RBAC@v1",
+        "GYM-RBAC@v1",
+        "GYM-RBAC@v1",
+        "GYM-AC@v1",
+        "GYM-AC@v1",
+        "GYM-AC@v1",
+        "GYM-RBAC@v1",
+        "GYM-AC@v1",
+        "GYM-AC@v1",
+        "GYM-AC@v1",
+        "GYM-RBAC@v1",
+        "GYM-AC@v1",
+        "GYM-RBAC@v1",
+        "GYM-RBAC@v1",
+        "GYM-RBAC@v1",
+        "GYM-RBAC@v1"
+      ],
+      "question": "Relevant sources exceed the context budget; split the story or narrow its acceptance criteria.",
+      "reviewKind": "MISSING_KNOWLEDGE",
+      "reason": "CONTEXT_BUDGET_EXCEEDED",
+      "draft": null,
+      "models": [],
+      "tokens": 0
+    },
+    {
+      "story": "GYM-AC-02",
+      "followUp": null,
+      "ac": "AC-02",
+      "criterion": "Admin changes permissions, approval thresholds, price tiers, timers, and session status rules on screen; changes take effect immediately, with no developer.",
+      "route": "REVIEW_REQUESTED",
+      "caseId": null,
+      "sourceRefs": [
+        "GYM-AC@v1",
+        "GYM-RBAC@v1",
+        "GYM-RBAC@v1",
+        "GYM-AC@v1",
+        "GYM-AC@v1",
+        "GYM-AC@v1",
+        "GYM-AC@v1",
+        "GYM-RBAC@v1",
+        "GYM-RBAC@v1",
+        "GYM-RBAC@v1",
+        "GYM-RBAC@v1",
+        "GYM-RBAC@v1",
+        "GYM-RBAC@v1",
+        "GYM-RBAC@v1",
+        "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+        "GYM-AC@v1",
+        "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+        "GYM-AC@v1",
+        "GYM-AC@v1"
+      ],
+      "question": "Relevant sources exceed the context budget; split the story or narrow its acceptance criteria.",
+      "reviewKind": "MISSING_KNOWLEDGE",
+      "reason": "CONTEXT_BUDGET_EXCEEDED",
+      "draft": null,
+      "models": [],
+      "tokens": 0
+    },
+    {
+      "story": "GYM-AC-03",
+      "followUp": null,
+      "ac": "AC-03",
+      "criterion": "Every consulting step result, checklist item, and reason is a drop-down; admin adds or deactivates an option on screen, the change shows immediately, and old data is unchanged.",
+      "route": "DRAFT_CREATED",
+      "caseId": "case_a0e3304f383d4564a61ce8220df2fde1",
+      "sourceRefs": ["GYM-AC@v1"],
+      "question": null,
+      "reviewKind": null,
+      "reason": null,
+      "draft": {
+        "steps": [
+          {
+            "action": "Exercise AC-03: Every consulting step result, checklist item, and reason is a drop-down; admin adds or deactivates an option on screen, the change shows immediately, and old data is unchanged.",
+            "expected": "Every consulting step result, checklist item, and reason is a drop-down; admin adds or deactivates an option on screen, the change shows immediately, and old data is unchanged. (milestone M1, M2)",
+            "sourceRefs": ["GYM-AC@v1"]
+          }
+        ],
+        "title": "Verify Gym CRM AC-03",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      },
+      "models": ["mock-heuristic-v1"],
+      "tokens": 1040
+    },
+    {
+      "story": "GYM-AC-04",
+      "followUp": null,
+      "ac": "AC-04",
+      "criterion": "Choosing \"Khác\" in any drop-down cannot be saved without a note.",
+      "route": "DRAFT_CREATED",
+      "caseId": "case_db872faa356d424ea98294c1a9586601",
+      "sourceRefs": ["GYM-AC@v1"],
+      "question": null,
+      "reviewKind": null,
+      "reason": null,
+      "draft": {
+        "steps": [
+          {
+            "action": "Exercise AC-04: Choosing \"Khác\" in any drop-down cannot be saved without a note.",
+            "expected": "Choosing \"Khác\" in any drop-down cannot be saved without a note. (milestone M1)",
+            "sourceRefs": ["GYM-AC@v1"]
+          }
+        ],
+        "title": "Verify Gym CRM AC-04",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      },
+      "models": ["mock-heuristic-v1"],
+      "tokens": 1040
+    },
+    {
+      "story": "GYM-AC-05",
+      "followUp": null,
+      "ac": "AC-05",
+      "criterion": "Actions in approval groups have no effect until approved; the submitter cannot approve them; admin switches approval on or off and changes approvers per action type on screen.",
+      "route": "REVIEW_REQUESTED",
+      "caseId": null,
+      "sourceRefs": [
+        "GYM-AC@v1",
+        "GYM-RBAC@v1",
+        "GYM-AC@v1",
+        "GYM-RBAC@v1",
+        "GYM-AC@v1",
+        "GYM-AC@v1",
+        "GYM-AC@v1",
+        "GYM-AC@v1",
+        "GYM-RBAC@v1",
+        "GYM-RBAC@v1",
+        "GYM-RBAC@v1",
+        "GYM-RBAC@v1",
+        "GYM-RBAC@v1",
+        "GYM-RBAC@v1",
+        "GYM-BR-PLATFORM@v1",
+        "GYM-RBAC@v1",
+        "GYM-RBAC@v1",
+        "GYM-AC@v1",
+        "GYM-AC@v1",
+        "GYM-RBAC@v1",
+        "GYM-RBAC@v1",
+        "GYM-BR-SERVICES-PRICES-CONTRACTS@v1"
+      ],
+      "question": "Relevant sources exceed the context budget; split the story or narrow its acceptance criteria.",
+      "reviewKind": "MISSING_KNOWLEDGE",
+      "reason": "CONTEXT_BUDGET_EXCEEDED",
+      "draft": null,
+      "models": [],
+      "tokens": 0
+    },
+    {
+      "story": "GYM-AC-06",
+      "followUp": null,
+      "ac": "AC-06",
+      "criterion": "A lead created from the form gets the right channel and source, is assigned in the right round-robin order, and the manager is notified.",
+      "route": "DRAFT_CREATED",
+      "caseId": "case_84e99c4c407e4b80a468135336bed632",
+      "sourceRefs": ["GYM-AC@v1"],
+      "question": null,
+      "reviewKind": null,
+      "reason": null,
+      "draft": {
+        "steps": [
+          {
+            "action": "Exercise AC-06: A lead created from the form gets the right channel and source, is assigned in the right round-robin order, and the manager is notified.",
+            "expected": "A lead created from the form gets the right channel and source, is assigned in the right round-robin order, and the manager is notified. (milestone M2)",
+            "sourceRefs": ["GYM-AC@v1"]
+          }
+        ],
+        "title": "Verify Gym CRM AC-06",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      },
+      "models": ["mock-heuristic-v1"],
+      "tokens": 1040
+    },
+    {
+      "story": "GYM-AC-07",
+      "followUp": null,
+      "ac": "AC-07",
+      "criterion": "Reminder steps at 60 minutes, 24 hours, 3 hours and 60 minutes before the visit, and 15 days are created at the right time; overdue steps appear in \"Today's tasks\" and count as late in the audit; the \"Báo Studio\" step creates a task for the coach manager.",
+      "route": "REVIEW_REQUESTED",
+      "caseId": null,
+      "sourceRefs": [
+        "GYM-AC@v1",
+        "GYM-AC@v1",
+        "GYM-RBAC@v1",
+        "GYM-AC@v1",
+        "GYM-AC@v1",
+        "GYM-AC@v1",
+        "GYM-AC@v1",
+        "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+        "GYM-BR-LEADS-AND-CUSTOMERS@v1",
+        "GYM-BR-LEADS-AND-CUSTOMERS@v1",
+        "GYM-RBAC@v1",
+        "GYM-AC@v1",
+        "GYM-AC@v1",
+        "GYM-AC@v1",
+        "GYM-RBAC@v1",
+        "GYM-AC@v1",
+        "GYM-RBAC@v1",
+        "GYM-RBAC@v1",
+        "GYM-RBAC@v1",
+        "GYM-RBAC@v1"
+      ],
+      "question": "Relevant sources exceed the context budget; split the story or narrow its acceptance criteria.",
+      "reviewKind": "MISSING_KNOWLEDGE",
+      "reason": "CONTEXT_BUDGET_EXCEEDED",
+      "draft": null,
+      "models": [],
+      "tokens": 0
+    },
+    {
+      "story": "GYM-AC-08",
+      "followUp": null,
+      "ac": "AC-08",
+      "criterion": "The consulting dashboard gives the right lead counts, booking rate, and show rate per consultant when compared with the Excel files of September and October 2026.",
+      "route": "DRAFT_CREATED",
+      "caseId": "case_be335ab3c60342709f0cf424e23427ee",
+      "sourceRefs": ["GYM-AC@v1"],
+      "question": null,
+      "reviewKind": null,
+      "reason": null,
+      "draft": {
+        "steps": [
+          {
+            "action": "Exercise AC-08: The consulting dashboard gives the right lead counts, booking rate, and show rate per consultant when compared with the Excel files of September and October 2026.",
+            "expected": "The consulting dashboard gives the right lead counts, booking rate, and show rate per consultant when compared with the Excel files of September and October 2026. (milestone M3)",
+            "sourceRefs": ["GYM-AC@v1"]
+          }
+        ],
+        "title": "Verify Gym CRM AC-08",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      },
+      "models": ["mock-heuristic-v1"],
+      "tokens": 1040
+    },
+    {
+      "story": "GYM-AC-09",
+      "followUp": null,
+      "ac": "AC-09",
+      "criterion": "One person goes through lead → appointment → show → contract → session with a single record.",
+      "route": "DRAFT_CREATED",
+      "caseId": "case_06faff0046884411acef7a58526744c7",
+      "sourceRefs": ["GYM-AC@v1"],
+      "question": null,
+      "reviewKind": null,
+      "reason": null,
+      "draft": {
+        "steps": [
+          {
+            "action": "Exercise AC-09: One person goes through lead → appointment → show → contract → session with a single record.",
+            "expected": "One person goes through lead → appointment → show → contract → session with a single record. (milestone M2, M4, M5)",
+            "sourceRefs": ["GYM-AC@v1"]
+          }
+        ],
+        "title": "Verify Gym CRM AC-09",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      },
+      "models": ["mock-heuristic-v1"],
+      "tokens": 1040
+    },
+    {
+      "story": "GYM-AC-10",
+      "followUp": null,
+      "ac": "AC-10",
+      "criterion": "Entering any session count gives the right tier unit price, end date, and display name; a price different from the tier flags the contract \"Exception price\" and it cannot be activated until approved.",
+      "route": "DRAFT_CREATED",
+      "caseId": "case_77bb069d76c147e599c1b89ab1396dd5",
+      "sourceRefs": ["GYM-AC@v1"],
+      "question": null,
+      "reviewKind": null,
+      "reason": null,
+      "draft": {
+        "steps": [
+          {
+            "action": "Exercise AC-10: Entering any session count gives the right tier unit price, end date, and display name; a price different from the tier flags the contract \"Exception price\" and it cannot be activated until approved.",
+            "expected": "Entering any session count gives the right tier unit price, end date, and display name; a price different from the tier flags the contract \"Exception price\" and it cannot be activated until approved. (milestone M4)",
+            "sourceRefs": ["GYM-AC@v1"]
+          }
+        ],
+        "title": "Verify Gym CRM AC-10",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      },
+      "models": ["mock-heuristic-v1"],
+      "tokens": 1040
+    },
+    {
+      "story": "GYM-AC-11",
+      "followUp": null,
+      "ac": "AC-11",
+      "criterion": "An approved contract cannot be edited, even by admin; a contract not yet approved cannot be booked.",
+      "route": "DRAFT_CREATED",
+      "caseId": "case_82bec376febf4444904930fbf7d57502",
+      "sourceRefs": ["GYM-AC@v1"],
+      "question": null,
+      "reviewKind": null,
+      "reason": null,
+      "draft": {
+        "steps": [
+          {
+            "action": "Exercise AC-11: An approved contract cannot be edited, even by admin; a contract not yet approved cannot be booked.",
+            "expected": "An approved contract cannot be edited, even by admin; a contract not yet approved cannot be booked. (milestone M4, M5)",
+            "sourceRefs": ["GYM-AC@v1"]
+          }
+        ],
+        "title": "Verify Gym CRM AC-11",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      },
+      "models": ["mock-heuristic-v1"],
+      "tokens": 1040
+    },
+    {
+      "story": "GYM-AC-12",
+      "followUp": null,
+      "ac": "AC-12",
+      "criterion": "Deleting a contract with receipts is blocked and the receipts to delete first are listed; after deleting in the right order, total receipts and revenue fall by exactly the deleted amounts.",
+      "route": "DRAFT_CREATED",
+      "caseId": "case_3d7dd303062f4c08bcd7f4044d13b824",
+      "sourceRefs": ["GYM-AC@v1"],
+      "question": null,
+      "reviewKind": null,
+      "reason": null,
+      "draft": {
+        "steps": [
+          {
+            "action": "Exercise AC-12: Deleting a contract with receipts is blocked and the receipts to delete first are listed; after deleting in the right order, total receipts and revenue fall by exactly the deleted amounts.",
+            "expected": "Deleting a contract with receipts is blocked and the receipts to delete first are listed; after deleting in the right order, total receipts and revenue fall by exactly the deleted amounts. (milestone M4)",
+            "sourceRefs": ["GYM-AC@v1"]
+          }
+        ],
+        "title": "Verify Gym CRM AC-12",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      },
+      "models": ["mock-heuristic-v1"],
+      "tokens": 1040
+    },
+    {
+      "story": "GYM-AC-13",
+      "followUp": null,
+      "ac": "AC-13",
+      "criterion": "Deleted data is in the trash with its reason, viewable only by management, and cannot be deleted.",
+      "route": "DRAFT_CREATED",
+      "caseId": "case_fd021191a2c843cfa3d01bda32bfdaa7",
+      "sourceRefs": ["GYM-AC@v1"],
+      "question": null,
+      "reviewKind": null,
+      "reason": null,
+      "draft": {
+        "steps": [
+          {
+            "action": "Exercise AC-13: Deleted data is in the trash with its reason, viewable only by management, and cannot be deleted.",
+            "expected": "Deleted data is in the trash with its reason, viewable only by management, and cannot be deleted. (milestone M1, M4)",
+            "sourceRefs": ["GYM-AC@v1"]
+          }
+        ],
+        "title": "Verify Gym CRM AC-13",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      },
+      "models": ["mock-heuristic-v1"],
+      "tokens": 1040
+    },
+    {
+      "story": "GYM-AC-14",
+      "followUp": null,
+      "ac": "AC-14",
+      "criterion": "A frozen contract cannot be booked or checked in; reactivation shows the frozen days and the proposed new end date; the end date changes only after admin confirms and is never extended twice; a freeze over 10 days reminds the manager.",
+      "route": "REVIEW_REQUESTED",
+      "caseId": null,
+      "sourceRefs": [
+        "GYM-AC@v1",
+        "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+        "GYM-AC@v1",
+        "GYM-BR-SESSIONS-AND-CLASSES@v1",
+        "GYM-AC@v1",
+        "GYM-AC@v1",
+        "GYM-RBAC@v1",
+        "GYM-BR-LEADS-AND-CUSTOMERS@v1",
+        "GYM-AC@v1",
+        "GYM-AC@v1",
+        "GYM-AC@v1",
+        "GYM-AC@v1",
+        "GYM-AC@v1",
+        "GYM-RBAC@v1",
+        "GYM-RBAC@v1",
+        "GYM-RBAC@v1",
+        "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+        "GYM-RBAC@v1",
+        "GYM-AC@v1",
+        "GYM-AC@v1",
+        "GYM-AC@v1"
+      ],
+      "question": "Relevant sources exceed the context budget; split the story or narrow its acceptance criteria.",
+      "reviewKind": "MISSING_KNOWLEDGE",
+      "reason": "CONTEXT_BUDGET_EXCEEDED",
+      "draft": null,
+      "models": [],
+      "tokens": 0
+    },
+    {
+      "story": "GYM-AC-15",
+      "followUp": null,
+      "ac": "AC-15",
+      "criterion": "\"Đã tập\" and no-show reduce sessions left by exactly 1 and credit the PT; \"Hủy lịch\" and delete do not; each status shows its color; booking is refused when no sessions are left, the contract has expired, or times overlap.",
+      "route": "DRAFT_CREATED",
+      "caseId": "case_0c479684ccdf4b44b5661583301d93d8",
+      "sourceRefs": ["GYM-AC@v1"],
+      "question": null,
+      "reviewKind": null,
+      "reason": null,
+      "draft": {
+        "steps": [
+          {
+            "action": "Exercise AC-15: \"Đã tập\" and no-show reduce sessions left by exactly 1 and credit the PT; \"Hủy lịch\" and delete do not; each status shows its color; booking is refused when no sessions are left, the contract has expired, or times overlap.",
+            "expected": "\"Đã tập\" and no-show reduce sessions left by exactly 1 and credit the PT; \"Hủy lịch\" and delete do not; each status shows its color; booking is refused when no sessions are left, the contract has expired, or times overlap. (milestone M5)",
+            "sourceRefs": ["GYM-AC@v1"]
+          }
+        ],
+        "title": "Verify Gym CRM AC-15",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      },
+      "models": ["mock-heuristic-v1"],
+      "tokens": 1040
+    },
+    {
+      "story": "GYM-AC-16",
+      "followUp": null,
+      "ac": "AC-16",
+      "criterion": "A session in \"Đã tập\" cannot change status; when admin deletes it, the customer gets exactly 1 session back and the PT exactly 1 credit less; if its period was already paid, the next period has an adjustment line.",
+      "route": "REVIEW_REQUESTED",
+      "caseId": null,
+      "sourceRefs": [
+        "GYM-AC@v1",
+        "GYM-BR-SESSIONS-AND-CLASSES@v1",
+        "GYM-AC@v1",
+        "GYM-AC@v1",
+        "GYM-RBAC@v1",
+        "GYM-AC@v1",
+        "GYM-AC@v1",
+        "GYM-AC@v1",
+        "GYM-AC@v1",
+        "GYM-BR-NOTIFICATIONS-AND-TASKS@v1",
+        "GYM-AC@v1",
+        "GYM-BR-SESSIONS-AND-CLASSES@v1",
+        "GYM-AC@v1",
+        "GYM-BR-SESSIONS-AND-CLASSES@v1",
+        "GYM-BR-SESSIONS-AND-CLASSES@v1",
+        "GYM-AC@v1",
+        "GYM-AC@v1",
+        "GYM-AC@v1",
+        "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+        "GYM-AC@v1",
+        "GYM-AC@v1",
+        "GYM-AC@v1",
+        "GYM-RBAC@v1",
+        "GYM-BR-MONEY@v1"
+      ],
+      "question": "Relevant sources exceed the context budget; split the story or narrow its acceptance criteria.",
+      "reviewKind": "MISSING_KNOWLEDGE",
+      "reason": "CONTEXT_BUDGET_EXCEEDED",
+      "draft": null,
+      "models": [],
+      "tokens": 0
+    },
+    {
+      "story": "GYM-AC-17",
+      "followUp": null,
+      "ac": "AC-17",
+      "criterion": "Every credited or refunded session sends exactly one email to the customer, from the template and in the right language, with its sending status stored in the customer profile.",
+      "route": "DRAFT_CREATED",
+      "caseId": "case_caee3c90c4d74b52a7d96454a1b2ee48",
+      "sourceRefs": ["GYM-AC@v1"],
+      "question": null,
+      "reviewKind": null,
+      "reason": null,
+      "draft": {
+        "steps": [
+          {
+            "action": "Exercise AC-17: Every credited or refunded session sends exactly one email to the customer, from the template and in the right language, with its sending status stored in the customer profile.",
+            "expected": "Every credited or refunded session sends exactly one email to the customer, from the template and in the right language, with its sending status stored in the customer profile. (milestone M6)",
+            "sourceRefs": ["GYM-AC@v1"]
+          }
+        ],
+        "title": "Verify Gym CRM AC-17",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      },
+      "models": ["mock-heuristic-v1"],
+      "tokens": 1040
+    },
+    {
+      "story": "GYM-AC-18",
+      "followUp": null,
+      "ac": "AC-18",
+      "criterion": "The PT revenue allocation report matches GymMaster's export on the same data; PT payout vouchers never pay a session twice.",
+      "route": "DRAFT_CREATED",
+      "caseId": "case_4a25a047205a43999e2b01b5d413592e",
+      "sourceRefs": ["GYM-AC@v1"],
+      "question": null,
+      "reviewKind": null,
+      "reason": null,
+      "draft": {
+        "steps": [
+          {
+            "action": "Exercise AC-18: The PT revenue allocation report matches GymMaster's export on the same data; PT payout vouchers never pay a session twice.",
+            "expected": "The PT revenue allocation report matches GymMaster's export on the same data; PT payout vouchers never pay a session twice. (milestone M5)",
+            "sourceRefs": ["GYM-AC@v1"]
+          }
+        ],
+        "title": "Verify Gym CRM AC-18",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      },
+      "models": ["mock-heuristic-v1"],
+      "tokens": 1040
+    },
+    {
+      "story": "GYM-AC-19",
+      "followUp": null,
+      "ac": "AC-19",
+      "criterion": "Each contract's paid amount and debt always equal the sum of its valid receipts; cash book closing balance equals opening balance plus receipts minus expenses.",
+      "route": "DRAFT_CREATED",
+      "caseId": "case_cb43381231464653b8545488ba3a4e39",
+      "sourceRefs": ["GYM-AC@v1"],
+      "question": null,
+      "reviewKind": null,
+      "reason": null,
+      "draft": {
+        "steps": [
+          {
+            "action": "Exercise AC-19: Each contract's paid amount and debt always equal the sum of its valid receipts; cash book closing balance equals opening balance plus receipts minus expenses.",
+            "expected": "Each contract's paid amount and debt always equal the sum of its valid receipts; cash book closing balance equals opening balance plus receipts minus expenses. (milestone M4)",
+            "sourceRefs": ["GYM-AC@v1"]
+          }
+        ],
+        "title": "Verify Gym CRM AC-19",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      },
+      "models": ["mock-heuristic-v1"],
+      "tokens": 1040
+    },
+    {
+      "story": "GYM-AC-20",
+      "followUp": null,
+      "ac": "AC-20",
+      "criterion": "A customer's plans and every session log are visible in their profile, with plan and actual on the same row; choosing a Cardio exercise shows time, speed, and heart rate.",
+      "route": "DRAFT_CREATED",
+      "caseId": "case_1acf9a2ad7734d7a93fbd3d792954cfb",
+      "sourceRefs": ["GYM-AC@v1"],
+      "question": null,
+      "reviewKind": null,
+      "reason": null,
+      "draft": {
+        "steps": [
+          {
+            "action": "Exercise AC-20: A customer's plans and every session log are visible in their profile, with plan and actual on the same row; choosing a Cardio exercise shows time, speed, and heart rate.",
+            "expected": "A customer's plans and every session log are visible in their profile, with plan and actual on the same row; choosing a Cardio exercise shows time, speed, and heart rate. (milestone M7)",
+            "sourceRefs": ["GYM-AC@v1"]
+          }
+        ],
+        "title": "Verify Gym CRM AC-20",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      },
+      "models": ["mock-heuristic-v1"],
+      "tokens": 1040
+    },
+    {
+      "story": "GYM-AC-21",
+      "followUp": null,
+      "ac": "AC-21",
+      "criterion": "Choosing Action \"Stop + Escalation\" notifies the manager and Master, and the item stays in the waiting list until handled; the weekly workout dashboard gives the right Flag and Action percentages.",
+      "route": "DRAFT_CREATED",
+      "caseId": "case_fb717409134d4bfeafc326c7b454f39f",
+      "sourceRefs": ["GYM-AC@v1"],
+      "question": null,
+      "reviewKind": null,
+      "reason": null,
+      "draft": {
+        "steps": [
+          {
+            "action": "Exercise AC-21: Choosing Action \"Stop + Escalation\" notifies the manager and Master, and the item stays in the waiting list until handled; the weekly workout dashboard gives the right Flag and Action percentages.",
+            "expected": "Choosing Action \"Stop + Escalation\" notifies the manager and Master, and the item stays in the waiting list until handled; the weekly workout dashboard gives the right Flag and Action percentages. (milestone M7)",
+            "sourceRefs": ["GYM-AC@v1"]
+          }
+        ],
+        "title": "Verify Gym CRM AC-21",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      },
+      "models": ["mock-heuristic-v1"],
+      "tokens": 1040
+    },
+    {
+      "story": "GYM-AC-22",
+      "followUp": null,
+      "ac": "AC-22",
+      "criterion": "Data imported from GymMaster matches the number of customers, contract value, paid amounts, and sessions left.",
+      "route": "DRAFT_CREATED",
+      "caseId": "case_38cf81519bc44f828dfd17905fe3c639",
+      "sourceRefs": ["GYM-AC@v1"],
+      "question": null,
+      "reviewKind": null,
+      "reason": null,
+      "draft": {
+        "steps": [
+          {
+            "action": "Exercise AC-22: Data imported from GymMaster matches the number of customers, contract value, paid amounts, and sessions left.",
+            "expected": "Data imported from GymMaster matches the number of customers, contract value, paid amounts, and sessions left. (milestone M9)",
+            "sourceRefs": ["GYM-AC@v1"]
+          }
+        ],
+        "title": "Verify Gym CRM AC-22",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      },
+      "models": ["mock-heuristic-v1"],
+      "tokens": 1040
+    },
+    {
+      "story": "GYM-AC-23",
+      "followUp": null,
+      "ac": "AC-23",
+      "criterion": "The lead, PT calendar, and session log screens work on a phone.",
+      "route": "DRAFT_CREATED",
+      "caseId": "case_0f2bdc18691a4c43b9202301c8a7ab22",
+      "sourceRefs": ["GYM-AC@v1"],
+      "question": null,
+      "reviewKind": null,
+      "reason": null,
+      "draft": {
+        "steps": [
+          {
+            "action": "Exercise AC-23: The lead, PT calendar, and session log screens work on a phone.",
+            "expected": "The lead, PT calendar, and session log screens work on a phone. (milestone M2, M5, M7)",
+            "sourceRefs": ["GYM-AC@v1"]
+          }
+        ],
+        "title": "Verify Gym CRM AC-23",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      },
+      "models": ["mock-heuristic-v1"],
+      "tokens": 1040
+    },
+    {
+      "story": "GYM-AC-24",
+      "followUp": null,
+      "ac": "AC-24",
+      "criterion": "A PT can book outside the on-duty shift, and the grid colors in-shift and off-shift time differently (D-058).",
+      "route": "DRAFT_CREATED",
+      "caseId": "case_dc61c18810364a67bd3e3080b48e5356",
+      "sourceRefs": ["GYM-AC@v1"],
+      "question": null,
+      "reviewKind": null,
+      "reason": null,
+      "draft": {
+        "steps": [
+          {
+            "action": "Exercise AC-24: A PT can book outside the on-duty shift, and the grid colors in-shift and off-shift time differently (D-058).",
+            "expected": "A PT can book outside the on-duty shift, and the grid colors in-shift and off-shift time differently (D-058). (milestone M5)",
+            "sourceRefs": ["GYM-AC@v1"]
+          }
+        ],
+        "title": "Verify Gym CRM AC-24",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      },
+      "models": ["mock-heuristic-v1"],
+      "tokens": 1040
+    },
+    {
+      "story": "GYM-AC-25",
+      "followUp": null,
+      "ac": "AC-25",
+      "criterion": "A lead needs only a name and a channel; the country is chosen from the list of countries and the email goes in the language derived from it (D-057, D-060).",
+      "route": "DRAFT_CREATED",
+      "caseId": "case_79edc1243e1f4edf909988fd5f4fd57e",
+      "sourceRefs": ["GYM-AC@v1"],
+      "question": null,
+      "reviewKind": null,
+      "reason": null,
+      "draft": {
+        "steps": [
+          {
+            "action": "Exercise AC-25: A lead needs only a name and a channel; the country is chosen from the list of countries and the email goes in the language derived from it (D-057, D-060).",
+            "expected": "A lead needs only a name and a channel; the country is chosen from the list of countries and the email goes in the language derived from it (D-057, D-060). (milestone M2)",
+            "sourceRefs": ["GYM-AC@v1"]
+          }
+        ],
+        "title": "Verify Gym CRM AC-25",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      },
+      "models": ["mock-heuristic-v1"],
+      "tokens": 1040
+    },
+    {
+      "story": "GYM-AC-26",
+      "followUp": null,
+      "ac": "AC-26",
+      "criterion": "Leads are shared by turn weight; a lead not taken care of after 1 working hour moves on, never outside 08:30–20:30, and each move is in the history and the dashboard (D-050, D-052).",
+      "route": "DRAFT_CREATED",
+      "caseId": "case_a171d93500ae4777a37b7187ab01d625",
+      "sourceRefs": ["GYM-AC@v1"],
+      "question": null,
+      "reviewKind": null,
+      "reason": null,
+      "draft": {
+        "steps": [
+          {
+            "action": "Exercise AC-26: Leads are shared by turn weight; a lead not taken care of after 1 working hour moves on, never outside 08:30–20:30, and each move is in the history and the dashboard (D-050, D-052).",
+            "expected": "Leads are shared by turn weight; a lead not taken care of after 1 working hour moves on, never outside 08:30–20:30, and each move is in the history and the dashboard (D-050, D-052). (milestone M2)",
+            "sourceRefs": ["GYM-AC@v1"]
+          }
+        ],
+        "title": "Verify Gym CRM AC-26",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      },
+      "models": ["mock-heuristic-v1"],
+      "tokens": 1040
+    },
+    {
+      "story": "GYM-AC-27",
+      "followUp": null,
+      "ac": "AC-27",
+      "criterion": "A ticked checklist step cannot be unticked; an overdue step past its grace period locks as \"Không thực hiện\" and cannot be ticked late (D-054).",
+      "route": "DRAFT_CREATED",
+      "caseId": "case_704fc1bda8574cc7b71fd135209d9bcd",
+      "sourceRefs": ["GYM-AC@v1"],
+      "question": null,
+      "reviewKind": null,
+      "reason": null,
+      "draft": {
+        "steps": [
+          {
+            "action": "Exercise AC-27: A ticked checklist step cannot be unticked; an overdue step past its grace period locks as \"Không thực hiện\" and cannot be ticked late (D-054).",
+            "expected": "A ticked checklist step cannot be unticked; an overdue step past its grace period locks as \"Không thực hiện\" and cannot be ticked late (D-054). (milestone M2)",
+            "sourceRefs": ["GYM-AC@v1"]
+          }
+        ],
+        "title": "Verify Gym CRM AC-27",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      },
+      "models": ["mock-heuristic-v1"],
+      "tokens": 1040
+    },
+    {
+      "story": "GYM-AC-28",
+      "followUp": null,
+      "ac": "AC-28",
+      "criterion": "A task is reminded at all three points before its deadline through the bell, email, and phone, and a slow approval past 24 hours is told to the approver's direct manager (D-053, D-056, D-048).",
+      "route": "DRAFT_CREATED",
+      "caseId": "case_447d00aa96054f20bbc5d8d089f2dadb",
+      "sourceRefs": ["GYM-AC@v1"],
+      "question": null,
+      "reviewKind": null,
+      "reason": null,
+      "draft": {
+        "steps": [
+          {
+            "action": "Exercise AC-28: A task is reminded at all three points before its deadline through the bell, email, and phone, and a slow approval past 24 hours is told to the approver's direct manager (D-053, D-056, D-048).",
+            "expected": "A task is reminded at all three points before its deadline through the bell, email, and phone, and a slow approval past 24 hours is told to the approver's direct manager (D-053, D-056, D-048). (milestone M2, M6)",
+            "sourceRefs": ["GYM-AC@v1"]
+          }
+        ],
+        "title": "Verify Gym CRM AC-28",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      },
+      "models": ["mock-heuristic-v1"],
+      "tokens": 1040
+    },
+    {
+      "story": "GYM-AC-29",
+      "followUp": null,
+      "ac": "AC-29",
+      "criterion": "Simulated scans through the API: a pair of the customer and the right PT within 15 minutes and the pairing window turns the session to *Đã tập* and triggers the session taken, the PT credit, and the email; a missing side hangs the session with the right reason; a scan with no booking is an error; a customer training twice with two PTs needs a pair for each (D-069, D-070).",
+      "route": "DRAFT_CREATED",
+      "caseId": "case_5b84711ea77b41f990a1cc9f4339defe",
+      "sourceRefs": ["GYM-AC@v1"],
+      "question": null,
+      "reviewKind": null,
+      "reason": null,
+      "draft": {
+        "steps": [
+          {
+            "action": "Exercise AC-29: Simulated scans through the API: a pair of the customer and the right PT within 15 minutes and the pairing window turns the session to *Đã tập* and triggers the session taken, the PT credit, and the email; a missing side hangs the session with the right reason; a scan with no booking is an error; a customer training twice with two PTs needs a pair for each (D-069, D-070).",
+            "expected": "Simulated scans through the API: a pair of the customer and the right PT within 15 minutes and the pairing window turns the session to *Đã tập* and triggers the session taken, the PT credit, and the email; a missing side hangs the session with the right reason; a scan with no booking is an error; a customer training twice with two PTs needs a pair for each (D-069, D-070). (milestone M5)",
+            "sourceRefs": ["GYM-AC@v1"]
+          }
+        ],
+        "title": "Verify Gym CRM AC-29",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      },
+      "models": ["mock-heuristic-v1"],
+      "tokens": 1040
+    },
+    {
+      "story": "GYM-AC-30",
+      "followUp": null,
+      "ac": "AC-30",
+      "criterion": "A session without a full check-in is notified to its PT at the end of the day, and to the Studio Manager with a task after 24 hours (D-071).",
+      "route": "DRAFT_CREATED",
+      "caseId": "case_135ab29a2d974775b83abf151ef0e7cf",
+      "sourceRefs": ["GYM-AC@v1"],
+      "question": null,
+      "reviewKind": null,
+      "reason": null,
+      "draft": {
+        "steps": [
+          {
+            "action": "Exercise AC-30: A session without a full check-in is notified to its PT at the end of the day, and to the Studio Manager with a task after 24 hours (D-071).",
+            "expected": "A session without a full check-in is notified to its PT at the end of the day, and to the Studio Manager with a task after 24 hours (D-071). (milestone M5, M6)",
+            "sourceRefs": ["GYM-AC@v1"]
+          }
+        ],
+        "title": "Verify Gym CRM AC-30",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      },
+      "models": ["mock-heuristic-v1"],
+      "tokens": 1040
+    },
+    {
+      "story": "GYM-AC-01-PART-1",
+      "followUp": "Split from AC-01 after the agent reported it exceeds the context budget and advised splitting the story. Part 2 (hidden phone numbers) is a separate story.",
+      "ac": "AC-01",
+      "criterion": "An account without permission for a module does not see its menu and cannot reach it by direct URL.",
+      "route": "DRAFT_CREATED",
+      "caseId": "case_117855b341044a2ea76b09faa6a3c993",
+      "sourceRefs": ["GYM-AC@v1"],
+      "question": null,
+      "reviewKind": null,
+      "reason": null,
+      "draft": {
+        "steps": [
+          {
+            "action": "Exercise AC-01: An account without permission for a module does not see its menu and cannot reach it by direct URL.",
+            "expected": "An account without permission for a module does not see its menu and cannot reach it by direct URL; a role with phone numbers hidden never sees them on any screen or export. (milestone M1)",
+            "sourceRefs": ["GYM-AC@v1"]
+          }
+        ],
+        "title": "Verify Gym CRM AC-01 (part 1: module access)",
+        "priority": "P1",
+        "testData": ["Synthetic test user"],
+        "assumptions": [],
+        "preconditions": ["Test account exists in the target environment"],
+        "missingRequirements": []
+      },
+      "models": ["mock-heuristic-v1"],
+      "tokens": 1040
+    }
+  ],
+  "runs": [
+    {
+      "label": "ac-01-trainer-no-finance",
+      "ac": "AC-01",
+      "environmentId": "staging",
+      "runId": "run_b21b45548e1d4535b28b6c9c2a0b58cf",
+      "status": "PASSED",
+      "reason": "ALL_ASSERTIONS_PASSED",
+      "assertions": [
+        {
+          "name": "expectUrl",
+          "actual": "/dashboard",
+          "passed": true,
+          "stepId": "signed-in",
+          "expected": "/dashboard"
+        },
+        {
+          "name": "expectHidden",
+          "actual": "hidden",
+          "passed": true,
+          "stepId": "no-finance-menu",
+          "expected": "hidden"
+        },
+        {
+          "name": "expectText",
+          "actual": "Bạn không có quyền xem trang này",
+          "passed": true,
+          "stepId": "finance-refused",
+          "expected": "Bạn không có quyền xem trang này"
+        }
+      ],
+      "blockedRequests": [],
+      "evidence": [
+        {
+          "kind": "screenshot",
+          "name": "001-open-login.png",
+          "digest": "f0c75dcbedbb85b3fe95f22350c57676d77c253bc2396247557c4ada657ee018"
+        },
+        {
+          "kind": "screenshot",
+          "name": "002-signed-in.png",
+          "digest": "739207d5ee031515be1fe8e4d8a187f6c6d262493d7d33f39d5f527f5d8e8ac5"
+        },
+        {
+          "kind": "screenshot",
+          "name": "003-no-finance-menu.png",
+          "digest": "739207d5ee031515be1fe8e4d8a187f6c6d262493d7d33f39d5f527f5d8e8ac5"
+        },
+        {
+          "kind": "screenshot",
+          "name": "005-finance-refused.png",
+          "digest": "308833ecd897ad94bb099b917c45abf9cdd320013673ff510a4b16aa9cde7dcd"
+        },
+        {
+          "kind": "network-log",
+          "name": "network.json",
+          "digest": "a8ca16d77dc182975bd04d647d9e1b6256634a9f97b1fa74442ca52af1d273c5"
+        },
+        {
+          "kind": "step-log",
+          "name": "steps.json",
+          "digest": "a97759c1ee968e9119a60862060036a8dd1eb33604ef1524bdcbea7898ed89a6"
+        }
+      ],
+      "triage": null,
+      "reproduction": null
+    },
+    {
+      "label": "ac-04-khac-needs-note",
+      "ac": "AC-04",
+      "environmentId": "staging",
+      "runId": "run_0964257dee8c4f44827307fef0d2fb79",
+      "status": "PASSED",
+      "reason": "ALL_ASSERTIONS_PASSED",
+      "assertions": [
+        {
+          "name": "expectUrl",
+          "actual": "/dashboard",
+          "passed": true,
+          "stepId": "signed-in",
+          "expected": "/dashboard"
+        },
+        {
+          "name": "expectText",
+          "actual": "Đã chọn \"Khác\" thì phải ghi rõ",
+          "passed": true,
+          "stepId": "note-required",
+          "expected": "Đã chọn \"Khác\" thì phải ghi rõ"
+        },
+        {
+          "name": "expectVisible",
+          "actual": "visible",
+          "passed": true,
+          "stepId": "still-open",
+          "expected": "visible"
+        }
+      ],
+      "blockedRequests": [],
+      "evidence": [
+        {
+          "kind": "screenshot",
+          "name": "001-open-login.png",
+          "digest": "f0c75dcbedbb85b3fe95f22350c57676d77c253bc2396247557c4ada657ee018"
+        },
+        {
+          "kind": "screenshot",
+          "name": "002-signed-in.png",
+          "digest": "07f25454df67712634c37f3c6170d95e436e0ce40bc069aec5066ccaf2054bae"
+        },
+        {
+          "kind": "screenshot",
+          "name": "003-open-leads.png",
+          "digest": "b0b3f667fbf0121a909887b39ba606cd7c49216330f80cc4ff4be67f8b8da2b3"
+        },
+        {
+          "kind": "screenshot",
+          "name": "004-note-required.png",
+          "digest": "644ec19bc711dd364250f559c13f66732b0a593da20cf6c25b39ff4c1b28636b"
+        },
+        {
+          "kind": "screenshot",
+          "name": "005-still-open.png",
+          "digest": "644ec19bc711dd364250f559c13f66732b0a593da20cf6c25b39ff4c1b28636b"
+        },
+        {
+          "kind": "network-log",
+          "name": "network.json",
+          "digest": "6633e3a9ce9da9855c7d8c0e61553c636c6a842d01db191293a55cb44958aa5f"
+        },
+        {
+          "kind": "step-log",
+          "name": "steps.json",
+          "digest": "5b0a3acb008ccd42daada37b5abd28f023723f63f4bc94014dabf425807aed18"
+        }
+      ],
+      "triage": null,
+      "reproduction": null
+    },
+    {
+      "label": "ac-25-lead-name-and-channel",
+      "ac": "AC-25",
+      "environmentId": "staging",
+      "runId": "run_ca54ee527f0c46558d40d51718fc4ff0",
+      "status": "PASSED",
+      "reason": "ALL_ASSERTIONS_PASSED",
+      "assertions": [
+        {
+          "name": "expectUrl",
+          "actual": "/dashboard",
+          "passed": true,
+          "stepId": "signed-in",
+          "expected": "/dashboard"
+        },
+        {
+          "name": "expectUrl",
+          "actual": "/leads/",
+          "passed": true,
+          "stepId": "on-lead-page",
+          "expected": "/leads/"
+        },
+        {
+          "name": "expectVisible",
+          "actual": "visible",
+          "passed": true,
+          "stepId": "lead-heading",
+          "expected": "visible"
+        }
+      ],
+      "blockedRequests": [],
+      "evidence": [
+        {
+          "kind": "screenshot",
+          "name": "001-open-login.png",
+          "digest": "f0c75dcbedbb85b3fe95f22350c57676d77c253bc2396247557c4ada657ee018"
+        },
+        {
+          "kind": "screenshot",
+          "name": "002-signed-in.png",
+          "digest": "07f25454df67712634c37f3c6170d95e436e0ce40bc069aec5066ccaf2054bae"
+        },
+        {
+          "kind": "screenshot",
+          "name": "003-open-leads.png",
+          "digest": "b0b3f667fbf0121a909887b39ba606cd7c49216330f80cc4ff4be67f8b8da2b3"
+        },
+        {
+          "kind": "screenshot",
+          "name": "004-on-lead-page.png",
+          "digest": "ff6596e2dc63fa212c1739cf1ff8ce00c02851758789d1a88f37fd56aaafa392"
+        },
+        {
+          "kind": "screenshot",
+          "name": "005-lead-heading.png",
+          "digest": "ff6596e2dc63fa212c1739cf1ff8ce00c02851758789d1a88f37fd56aaafa392"
+        },
+        {
+          "kind": "step-log",
+          "name": "steps.json",
+          "digest": "6815a3834818718b6bac801a8fbeff9d7e7f640a83af5b565afad5610d9264b6"
+        },
+        {
+          "kind": "network-log",
+          "name": "network.json",
+          "digest": "9a557add367f19ba52413ccc66373afad88f4da7d8ca7a2d304c65667657b195"
+        }
+      ],
+      "triage": null,
+      "reproduction": null
+    }
+  ],
+  "gates": [
+    {
+      "gate": "Same approved test against the production environment",
+      "outcome": {
+        "status": "BLOCKED",
+        "reason": "DENIED:PRODUCTION_WRITE_DISABLED"
+      }
+    },
+    {
+      "gate": "A destructive step without a scoped approval",
+      "outcome": {
+        "status": "BLOCKED",
+        "reason": "REVIEW_REQUIRED:SCOPED_APPROVAL_REQUIRED",
+        "approvalReview": "review_cd20bdf9a800440f81a902445e1c31c7"
+      }
+    },
+    {
+      "gate": "A step navigating to another host",
+      "refused": "VALIDATION invalid executable spec: [\n  {\n    \"code\": \"custom\",\n    \"path\": [\n      \"steps\",\n      0,\n      \"path\"\n    ],\n    \"message\": \"must be a path starting with \\\"/\\\"\"\n  }\n]"
+    },
+    {
+      "gate": "The proposer approving their own executable",
+      "refused": "FORBIDDEN the proposer cannot review their own executable"
+    }
+  ],
+  "staged": {
+    "note": "STAGED: ac-01-trainer-no-finance with a deliberately wrong expectation",
+    "label": "staged-ac-01-trainer-no-finance",
+    "ac": "AC-01",
+    "environmentId": "staging",
+    "runId": "run_38346a45f4fb469981ebbfb2984fa5f4",
+    "status": "FAILED",
+    "reason": "ASSERTION_FAILED:staged-wrong-expectation",
+    "assertions": [
+      {
+        "name": "expectUrl",
+        "actual": "/dashboard",
+        "passed": true,
+        "stepId": "signed-in",
+        "expected": "/dashboard"
+      },
+      {
+        "name": "expectHidden",
+        "actual": "hidden",
+        "passed": true,
+        "stepId": "no-finance-menu",
+        "expected": "hidden"
+      },
+      {
+        "name": "expectText",
+        "actual": "Bạn không có quyền xem trang này\n\nHãy liên hệ quản trị viên nếu bạn cần quyền truy cập.",
+        "passed": false,
+        "stepId": "staged-wrong-expectation",
+        "expected": "This text is deliberately not on the page (staged failure)"
+      }
+    ],
+    "blockedRequests": [],
+    "evidence": [
+      {
+        "kind": "screenshot",
+        "name": "001-open-login.png",
+        "digest": "f0c75dcbedbb85b3fe95f22350c57676d77c253bc2396247557c4ada657ee018"
+      },
+      {
+        "kind": "screenshot",
+        "name": "002-signed-in.png",
+        "digest": "739207d5ee031515be1fe8e4d8a187f6c6d262493d7d33f39d5f527f5d8e8ac5"
+      },
+      {
+        "kind": "screenshot",
+        "name": "003-no-finance-menu.png",
+        "digest": "739207d5ee031515be1fe8e4d8a187f6c6d262493d7d33f39d5f527f5d8e8ac5"
+      },
+      {
+        "kind": "screenshot",
+        "name": "004-open-finance-directly.png",
+        "digest": "915abeee8c7069c5078a2d4b36553c29db0161c8879d5dd63052246a26c1e165"
+      },
+      {
+        "kind": "screenshot",
+        "name": "005-staged-wrong-expectation.png",
+        "digest": "308833ecd897ad94bb099b917c45abf9cdd320013673ff510a4b16aa9cde7dcd"
+      },
+      {
+        "kind": "network-log",
+        "name": "network.json",
+        "digest": "2167d6c382db2d51bd55b9c7ee0a4cd518a6c1e2df2719da1991a33a85f4aaec"
+      },
+      {
+        "kind": "step-log",
+        "name": "steps.json",
+        "digest": "bc2a72a435525ac50c9a95707b8d6e9fa6d8cdc044a1822bac8d3906ae935ff8"
+      }
+    ],
+    "triage": {
+      "suspectedCause": "PRODUCT_DEFECT",
+      "securitySensitive": false,
+      "rationale": "Heuristic suggestion (PRODUCT_DEFECT).",
+      "reviewId": "review_9ba17a6a030b4ae6a8b6d5b767b1dd80"
+    },
+    "reproduction": "# Reproduction: Verify Gym CRM AC-01 (part 1: module access)\n\n- Run: run_38346a45f4fb469981ebbfb2984fa5f4 (FAILED: ASSERTION_FAILED:staged-wrong-expectation)\n- Test case: case_117855b341044a2ea76b09faa6a3c993 revision 1; executable v4 (spec 3dddd79ff8ee)\n- Environment: staging (staging) http://localhost:3410\n- Triage: PRODUCT_DEFECT (suggested, unverified)\n- Executed: 2026-10-16T03:34:30.616Z\n\n## Steps\n\n1. navigate /login\n2. fill role=main >> label=\"Email\" with \"[REDACTED_EMAIL]\"\n3. fill role=main >> label=\"Password\" with [secret:GYM_PASSWORD]\n4. click role=main >> role=button[name=\"Sign in\"]\n5. expect URL exact /dashboard\n6. expect role=link[name=\"Tài chính\"] hidden\n7. navigate /finance\n8. expect role=main to contain \"This text is deliberately not on the page (staged failure)\"  <- FAILED: expected \"This text is deliberately not on the page (staged failure)\" but was \"Bạn không có quyền xem trang này\\n\\nHãy liên hệ quản trị viên nếu bạn cần quyền truy cập.\"\n\n## Evidence (authenticated access via the QA API)\n\n- screenshot 001-open-login.png: id evd_ba815b9e13d445f98ec7c6003366fc93, sha256 f0c75dcbedbb85b3...\n- screenshot 002-signed-in.png: id evd_be8d1ee6ed794d4ea6d5714b58650ac0, sha256 739207d5ee031515...\n- screenshot 003-no-finance-menu.png: id evd_6f4907796d234db89274b1b997d9454d, sha256 739207d5ee031515...\n- screenshot 004-open-finance-directly.png: id evd_c2c127f9db15439299892972d16d2bad, sha256 915abeee8c7069c5...\n- screenshot 005-staged-wrong-expectation.png: id evd_64570faade6d43dd84f9a63ee37cf6d7, sha256 308833ecd897ad94...\n- network-log network.json: id evd_903874bfaaea4a168b7c0b185a8c4403, sha256 2167d6c382db2d51...\n- step-log steps.json: id evd_920f9599c9694d9b8dbdaae1dacd5329, sha256 bc2a72a435525ac5...\n\nSecrets are shown as [secret:NAME] and never included. Verdicts come from deterministic assertions;\nany cause above marked \"suggested\" is a model suggestion, not a finding."
+  },
+  "metrics": {
+    "window": {
+      "days": 7
+    },
+    "workflows": {
+      "total": 31,
+      "byRoute": {
+        "DRAFT_CREATED": 25,
+        "REVIEW_REQUESTED": 6
+      }
+    },
+    "decisions": {
+      "total": 51,
+      "failureRate": 0,
+      "cacheHitRate": 0,
+      "byKindOutcome": [
+        {
+          "kind": "draft",
+          "outcome": "OK",
+          "cacheHit": false,
+          "count": 25
+        },
+        {
+          "kind": "readiness",
+          "outcome": "OK",
+          "cacheHit": false,
+          "count": 25
+        },
+        {
+          "kind": "triage",
+          "outcome": "OK",
+          "cacheHit": false,
+          "count": 1
+        }
+      ]
+    },
+    "tokens": {
+      "input": 20400,
+      "output": 6120,
+      "byModel": [
+        {
+          "model": "mock-heuristic-v1",
+          "input": 20400,
+          "output": 6120
+        },
+        {
+          "model": "none",
+          "input": 0,
+          "output": 0
+        }
+      ]
+    },
+    "reviews": {
+      "openByKind": {
+        "ACTION_APPROVAL": 1,
+        "FAILURE_TRIAGE": 1,
+        "MISSING_KNOWLEDGE": 6
+      },
+      "oldestOpenHours": 0.005335555555555555
+    },
+    "runs": {
+      "byState": {
+        "BLOCKED": 2,
+        "FAILED": 1,
+        "PASSED": 3
+      }
+    },
+    "policy": {
+      "deniedByReason": {
+        "PRODUCTION_WRITE_DISABLED": 1
+      }
+    },
+    "triage": {
+      "bySuggestedCause": {
+        "PRODUCT_DEFECT": 1
+      },
+      "verified": 0,
+      "agreementRate": null,
+      "securityEscalations": 0
+    }
+  }
+}

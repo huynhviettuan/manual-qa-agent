@@ -1,0 +1,11 @@
+{
+  "externalId": "GYM-AC-29",
+  "title": "Gym CRM AC-29",
+  "description": "Acceptance criterion AC-29 of the Gym CRM (milestone M5).",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-29",
+      "text": "Simulated scans through the API: a pair of the customer and the right PT within 15 minutes and the pairing window turns the session to *Đã tập* and triggers the session taken, the PT credit, and the email; a missing side hangs the session with the right reason; a scan with no booking is an error; a customer training twice with two PTs needs a pair for each (D-069, D-070)."
+    }
+  ]
+}

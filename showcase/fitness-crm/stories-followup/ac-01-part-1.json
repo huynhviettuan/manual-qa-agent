@@ -1,0 +1,11 @@
+{
+  "externalId": "GYM-AC-01-PART-1",
+  "title": "Gym CRM AC-01 (part 1: module access)",
+  "description": "Split from AC-01 after the agent reported it exceeds the context budget and advised splitting the story. Part 2 (hidden phone numbers) is a separate story.",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-01",
+      "text": "An account without permission for a module does not see its menu and cannot reach it by direct URL."
+    }
+  ]
+}

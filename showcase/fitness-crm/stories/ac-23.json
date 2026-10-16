@@ -1,0 +1,11 @@
+{
+  "externalId": "GYM-AC-23",
+  "title": "Gym CRM AC-23",
+  "description": "Acceptance criterion AC-23 of the Gym CRM (milestone M2, M5, M7).",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-23",
+      "text": "The lead, PT calendar, and session log screens work on a phone."
+    }
+  ]
+}

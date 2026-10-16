@@ -1,0 +1,11 @@
+{
+  "externalId": "GYM-AC-17",
+  "title": "Gym CRM AC-17",
+  "description": "Acceptance criterion AC-17 of the Gym CRM (milestone M6).",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-17",
+      "text": "Every credited or refunded session sends exactly one email to the customer, from the template and in the right language, with its sending status stored in the customer profile."
+    }
+  ]
+}

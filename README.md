@@ -4,7 +4,7 @@ An assistant for manual QA teams. It turns user stories into test cases that cit
 
 > **Status:** Phases 1–3 are implemented and tested; Phase 4 is not started ([status](#project-status)). The reviewer workflow is API-only (no web UI yet). · **Version:** 0.3 · **Updated:** 2026-10-14
 
-**Contents:** [How it works](#how-it-works) · [Quickstart](#quickstart) · [Walkthroughs](#walkthroughs) · [Roles](#roles-and-api-keys) · [Real AI models](#use-a-real-ai-model) · [Configuration](#configuration) · [Production setup](#run-it-like-production) · [Development](#develop-and-test) · [Troubleshooting](#troubleshooting) · [Docs](#documentation)
+**Contents:** [How it works](#how-it-works) · [Quickstart](#quickstart) · [Walkthroughs](#walkthroughs) · [Showcase](#showcase-gym-crm) · [Roles](#roles-and-api-keys) · [Real AI models](#use-a-real-ai-model) · [Configuration](#configuration) · [Production setup](#run-it-like-production) · [Development](#develop-and-test) · [Troubleshooting](#troubleshooting) · [Docs](#documentation)
 
 ## How it works
 
@@ -155,6 +155,10 @@ To file the confirmed defect in Jira, [configure Jira](#configuration) and resta
 1. `POST /api/test-runs/$RUN/bugs` creates a bug draft and an approval review.
 2. A QA lead approves the review.
 3. `POST /api/bugs/<id>/publish` with that `approvalId` files the issue. It's idempotent, and `POST /api/bugs/<id>/revert` undoes it (audited; no deletes).
+
+## Showcase: Gym CRM
+
+The agent tested a real product: the Gym CRM sample with its fictional Demo Gym data. It checked all 30 acceptance criteria for readiness, ran approved tests for AC-01 (permissions), AC-04 ("Khác" needs a note) and AC-25 (minimal lead) in a browser, and tried four unsafe actions, all of which were stopped. The run also found and fixed five problems in the agent itself. See [showcase/fitness-crm](showcase/fitness-crm/README.md) to reproduce it; the report is published privately at https://claude.ai/artifact/5NU9478WKjcSdzTi3wzmKN.
 
 ## Roles and API keys
 

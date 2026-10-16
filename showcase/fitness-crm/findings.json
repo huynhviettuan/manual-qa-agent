@@ -1,0 +1,51 @@
+{
+  "agent": [
+    {
+      "title": "Test results depended on the machine's language",
+      "detail": "The executor did not pin a browser locale, so Gym CRM rendered its login page in Vietnamese on one machine and English on another, and the same spec failed on one of them. The executor now pins en-US by default (configurable), with a test.",
+      "status": "Fixed"
+    },
+    {
+      "title": "A redirect could make a passing test inconclusive",
+      "detail": "Gym CRM redirects /finance to /finance/payments on the client at an unpredictable moment after load. The screenshot taken after the navigation step sometimes raced it (3 of 25 runs). Navigation screenshots are now supporting evidence: if one cannot be captured, the step log says why and the run continues. Assertion screenshots stay mandatory. After the fix: 0 inconclusive runs in 50.",
+      "status": "Fixed"
+    },
+    {
+      "title": "Redaction mangled secret names in reproduction notes",
+      "detail": "The reproduction write-up showed the password step as [secret:[REDACTED] because the redactor treated the reference name as a value. The secret was never exposed. References of the exact form [secret:NAME] are now kept; real values in brackets are still redacted. Test added.",
+      "status": "Fixed"
+    },
+    {
+      "title": "Locators could not scope Gym CRM's dropdowns",
+      "detail": "Gym CRM uses custom dropdowns (a listbox of options) and only a main landmark on some pages. The allowed ARIA roles gained main, listbox and option. No new step type was added (ADR-0008).",
+      "status": "Fixed"
+    },
+    {
+      "title": "Large requirement sections overflowed the context budget",
+      "detail": "With whole business-rule sections as sources, 28 of 30 criteria hit the 1,800-token budget and the agent refused them rather than truncating. Sources now hold one block per rule (BR-xxx) and per permission row. Six long criteria still exceed it; the agent asks for them to be split.",
+      "status": "Fixed in the source preparation"
+    }
+  ],
+  "product": [
+    {
+      "title": "AC-04 is enforced on the server",
+      "detail": "Saving a lead with channel \"Khác\" and no note is refused by the server, not only by the form: the field shows \"Đã chọn \\\"Khác\\\" thì phải ghi rõ\" and a toast reports invalid data.",
+      "kind": "Confirmed"
+    },
+    {
+      "title": "Sign-in is rate limited",
+      "detail": "25 sign-ins within about a minute produced HTTP 429 for some attempts. This is brute-force protection working; it means test suites should sign in once per role and reuse the session.",
+      "kind": "Observation"
+    },
+    {
+      "title": "The sidebar is not a navigation landmark",
+      "detail": "The main menu has no <nav> element, ARIA navigation role or test ids, so assistive technology cannot jump to it and tests cannot scope menu links to it. The trainer check therefore asserts that \"Tài chính\" appears nowhere on the page.",
+      "kind": "Accessibility"
+    },
+    {
+      "title": "Two channel dropdowns on one page",
+      "detail": "The leads page has a \"Kênh liên hệ\" filter and a \"Kênh liên hệ\" field in the add-lead dialog. Page-wide locators would be ambiguous; every step is scoped to its dialog.",
+      "kind": "Observation"
+    }
+  ]
+}

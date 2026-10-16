@@ -1,4 +1,6 @@
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { createServer } from 'node:http';
+import type { AddressInfo } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -181,5 +183,62 @@ describe('PlaywrightExecutor against the demo app', () => {
     const { target } = await demo();
     const out = await executor.execute(input(deleteAccountSpec, target));
     expect(out.verdict).toBe('PASSED');
+  });
+});
+
+describe('PlaywrightExecutor locale', () => {
+  // Apps that localize from Accept-Language must see the same language on every machine.
+  it('pins the browser locale (en-US by default, overridable)', async () => {
+    const server = createServer((req, res) => {
+      res.setHeader('content-type', 'text/html; charset=utf-8');
+      res.end(`<main><p>${String(req.headers['accept-language'] ?? '').split(',')[0]}</p></main>`);
+    });
+    await new Promise<void>((r) => server.listen(0, '127.0.0.1', r));
+    apps.push({ close: () => new Promise((r) => server.close(r)) });
+    const baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+    const target = { baseUrl, allowedHosts: [new URL(baseUrl).host] };
+    const languageIs = (lang: string): ExecutableSpecInput => ({
+      steps: [
+        { id: 'open', type: 'navigate', path: '/' },
+        { id: 'lang', type: 'expectText', target: { by: 'role', role: 'main' }, text: lang, match: 'exact' },
+      ],
+    });
+    expect((await executor.execute(input(languageIs('en-US'), target))).verdict).toBe('PASSED');
+    const vietnamese = new PlaywrightExecutor({
+      channel: process.env.QA_BROWSER_CHANNEL || undefined,
+      stepTimeoutMs: 3000,
+      locale: 'vi-VN',
+    });
+    expect((await vietnamese.execute(input(languageIs('vi-VN'), target))).verdict).toBe('PASSED');
+  });
+});
+
+describe('PlaywrightExecutor redirects', () => {
+  // A route that redirects after loading (like Gym CRM's /finance -> /finance/payments) must still
+  // pass. This does not reliably reproduce the screenshot-vs-redirect race fixed in the executor (the
+  // window is too narrow to hit on demand); the showcase's /finance run is the regression check.
+  it('a navigation that redirects after load still passes', async () => {
+    const server = createServer((req, res) => {
+      res.setHeader('content-type', 'text/html; charset=utf-8');
+      res.end(
+        req.url === '/start'
+          ? `<main>start</main><script>addEventListener('load', () => setTimeout(() => location.replace('/done'), 0))</script>`
+          : `<main><p>arrived</p></main>`,
+      );
+    });
+    await new Promise<void>((r) => server.listen(0, '127.0.0.1', r));
+    apps.push({ close: () => new Promise((r) => server.close(r)) });
+    const baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+    const target = { baseUrl, allowedHosts: [new URL(baseUrl).host] };
+    const spec: ExecutableSpecInput = {
+      steps: [
+        { id: 'open', type: 'navigate', path: '/start' },
+        { id: 'arrived', type: 'expectText', target: { by: 'role', role: 'main' }, text: 'arrived' },
+      ],
+    };
+    const out = await executor.execute(input(spec, target));
+    expect(out, JSON.stringify(out.steps.map((s) => s.error).filter(Boolean))).toMatchObject({
+      verdict: 'PASSED',
+    });
   });
 });

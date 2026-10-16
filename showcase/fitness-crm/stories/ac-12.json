@@ -1,0 +1,11 @@
+{
+  "externalId": "GYM-AC-12",
+  "title": "Gym CRM AC-12",
+  "description": "Acceptance criterion AC-12 of the Gym CRM (milestone M4).",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-12",
+      "text": "Deleting a contract with receipts is blocked and the receipts to delete first are listed; after deleting in the right order, total receipts and revenue fall by exactly the deleted amounts."
+    }
+  ]
+}

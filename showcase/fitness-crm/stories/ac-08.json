@@ -1,0 +1,11 @@
+{
+  "externalId": "GYM-AC-08",
+  "title": "Gym CRM AC-08",
+  "description": "Acceptance criterion AC-08 of the Gym CRM (milestone M3).",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-08",
+      "text": "The consulting dashboard gives the right lead counts, booking rate, and show rate per consultant when compared with the Excel files of September and October 2026."
+    }
+  ]
+}

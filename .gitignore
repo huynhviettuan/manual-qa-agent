@@ -6,3 +6,4 @@ coverage/
 !env.example
 .pglite/
 .evidence/
+.showcase-evidence/

@@ -1,0 +1,11 @@
+{
+  "externalId": "GYM-AC-20",
+  "title": "Gym CRM AC-20",
+  "description": "Acceptance criterion AC-20 of the Gym CRM (milestone M7).",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-20",
+      "text": "A customer's plans and every session log are visible in their profile, with plan and actual on the same row; choosing a Cardio exercise shows time, speed, and heart rate."
+    }
+  ]
+}

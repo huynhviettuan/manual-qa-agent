@@ -1,0 +1,11 @@
+{
+  "externalId": "GYM-AC-27",
+  "title": "Gym CRM AC-27",
+  "description": "Acceptance criterion AC-27 of the Gym CRM (milestone M2).",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-27",
+      "text": "A ticked checklist step cannot be unticked; an overdue step past its grace period locks as \"Không thực hiện\" and cannot be ticked late (D-054)."
+    }
+  ]
+}

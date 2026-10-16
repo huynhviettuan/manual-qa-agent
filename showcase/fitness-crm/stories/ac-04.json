@@ -1,0 +1,11 @@
+{
+  "externalId": "GYM-AC-04",
+  "title": "Gym CRM AC-04",
+  "description": "Acceptance criterion AC-04 of the Gym CRM (milestone M1).",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-04",
+      "text": "Choosing \"Khác\" in any drop-down cannot be saved without a note."
+    }
+  ]
+}
