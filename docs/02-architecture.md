@@ -49,6 +49,7 @@ flowchart LR
 apps/
   api/                     # HTTP API + API-key auth (implemented)
   cli/                     # migrate, seed, ingest, revoke, eval (implemented)
+  mcp/                     # Propose-only MCP tool server for AI clients, AI_AGENT key only (implemented; ADR-0011)
   reviewer-ui/             # Optional web review queue (planned)
   worker/                  # Test-run worker with leases (implemented)
   demo-sut/                # Demo system under test + executable specs (pilot/CI only)

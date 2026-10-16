@@ -55,6 +55,12 @@ describe('auth', () => {
     expect((await app.inject({ method: 'GET', url: '/healthz' })).statusCode).toBe(200);
   });
 
+  it('GET /api/me returns the key holder from the server-side lookup', async () => {
+    const res = await app.inject({ method: 'GET', url: '/api/me', headers: key('agent') });
+    expect(res.json()).toEqual({ actorId: 'p-agent', tenantId: 't', projectId: 'p', roles: ['AI_AGENT'] });
+    expect((await app.inject({ method: 'GET', url: '/api/me' })).statusCode).toBe(401);
+  });
+
   it('ignores roles supplied in the request body', async () => {
     const res = await app.inject({
       method: 'POST',

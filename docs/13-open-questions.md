@@ -18,6 +18,7 @@
 | OQ-10 | Is GitHub repo private/public? | Private until permission review | Documentation/secrets/security |
 | OQ-11 | Hosting model and budget? | Small single-service deployment | Infrastructure and operational choices |
 | OQ-12 | Expected reviewer roles / SLA? | QA + Product Owner + Admin | Review workflow |
+| OQ-13 | May an AI client submit stories (and so trigger drafts) on a person's behalf? | No: `AI_AGENT` is not a submitter; people submit stories (ADR-0011). Needs a delegated-access design first | Agent tool server scope, security matrix |
 
 ## Decisions to validate before implementation
 

@@ -201,6 +201,15 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
 
   app.get('/healthz', async () => ({ ok: true }));
 
+  // Who the presented key belongs to. Lets clients such as the agent tool server (ADR-0011) refuse to run with
+  // the wrong kind of key; it reveals nothing the key holder can't already do.
+  app.get('/api/me', async (req) => ({
+    actorId: req.actor.id,
+    tenantId: req.actor.tenantId,
+    projectId: req.actor.projectId,
+    roles: req.actor.roles,
+  }));
+
   app.post('/api/stories', async (req, reply) => {
     const body = StoryBody.parse(req.body);
     const result = await submitStory(orchestratorDeps(req), req.actor, body, {
