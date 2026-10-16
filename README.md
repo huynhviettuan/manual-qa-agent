@@ -170,9 +170,13 @@ claude mcp add qa-agent --env QA_API_URL=http://127.0.0.1:3000 --env QA_AGENT_KE
 
 `-s` matters: the tool server speaks MCP on stdout, and pnpm's script banner would corrupt it.
 
+For assistants that can't spawn a local process, run it over HTTP instead: `QA_API_URL=… pnpm -s mcp --http` serves
+`http://127.0.0.1:3100/mcp`, and every request must send its own `pilot-agent` key as `Authorization: Bearer <key>`
+([ADR-0013](docs/adr/0013-tool-server-http-transport.md)).
+
 Tools: `whoami`, `get_test_case`, `check_executable`, `propose_executable`, `request_run`, `get_run`, `get_triage`,
 `get_reproduction`. Approving cases and executables, answering clarifications and filing bugs stay with people;
-there is no tool for them. Stories are also submitted by people for now ([OQ-13](docs/13-open-questions.md)).
+there is no tool for them. Stories are also submitted by people ([ADR-0012](docs/adr/0012-story-submission-stays-with-people.md)).
 The `manual-qa-agent` and `test-script-writer` skills in [sdet-skills](https://github.com/huynhviettuan/sdet-skills)
 teach an assistant this workflow and the executable-step format.
 
