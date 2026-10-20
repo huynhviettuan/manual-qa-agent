@@ -1,7 +1,7 @@
 import OpenAI from 'openai';
 import { zodTextFormat } from 'openai/helpers/zod';
 import { z } from 'zod';
-import { canonicalJson, DraftContent, sha256 } from '@qa/domain';
+import { canonicalJson, type DraftContent, DraftOutput, sha256 } from '@qa/domain';
 import {
   assessmentFromDecisions,
   DECISIONS_PROMPT_VERSION,
@@ -209,7 +209,7 @@ export class OpenAIResponsesDrafter implements DraftGenerator {
         model: this.model,
         instructions: DRAFT_SYSTEM,
         input: userMessage(payload),
-        text: { format: zodTextFormat(DraftContent, 'test_case_draft') },
+        text: { format: zodTextFormat(DraftOutput, 'test_case_draft') },
         max_output_tokens: 16000,
         // Do not retain requirement text in the provider's response store.
         store: false,

@@ -87,6 +87,11 @@ export function heuristicDraft(payload: PromptPayload): DraftContent {
     }),
     assumptions: [],
     missingRequirements: [],
+    // The stand-in derives no partitions or boundaries, so it claims only specification-based design.
+    requirementRefs: story.acceptanceCriteria.map((ac) => `story:${ac.id}`),
+    techniques: ['specification_based'],
+    testTypes: ['positive'],
+    testConditions: story.acceptanceCriteria.map((ac) => `${ac.id}: behaviour as stated`),
   };
 }
 

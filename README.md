@@ -76,7 +76,7 @@ curl -s -X POST $API/api/stories -H "x-api-key: $QA_KEY" -H "content-type: appli
   -d @examples/story-login-valid.json
 ```
 
-The response says `"route":"DRAFT_CREATED"` and gives a `caseId`, plus the `sourceRefs` the draft cites (`AC-LOGIN@v1`). Read the draft, then approve it as a QA engineer:
+The response says `"route":"DRAFT_CREATED"` and gives a `caseId`, plus the `sourceRefs` the draft cites (`AC-LOGIN@v1`). The draft also names the test-design techniques it used (boundary values, decision table, state transition and so on), the conditions it derived, and the requirements it verifies. Any acceptance criterion it does not cover is listed in `missingRequirements` by a check in code ([ADR-0014](docs/adr/0014-drafts-name-test-design-techniques.md)). Read the draft, then approve it as a QA engineer:
 
 ```bash
 export CASE=<caseId>
@@ -309,7 +309,7 @@ pnpm eval                                          # labeled pilot set; fails on
 
 | Phase | What works | Not yet |
 | --- | --- | --- |
-| 1. Requirements and review | Approved-source registry, full-text + exact-ID retrieval, readiness check, cited drafts, review queue, knowledge feedback, evaluation set | Vector search (ADR-0005), reviewer web UI |
+| 1. Requirements and review | Approved-source registry, full-text + exact-ID retrieval, readiness check, cited drafts with named test-design techniques and a coverage check, review queue, knowledge feedback, evaluation set | Vector search (ADR-0005), reviewer web UI |
 | 2. Execution and evidence | Constrained steps (ADR-0008), Playwright executor with host allowlist and pinned locale, deterministic verdicts, leased workers, immutable evidence with retention, test suites (sections, suite runs, per-case report) | S3 evidence storage, AI-proposed steps, date-relative inputs, values carried between steps |
 | 3. Triage and integration | Advisory triage with security escalation (ADR-0009), reproduction write-up, Jira Cloud filing (off by default), decision cache, metrics and drift alerts, propose-only MCP tool server for AI assistants (ADR-0011) | Live Jira verification, test-management sync |
 | 4. Scale | — | Per-project budgets, scheduled runs, more frameworks; only with measured benefit ([docs/08](docs/08-implementation-plan.md)) |

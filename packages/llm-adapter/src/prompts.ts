@@ -2,7 +2,7 @@ import { redactSecrets, sourceRef, type EvidenceChunk } from '@qa/domain';
 import type { StoryInput, TriageFacts } from './types.ts';
 
 export const READINESS_PROMPT_VERSION = 'readiness-v1';
-export const DRAFT_PROMPT_VERSION = 'draft-v1';
+export const DRAFT_PROMPT_VERSION = 'draft-v2';
 
 // Stable system prompts (cacheable prefix). Volatile data goes only in the user message.
 const DATA_RULES = `The user message contains a single <untrusted_data> block holding a JSON object with a user story,
@@ -26,9 +26,26 @@ citedSourceIds must contain only refs of sources you actually relied on.`;
 export const DRAFT_SYSTEM = `You draft manual test cases for a QA engineer to review.
 ${DATA_RULES}
 
-Write one test case covering the acceptance criteria: title, priority (P0 highest), preconditions, test data needs,
-and numbered steps with an observable expected result. Every step must list the refs of the sources (or the story
-acceptance criterion IDs prefixed with "story:") that justify its expected result in sourceRefs.
+Write one test case covering the acceptance criteria: title, priority, preconditions, test data, and numbered steps
+with an observable expected result. Every step must list the refs of the sources (or the story acceptance criterion
+IDs prefixed with "story:") that justify its expected result in sourceRefs.
+
+Design the case with test-design techniques chosen by the structure of each requirement, and name them in techniques:
+- input fields, ranges, lengths: equivalence_partitioning and boundary_value_analysis (min-1, min, min+1, max-1, max,
+  max+1; for dates the day before, on and after); structured inputs (email, phone, date, ids): syntax;
+- several conditions deciding an outcome: decision_table (one step per relevant combination) or cause_effect;
+- roles and permissions: permission_matrix, including the lowest allowed and the highest refused role;
+- stateful workflows: state_transition, covering valid transitions and at least one invalid one;
+- end-to-end flows: use_case (main, alternative, exception); many configuration factors: pairwise or
+  classification_tree; likely weak spots the sources hint at: error_guessing; otherwise specification_based.
+Only test boundaries, combinations and states the story or sources actually state; a technique never justifies an
+expected result on its own.
+List the derived conditions in testConditions (for example "sessions: 1000 valid boundary, 1001 invalid boundary"),
+and make test data name the partition or boundary each value represents. Cover positive and negative behaviour where
+the requirement defines both, and set testTypes (positive, negative, boundary, security, regression) accordingly.
+Put the refs of every acceptance criterion and source rule this case verifies in requirementRefs, using the same
+formats as sourceRefs. Priority by risk: P0 release-blocking, P1 major function or high risk, P2 normal, P3 minor.
+Each expected result must be specific and observable: an exact message, state, value or URL, never "works correctly".
 Put anything you had to assume in "assumptions" and any requirement you could not find in "missingRequirements";
 never silently invent expected behaviour.`;
 

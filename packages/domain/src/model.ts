@@ -47,12 +47,27 @@ export const AcceptanceCriterion = z.object({
 });
 export type AcceptanceCriterion = z.infer<typeof AcceptanceCriterion>;
 
-/**
- * Content of a test-case draft revision. The model emits this shape; the same schema
- * validates reviewer edits. Kept free of length constraints so it maps cleanly onto
- * provider structured-output schemas; business rules are checked in code.
- */
-export const DraftContent = z.object({
+/** Test-design techniques a draft may name (ADR-0014). */
+export const TestTechnique = z.enum([
+  'specification_based',
+  'equivalence_partitioning',
+  'boundary_value_analysis',
+  'decision_table',
+  'cause_effect',
+  'state_transition',
+  'use_case',
+  'permission_matrix',
+  'pairwise',
+  'classification_tree',
+  'syntax',
+  'error_guessing',
+]);
+export type TestTechnique = z.infer<typeof TestTechnique>;
+
+export const TestType = z.enum(['positive', 'negative', 'boundary', 'security', 'regression']);
+export type TestType = z.infer<typeof TestType>;
+
+const draftFields = {
   title: z.string(),
   priority: z.enum(['P0', 'P1', 'P2', 'P3']),
   preconditions: z.array(z.string()),
@@ -66,6 +81,32 @@ export const DraftContent = z.object({
   ),
   assumptions: z.array(z.string()),
   missingRequirements: z.array(z.string()),
+};
+const designFields = {
+  /** Requirements this case verifies, as `story:<AC id>` or `sourceId@version`. */
+  requirementRefs: z.array(z.string()),
+  techniques: z.array(TestTechnique),
+  testTypes: z.array(TestType),
+  /** Conditions derived with the techniques: partitions, boundaries, rule columns, transitions. */
+  testConditions: z.array(z.string()),
+};
+
+/**
+ * What the model must emit for a draft (draft-v2). Every field is required so it maps cleanly
+ * onto provider structured-output schemas; business rules are checked in code (grounding.ts).
+ */
+export const DraftOutput = z.object({ ...draftFields, ...designFields });
+
+/**
+ * Content of a test-case draft revision; also validates reviewer edits. Revisions written
+ * before draft-v2 have no test-design fields, so those default to empty.
+ */
+export const DraftContent = z.object({
+  ...draftFields,
+  requirementRefs: designFields.requirementRefs.default([]),
+  techniques: designFields.techniques.default([]),
+  testTypes: designFields.testTypes.default([]),
+  testConditions: designFields.testConditions.default([]),
 });
 export type DraftContent = z.infer<typeof DraftContent>;
 

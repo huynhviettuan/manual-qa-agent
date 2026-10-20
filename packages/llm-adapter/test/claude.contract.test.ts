@@ -158,6 +158,10 @@ describe('ClaudeProvider.generate (mocked API)', () => {
     ],
     assumptions: [],
     missingRequirements: [],
+    requirementRefs: ['story:AC-LOGIN-04', 'AC-LOGIN@v2'],
+    techniques: ['boundary_value_analysis', 'state_transition'],
+    testTypes: ['negative', 'boundary'],
+    testConditions: ['failed logins: 5 locks the account (boundary)'],
   };
 
   it('returns a validated draft whose steps cite retrieved sources', async () => {
@@ -185,6 +189,48 @@ describe('ClaudeProvider.generate (mocked API)', () => {
   it('rejects an empty draft', async () => {
     const { p } = provider(() => messageReply({ ...draft, steps: [] }));
     expect(await p.generate({ story, sources: [source] })).toMatchObject({ failure: 'MALFORMED' });
+  });
+
+  it('rejects a draft without test-design fields (draft-v1 shape) or naming no technique', async () => {
+    const { requirementRefs, techniques, testTypes, testConditions, ...v1 } = draft;
+    void [requirementRefs, techniques, testTypes, testConditions];
+    const { p } = provider(() => messageReply(v1));
+    expect(await p.generate({ story, sources: [source] })).toMatchObject({ failure: 'MALFORMED' });
+    const { p: p2 } = provider(() => messageReply({ ...draft, techniques: [] }));
+    expect(await p2.generate({ story, sources: [source] })).toMatchObject({
+      failure: 'MALFORMED',
+      detail: 'draft names no test-design technique',
+    });
+  });
+
+  it('rejects traceability to a requirement that was not supplied', async () => {
+    const { p } = provider(() => messageReply({ ...draft, requirementRefs: ['story:AC-OTHER', 'X@v9'] }));
+    expect(await p.generate({ story, sources: [source] })).toMatchObject({
+      failure: 'UNGROUNDED',
+      detail: 'traces to unknown story:AC-OTHER; traces to unknown X@v9',
+    });
+  });
+
+  it('reports an acceptance criterion the draft neither traces nor lists as missing', async () => {
+    const twoAcs = {
+      ...story,
+      acceptanceCriteria: [...story.acceptanceCriteria, { id: 'AC-LOGIN-0', text: 'Unlock by admin' }],
+    };
+    const { p } = provider(() => messageReply({ ...draft, requirementRefs: [] }));
+    const out = await p.generate({ story: twoAcs, sources: [source] });
+    expect(out.ok && out.value.missingRequirements).toEqual([
+      'AC-LOGIN-04: not covered by this draft (coverage check)',
+      'AC-LOGIN-0: not covered by this draft (coverage check)',
+    ]);
+    // Listed by the model as missing: not repeated. An id inside a longer id does not count.
+    const { p: p2 } = provider(() =>
+      messageReply({ ...draft, missingRequirements: ['AC-LOGIN-04: unlock rule not found'] }),
+    );
+    const out2 = await p2.generate({ story: twoAcs, sources: [source] });
+    expect(out2.ok && out2.value.missingRequirements).toEqual([
+      'AC-LOGIN-04: unlock rule not found',
+      'AC-LOGIN-0: not covered by this draft (coverage check)',
+    ]);
   });
 });
 
