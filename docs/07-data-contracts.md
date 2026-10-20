@@ -10,7 +10,7 @@
 | `Story` | id, externalId, projectId, version, acceptanceCriteria | Immutable snapshots |
 | `KnowledgeSource` | id, projectId, kind, version, approvedBy, approvalStatus, effectiveFrom, hash | Source owner approval required |
 | `KnowledgeChunk` | id, sourceId, sourceVersion, chunkIndex, embedding, metadata | ACL and source version inherited |
-| `TestCase` | id, storyId, revision, steps, expected, status, sourceRefs | Approval tied to revision |
+| `TestCase` | id, storyId, revision, steps, expected, status, sourceRefs, requirementRefs, techniques, testTypes, testConditions | Approval tied to revision |
 | `TestRun` | id, testCaseRevisionId, environmentId, state, assertions, evidenceIds | Run state independent of case approval |
 | `EvidenceArtifact` | id, runId, kind, objectKey, digest, retentionUntil, classification | Store pointer, not raw bytes in prompt |
 | `DecisionRecord` | id, taskId, kind, provider/model, result, confidence, usage, inputHash, sourceRefs | Recommendation separate from policy outcome |

@@ -98,6 +98,8 @@ export async function promoteToReference(db: Db, actor: Actor, caseId: string): 
   const content = DraftContent.parse(latest.content);
   const body = [
     `# ${content.title}`,
+    ...(content.techniques.length > 0 ? [`Techniques: ${content.techniques.join(', ')}`] : []),
+    ...(content.requirementRefs.length > 0 ? [`Verifies: ${content.requirementRefs.join(', ')}`] : []),
     ...content.steps.map(
       (s, i) => `${i + 1}. ${s.action} -> Expected: ${s.expected} (sources: ${s.sourceRefs.join(', ')})`,
     ),

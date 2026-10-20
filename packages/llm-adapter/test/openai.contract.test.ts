@@ -169,6 +169,10 @@ describe('OpenAIResponsesDrafter via Responses API (mocked)', () => {
     steps: [{ action: 'Fail login 5 times', expected: 'Locked 15 minutes', sourceRefs: ['AC-LOGIN@v2'] }],
     assumptions: [],
     missingRequirements: [],
+    requirementRefs: ['story:AC-LOGIN-04'],
+    techniques: ['state_transition'],
+    testTypes: ['negative'],
+    testConditions: ['5 failed logins: locked'],
   };
 
   it('returns a validated draft; requests strict JSON schema and no response storage', async () => {
@@ -177,7 +181,7 @@ describe('OpenAIResponsesDrafter via Responses API (mocked)', () => {
     expect(out).toMatchObject({
       ok: true,
       value: { title: 'Lockout' },
-      meta: { model: 'gpt-test-draft', promptVersion: 'draft-v1' },
+      meta: { model: 'gpt-test-draft', promptVersion: 'draft-v2' },
     });
     const body = fetch.calls[0]!.body;
     expect(fetch.calls[0]!.endpoint).toBe('responses');

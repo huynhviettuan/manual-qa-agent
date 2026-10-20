@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { betaZodOutputFormat } from '@anthropic-ai/sdk/helpers/beta/zod';
 import { z } from 'zod';
-import { canonicalJson, DraftContent, Readiness, sha256 } from '@qa/domain';
+import { canonicalJson, type DraftContent, DraftOutput, Readiness, sha256 } from '@qa/domain';
 import { checkDraft, checkReadiness } from './grounding.ts';
 import {
   buildPayload,
@@ -212,7 +212,7 @@ export class ClaudeProvider implements ReadinessClassifier, DraftGenerator, Tria
       DRAFT_PROMPT_VERSION,
       DRAFT_SYSTEM,
       buildPayload(input.story, input.sources),
-      DraftContent,
+      DraftOutput,
       16000,
     );
     return checkDraft(input, out);
