@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { createTestDb, seedProject, workflowUsage, type Db, type SeededActors } from '@qa/db';
+import { createTestDb, latestRevision, seedProject, workflowUsage, type Db, type SeededActors } from '@qa/db';
 import {
   choiceAnswer,
   ClaudeProvider,
@@ -78,6 +78,37 @@ beforeAll(async () => {
 afterAll(() => db.close());
 
 describe('Workflow A — readiness to draft', () => {
+  it('a story with two sourced criteria yields one DRAFT case per criterion, all in one workflow (ADR-0016)', async () => {
+    const s = story('Valid login shows "Welcome back".');
+    s.acceptanceCriteria.push({
+      id: s.acceptanceCriteria[0]!.id.replace('AC-T-', 'AC-U-'),
+      text: 'A wrong password shows "Invalid credentials".',
+    });
+    for (const ac of s.acceptanceCriteria) {
+      await ingestSource(
+        db,
+        a.po,
+        src(`SRC-${ac.id}`, `# ${ac.id}\n${ac.text.replace('shows', 'shows the text')} within 2 seconds.`),
+      );
+    }
+    const { d } = deps(heuristicResponder);
+    const r = await submitStory(d, a.qa, s);
+    expect(r.outcome.route, JSON.stringify(r.outcome)).toBe('DRAFT_CREATED');
+    if (r.outcome.route !== 'DRAFT_CREATED') return;
+    expect(r.outcome.caseIds).toHaveLength(2);
+    expect(r.outcome.caseId).toBe(r.outcome.caseIds[0]);
+    expect(r.outcome.cases.map((c) => c.title)).toEqual(
+      s.acceptanceCriteria.map((ac) => `Verify ${s.title}: ${ac.id}`),
+    );
+    expect(r.outcome.missingRequirements).toEqual([]);
+    expect(r.outcome.designNotes).toHaveLength(1);
+    for (const [i, caseId] of r.outcome.caseIds.entries()) {
+      const rev = await latestRevision(db, S, caseId);
+      expect(rev).toMatchObject({ revision: 1, status: 'DRAFT', workflowId: r.workflowId });
+      expect(rev?.sourceRefs).toEqual([`SRC-${s.acceptanceCriteria[i]!.id}@v1`]);
+    }
+  });
+
   it('a measurable, sourced AC yields a DRAFT test case with provenance, usage and policy audit', async () => {
     const s = story('Login with valid credentials shows "Welcome back".');
     const ac = s.acceptanceCriteria[0]!.id;

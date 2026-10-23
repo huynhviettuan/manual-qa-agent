@@ -103,6 +103,8 @@ describe.each(['anthropic', 'openai'] as const)('draft conformance: %s', (draft)
 
   it('draft steps cite only supplied sources', async () => {
     const out = await generator.generate({ story, sources: [lockout] });
-    expect(out.ok && out.value.steps.flatMap((s) => s.sourceRefs)).toEqual(['AC-LOGIN@v2']);
+    expect(out.ok && out.value.cases.flatMap((c) => c.steps.flatMap((s) => s.sourceRefs))).toEqual([
+      'AC-LOGIN@v2',
+    ]);
   });
 });

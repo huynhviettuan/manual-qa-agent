@@ -75,10 +75,15 @@ export function minReadyConfidenceFromEnv(env: NodeJS.ProcessEnv = process.env):
 export type WorkflowOutcome =
   | {
       route: 'DRAFT_CREATED';
+      /** The first case, for callers that handle one; `cases` has them all (ADR-0016). */
       caseId: string;
+      caseIds: string[];
+      cases: Array<{ caseId: string; title: string }>;
       revision: number;
       sourceRefs: string[];
+      /** Requirements the drafts could not find, plus acceptance criteria no case covers (checked in code). */
       missingRequirements: string[];
+      designNotes: string[];
     }
   | {
       route: 'REVIEW_REQUESTED';
@@ -497,20 +502,33 @@ async function execute(ctx: Ctx): Promise<WorkflowOutcome> {
     );
   }
   return step(ctx, 'persist_draft', async () => {
-    const refs = [...new Set(drafted.value.steps.flatMap((s) => s.sourceRefs))];
-    const created = await createTestCase(db, ctx.scope, {
-      storyId: story.id,
-      workflowId: ctx.workflowId,
-      content: drafted.value,
-      sourceRefs: refs,
-      authorId: ctx.actor.id,
-    });
+    // One test case per drafted case, each its own revision 1 in DRAFT, all tied to this workflow.
+    const created: Array<{ caseId: string; title: string; refs: string[] }> = [];
+    for (const c of drafted.value.cases) {
+      const refs = [...new Set(c.steps.flatMap((s) => s.sourceRefs))];
+      const row = await createTestCase(db, ctx.scope, {
+        storyId: story.id,
+        workflowId: ctx.workflowId,
+        content: c,
+        sourceRefs: refs,
+        authorId: ctx.actor.id,
+      });
+      created.push({ caseId: row.caseId, title: c.title, refs });
+    }
     return {
       route: 'DRAFT_CREATED' as const,
-      caseId: created.caseId,
-      revision: created.revision,
-      sourceRefs: refs,
-      missingRequirements: drafted.value.missingRequirements,
+      caseId: created[0]!.caseId,
+      caseIds: created.map((c) => c.caseId),
+      cases: created.map(({ caseId, title }) => ({ caseId, title })),
+      revision: 1,
+      sourceRefs: [...new Set(created.flatMap((c) => c.refs))],
+      missingRequirements: [
+        ...new Set([
+          ...drafted.value.cases.flatMap((c) => c.missingRequirements),
+          ...drafted.value.coverageGaps,
+        ]),
+      ],
+      designNotes: drafted.value.designNotes,
     };
   });
 }

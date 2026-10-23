@@ -49,7 +49,9 @@ Create a project board with fields `Status` (Backlog, Ready, In Progress, In Rev
 | QA-022 | Operational dashboards and drift alerts | P1 | Token/cost, review, safety metrics and errors visible. **Done** (JSON endpoints; no UI) |
 | QA-023 | Propose-only tool server for AI clients | P1 | MCP tools to read cases, check and propose executables, request and read runs; starts only with an `AI_AGENT` key; no approve/resolve/file tools. **Done (ADR-0011)** |
 | QA-024 | Tool server over Streamable HTTP | P2 | Per-request AI_AGENT key checked via /api/me; 401/403 for missing, unknown or human keys; stateless. **Done (ADR-0013)** |
-| QA-025 | Test-design techniques in drafts | P1 | Drafts name techniques, test types, derived conditions and traced requirements; unknown traces rejected; uncovered ACs reported by code. **Done (ADR-0014)** (one case per story; multi-case suites per story not started) |
+| QA-025 | Test-design techniques in drafts | P1 | Drafts name techniques, test types, derived conditions and traced requirements; unknown traces rejected; uncovered ACs reported by code. **Done (ADR-0014)** |
+| QA-026 | One case per test condition | P1 | A story drafts a bounded set of cases with design notes; duplicate titles and empty sets rejected; coverage judged across the set; one DRAFT revision per case. **Done (ADR-0016)** |
+| QA-027 | Run-scoped values in executable steps | P1 | Declared date values derived once per run; `capture` step from text or URL; `{ var }` and `{{name}}` references validated before approval; filled paths re-checked at run time. **Done (ADR-0015)** |
 
 ## Example issue template
 

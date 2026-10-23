@@ -113,6 +113,7 @@ const designFields = {
  * onto provider structured-output schemas; business rules are checked in code (grounding.ts).
  */
 export const DraftOutput = z.object({ ...draftFields, ...designFields });
+export type DraftOutput = z.infer<typeof DraftOutput>;
 
 /**
  * Content of a test-case draft revision; also validates reviewer edits. Revisions written
@@ -126,6 +127,21 @@ export const DraftContent = z.object({
   testConditions: designFields.testConditions.default([]),
 });
 export type DraftContent = z.infer<typeof DraftContent>;
+
+/**
+ * What the model emits for a story (ADR-0016): the set of cases its acceptance criteria need, one
+ * per distinct test condition, with the design they were derived from. Bounded so a set stays
+ * reviewable and inside one structured-output response.
+ */
+export const DraftSetOutput = z.object({
+  /** The design in brief: partitions, boundaries, rule columns, states the cases come from. */
+  designNotes: z.array(z.string()),
+  cases: z.array(DraftOutput).min(1).max(12),
+});
+export type DraftSetOutput = z.infer<typeof DraftSetOutput>;
+
+/** A checked set as the orchestrator stores it: one test case per entry; gaps are found in code. */
+export type DraftSet = { designNotes: string[]; cases: DraftContent[]; coverageGaps: string[] };
 
 export type EvidenceChunk = {
   sourceId: string;

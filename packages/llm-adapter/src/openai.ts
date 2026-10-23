@@ -1,14 +1,14 @@
 import OpenAI from 'openai';
 import { zodTextFormat } from 'openai/helpers/zod';
 import { z } from 'zod';
-import { canonicalJson, type DraftContent, DraftOutput, sha256 } from '@qa/domain';
+import { canonicalJson, type DraftSet, DraftSetOutput, sha256 } from '@qa/domain';
 import {
   assessmentFromDecisions,
   DECISIONS_PROMPT_VERSION,
   readinessQuestions,
 } from './decision-readiness.ts';
 import { TRIAGE_DECISIONS_PROMPT_VERSION, triageFromDecisions, triageQuestions } from './decision-triage.ts';
-import { checkDraft } from './grounding.ts';
+import { checkDraftSet } from './grounding.ts';
 import {
   buildPayload,
   buildTriagePayload,
@@ -198,7 +198,7 @@ export class OpenAIResponsesDrafter implements DraftGenerator {
     this.model = config.model;
   }
 
-  async generate(input: DraftInput): Promise<ProviderOutcome<DraftContent>> {
+  async generate(input: DraftInput): Promise<ProviderOutcome<DraftSet>> {
     const payload = buildPayload(input.story, input.sources);
     const meta = newMeta(this.config.providerLabel ?? 'openai', this.model, DRAFT_PROMPT_VERSION, {
       payload,
@@ -209,8 +209,8 @@ export class OpenAIResponsesDrafter implements DraftGenerator {
         model: this.model,
         instructions: DRAFT_SYSTEM,
         input: userMessage(payload),
-        text: { format: zodTextFormat(DraftOutput, 'test_case_draft') },
-        max_output_tokens: 16000,
+        text: { format: zodTextFormat(DraftSetOutput, 'test_case_drafts') },
+        max_output_tokens: 32000,
         // Do not retain requirement text in the provider's response store.
         store: false,
       });
@@ -243,7 +243,7 @@ export class OpenAIResponsesDrafter implements DraftGenerator {
       if (response.output_parsed == null) {
         return { ok: false, failure: 'MALFORMED', detail: 'no_structured_output', meta };
       }
-      return checkDraft(input, { ok: true, value: response.output_parsed, meta });
+      return checkDraftSet(input, { ok: true, value: response.output_parsed, meta });
     } catch (err) {
       meta.latencyMs = performance.now() - started;
       return { ok: false, ...classifyError(err), meta };

@@ -465,10 +465,11 @@ export type CaseRevisionRow = {
   content: unknown;
   sourceRefs: string[];
   authorId: string;
+  workflowId: string | null;
 };
 
 const REVISION_SELECT = `SELECT c.id AS "caseId", c.story_id AS "storyId", r.id AS "revisionId", r.revision,
-  r.status, r.content, r.source_refs AS "sourceRefs", r.author_id AS "authorId"
+  r.status, r.content, r.source_refs AS "sourceRefs", r.author_id AS "authorId", c.workflow_id AS "workflowId"
   FROM test_cases c JOIN test_case_revisions r ON r.case_id = c.id`;
 
 export async function createTestCase(

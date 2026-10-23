@@ -1,4 +1,4 @@
-import type { DraftContent } from '@qa/domain';
+import type { DraftOutput, DraftSetOutput } from '@qa/domain';
 import type { ReadinessAssessment, SuspectedCause, TriageFacts } from './types.ts';
 
 /** The decoded `<untrusted_data>` payload every provider receives (see prompts.ts). */
@@ -66,14 +66,14 @@ export function heuristicAssessment(payload: PromptPayload): {
   };
 }
 
-export function heuristicDraft(payload: PromptPayload): DraftContent {
+export function heuristicDraft(payload: PromptPayload): DraftSetOutput {
   const { story, sources } = payload;
-  return {
-    title: `Verify ${story.title}`,
+  const caseFor = (acs: PromptPayload['story']['acceptanceCriteria'], title: string): DraftOutput => ({
+    title,
     priority: 'P1',
     preconditions: ['Test account exists in the target environment'],
     testData: ['Synthetic test user'],
-    steps: story.acceptanceCriteria.map((ac) => {
+    steps: acs.map((ac) => {
       const support = sources.filter((s) => s.content.includes(ac.id));
       return {
         action: `Exercise ${ac.id}: ${ac.text}`,
@@ -88,10 +88,20 @@ export function heuristicDraft(payload: PromptPayload): DraftContent {
     assumptions: [],
     missingRequirements: [],
     // The stand-in derives no partitions or boundaries, so it claims only specification-based design.
-    requirementRefs: story.acceptanceCriteria.map((ac) => `story:${ac.id}`),
+    requirementRefs: acs.map((ac) => `story:${ac.id}`),
     techniques: ['specification_based'],
     testTypes: ['positive'],
-    testConditions: story.acceptanceCriteria.map((ac) => `${ac.id}: behaviour as stated`),
+    testConditions: acs.map((ac) => `${ac.id}: behaviour as stated`),
+  });
+  const acs = story.acceptanceCriteria;
+  return {
+    designNotes: [
+      'Specification-based: one case per acceptance criterion, as stated; no derived conditions.',
+    ],
+    cases:
+      acs.length <= 1
+        ? [caseFor(acs, `Verify ${story.title}`)]
+        : acs.map((ac) => caseFor([ac], `Verify ${story.title}: ${ac.id}`)),
   };
 }
 

@@ -2,7 +2,7 @@ import { redactSecrets, sourceRef, type EvidenceChunk } from '@qa/domain';
 import type { StoryInput, TriageFacts } from './types.ts';
 
 export const READINESS_PROMPT_VERSION = 'readiness-v1';
-export const DRAFT_PROMPT_VERSION = 'draft-v3';
+export const DRAFT_PROMPT_VERSION = 'draft-v4';
 
 // Stable system prompts (cacheable prefix). Volatile data goes only in the user message.
 const DATA_RULES = `The user message contains a single <untrusted_data> block holding a JSON object with a user story,
@@ -26,8 +26,11 @@ citedSourceIds must contain only refs of sources you actually relied on.`;
 export const DRAFT_SYSTEM = `You draft manual test cases for a QA engineer to review.
 ${DATA_RULES}
 
-Write one test case covering the acceptance criteria: title, priority, preconditions, test data, and numbered steps
-with an observable expected result. Every step must list the refs of the sources (or the story acceptance criterion
+Write the set of test cases the acceptance criteria need: one case per distinct test condition (a partition, a
+boundary, a rule combination, a state transition, a flow), between 1 and 12 cases, and never two cases checking the
+same condition. Each case stands alone, with its own title, priority, preconditions, test data and numbered steps
+with an observable expected result. Put the design the cases come from in designNotes (the partitions, boundaries,
+rule columns and states, in brief). Every step must list the refs of the sources (or the story acceptance criterion
 IDs prefixed with "story:") that justify its expected result in sourceRefs.
 
 Design the case with test-design techniques chosen by the structure of each requirement, and name them in techniques:
@@ -47,8 +50,9 @@ List the derived conditions in testConditions (for example "sessions: 1000 valid
 and make test data name the partition or boundary each value represents. Cover positive and negative behaviour where
 the requirement defines both, and set testTypes (positive, negative, boundary, security, concurrency, end_to_end, regression, ui, accessibility)
 accordingly.
-Put the refs of every acceptance criterion and source rule this case verifies in requirementRefs, using the same
-formats as sourceRefs. Priority by risk: P0 release-blocking, P1 major function or high risk, P2 normal, P3 minor.
+Put the refs of every acceptance criterion and source rule each case verifies in its requirementRefs, using the
+same formats as sourceRefs; across the set, every acceptance criterion is either verified by a case or named in
+missingRequirements. Priority by risk: P0 release-blocking, P1 major function or high risk, P2 normal, P3 minor.
 Each expected result must be specific and observable: an exact message, state, value or URL, never "works correctly".
 Put anything you had to assume in "assumptions" and any requirement you could not find in "missingRequirements";
 never silently invent expected behaviour.`;
