@@ -125,6 +125,8 @@ export const DraftContent = z.object({
   techniques: designFields.techniques.default([]),
   testTypes: designFields.testTypes.default([]),
   testConditions: designFields.testConditions.default([]),
+  /** Problems found in code for the reviewer (for example an expected result that cannot be observed). */
+  reviewFlags: z.array(z.string()).default([]),
 });
 export type DraftContent = z.infer<typeof DraftContent>;
 

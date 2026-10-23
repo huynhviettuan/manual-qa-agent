@@ -1,4 +1,4 @@
-import type { DraftOutput, DraftSetOutput } from '@qa/domain';
+import { type DraftOutput, type DraftSetOutput, MEASURABLE, VAGUE } from '@qa/domain';
 import type { ReadinessAssessment, SuspectedCause, TriageFacts } from './types.ts';
 
 /** The decoded `<untrusted_data>` payload every provider receives (see prompts.ts). */
@@ -13,10 +13,6 @@ export type PromptPayload = {
 };
 
 export const HEURISTIC_MODEL = 'mock-heuristic-v1';
-
-const VAGUE =
-  /\b(quick(ly)?|fast|multiple|several|some|many|few|appropriate(ly)?|user[- ]friendly|reasonable|soon|large|small|etc)\b/i;
-const MEASURABLE = /\d|"[^"]+"|'[^']+'/;
 
 /**
  * Deterministic stand-in for a model, used when QA_LIVE_LLM is not set. An acceptance criterion

@@ -6,6 +6,7 @@ import {
   insertSuite,
   insertSuiteRun,
   insertSuiteRunItem,
+  latestManualRunsForSuiteRun,
   latestRevision,
   latestTriage,
   listEvidence,
@@ -148,23 +149,29 @@ export async function getSuiteRunReport(db: Db, scope: TenantScope, suiteRunId: 
   const suiteRun = await getSuiteRun(db, scope, suiteRunId);
   if (!suiteRun) throw new DomainError('NOT_FOUND', `suite run ${suiteRunId} not found`);
   const cases = new Map((await listSuiteCases(db, scope, suiteRun.suiteId)).map((c) => [c.caseId, c]));
+  // Manual results recorded against this suite run (ADR-0017) fill in the cases automation left.
+  const manual = new Map(
+    (await latestManualRunsForSuiteRun(db, scope, suiteRunId)).map((m) => [m.caseId, m]),
+  );
   const items = await Promise.all(
     (await listSuiteRunItems(db, scope, suiteRunId)).map(async (i) => {
       const c = cases.get(i.caseId);
       const triage = i.runId ? await latestTriage(db, scope, i.runId) : null;
-      const status = i.outcome === 'REQUESTED' ? i.runState! : i.outcome;
+      const m = i.outcome === 'NOT_AUTOMATED' ? manual.get(i.caseId) : undefined;
+      const status = m ? m.status : i.outcome === 'REQUESTED' ? i.runState! : i.outcome;
+      const started = m ? m.startedAt : i.startedAt;
+      const finished = m ? m.finishedAt : i.finishedAt;
       return {
         caseId: i.caseId,
         section: c?.section ?? '',
         title: DraftContent.safeParse(c?.content).data?.title ?? i.caseId,
         sourceRefs: c?.sourceRefs ?? [],
         status,
-        reason: i.runReason,
+        reason: m ? m.reason || null : i.runReason,
         runId: i.runId,
-        durationMs:
-          i.startedAt && i.finishedAt
-            ? new Date(i.finishedAt).getTime() - new Date(i.startedAt).getTime()
-            : null,
+        manualRunId: m?.id ?? null,
+        testerId: m?.testerId ?? null,
+        durationMs: started && finished ? new Date(finished).getTime() - new Date(started).getTime() : null,
         evidence: i.runId ? (await listEvidence(db, scope, i.runId)).length : 0,
         suspectedCause: triage?.suspectedCause ?? null,
         suspectedCauseIsVerified: triage?.verifiedCause != null,
@@ -187,7 +194,9 @@ export async function getSuiteRunReport(db: Db, scope: TenantScope, suiteRunId: 
       inconclusive: count('INCONCLUSIVE'),
       blocked: count('BLOCKED'),
       pending: requested.filter((i) => !TERMINAL.has(i.status)).length,
+      /** Manual cases still awaiting a tester's record. */
       notAutomated: count('NOT_AUTOMATED'),
+      manualRecorded: items.filter((i) => i.manualRunId).length,
       notApproved: count('NOT_APPROVED'),
     },
     items,

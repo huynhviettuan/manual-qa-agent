@@ -261,7 +261,9 @@ export async function updateRunState(
 
 export type EvidenceRow = {
   id: string;
-  runId: string;
+  /** Exactly one of runId (automated) and manualRunId (ADR-0017) is set. */
+  runId: string | null;
+  manualRunId: string | null;
   kind: string;
   name: string;
   contentType: string;
@@ -271,23 +273,27 @@ export type EvidenceRow = {
   retentionUntil: Date;
 };
 
-const EVIDENCE_COLS = `id, run_id AS "runId", kind, name, content_type AS "contentType", object_key AS "objectKey",
-  digest, size_bytes AS "sizeBytes", retention_until AS "retentionUntil"`;
+const EVIDENCE_COLS = `id, run_id AS "runId", manual_run_id AS "manualRunId", kind, name, content_type AS "contentType",
+  object_key AS "objectKey", digest, size_bytes AS "sizeBytes", retention_until AS "retentionUntil"`;
 
 export async function insertEvidence(
   db: Db,
   scope: TenantScope,
-  e: Omit<EvidenceRow, 'id'>,
+  e: Omit<EvidenceRow, 'id' | 'runId' | 'manualRunId'> & {
+    runId?: string | null;
+    manualRunId?: string | null;
+  },
 ): Promise<EvidenceRow> {
   const rows = await db.query<EvidenceRow>(
-    `INSERT INTO evidence_artifacts (id, tenant_id, project_id, run_id, kind, name, content_type, object_key, digest,
-       size_bytes, retention_until)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING ${EVIDENCE_COLS}`,
+    `INSERT INTO evidence_artifacts (id, tenant_id, project_id, run_id, manual_run_id, kind, name, content_type,
+       object_key, digest, size_bytes, retention_until)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING ${EVIDENCE_COLS}`,
     [
       newId('evd'),
       scope.tenantId,
       scope.projectId,
-      e.runId,
+      e.runId ?? null,
+      e.manualRunId ?? null,
       e.kind,
       e.name,
       e.contentType,
@@ -305,6 +311,18 @@ export async function listEvidence(db: Db, scope: TenantScope, runId: string): P
     `SELECT ${EVIDENCE_COLS} FROM evidence_artifacts WHERE run_id = $1 AND tenant_id = $2 AND project_id = $3
       ORDER BY created_at, name`,
     [runId, scope.tenantId, scope.projectId],
+  );
+}
+
+export async function listManualRunEvidence(
+  db: Db,
+  scope: TenantScope,
+  manualRunId: string,
+): Promise<EvidenceRow[]> {
+  return db.query<EvidenceRow>(
+    `SELECT ${EVIDENCE_COLS} FROM evidence_artifacts
+      WHERE manual_run_id = $1 AND tenant_id = $2 AND project_id = $3 ORDER BY created_at, name`,
+    [manualRunId, scope.tenantId, scope.projectId],
   );
 }
 

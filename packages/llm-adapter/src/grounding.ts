@@ -1,4 +1,10 @@
-import { DraftContent, type DraftSet, type DraftSetOutput, sourceRef } from '@qa/domain';
+import {
+  DraftContent,
+  type DraftSet,
+  type DraftSetOutput,
+  sourceRef,
+  unobservableExpectation,
+} from '@qa/domain';
 import { storyRefs } from './prompts.ts';
 import type { DraftInput, ProviderOutcome, ReadinessAssessment, ReadinessInput } from './types.ts';
 
@@ -76,7 +82,15 @@ export function checkDraftSet(
     ...out,
     value: {
       designNotes: out.value.designNotes,
-      cases: out.value.cases.map((c) => DraftContent.parse(c)),
+      // An expected result a tester cannot verify as written is flagged, not rejected: the
+      // reviewer decides whether to sharpen it or send the story back.
+      cases: out.value.cases.map((c) => ({
+        ...DraftContent.parse(c),
+        reviewFlags: c.steps.flatMap((s, i) => {
+          const problem = unobservableExpectation(s.expected);
+          return problem ? [`step ${i + 1}: ${problem}`] : [];
+        }),
+      })),
       coverageGaps,
     },
   };

@@ -52,6 +52,8 @@ Create a project board with fields `Status` (Backlog, Ready, In Progress, In Rev
 | QA-025 | Test-design techniques in drafts | P1 | Drafts name techniques, test types, derived conditions and traced requirements; unknown traces rejected; uncovered ACs reported by code. **Done (ADR-0014)** |
 | QA-026 | One case per test condition | P1 | A story drafts a bounded set of cases with design notes; duplicate titles and empty sets rejected; coverage judged across the set; one DRAFT revision per case. **Done (ADR-0016)** |
 | QA-027 | Run-scoped values in executable steps | P1 | Declared date values derived once per run; `capture` step from text or URL; `{ var }` and `{{name}}` references validated before approval; filled paths re-checked at run time. **Done (ADR-0015)** |
+| QA-028 | Manual execution records | P1 | Testers record per-step results; status derived in code; immutable history; evidence through the evidence store; suite reports show manual beside automated; AI agent refused. **Done (ADR-0017)** |
+| QA-029 | Observability check on expected results | P2 | Steps whose expected result cannot be verified as written are flagged for the reviewer (`reviewFlags`). **Done (ADR-0017)** |
 
 ## Example issue template
 

@@ -128,7 +128,17 @@ curl -s -o step.png $API/api/evidence/<evidence id> -H "x-api-key: $QA_KEY"
 
 Destructive steps (for example, deleting an account) come back `BLOCKED` with an approval review for a QA lead. Once it is approved, request the run again with `"approvalId"`.
 
-### 4. Triage a failing test
+### 4. Record a manual execution
+
+Not every approved case can run in a browser. A tester runs the rest by hand and records the result step by step; the status is worked out from the steps in code, never typed in ([ADR-0017](docs/adr/0017-manual-execution-records.md)):
+
+```bash
+curl -s -X POST $API/api/manual-runs -H "x-api-key: $QA_KEY" -H "content-type: application/json"   -d "{\"caseId\":\"$CASE\",\"environmentId\":\"staging\",\"build\":\"a981386\",\"steps\":[{\"status\":\"PASSED\",\"actual\":\"\"},{\"status\":\"FAILED\",\"actual\":\"Shows the raw message Too big: expected number to be <=1000\"}]}"
+```
+
+The answer is `"status":"FAILED","failedStep":2`. Attach a screenshot with `POST /api/manual-runs/<id>/evidence` (`name`, `contentType`, `dataBase64`), read the history with `GET /api/test-cases/$CASE/manual-runs`, and when the case was part of a suite run, pass `suiteRunId` so the suite report shows the manual result beside the automated ones. The AI agent key cannot record results.
+
+### 5. Triage a failing test
 
 Restart the demo app with a planted bug: its error message now reveals whether an account exists (`DEMO_BUG_1042=1`). Then run the "wrong password" test:
 

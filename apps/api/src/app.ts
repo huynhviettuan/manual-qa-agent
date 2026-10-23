@@ -23,6 +23,7 @@ import {
   type Actor,
   DomainError,
   hasRole,
+  ManualRunInput,
   newId,
   REVIEW_STATUSES,
   Role,
@@ -38,6 +39,11 @@ import {
   DEFAULT_THRESHOLDS,
   getSuiteDetail,
   getSuiteRunReport,
+  attachManualEvidence,
+  getManualRunDetail,
+  listManualRuns,
+  MAX_ATTACHMENT_BYTES,
+  recordManualRun,
   runSuite,
   driftAlerts,
   getRunReport,
@@ -74,6 +80,8 @@ export type AppOptions = {
   tracker?: BugTracker | null;
   logger?: Logger;
   rateLimitPerMinute?: number;
+  /** Retention for evidence attached to manual runs (days; default 30). */
+  evidenceRetentionDays?: number;
 };
 
 const ExecutableBody = z.object({ spec: z.unknown() });
@@ -451,6 +459,47 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
     const { id } = IdParams.parse(req.params);
     return getSuiteRunReport(db, scope(req), id);
   });
+
+  // ---------------------------------------------------------------- manual execution (ADR-0017)
+
+  app.post('/api/manual-runs', async (req, reply) => {
+    return reply.code(201).send(await recordManualRun(db, req.actor, ManualRunInput.parse(req.body)));
+  });
+
+  app.get('/api/manual-runs/:id', async (req) => {
+    const { id } = IdParams.parse(req.params);
+    return getManualRunDetail(db, scope(req), id);
+  });
+
+  app.get('/api/test-cases/:id/manual-runs', async (req) => {
+    const { id } = IdParams.parse(req.params);
+    return { items: await listManualRuns(db, scope(req), id) };
+  });
+
+  // JSON with base64 content: no multipart dependency, and the size limit is explicit.
+  app.post(
+    '/api/manual-runs/:id/evidence',
+    { bodyLimit: Math.ceil((MAX_ATTACHMENT_BYTES * 4) / 3) + 4096 },
+    async (req, reply) => {
+      const { id } = IdParams.parse(req.params);
+      const body = z
+        .object({
+          name: z.string().min(1).max(128),
+          contentType: z.string().min(1).max(100),
+          dataBase64: z.string().min(1),
+        })
+        .parse(req.body);
+      const data = Buffer.from(body.dataBase64, 'base64');
+      const deps = { db, store: requireStore(), evidenceRetentionDays: opts.evidenceRetentionDays };
+      return reply.code(201).send(
+        await attachManualEvidence(deps, req.actor, id, {
+          name: body.name,
+          contentType: body.contentType,
+          data,
+        }),
+      );
+    },
+  );
 
   return app;
 }
