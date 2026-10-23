@@ -16,4 +16,21 @@ export default tseslint.config(
     files: ['apps/cli/**'],
     rules: { 'no-console': 'off' },
   },
+  {
+    // The tester screen runs in the browser (ADR-0019).
+    files: ['apps/api/src/tester/**/*.js'],
+    languageOptions: {
+      globals: {
+        document: 'readonly',
+        window: 'readonly',
+        location: 'readonly',
+        sessionStorage: 'readonly',
+        fetch: 'readonly',
+        URL: 'readonly',
+        URLSearchParams: 'readonly',
+        FileReader: 'readonly',
+        setTimeout: 'readonly',
+      },
+    },
+  },
 );

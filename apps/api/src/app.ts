@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises';
 import Fastify, {
   type FastifyBaseLogger,
   type FastifyInstance,
@@ -39,6 +40,7 @@ import {
   DEFAULT_THRESHOLDS,
   getSuiteDetail,
   getSuiteRunReport,
+  listSuiteRunSummaries,
   getCoverage,
   listQuestions,
   recordObservation,
@@ -183,7 +185,7 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
     req.correlationId =
       typeof incoming === 'string' && /^[\w-]{1,100}$/.test(incoming) ? incoming : newId('corr');
     reply.header('x-correlation-id', req.correlationId);
-    if (req.url === '/healthz') return;
+    if (req.url === '/healthz' || req.url === '/tester' || req.url.startsWith('/tester/')) return;
     // Identity and roles come only from the server-side key lookup, never from the request body.
     const key = apiKeyFrom(req);
     const actor = key ? await findActorByApiKey(db, key) : null;
@@ -211,6 +213,28 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
     ...deps,
     logger: req.log as unknown as Logger,
   });
+
+  // ---------------------------------------------------------------- tester screen (ADR-0019)
+  // Static files read once; no framework, no inline script, and a CSP that keeps data calls same-origin.
+  const testerDir = new URL('./tester/', import.meta.url);
+  const testerPage = await readFile(new URL('index.html', testerDir), 'utf8');
+  const testerScript = await readFile(new URL('app.js', testerDir), 'utf8');
+  const testerHeaders = (reply: FastifyReply, type: string) =>
+    reply
+      .header('content-type', type)
+      .header(
+        'content-security-policy',
+        "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' blob: data:; form-action 'self'; base-uri 'none'; frame-ancestors 'none'",
+      )
+      .header('x-content-type-options', 'nosniff')
+      .header('referrer-policy', 'no-referrer')
+      .header('cache-control', 'no-store');
+  app.get('/tester', async (_req, reply) =>
+    testerHeaders(reply, 'text/html; charset=utf-8').send(testerPage),
+  );
+  app.get('/tester/app.js', async (_req, reply) =>
+    testerHeaders(reply, 'text/javascript; charset=utf-8').send(testerScript),
+  );
 
   app.get('/healthz', async () => ({ ok: true }));
 
@@ -458,6 +482,11 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
     const { id } = IdParams.parse(req.params);
     const { environmentId } = z.object({ environmentId: z.string().min(1).max(100) }).parse(req.body);
     return reply.code(202).send(await runSuite({ db }, req.actor, id, { environmentId }));
+  });
+
+  app.get('/api/suites/:id/runs', async (req) => {
+    const { id } = IdParams.parse(req.params);
+    return { items: await listSuiteRunSummaries(db, scope(req), id) };
   });
 
   app.get('/api/suite-runs/:id', async (req) => {

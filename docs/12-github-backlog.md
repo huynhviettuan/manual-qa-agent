@@ -57,6 +57,7 @@ Create a project board with fields `Status` (Backlog, Ready, In Progress, In Rev
 | QA-030 | Full manual case schema | P1 | module, level and manual reason, per-step test data from the model (draft-v5); basis derived; openQuestions, refs and smoke set by people. **Done (ADR-0018)** |
 | QA-031 | Coverage, tester workbook and traceability from the agent | P1 | `GET /api/coverage`, CSV exports with execution columns from recorded runs only. **Done (ADR-0018)** |
 | QA-032 | Open-question register | P2 | Clarification reviews with observed current behaviour recorded by QA; cases link to them. **Done (ADR-0018)** |
+| QA-033 | Tester screen | P1 | Static page served by the API: suite runs, step-by-step recording, evidence upload, questions, exports; the server derives every status; browser-tested. **Done (ADR-0019)** |
 
 ## Example issue template
 

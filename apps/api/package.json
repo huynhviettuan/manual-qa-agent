@@ -19,6 +19,7 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
-    "@qa/demo-sut": "workspace:*"
+    "@qa/demo-sut": "workspace:*",
+    "playwright": "1.64.0"
   }
 }

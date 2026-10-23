@@ -12,6 +12,7 @@ import {
   listEvidence,
   listSuiteCases,
   listSuiteRunItems,
+  listSuiteRuns,
   upsertSuiteCase,
   type Db,
   type SuiteRunItemOutcome,
@@ -140,6 +141,11 @@ export async function runSuite(
   }
   await audit(db, actor, 'SUITE_RUN_REQUESTED', suiteRun.id, input.environmentId);
   return getSuiteRunReport(db, scope, suiteRun.id);
+}
+
+export async function listSuiteRunSummaries(db: Db, scope: TenantScope, suiteId: string) {
+  if (!(await getSuite(db, scope, suiteId))) throw new DomainError('NOT_FOUND', `suite ${suiteId} not found`);
+  return listSuiteRuns(db, scope, suiteId);
 }
 
 const TERMINAL = new Set(['PASSED', 'FAILED', 'INCONCLUSIVE', 'BLOCKED']);
