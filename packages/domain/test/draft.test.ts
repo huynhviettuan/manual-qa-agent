@@ -36,5 +36,20 @@ describe('draft content (ADR-0014)', () => {
   it('accepts only known techniques and test types', () => {
     expect(DraftContent.safeParse({ ...v1, techniques: ['vibes'] }).success).toBe(false);
     expect(DraftContent.safeParse({ ...v1, testTypes: ['smoke'] }).success).toBe(false);
+    // The full lists of the manual-test-design skill are accepted.
+    const all = {
+      ...v1,
+      techniques: [
+        'metamorphic',
+        'scenario',
+        'domain',
+        'exploratory',
+        'checklist',
+        'defect_based',
+        'attack_based',
+      ],
+      testTypes: ['concurrency', 'end_to_end', 'ui', 'accessibility'],
+    };
+    expect(DraftContent.safeParse(all).success).toBe(true);
   });
 });

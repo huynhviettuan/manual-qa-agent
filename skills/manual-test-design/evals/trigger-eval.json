@@ -1,0 +1,79 @@
+[
+  {
+    "query": "here's the user story for the new contract freeze feature (FF-412 in jira): 'As a receptionist I can freeze a contract for 7-60 days, max 2 freezes per contract, the end date moves by the frozen days'. write me the test cases for it",
+    "should_trigger": true
+  },
+  {
+    "query": "we have docs/05-business-rules.md and docs/14-acceptance-criteria.md in D:\\Flow-Fitness. design a full regression suite from them, i want to see which technique each case comes from and which requirement it covers",
+    "should_trigger": true
+  },
+  {
+    "query": "QA lead asked for a traceability matrix: requirement id vs test case id for the payments module. the cases are in tests/payments/*.spec.ts and the requirements are BR-3xx in the spec. can you produce it and tell me what's not covered",
+    "should_trigger": true
+  },
+  {
+    "query": "what boundary values should i test for a 'number of sessions' field that allows 1 to 1000 and a price per session that must be a multiple of 1000 đ?",
+    "should_trigger": true
+  },
+  {
+    "query": "the PO wrote 'after multiple failed logins the account locks'. is this testable as written? what would you ask them and what cases can you already write",
+    "should_trigger": true
+  },
+  {
+    "query": "we have 8 roles and about 110 permissions. how do i design permission tests without writing 880 cases by hand",
+    "should_trigger": true
+  },
+  {
+    "query": "review these 40 test cases in docs/test-cases.csv — are they redundant? which techniques are missing? the feature is customer phone number validation",
+    "should_trigger": true
+  },
+  {
+    "query": "contract creation has service (PT/class), sessions (1/17/1000), vat (0/8/10), first payment (none/half/full), creator (2 roles). thats 108 combos, too many. reduce it properly",
+    "should_trigger": true
+  },
+  {
+    "query": "turn this trial script the customer sent (Kịch bản dùng thử.docx, 30 steps from lead to payout) into test scenarios we can execute before the demo on friday",
+    "should_trigger": true
+  },
+  {
+    "query": "can you write unit tests for src/utils/normalizePhone.ts? it strips spaces and converts +84 to 0",
+    "should_trigger": false
+  },
+  {
+    "query": "our playwright tests are flaky on CI, mostly timeouts on the login page. help me figure out why",
+    "should_trigger": false
+  },
+  {
+    "query": "BUG-017 is fixed on branch fix/phones, retest it and update the bug report",
+    "should_trigger": false
+  },
+  {
+    "query": "set up a new playwright project for the gym app with page objects and fixtures, api + ui",
+    "should_trigger": false
+  },
+  {
+    "query": "write a test plan document for the Q4 release — scope, schedule, resources, entry/exit criteria, risks — for the steering committee",
+    "should_trigger": false
+  },
+  { "query": "run the regression suite against staging and tell me what failed", "should_trigger": false },
+  {
+    "query": "explain the difference between equivalence partitioning and boundary value analysis for my ISTQB foundation exam tomorrow",
+    "should_trigger": false
+  },
+  {
+    "query": "generate 500 rows of realistic fake customers (vietnamese names, phones, emails) as a csv for load testing",
+    "should_trigger": false
+  },
+  {
+    "query": "our test cases in kiwi tcms need to be exported to excel with the same columns, write a script for the kiwi api",
+    "should_trigger": false
+  },
+  {
+    "query": "add a test case to tests/api/contracts.spec.ts that checks a frozen contract can't be renewed, same style as the others",
+    "should_trigger": false
+  },
+  {
+    "query": "what's a good test case management tool for a 4 person QA team, we're leaving kiwi",
+    "should_trigger": false
+  }
+]

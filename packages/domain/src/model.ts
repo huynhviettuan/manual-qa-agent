@@ -47,7 +47,7 @@ export const AcceptanceCriterion = z.object({
 });
 export type AcceptanceCriterion = z.infer<typeof AcceptanceCriterion>;
 
-/** Test-design techniques a draft may name (ADR-0014). */
+/** Test-design techniques a draft may name (ADR-0014); the list of the manual-test-design skill. */
 export const TestTechnique = z.enum([
   'specification_based',
   'equivalence_partitioning',
@@ -59,12 +59,29 @@ export const TestTechnique = z.enum([
   'permission_matrix',
   'pairwise',
   'classification_tree',
+  'domain',
   'syntax',
+  'metamorphic',
+  'scenario',
   'error_guessing',
+  'exploratory',
+  'checklist',
+  'defect_based',
+  'attack_based',
 ]);
 export type TestTechnique = z.infer<typeof TestTechnique>;
 
-export const TestType = z.enum(['positive', 'negative', 'boundary', 'security', 'regression']);
+export const TestType = z.enum([
+  'positive',
+  'negative',
+  'boundary',
+  'security',
+  'concurrency',
+  'end_to_end',
+  'regression',
+  'ui',
+  'accessibility',
+]);
 export type TestType = z.infer<typeof TestType>;
 
 const draftFields = {
@@ -92,7 +109,7 @@ const designFields = {
 };
 
 /**
- * What the model must emit for a draft (draft-v2). Every field is required so it maps cleanly
+ * What the model must emit for a draft (draft-v2 and later). Every field is required so it maps cleanly
  * onto provider structured-output schemas; business rules are checked in code (grounding.ts).
  */
 export const DraftOutput = z.object({ ...draftFields, ...designFields });

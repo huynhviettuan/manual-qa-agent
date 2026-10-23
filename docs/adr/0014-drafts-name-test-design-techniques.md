@@ -45,3 +45,11 @@ transitions, use cases, permission matrices, error guessing and so on) was left 
   fresh model call.
 - Still one case per story; designing a full suite per story (several cases, one per condition) is a separate
   change.
+
+## Amendment, 2026-10-23 (draft-v3)
+
+`TestTechnique` and `TestType` were extended to the full lists of the team's `manual-test-design` skill, which is
+the authoritative catalogue: techniques gain `domain`, `metamorphic`, `scenario`, `exploratory`, `checklist`,
+`defect_based` and `attack_based`; test types gain `concurrency`, `end_to_end`, `ui` and `accessibility`. The prompt
+names when each applies and says `exploratory` and `checklist` may be claimed only for a charter or checklist the
+sources define. Stored drafts are unaffected; the cache key changes with the prompt version.
