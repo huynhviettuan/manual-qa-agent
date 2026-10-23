@@ -1,0 +1,12 @@
+{
+ "readiness": "clarification",
+ "missingExpectations": [
+  "AC-06: \"the right channel and source\" for a lead created from the form is not defined; no source says which channel and source the form sets."
+ ],
+ "clarificationQuestion": "Which channel and source should a lead created from the quick form (FR-LEAD-001) receive: fixed values per form, or values the person picks?",
+ "citedSourceIds": [
+  "GYM-AC@v1",
+  "GYM-FR@v1",
+  "GYM-BR-LEADS-AND-CUSTOMERS@v1"
+ ]
+}

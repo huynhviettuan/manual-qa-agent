@@ -1,0 +1,141 @@
+{
+ "designNotes": [
+  "BVA on the session count at the tier edges (1, 10, 11 within the configured tiers) and an out-of-range count.",
+  "Exception price: a price different from the tier -> flagged, cannot be activated until approved."
+ ],
+ "cases": [
+  {
+   "title": "The tier unit price, end date and name follow the session count",
+   "priority": "P1",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "Open a new PT contract and type 24 sessions",
+     "expected": "Unit price, total and end date come from the PT tier for 24; the name reads \"PT 24 buổi\"",
+     "sourceRefs": [
+      "story:AC-10",
+      "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+      "GYM-FR@v1"
+     ],
+     "testData": "24 sessions (inside a tier)"
+    },
+    {
+     "action": "Change the count to the first count of the next tier",
+     "expected": "The unit price changes to the next tier's price",
+     "sourceRefs": [
+      "GYM-BR-SERVICES-PRICES-CONTRACTS@v1"
+     ],
+     "testData": "first count of the next tier"
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-10",
+    "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+    "GYM-FR@v1"
+   ],
+   "techniques": [
+    "boundary_value_analysis",
+    "equivalence_partitioning"
+   ],
+   "testTypes": [
+    "boundary",
+    "positive"
+   ],
+   "testConditions": [
+    "count at a tier boundary",
+    "count inside a tier"
+   ],
+   "module": "Contracts",
+   "level": "ui",
+   "manualReason": ""
+  },
+  {
+   "title": "A count above the highest tier is refused",
+   "priority": "P1",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "Type one more session than the highest tier allows",
+     "expected": "No price is computed and the contract cannot be created",
+     "sourceRefs": [
+      "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+      "story:AC-10"
+     ],
+     "testData": "top of the highest tier + 1"
+    }
+   ],
+   "assumptions": [
+    "The sources do not say what happens above the highest tier; refusing is the reading of BR-301 (price only from a tier)."
+   ],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-10",
+    "GYM-BR-SERVICES-PRICES-CONTRACTS@v1"
+   ],
+   "techniques": [
+    "boundary_value_analysis"
+   ],
+   "testTypes": [
+    "boundary",
+    "negative"
+   ],
+   "testConditions": [
+    "count = top tier + 1"
+   ],
+   "module": "Contracts",
+   "level": "ui",
+   "manualReason": ""
+  },
+  {
+   "title": "A price different from the tier makes an exception price that waits for approval",
+   "priority": "P0",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "Switch on \"Giá ngoại lệ\", type a price below the tier and no reason, then save",
+     "expected": "The save is refused until a reason is given",
+     "sourceRefs": [
+      "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+      "story:AC-10"
+     ],
+     "testData": "price = tier - 100.000"
+    },
+    {
+     "action": "Add a reason and save",
+     "expected": "The contract is flagged \"Exception price\" and stays pending; it cannot be activated",
+     "sourceRefs": [
+      "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+      "story:AC-10",
+      "GYM-FR@v1"
+     ],
+     "testData": ""
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-10",
+    "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+    "GYM-FR@v1"
+   ],
+   "techniques": [
+    "decision_table",
+    "state_transition"
+   ],
+   "testTypes": [
+    "positive"
+   ],
+   "testConditions": [
+    "price != tier -> exception, reason required, pending approval"
+   ],
+   "module": "Contracts",
+   "level": "ui",
+   "manualReason": ""
+  }
+ ]
+}

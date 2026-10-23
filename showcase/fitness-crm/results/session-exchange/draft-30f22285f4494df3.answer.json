@@ -1,0 +1,79 @@
+{
+ "designNotes": [
+  "Specification: profile shows plans and logs; one row per set, plan read-only beside actual; Cardio fields differ."
+ ],
+ "cases": [
+  {
+   "title": "A customer's plans and session logs are in the profile, plan and actual on one row",
+   "priority": "P2",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "Open a customer with a plan and a logged session, tab \"Session logs and progress\"",
+     "expected": "Each set is one row with the plan (read-only) and the actual side by side",
+     "sourceRefs": [
+      "story:AC-20",
+      "GYM-BR-WORKOUTS@v1",
+      "GYM-FR@v1"
+     ],
+     "testData": ""
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-20",
+    "GYM-BR-WORKOUTS@v1",
+    "GYM-FR@v1"
+   ],
+   "techniques": [
+    "specification_based"
+   ],
+   "testTypes": [
+    "positive"
+   ],
+   "testConditions": [
+    "Strength set row"
+   ],
+   "module": "Workouts",
+   "level": "ui",
+   "manualReason": ""
+  },
+  {
+   "title": "A Cardio exercise shows time, speed and heart rate instead of weights",
+   "priority": "P2",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "In a session log, choose a Cardio exercise",
+     "expected": "The row has the fields \"time\", \"speed\" and \"heart rate\" and no weight field",
+     "sourceRefs": [
+      "story:AC-20",
+      "GYM-BR-WORKOUTS@v1"
+     ],
+     "testData": "exercise type Cardio"
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-20",
+    "GYM-BR-WORKOUTS@v1"
+   ],
+   "techniques": [
+    "equivalence_partitioning"
+   ],
+   "testTypes": [
+    "positive"
+   ],
+   "testConditions": [
+    "Strength vs Cardio"
+   ],
+   "module": "Workouts",
+   "level": "ui",
+   "manualReason": ""
+  }
+ ]
+}

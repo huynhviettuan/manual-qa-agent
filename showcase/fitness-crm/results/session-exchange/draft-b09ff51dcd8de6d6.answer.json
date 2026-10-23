@@ -1,0 +1,142 @@
+{
+ "designNotes": [
+  "Decision table on status: Đã tập / Khách không đến (consume, credit) vs Hủy lịch / delete (neither).",
+  "Booking refusals: no sessions left, expired, overlap (BR-402, BR-403)."
+ ],
+ "cases": [
+  {
+   "title": "\"Đã tập\" and \"Khách không đến\" reduce sessions left by 1 and credit the PT",
+   "priority": "P0",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "Mark a booked session \"Đã tập\"",
+     "expected": "Sessions left fall by exactly 1 and the PT gets 1 credit",
+     "sourceRefs": [
+      "story:AC-15",
+      "GYM-BR-SESSIONS-AND-CLASSES@v1"
+     ],
+     "testData": "contract with 10 left"
+    },
+    {
+     "action": "Mark another booked session \"Khách không đến\"",
+     "expected": "Sessions left fall by exactly 1 more and the PT gets 1 more credit",
+     "sourceRefs": [
+      "GYM-BR-SESSIONS-AND-CLASSES@v1"
+     ],
+     "testData": ""
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-15",
+    "GYM-BR-SESSIONS-AND-CLASSES@v1"
+   ],
+   "techniques": [
+    "decision_table"
+   ],
+   "testTypes": [
+    "positive"
+   ],
+   "testConditions": [
+    "Đã tập",
+    "Khách không đến"
+   ],
+   "module": "Sessions",
+   "level": "manual",
+   "manualReason": "Needs a booking created earlier in the test and arithmetic across displayed counts."
+  },
+  {
+   "title": "\"Hủy lịch\" neither consumes nor credits",
+   "priority": "P1",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "Cancel a booked session with \"Hủy lịch\"",
+     "expected": "Sessions left are unchanged and the PT gets no credit",
+     "sourceRefs": [
+      "story:AC-15",
+      "GYM-BR-SESSIONS-AND-CLASSES@v1"
+     ],
+     "testData": ""
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-15",
+    "GYM-BR-SESSIONS-AND-CLASSES@v1"
+   ],
+   "techniques": [
+    "decision_table"
+   ],
+   "testTypes": [
+    "negative"
+   ],
+   "testConditions": [
+    "Hủy lịch"
+   ],
+   "module": "Sessions",
+   "level": "manual",
+   "manualReason": "Needs a booking created earlier in the test."
+  },
+  {
+   "title": "Booking is refused with no sessions left, on an expired contract, or on an overlap",
+   "priority": "P0",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "Book on a contract with 0 sessions left",
+     "expected": "The booking is refused; no session is created",
+     "sourceRefs": [
+      "GYM-BR-SESSIONS-AND-CLASSES@v1",
+      "story:AC-15"
+     ],
+     "testData": "0 sessions left"
+    },
+    {
+     "action": "Book on an expired contract",
+     "expected": "The booking is refused",
+     "sourceRefs": [
+      "GYM-BR-SESSIONS-AND-CLASSES@v1"
+     ],
+     "testData": "end date in the past"
+    },
+    {
+     "action": "Book the same PT at a time they already hold",
+     "expected": "The booking is refused",
+     "sourceRefs": [
+      "GYM-BR-SESSIONS-AND-CLASSES@v1"
+     ],
+     "testData": "overlapping slot"
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-15",
+    "GYM-BR-SESSIONS-AND-CLASSES@v1"
+   ],
+   "techniques": [
+    "decision_table",
+    "equivalence_partitioning"
+   ],
+   "testTypes": [
+    "negative"
+   ],
+   "testConditions": [
+    "0 left",
+    "expired",
+    "PT overlap",
+    "customer overlap"
+   ],
+   "module": "Sessions",
+   "level": "ui",
+   "manualReason": ""
+  }
+ ]
+}

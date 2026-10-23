@@ -1,0 +1,173 @@
+{
+ "designNotes": [
+  "State model: active -> frozen -> reactivated; while frozen: no booking, no check-in.",
+  "Boundary on freeze length: 10 days (no reminder) vs 11 days (reminder)."
+ ],
+ "cases": [
+  {
+   "title": "A frozen contract cannot be booked",
+   "priority": "P0",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "Deactivate an active contract with a reason, then book a session on it",
+     "expected": "The booking is refused; no session is created",
+     "sourceRefs": [
+      "story:AC-14",
+      "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+      "GYM-BR-SESSIONS-AND-CLASSES@v1"
+     ],
+     "testData": ""
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-14",
+    "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+    "GYM-BR-SESSIONS-AND-CLASSES@v1"
+   ],
+   "techniques": [
+    "state_transition"
+   ],
+   "testTypes": [
+    "negative"
+   ],
+   "testConditions": [
+    "frozen -> booking refused"
+   ],
+   "module": "Contracts",
+   "level": "ui",
+   "manualReason": ""
+  },
+  {
+   "title": "Reactivation proposes extending by the frozen days, applied only after Admin confirms",
+   "priority": "P1",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "Reactivate a contract frozen for 7 days",
+     "expected": "The screen shows 7 frozen days, the old end date and the proposed end date (old + 7)",
+     "sourceRefs": [
+      "story:AC-14",
+      "GYM-FR@v1",
+      "GYM-BR-SERVICES-PRICES-CONTRACTS@v1"
+     ],
+     "testData": "frozen 7 days"
+    },
+    {
+     "action": "As Admin, accept the proposal",
+     "expected": "The end date becomes the proposed date",
+     "sourceRefs": [
+      "GYM-BR-SERVICES-PRICES-CONTRACTS@v1"
+     ],
+     "testData": ""
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-14",
+    "GYM-FR@v1",
+    "GYM-BR-SERVICES-PRICES-CONTRACTS@v1"
+   ],
+   "techniques": [
+    "state_transition"
+   ],
+   "testTypes": [
+    "positive"
+   ],
+   "testConditions": [
+    "reactivation proposal -> admin accepts"
+   ],
+   "module": "Contracts",
+   "level": "manual",
+   "manualReason": "The expected dates depend on time passing between freeze and reactivation."
+  },
+  {
+   "title": "A freeze extends the end date at most once",
+   "priority": "P1",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "After accepting an extension, try to apply the same freeze again",
+     "expected": "The end date is unchanged; no second extension is offered",
+     "sourceRefs": [
+      "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+      "story:AC-14"
+     ],
+     "testData": ""
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-14",
+    "GYM-BR-SERVICES-PRICES-CONTRACTS@v1"
+   ],
+   "techniques": [
+    "state_transition",
+    "error_guessing"
+   ],
+   "testTypes": [
+    "negative"
+   ],
+   "testConditions": [
+    "second extension of the same freeze"
+   ],
+   "module": "Contracts",
+   "level": "manual",
+   "manualReason": "Depends on time passing (a freeze that has run)."
+  },
+  {
+   "title": "A freeze longer than 10 days creates a reminder task for the manager",
+   "priority": "P2",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "Keep a contract frozen 10 days",
+     "expected": "No reminder task exists",
+     "sourceRefs": [
+      "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+      "story:AC-14"
+     ],
+     "testData": "10 days"
+    },
+    {
+     "action": "Keep it frozen an 11th day",
+     "expected": "A reminder task for the manager is created",
+     "sourceRefs": [
+      "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+      "GYM-FR@v1",
+      "story:AC-14"
+     ],
+     "testData": "11 days"
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-14",
+    "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+    "GYM-FR@v1"
+   ],
+   "techniques": [
+    "boundary_value_analysis"
+   ],
+   "testTypes": [
+    "boundary"
+   ],
+   "testConditions": [
+    "10 days: no task",
+    "11 days: task"
+   ],
+   "module": "Contracts",
+   "level": "manual",
+   "manualReason": "Depends on time passing; needs a controllable clock."
+  }
+ ]
+}

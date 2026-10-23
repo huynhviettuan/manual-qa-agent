@@ -1,0 +1,90 @@
+{
+ "designNotes": [
+  "Metamorphic relations: paid = sum of valid receipts; closing = opening + receipts - expenses (BR-602, BR-609)."
+ ],
+ "cases": [
+  {
+   "title": "A contract's paid amount and debt follow its valid receipts only",
+   "priority": "P0",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "Add an approved receipt of 2.000.000 and a pending one of 1.000.000 to a 5.000.000 contract",
+     "expected": "Paid shows 2.000.000 and debt 3.000.000",
+     "sourceRefs": [
+      "story:AC-19",
+      "GYM-BR-MONEY@v1"
+     ],
+     "testData": "value 5.000.000; receipts 2.000.000 approved, 1.000.000 pending"
+    },
+    {
+     "action": "Delete the approved receipt",
+     "expected": "Paid shows 0 and debt 5.000.000",
+     "sourceRefs": [
+      "GYM-BR-MONEY@v1"
+     ],
+     "testData": ""
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-19",
+    "GYM-BR-MONEY@v1"
+   ],
+   "techniques": [
+    "metamorphic",
+    "equivalence_partitioning"
+   ],
+   "testTypes": [
+    "positive"
+   ],
+   "testConditions": [
+    "approved receipt counts",
+    "pending receipt does not",
+    "deleted receipt does not"
+   ],
+   "module": "Money",
+   "level": "manual",
+   "manualReason": "Changes shared money data and needs approvals by a second person."
+  },
+  {
+   "title": "The cash book closes at opening plus receipts minus expenses",
+   "priority": "P0",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "Read the opening balance, receipts and expenses for one day, method and branch",
+     "expected": "Closing balance = opening + receipts - expenses, to the đồng",
+     "sourceRefs": [
+      "story:AC-19",
+      "GYM-BR-MONEY@v1",
+      "GYM-FR@v1"
+     ],
+     "testData": ""
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-19",
+    "GYM-BR-MONEY@v1",
+    "GYM-FR@v1"
+   ],
+   "techniques": [
+    "metamorphic"
+   ],
+   "testTypes": [
+    "positive"
+   ],
+   "testConditions": [
+    "one method and branch, one day"
+   ],
+   "module": "Money",
+   "level": "manual",
+   "manualReason": "Needs arithmetic across displayed values."
+  }
+ ]
+}

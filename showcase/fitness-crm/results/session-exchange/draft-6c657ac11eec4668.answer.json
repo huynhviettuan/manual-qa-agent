@@ -1,0 +1,55 @@
+{
+ "designNotes": [
+  "Two time points for a session without full check-in: end of day -> PT; 24 hours -> Studio Manager task."
+ ],
+ "cases": [
+  {
+   "title": "A session without full check-in is notified to its PT at the end of the day and to the Studio Manager after 24 hours",
+   "priority": "P2",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "Leave a booked session without a full check-in until the end of its day",
+     "expected": "The PT receives 1 notice for that session",
+     "sourceRefs": [
+      "story:AC-30",
+      "GYM-BR-SESSIONS-AND-CLASSES@v1"
+     ],
+     "testData": ""
+    },
+    {
+     "action": "Leave it 24 hours",
+     "expected": "A task is created for the Studio Manager",
+     "sourceRefs": [
+      "story:AC-30",
+      "GYM-FR@v1"
+     ],
+     "testData": ""
+    }
+   ],
+   "assumptions": [
+    "\"End of the day\" is taken as the end of the session's calendar day; the sources do not give a time."
+   ],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-30",
+    "GYM-BR-SESSIONS-AND-CLASSES@v1",
+    "GYM-FR@v1"
+   ],
+   "techniques": [
+    "state_transition"
+   ],
+   "testTypes": [
+    "positive"
+   ],
+   "testConditions": [
+    "end of day",
+    "after 24 h"
+   ],
+   "module": "Check-in",
+   "level": "manual",
+   "manualReason": "Depends on time passing; needs a controllable clock."
+  }
+ ]
+}

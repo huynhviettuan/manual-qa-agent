@@ -1,0 +1,12 @@
+{
+ "readiness": "clarification",
+ "missingExpectations": [
+  "AC-27: the length of the grace period after which an overdue step locks is not given; GYM-FR also allows Admin to remove a tick with a reason, which the criterion does not mention."
+ ],
+ "clarificationQuestion": "For AC-27, how long is the grace period before an overdue step locks as \"Không thực hiện\", and does the Admin exception (untick with a reason) apply?",
+ "citedSourceIds": [
+  "GYM-AC@v1",
+  "GYM-FR@v1",
+  "GYM-BR-LEADS-AND-CUSTOMERS@v1"
+ ]
+}

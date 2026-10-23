@@ -50,7 +50,7 @@ const TriageSchema = z.object({
   rationale: z.string(),
 });
 
-const ReadinessSchema = z.object({
+export const ReadinessSchema = z.object({
   readiness: Readiness,
   missingExpectations: z.array(z.string()),
   clarificationQuestion: z.string().nullable(),

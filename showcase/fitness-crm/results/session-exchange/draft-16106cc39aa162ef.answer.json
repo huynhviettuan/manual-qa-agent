@@ -1,0 +1,69 @@
+{
+ "designNotes": [
+  "End-to-end use case: one record from lead to session; the ID never changes (BR-201)."
+ ],
+ "cases": [
+  {
+   "title": "One person keeps one record from lead to first session",
+   "priority": "P0",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "Create a lead \"QA Một Người\" with a phone and note its ID",
+     "expected": "The lead is created with an ID",
+     "sourceRefs": [
+      "story:AC-09",
+      "GYM-BR-LEADS-AND-CUSTOMERS@v1"
+     ],
+     "testData": "name \"QA Một Người\", phone 0900000123"
+    },
+    {
+     "action": "Book an appointment and mark Show",
+     "expected": "The lead becomes a customer with the same ID",
+     "sourceRefs": [
+      "GYM-BR-LEADS-AND-CUSTOMERS@v1",
+      "story:AC-09"
+     ],
+     "testData": ""
+    },
+    {
+     "action": "Create and approve a contract, then book and confirm a session",
+     "expected": "The contract and the session belong to the customer with that same ID",
+     "sourceRefs": [
+      "story:AC-09"
+     ],
+     "testData": ""
+    },
+    {
+     "action": "Search customers by the phone",
+     "expected": "Exactly 1 record is found",
+     "sourceRefs": [
+      "GYM-BR-LEADS-AND-CUSTOMERS@v1",
+      "story:AC-09"
+     ],
+     "testData": "phone 0900000123"
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-09",
+    "GYM-BR-LEADS-AND-CUSTOMERS@v1"
+   ],
+   "techniques": [
+    "use_case",
+    "scenario"
+   ],
+   "testTypes": [
+    "end_to_end"
+   ],
+   "testConditions": [
+    "lead -> appointment -> Show -> contract -> session, same ID"
+   ],
+   "module": "Leads and customers",
+   "level": "manual",
+   "manualReason": "Needs a record created earlier in the test carried through five steps and two people in sequence (contract approval)."
+  }
+ ]
+}

@@ -37,3 +37,37 @@ The agent tested the Gym CRM sample (`D:\fitness-crm`, fictional *Demo Gym* data
 Each run creates a few leads in the instance. Sign-in is rate limited, so avoid running the showcase in a tight loop.
 
 Third run (2026-10-23, draft sets per story and run-scoped values): SEC-01 asserts the "Không tìm thấy" heading and passes; CON-08 is automated with derived dates (`values` in its spec). 131 automated: 130 passed, 1 failed (CON-07), identically in two suite runs.
+
+## Drafted by Claude in an interactive session (ADR-0020)
+
+No API key was available, so the 30 acceptance-criteria stories were answered by Claude in an interactive Claude
+Code session through the file-exchange provider: the agent wrote each exact prompt to
+`results/session-exchange/`, Claude answered there, and the agent applied its usual schema, grounding, coverage
+and observability checks. Run it with `npx tsx showcase/fitness-crm/session-drafts.ts` (it replays the stored
+answers). Results are in `results/session-drafts.json`. This is a best case, not the unattended agent: the session
+had the whole project in context.
+
+| | Keyless stand-in | Claude (session) |
+| --- | ---: | ---: |
+| Stories judged ready | 30 of 30 | 20 of 30 |
+| Clarification questions | 0 | 10 |
+| Draft cases | 30 (one restatement per story) | 53 (one per test condition) |
+| Techniques used | specification-based only | 11 (state transition 15, equivalence partitioning 9, decision table 8, …) |
+| Cases the observability check flagged | — | 20 of 53 |
+
+**The clarifications are real gaps in the Gym CRM documents.** For example: AC-13 says the trash is "viewable only
+by management", but the seeded roles keep it from the Fitness Manager (Admin only); AC-27 locks an overdue step
+"past its grace period" without saying how long that is; AC-08, AC-18 and AC-22 compare with Excel or GymMaster
+files that are not among the sources. The team's designed suite has cases on 9 of these 10 criteria, written
+against today's behaviour rather than a stated rule.
+
+**Against the team's cases on the 20 drafted criteria** (110 cases, 74 of them the AC-01 permission matrix):
+outside AC-01 the session drafted 49 cases where the team designed 36, often splitting one requirement by
+condition. The team's suite is broader on permissions; the drafts are broader on state transitions and money
+relations. 23 drafts are marked manual with a reason (time passing, email, shared data), 29 UI, 1 API.
+
+**The observability check over-flags.** About half of its 20 flags are fair (an expected value the sources do not
+give, such as a tier price or the exact required-field message). The other half are false positives on absence and
+relations: "No edit action is offered", "No reminder task exists", "Closing balance = opening + receipts −
+expenses". The check is lexical; teaching it absence and arithmetic relations is a follow-up, not done here so the
+drafts are not tuned to the checker.

@@ -1,0 +1,3469 @@
+{
+  "model": "claude-opus-5-5 (interactive Claude Code session)",
+  "generatedAt": "2026-10-23T06:44:18.440Z",
+  "summary": {
+    "stories": 30,
+    "drafted": 20,
+    "clarification": 10,
+    "pending": 0,
+    "cases": 53,
+    "steps": 80,
+    "flaggedCases": 20,
+    "automatable": 30,
+    "techniques": {
+      "permission_matrix": 6,
+      "attack_based": 1,
+      "error_guessing": 4,
+      "use_case": 6,
+      "state_transition": 15,
+      "decision_table": 8,
+      "specification_based": 5,
+      "equivalence_partitioning": 9,
+      "scenario": 1,
+      "boundary_value_analysis": 6,
+      "metamorphic": 3
+    },
+    "teamCasesOnTheseCriteria": 123
+  },
+  "stories": [
+    {
+      "story": "GYM-AC-01",
+      "criterion": "AC-01",
+      "text": "An account without permission for a module does not see its menu and cannot reach it by direct URL; a role with phone numbers hidden never sees them on any screen or export.",
+      "route": "DRAFT_CREATED",
+      "pending": null,
+      "question": null,
+      "reason": null,
+      "designNotes": [
+        "Permission matrix: for each module, the lowest role granted and the highest role refused (GYM-RBAC seeded roles).",
+        "Two channels per refusal: the menu (hidden) and a direct URL (refused).",
+        "Field masking: phone hidden for Marketing on a screen and in an export."
+      ],
+      "missingRequirements": [],
+      "drafts": [
+        {
+          "title": "A role without the Configuration permission sees no Configuration menu",
+          "priority": "P0",
+          "level": "ui",
+          "manualReason": "",
+          "basis": "specified",
+          "techniques": [
+            "permission_matrix"
+          ],
+          "testTypes": [
+            "security",
+            "negative"
+          ],
+          "testConditions": [
+            "Configuration: Admin granted, every other role refused"
+          ],
+          "requirementRefs": [
+            "story:AC-01",
+            "GYM-RBAC@v1"
+          ],
+          "steps": [
+            {
+              "action": "Sign in as Receptionist and open the main menu",
+              "expected": "The main menu has no \"Cấu hình\" entry",
+              "testData": "Receptionist (seeded role)",
+              "sourceRefs": [
+                "story:AC-01",
+                "GYM-RBAC@v1"
+              ]
+            },
+            {
+              "action": "Sign in as Admin and open the main menu",
+              "expected": "The main menu shows a \"Cấu hình\" entry",
+              "testData": "Admin",
+              "sourceRefs": [
+                "GYM-RBAC@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": []
+        },
+        {
+          "title": "A direct URL to a module without permission is refused",
+          "priority": "P0",
+          "level": "ui",
+          "manualReason": "",
+          "basis": "specified",
+          "techniques": [
+            "permission_matrix",
+            "attack_based"
+          ],
+          "testTypes": [
+            "security",
+            "negative"
+          ],
+          "testConditions": [
+            "Configuration URL as a refused role"
+          ],
+          "requirementRefs": [
+            "story:AC-01",
+            "GYM-RBAC@v1"
+          ],
+          "steps": [
+            {
+              "action": "Sign in as Receptionist and type the Configuration URL in the address bar",
+              "expected": "The configuration page is refused (no settings are shown) and the API answers 403 for its data",
+              "testData": "Receptionist; the Configuration page URL",
+              "sourceRefs": [
+                "story:AC-01",
+                "GYM-RBAC@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": []
+        },
+        {
+          "title": "Marketing never sees customer phone numbers on screen",
+          "priority": "P0",
+          "level": "ui",
+          "manualReason": "",
+          "basis": "specified",
+          "techniques": [
+            "permission_matrix"
+          ],
+          "testTypes": [
+            "security"
+          ],
+          "testConditions": [
+            "Field masking: phone hidden for Marketing"
+          ],
+          "requirementRefs": [
+            "story:AC-01",
+            "GYM-RBAC@v1"
+          ],
+          "steps": [
+            {
+              "action": "Sign in as Marketing and open the lead analysis report",
+              "expected": "No customer phone number appears in the report; the phone column is empty or masked",
+              "testData": "Marketing (phone and email hidden)",
+              "sourceRefs": [
+                "story:AC-01",
+                "GYM-RBAC@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": []
+        },
+        {
+          "title": "A masked field stays masked in an Excel export",
+          "priority": "P1",
+          "level": "manual",
+          "manualReason": "Opening and inspecting a downloaded Excel file is outside the browser steps the executor runs.",
+          "basis": "specified",
+          "techniques": [
+            "permission_matrix",
+            "error_guessing"
+          ],
+          "testTypes": [
+            "security"
+          ],
+          "testConditions": [
+            "Export of a list for a role with phone hidden"
+          ],
+          "requirementRefs": [
+            "story:AC-01",
+            "GYM-RBAC@v1"
+          ],
+          "steps": [
+            {
+              "action": "As a role with phone hidden and an export permission, export a customer list to Excel",
+              "expected": "The exported file has no phone numbers: the phone column is empty or masked",
+              "testData": "A custom role with customer.export and phone hidden",
+              "sourceRefs": [
+                "story:AC-01",
+                "GYM-RBAC@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": []
+        }
+      ],
+      "team": [
+        {
+          "id": "AUTH-04",
+          "title": "A signed-out visitor who opens the dashboard is sent to the login page",
+          "technique": "State transition",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "AUTH-05",
+          "title": "A signed-out deep link to a record page is sent to the login page",
+          "technique": "Equivalence partitioning",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-01A",
+          "title": "Admin can open /admin/users",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-01B",
+          "title": "Fitness Manager cannot open /admin/users",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-02A",
+          "title": "Admin can open /admin/roles",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-02B",
+          "title": "Fitness Manager cannot open /admin/roles",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-03A",
+          "title": "Admin can open /admin/options",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-03B",
+          "title": "Fitness Manager cannot open /admin/options",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-04A",
+          "title": "Admin can open /admin/parameters",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-04B",
+          "title": "Fitness Manager cannot open /admin/parameters",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-05A",
+          "title": "Admin can open /admin/trash",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-05B",
+          "title": "Fitness Manager cannot open /admin/trash",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-06A",
+          "title": "Admin can open /admin/audit",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-06B",
+          "title": "Fitness Manager cannot open /admin/audit",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-07A",
+          "title": "Admin can open /admin/system",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-07B",
+          "title": "Fitness Manager cannot open /admin/system",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-08A",
+          "title": "Admin can open /admin/approvals",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-08B",
+          "title": "Fitness Manager cannot open /admin/approvals",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-09A",
+          "title": "Admin can open /admin/email-templates",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-09B",
+          "title": "Fitness Manager cannot open /admin/email-templates",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-10A",
+          "title": "Admin can open /admin/intake",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-10B",
+          "title": "Fitness Manager cannot open /admin/intake",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-11A",
+          "title": "Admin can open /admin/promotions",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-11B",
+          "title": "Receptionist cannot open /admin/promotions",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-12A",
+          "title": "Receptionist can open /admin/services",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-12B",
+          "title": "PT cannot open /admin/services",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-13A",
+          "title": "Receptionist can open /leads",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-13B",
+          "title": "PT cannot open /leads",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-14A",
+          "title": "Fitness Manager can open /leads/audit",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-14B",
+          "title": "Receptionist cannot open /leads/audit",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-15A",
+          "title": "Fitness Manager can open /leads/receivers",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-15B",
+          "title": "Consulting cannot open /leads/receivers",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-16A",
+          "title": "PT can open /employees",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-16B",
+          "title": "Receptionist cannot open /employees",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-17A",
+          "title": "Kế toán (custom role) can open /reports/pt-revenue",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-17B",
+          "title": "Receptionist cannot open /reports/pt-revenue",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-18A",
+          "title": "Kế toán (custom role) can open /reports/pt-payouts",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-18B",
+          "title": "Receptionist cannot open /reports/pt-payouts",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-19A",
+          "title": "Receptionist can open /reports/bookings",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-19B",
+          "title": "Consulting cannot open /reports/bookings",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-20A",
+          "title": "Fitness Manager can open /reports/tasks",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-20B",
+          "title": "Receptionist cannot open /reports/tasks",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-21A",
+          "title": "Fitness Manager can open /reports/workouts",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-21B",
+          "title": "PT cannot open /reports/workouts",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-22A",
+          "title": "Fitness Manager can open /reports/lead-analysis",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-22B",
+          "title": "Consulting cannot open /reports/lead-analysis",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-23A",
+          "title": "Consulting can open /reports/consulting",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-23B",
+          "title": "Receptionist cannot open /reports/consulting",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-24A",
+          "title": "Kế toán (custom role) can open /reports/cash-book",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-24B",
+          "title": "Receptionist cannot open /reports/cash-book",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-25A",
+          "title": "Kế toán (custom role) can open /finance/cash",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-25B",
+          "title": "Receptionist cannot open /finance/cash",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-26A",
+          "title": "Consulting can open /finance/payments",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-26B",
+          "title": "PT cannot open /finance/payments",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-27A",
+          "title": "PT can open /workouts/plans",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-27B",
+          "title": "Receptionist cannot open /workouts/plans",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-28A",
+          "title": "PT can open /admin/workout-catalog",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-28B",
+          "title": "Consulting cannot open /admin/workout-catalog",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-29A",
+          "title": "PT can open /calendar",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-29B",
+          "title": "Consulting cannot open /calendar",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-30A",
+          "title": "Receptionist can open /classes",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-30B",
+          "title": "Consulting cannot open /classes",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-M1",
+          "title": "A trainer has no Finance menu entry",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-M2",
+          "title": "A manager has the Finance menu entry",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-M3",
+          "title": "A receptionist sees services but cannot add one",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-M4",
+          "title": "An admin can add a service",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "RBAC-M6",
+          "title": "A role with phone numbers hidden never sees them, on screen or in exports",
+          "technique": "Permission matrix",
+          "steps": 2,
+          "automated": false
+        },
+        {
+          "id": "CON-17",
+          "title": "A receptionist sees a contract but cannot cancel it",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "CON-18",
+          "title": "A receptionist cannot create a contract",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "MON-14",
+          "title": "A receptionist has payments and debt but not income and expenses",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "MON-15",
+          "title": "A manager has income and expenses",
+          "technique": "Permission matrix",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "SEC-02",
+          "title": "The API refuses a request without a session",
+          "technique": "Error guessing",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "SEC-03",
+          "title": "The API refuses an admin endpoint to a receptionist",
+          "technique": "Error guessing",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "SEC-04",
+          "title": "The API refuses lead data to a trainer",
+          "technique": "Error guessing",
+          "steps": 1,
+          "automated": true
+        }
+      ]
+    },
+    {
+      "story": "GYM-AC-02",
+      "criterion": "AC-02",
+      "text": "Admin changes permissions, approval thresholds, price tiers, timers, and session status rules on screen; changes take effect immediately, with no developer.",
+      "route": "DRAFT_CREATED",
+      "pending": null,
+      "question": null,
+      "reason": null,
+      "designNotes": [
+        "Use case per configurable area named in the criterion: permissions, approval thresholds, price tiers, timers, session status rules.",
+        "Each case checks the change takes effect without a deployment and that only Admin can make it (Configuration: Admin only)."
+      ],
+      "missingRequirements": [],
+      "drafts": [
+        {
+          "title": "Granting a permission on screen takes effect at the next request",
+          "priority": "P1",
+          "level": "ui",
+          "manualReason": "",
+          "basis": "specified",
+          "techniques": [
+            "use_case",
+            "state_transition"
+          ],
+          "testTypes": [
+            "positive"
+          ],
+          "testConditions": [
+            "Role without lead.export -> granted -> export available"
+          ],
+          "requirementRefs": [
+            "story:AC-02",
+            "GYM-RBAC@v1"
+          ],
+          "steps": [
+            {
+              "action": "As Admin, add lead.export to a custom role on the Roles screen and save",
+              "expected": "The role shows lead.export as granted",
+              "testData": "Custom role \"QA export\" without lead.export",
+              "sourceRefs": [
+                "story:AC-02",
+                "GYM-RBAC@v1"
+              ]
+            },
+            {
+              "action": "As a user of that role, reload the leads list",
+              "expected": "The \"Xuất Excel\" button is shown without any deployment",
+              "testData": "",
+              "sourceRefs": [
+                "story:AC-02",
+                "GYM-RBAC@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": [
+            "step 1: no exact message, value or state in \"The role shows lead.export as granted\""
+          ]
+        },
+        {
+          "title": "Changing a role's discount threshold changes who approves",
+          "priority": "P1",
+          "level": "ui",
+          "manualReason": "",
+          "basis": "specified",
+          "techniques": [
+            "decision_table"
+          ],
+          "testTypes": [
+            "positive",
+            "boundary"
+          ],
+          "testConditions": [
+            "Fitness Manager threshold 10% -> 15%: a 12% discount moves from Admin to Fitness Manager"
+          ],
+          "requirementRefs": [
+            "story:AC-02",
+            "GYM-RBAC@v1"
+          ],
+          "steps": [
+            {
+              "action": "As Admin, set the Fitness Manager discount threshold from 10% to 15%",
+              "expected": "The role screen shows 15%",
+              "testData": "10% -> 15%",
+              "sourceRefs": [
+                "GYM-RBAC@v1"
+              ]
+            },
+            {
+              "action": "Submit a contract with a 12% discount",
+              "expected": "The approval request goes to the Fitness Manager, not to Admin",
+              "testData": "discount 12%",
+              "sourceRefs": [
+                "story:AC-02",
+                "GYM-RBAC@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": [
+            "step 2: no exact message, value or state in \"The approval request goes to the Fitness Manager, not to Admin\""
+          ]
+        },
+        {
+          "title": "A new price tier version applies to contracts created after it",
+          "priority": "P2",
+          "level": "ui",
+          "manualReason": "",
+          "basis": "specified",
+          "techniques": [
+            "use_case"
+          ],
+          "testTypes": [
+            "positive"
+          ],
+          "testConditions": [
+            "Tier unit price changed by Admin"
+          ],
+          "requirementRefs": [
+            "story:AC-02",
+            "GYM-FR@v1",
+            "GYM-BR-SERVICES-PRICES-CONTRACTS@v1"
+          ],
+          "steps": [
+            {
+              "action": "As Admin, change the PT tier unit price for 1-10 sessions and save",
+              "expected": "The tier list shows the new unit price",
+              "testData": "PT 1-10 sessions",
+              "sourceRefs": [
+                "GYM-FR@v1",
+                "story:AC-02"
+              ]
+            },
+            {
+              "action": "Open a new PT contract for 10 sessions",
+              "expected": "The unit price on the form equals the new tier price",
+              "testData": "10 sessions",
+              "sourceRefs": [
+                "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+                "story:AC-02"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": [
+            "step 1: no exact message, value or state in \"The tier list shows the new unit price\"",
+            "step 2: no exact message, value or state in \"The unit price on the form equals the new tier price\""
+          ]
+        },
+        {
+          "title": "Only Admin can change configuration",
+          "priority": "P0",
+          "level": "ui",
+          "manualReason": "",
+          "basis": "specified",
+          "techniques": [
+            "permission_matrix"
+          ],
+          "testTypes": [
+            "security",
+            "negative"
+          ],
+          "testConditions": [
+            "Configuration: Admin granted, Fitness Manager refused"
+          ],
+          "requirementRefs": [
+            "story:AC-02",
+            "GYM-RBAC@v1"
+          ],
+          "steps": [
+            {
+              "action": "As Fitness Manager, open the system parameters screen",
+              "expected": "The screen is refused; no parameter can be saved",
+              "testData": "Fitness Manager",
+              "sourceRefs": [
+                "GYM-RBAC@v1",
+                "story:AC-02"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": []
+        }
+      ],
+      "team": [
+        {
+          "id": "CFG-03",
+          "title": "Parameters change behaviour without a developer",
+          "technique": "Use case",
+          "steps": 1,
+          "automated": false
+        },
+        {
+          "id": "CFG-09",
+          "title": "Only Admin changes session status rules",
+          "technique": "Permission matrix",
+          "steps": 2,
+          "automated": false
+        }
+      ]
+    },
+    {
+      "story": "GYM-AC-03",
+      "criterion": "AC-03",
+      "text": "Every consulting step result, checklist item, and reason is a drop-down; admin adds or deactivates an option on screen, the change shows immediately, and old data is unchanged.",
+      "route": "DRAFT_CREATED",
+      "pending": null,
+      "question": null,
+      "reason": null,
+      "designNotes": [
+        "Option list lifecycle (state transition): active -> deactivated; new option -> active.",
+        "Old records keep a deactivated option (BR-102)."
+      ],
+      "missingRequirements": [],
+      "drafts": [
+        {
+          "title": "A consulting step result is chosen from a drop-down",
+          "priority": "P2",
+          "level": "ui",
+          "manualReason": "",
+          "basis": "specified",
+          "techniques": [
+            "specification_based"
+          ],
+          "testTypes": [
+            "positive"
+          ],
+          "testConditions": [
+            "Step result field type"
+          ],
+          "requirementRefs": [
+            "story:AC-03",
+            "GYM-BR-PLATFORM@v1"
+          ],
+          "steps": [
+            {
+              "action": "Open a lead's consulting checklist and set a step result",
+              "expected": "The result field is a drop-down with the configured options; free text cannot be typed into it",
+              "testData": "",
+              "sourceRefs": [
+                "story:AC-03",
+                "GYM-BR-PLATFORM@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": [
+            "step 1: no exact message, value or state in \"The result field is a drop-down with the configured options; free text cannot...\""
+          ]
+        },
+        {
+          "title": "An option added by Admin appears at once",
+          "priority": "P2",
+          "level": "ui",
+          "manualReason": "",
+          "basis": "specified",
+          "techniques": [
+            "state_transition"
+          ],
+          "testTypes": [
+            "positive"
+          ],
+          "testConditions": [
+            "New option -> active"
+          ],
+          "requirementRefs": [
+            "story:AC-03",
+            "GYM-FR@v1"
+          ],
+          "steps": [
+            {
+              "action": "As Admin, add the option \"QA mới\" to the consulting step result list",
+              "expected": "The list shows \"QA mới\" as active",
+              "testData": "option \"QA mới\"",
+              "sourceRefs": [
+                "GYM-FR@v1",
+                "story:AC-03"
+              ]
+            },
+            {
+              "action": "Reload a lead's checklist as Consulting",
+              "expected": "The result drop-down includes \"QA mới\"",
+              "testData": "",
+              "sourceRefs": [
+                "story:AC-03"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": []
+        },
+        {
+          "title": "A deactivated option disappears from new choices but stays on old records",
+          "priority": "P1",
+          "level": "ui",
+          "manualReason": "",
+          "basis": "specified",
+          "techniques": [
+            "state_transition"
+          ],
+          "testTypes": [
+            "positive",
+            "regression"
+          ],
+          "testConditions": [
+            "Active -> deactivated; old record keeps it"
+          ],
+          "requirementRefs": [
+            "story:AC-03",
+            "GYM-BR-PLATFORM@v1",
+            "GYM-FR@v1"
+          ],
+          "steps": [
+            {
+              "action": "Record a step result \"QA mới\" on a lead",
+              "expected": "The lead shows \"QA mới\"",
+              "testData": "",
+              "sourceRefs": [
+                "story:AC-03"
+              ]
+            },
+            {
+              "action": "As Admin, deactivate \"QA mới\"",
+              "expected": "The option is marked inactive",
+              "testData": "",
+              "sourceRefs": [
+                "GYM-FR@v1",
+                "GYM-BR-PLATFORM@v1"
+              ]
+            },
+            {
+              "action": "Open the drop-down on another lead, then reopen the first lead",
+              "expected": "The drop-down no longer offers \"QA mới\"; the first lead still shows \"QA mới\" unchanged",
+              "testData": "",
+              "sourceRefs": [
+                "GYM-BR-PLATFORM@v1",
+                "story:AC-03"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": [
+            "step 2: no exact message, value or state in \"The option is marked inactive\""
+          ]
+        }
+      ],
+      "team": [
+        {
+          "id": "CFG-01",
+          "title": "An option added on screen shows immediately; old data is unchanged",
+          "technique": "Use case",
+          "steps": 2,
+          "automated": false
+        }
+      ]
+    },
+    {
+      "story": "GYM-AC-04",
+      "criterion": "AC-04",
+      "text": "Choosing \"Khác\" in any drop-down cannot be saved without a note.",
+      "route": "DRAFT_CREATED",
+      "pending": null,
+      "question": null,
+      "reason": null,
+      "designNotes": [
+        "Equivalence classes for the note when \"Khác\" is chosen: empty, whitespace only, non-empty."
+      ],
+      "missingRequirements": [],
+      "drafts": [
+        {
+          "title": "\"Khác\" with an empty note cannot be saved",
+          "priority": "P2",
+          "level": "ui",
+          "manualReason": "",
+          "basis": "specified",
+          "techniques": [
+            "equivalence_partitioning"
+          ],
+          "testTypes": [
+            "negative"
+          ],
+          "testConditions": [
+            "note empty"
+          ],
+          "requirementRefs": [
+            "story:AC-04",
+            "GYM-BR-PLATFORM@v1"
+          ],
+          "steps": [
+            {
+              "action": "Choose \"Khác\" in a drop-down and save with the note empty",
+              "expected": "The save is refused and the note field is marked required; nothing is saved",
+              "testData": "note = \"\" (empty class)",
+              "sourceRefs": [
+                "story:AC-04",
+                "GYM-BR-PLATFORM@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": []
+        },
+        {
+          "title": "\"Khác\" with a whitespace-only note cannot be saved",
+          "priority": "P3",
+          "level": "ui",
+          "manualReason": "",
+          "basis": "assumption",
+          "techniques": [
+            "error_guessing"
+          ],
+          "testTypes": [
+            "negative"
+          ],
+          "testConditions": [
+            "note whitespace only"
+          ],
+          "requirementRefs": [
+            "story:AC-04",
+            "GYM-BR-PLATFORM@v1"
+          ],
+          "steps": [
+            {
+              "action": "Choose \"Khác\" and type three spaces as the note, then save",
+              "expected": "The save is refused as for an empty note",
+              "testData": "note = \"   \"",
+              "sourceRefs": [
+                "story:AC-04",
+                "GYM-BR-PLATFORM@v1"
+              ]
+            }
+          ],
+          "assumptions": [
+            "A whitespace-only note counts as no note; the sources only say \"without a note\"."
+          ],
+          "reviewFlags": []
+        },
+        {
+          "title": "\"Khác\" with a note is saved",
+          "priority": "P2",
+          "level": "ui",
+          "manualReason": "",
+          "basis": "specified",
+          "techniques": [
+            "equivalence_partitioning"
+          ],
+          "testTypes": [
+            "positive"
+          ],
+          "testConditions": [
+            "note non-empty"
+          ],
+          "requirementRefs": [
+            "story:AC-04",
+            "GYM-BR-PLATFORM@v1"
+          ],
+          "steps": [
+            {
+              "action": "Choose \"Khác\", type a note and save",
+              "expected": "The record is saved with \"Khác\" and the note text shown",
+              "testData": "note = \"Khách giới thiệu\"",
+              "sourceRefs": [
+                "story:AC-04",
+                "GYM-BR-PLATFORM@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": []
+        }
+      ],
+      "team": [
+        {
+          "id": "LEAD-15",
+          "title": "\"Khác\" without a note cannot be saved",
+          "technique": "Decision table",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "LEAD-16",
+          "title": "\"Khác\" with a note is saved",
+          "technique": "Decision table",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "LEAD-17",
+          "title": "Another channel needs no note",
+          "technique": "Decision table",
+          "steps": 2,
+          "automated": true
+        }
+      ]
+    },
+    {
+      "story": "GYM-AC-05",
+      "criterion": "AC-05",
+      "text": "Actions in approval groups have no effect until approved; the submitter cannot approve them; admin switches approval on or off and changes approvers per action type on screen.",
+      "route": "DRAFT_CREATED",
+      "pending": null,
+      "question": null,
+      "reason": null,
+      "designNotes": [
+        "Decision table: approval on/off x submitter vs other approver.",
+        "State: pending -> approved (takes effect) / rejected (no effect)."
+      ],
+      "missingRequirements": [],
+      "drafts": [
+        {
+          "title": "A contract has no effect until approved",
+          "priority": "P0",
+          "level": "ui",
+          "manualReason": "",
+          "basis": "specified",
+          "techniques": [
+            "state_transition"
+          ],
+          "testTypes": [
+            "positive"
+          ],
+          "testConditions": [
+            "pending contract: cannot be booked"
+          ],
+          "requirementRefs": [
+            "story:AC-05",
+            "GYM-BR-PLATFORM@v1"
+          ],
+          "steps": [
+            {
+              "action": "As Consulting, create a contract",
+              "expected": "The contract is in \"Chờ duyệt\"",
+              "testData": "",
+              "sourceRefs": [
+                "story:AC-05",
+                "GYM-RBAC@v1"
+              ]
+            },
+            {
+              "action": "Try to book a session on it",
+              "expected": "The booking is refused while the contract is pending",
+              "testData": "",
+              "sourceRefs": [
+                "story:AC-05",
+                "GYM-BR-PLATFORM@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": []
+        },
+        {
+          "title": "The submitter cannot approve their own request",
+          "priority": "P0",
+          "level": "ui",
+          "manualReason": "",
+          "basis": "specified",
+          "techniques": [
+            "decision_table"
+          ],
+          "testTypes": [
+            "security",
+            "negative"
+          ],
+          "testConditions": [
+            "approver = submitter"
+          ],
+          "requirementRefs": [
+            "story:AC-05",
+            "GYM-RBAC@v1",
+            "GYM-BR-PLATFORM@v1"
+          ],
+          "steps": [
+            {
+              "action": "As Fitness Manager, submit an exception-price contract and open its approval request",
+              "expected": "The approve action is refused for the submitter",
+              "testData": "submitter = approver = Fitness Manager",
+              "sourceRefs": [
+                "story:AC-05",
+                "GYM-RBAC@v1",
+                "GYM-BR-PLATFORM@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": []
+        },
+        {
+          "title": "Admin switches approval off for an action type",
+          "priority": "P1",
+          "level": "manual",
+          "manualReason": "Changes shared global configuration; kept manual until a settings snapshot and restore exist for it.",
+          "basis": "specified",
+          "techniques": [
+            "decision_table"
+          ],
+          "testTypes": [
+            "positive"
+          ],
+          "testConditions": [
+            "approval off -> takes effect at once"
+          ],
+          "requirementRefs": [
+            "story:AC-05",
+            "GYM-RBAC@v1"
+          ],
+          "steps": [
+            {
+              "action": "As Admin, switch off approval for receipts",
+              "expected": "The approval matrix shows receipts as not requiring approval",
+              "testData": "",
+              "sourceRefs": [
+                "story:AC-05",
+                "GYM-RBAC@v1"
+              ]
+            },
+            {
+              "action": "Create a receipt",
+              "expected": "The receipt is valid at once, with no approval request created",
+              "testData": "",
+              "sourceRefs": [
+                "story:AC-05"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": [
+            "step 1: no exact message, value or state in \"The approval matrix shows receipts as not requiring approval\""
+          ]
+        },
+        {
+          "title": "Admin changes the approver of an action type",
+          "priority": "P2",
+          "level": "manual",
+          "manualReason": "Changes shared global configuration; kept manual until a settings snapshot and restore exist for it.",
+          "basis": "specified",
+          "techniques": [
+            "use_case"
+          ],
+          "testTypes": [
+            "positive"
+          ],
+          "testConditions": [
+            "approver Fitness Manager -> Admin"
+          ],
+          "requirementRefs": [
+            "story:AC-05",
+            "GYM-RBAC@v1"
+          ],
+          "steps": [
+            {
+              "action": "As Admin, set the approver of change vouchers to Admin and submit a renewal",
+              "expected": "The approval task goes to Admin, not to the Fitness Manager",
+              "testData": "",
+              "sourceRefs": [
+                "story:AC-05",
+                "GYM-RBAC@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": [
+            "step 1: no exact message, value or state in \"The approval task goes to Admin, not to the Fitness Manager\""
+          ]
+        }
+      ],
+      "team": [
+        {
+          "id": "APR-01",
+          "title": "The submitter cannot approve their own request",
+          "technique": "Decision table",
+          "steps": 2,
+          "automated": false
+        },
+        {
+          "id": "APR-05",
+          "title": "Admin switches approval on or off per action on screen",
+          "technique": "Use case",
+          "steps": 1,
+          "automated": false
+        }
+      ]
+    },
+    {
+      "story": "GYM-AC-06",
+      "criterion": "AC-06",
+      "text": "A lead created from the form gets the right channel and source, is assigned in the right round-robin order, and the manager is notified.",
+      "route": "REVIEW_REQUESTED",
+      "pending": null,
+      "question": "Which channel and source should a lead created from the quick form (FR-LEAD-001) receive: fixed values per form, or values the person picks?",
+      "reason": "READINESS_CLARIFICATION",
+      "designNotes": [],
+      "missingRequirements": [],
+      "drafts": [],
+      "team": []
+    },
+    {
+      "story": "GYM-AC-07",
+      "criterion": "AC-07",
+      "text": "Reminder steps at 60 minutes, 24 hours, 3 hours and 60 minutes before the visit, and 15 days are created at the right time; overdue steps appear in \"Today's tasks\" and count as late in the audit; the \"Báo Studio\" step creates a task for the coach manager.",
+      "route": "REVIEW_REQUESTED",
+      "pending": null,
+      "question": "For AC-07, what are the first 60-minute step and the 15-day step measured from: lead creation, the last contact, or the appointment?",
+      "reason": "READINESS_CLARIFICATION",
+      "designNotes": [],
+      "missingRequirements": [],
+      "drafts": [],
+      "team": [
+        {
+          "id": "LEAD-40",
+          "title": "Reminder steps are created at the right times",
+          "technique": "Use case",
+          "steps": 1,
+          "automated": false
+        }
+      ]
+    },
+    {
+      "story": "GYM-AC-08",
+      "criterion": "AC-08",
+      "text": "The consulting dashboard gives the right lead counts, booking rate, and show rate per consultant when compared with the Excel files of September and October 2026.",
+      "route": "REVIEW_REQUESTED",
+      "pending": null,
+      "question": "Please provide the September and October 2026 Excel files (or their totals per consultant) and say how booking rate and show rate are calculated.",
+      "reason": "READINESS_CLARIFICATION",
+      "designNotes": [],
+      "missingRequirements": [],
+      "drafts": [],
+      "team": [
+        {
+          "id": "RPT-01",
+          "title": "The consulting dashboard matches the September and October files",
+          "technique": "Use case",
+          "steps": 1,
+          "automated": false
+        }
+      ]
+    },
+    {
+      "story": "GYM-AC-09",
+      "criterion": "AC-09",
+      "text": "One person goes through lead → appointment → show → contract → session with a single record.",
+      "route": "DRAFT_CREATED",
+      "pending": null,
+      "question": null,
+      "reason": null,
+      "designNotes": [
+        "End-to-end use case: one record from lead to session; the ID never changes (BR-201)."
+      ],
+      "missingRequirements": [],
+      "drafts": [
+        {
+          "title": "One person keeps one record from lead to first session",
+          "priority": "P0",
+          "level": "manual",
+          "manualReason": "Needs a record created earlier in the test carried through five steps and two people in sequence (contract approval).",
+          "basis": "specified",
+          "techniques": [
+            "use_case",
+            "scenario"
+          ],
+          "testTypes": [
+            "end_to_end"
+          ],
+          "testConditions": [
+            "lead -> appointment -> Show -> contract -> session, same ID"
+          ],
+          "requirementRefs": [
+            "story:AC-09",
+            "GYM-BR-LEADS-AND-CUSTOMERS@v1"
+          ],
+          "steps": [
+            {
+              "action": "Create a lead \"QA Một Người\" with a phone and note its ID",
+              "expected": "The lead is created with an ID",
+              "testData": "name \"QA Một Người\", phone 0900000123",
+              "sourceRefs": [
+                "story:AC-09",
+                "GYM-BR-LEADS-AND-CUSTOMERS@v1"
+              ]
+            },
+            {
+              "action": "Book an appointment and mark Show",
+              "expected": "The lead becomes a customer with the same ID",
+              "testData": "",
+              "sourceRefs": [
+                "GYM-BR-LEADS-AND-CUSTOMERS@v1",
+                "story:AC-09"
+              ]
+            },
+            {
+              "action": "Create and approve a contract, then book and confirm a session",
+              "expected": "The contract and the session belong to the customer with that same ID",
+              "testData": "",
+              "sourceRefs": [
+                "story:AC-09"
+              ]
+            },
+            {
+              "action": "Search customers by the phone",
+              "expected": "Exactly 1 record is found",
+              "testData": "phone 0900000123",
+              "sourceRefs": [
+                "GYM-BR-LEADS-AND-CUSTOMERS@v1",
+                "story:AC-09"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": [
+            "step 2: no exact message, value or state in \"The lead becomes a customer with the same ID\"",
+            "step 3: no exact message, value or state in \"The contract and the session belong to the customer with that same ID\""
+          ]
+        }
+      ],
+      "team": []
+    },
+    {
+      "story": "GYM-AC-10",
+      "criterion": "AC-10",
+      "text": "Entering any session count gives the right tier unit price, end date, and display name; a price different from the tier flags the contract \"Exception price\" and it cannot be activated until approved.",
+      "route": "DRAFT_CREATED",
+      "pending": null,
+      "question": null,
+      "reason": null,
+      "designNotes": [
+        "BVA on the session count at the tier edges (1, 10, 11 within the configured tiers) and an out-of-range count.",
+        "Exception price: a price different from the tier -> flagged, cannot be activated until approved."
+      ],
+      "missingRequirements": [],
+      "drafts": [
+        {
+          "title": "The tier unit price, end date and name follow the session count",
+          "priority": "P1",
+          "level": "ui",
+          "manualReason": "",
+          "basis": "specified",
+          "techniques": [
+            "boundary_value_analysis",
+            "equivalence_partitioning"
+          ],
+          "testTypes": [
+            "boundary",
+            "positive"
+          ],
+          "testConditions": [
+            "count at a tier boundary",
+            "count inside a tier"
+          ],
+          "requirementRefs": [
+            "story:AC-10",
+            "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+            "GYM-FR@v1"
+          ],
+          "steps": [
+            {
+              "action": "Open a new PT contract and type 24 sessions",
+              "expected": "Unit price, total and end date come from the PT tier for 24; the name reads \"PT 24 buổi\"",
+              "testData": "24 sessions (inside a tier)",
+              "sourceRefs": [
+                "story:AC-10",
+                "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+                "GYM-FR@v1"
+              ]
+            },
+            {
+              "action": "Change the count to the first count of the next tier",
+              "expected": "The unit price changes to the next tier's price",
+              "testData": "first count of the next tier",
+              "sourceRefs": [
+                "GYM-BR-SERVICES-PRICES-CONTRACTS@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": [
+            "step 2: no exact message, value or state in \"The unit price changes to the next tier's price\""
+          ]
+        },
+        {
+          "title": "A count above the highest tier is refused",
+          "priority": "P1",
+          "level": "ui",
+          "manualReason": "",
+          "basis": "assumption",
+          "techniques": [
+            "boundary_value_analysis"
+          ],
+          "testTypes": [
+            "boundary",
+            "negative"
+          ],
+          "testConditions": [
+            "count = top tier + 1"
+          ],
+          "requirementRefs": [
+            "story:AC-10",
+            "GYM-BR-SERVICES-PRICES-CONTRACTS@v1"
+          ],
+          "steps": [
+            {
+              "action": "Type one more session than the highest tier allows",
+              "expected": "No price is computed and the contract cannot be created",
+              "testData": "top of the highest tier + 1",
+              "sourceRefs": [
+                "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+                "story:AC-10"
+              ]
+            }
+          ],
+          "assumptions": [
+            "The sources do not say what happens above the highest tier; refusing is the reading of BR-301 (price only from a tier)."
+          ],
+          "reviewFlags": []
+        },
+        {
+          "title": "A price different from the tier makes an exception price that waits for approval",
+          "priority": "P0",
+          "level": "ui",
+          "manualReason": "",
+          "basis": "specified",
+          "techniques": [
+            "decision_table",
+            "state_transition"
+          ],
+          "testTypes": [
+            "positive"
+          ],
+          "testConditions": [
+            "price != tier -> exception, reason required, pending approval"
+          ],
+          "requirementRefs": [
+            "story:AC-10",
+            "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+            "GYM-FR@v1"
+          ],
+          "steps": [
+            {
+              "action": "Switch on \"Giá ngoại lệ\", type a price below the tier and no reason, then save",
+              "expected": "The save is refused until a reason is given",
+              "testData": "price = tier - 100.000",
+              "sourceRefs": [
+                "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+                "story:AC-10"
+              ]
+            },
+            {
+              "action": "Add a reason and save",
+              "expected": "The contract is flagged \"Exception price\" and stays pending; it cannot be activated",
+              "testData": "",
+              "sourceRefs": [
+                "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+                "story:AC-10",
+                "GYM-FR@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": []
+        }
+      ],
+      "team": [
+        {
+          "id": "CON-01",
+          "title": "1 session(s) price from the tier: 500.000 ₫",
+          "technique": "Boundary value analysis",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "CON-02",
+          "title": "24 session(s) price from the tier: 12.000.000 ₫",
+          "technique": "Equivalence partitioning",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "CON-03",
+          "title": "1000 session(s) price from the tier: 500.000.000 ₫",
+          "technique": "Boundary value analysis",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "CON-04",
+          "title": "Submitting zero sessions is refused",
+          "technique": "Boundary value analysis",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "CON-05",
+          "title": "Submitting too many (1001) sessions is refused",
+          "technique": "Boundary value analysis",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "CON-06",
+          "title": "Submitting non-numeric sessions is refused",
+          "technique": "Equivalence partitioning",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "CON-07",
+          "title": "The live price for 1001 sessions explains the range in Vietnamese",
+          "technique": "Boundary value analysis",
+          "steps": 1,
+          "automated": true
+        }
+      ]
+    },
+    {
+      "story": "GYM-AC-11",
+      "criterion": "AC-11",
+      "text": "An approved contract cannot be edited, even by admin; a contract not yet approved cannot be booked.",
+      "route": "DRAFT_CREATED",
+      "pending": null,
+      "question": null,
+      "reason": null,
+      "designNotes": [
+        "State transition on contract status: pending (editable, not bookable) -> approved (not editable, bookable)."
+      ],
+      "missingRequirements": [],
+      "drafts": [
+        {
+          "title": "An approved contract cannot be edited, even by Admin",
+          "priority": "P0",
+          "level": "api",
+          "manualReason": "",
+          "basis": "specified",
+          "techniques": [
+            "state_transition",
+            "permission_matrix"
+          ],
+          "testTypes": [
+            "negative",
+            "security"
+          ],
+          "testConditions": [
+            "approved + Admin -> no edit"
+          ],
+          "requirementRefs": [
+            "story:AC-11",
+            "GYM-BR-SERVICES-PRICES-CONTRACTS@v1"
+          ],
+          "steps": [
+            {
+              "action": "As Admin, open an approved contract",
+              "expected": "No edit action is offered",
+              "testData": "",
+              "sourceRefs": [
+                "story:AC-11",
+                "GYM-BR-SERVICES-PRICES-CONTRACTS@v1"
+              ]
+            },
+            {
+              "action": "As Admin, send an edit request for it through the API",
+              "expected": "The API refuses the edit and the contract is unchanged",
+              "testData": "",
+              "sourceRefs": [
+                "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+                "story:AC-11"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": [
+            "step 1: no exact message, value or state in \"No edit action is offered\""
+          ]
+        },
+        {
+          "title": "A pending contract cannot be booked",
+          "priority": "P0",
+          "level": "ui",
+          "manualReason": "",
+          "basis": "specified",
+          "techniques": [
+            "state_transition"
+          ],
+          "testTypes": [
+            "negative"
+          ],
+          "testConditions": [
+            "pending -> booking refused"
+          ],
+          "requirementRefs": [
+            "story:AC-11",
+            "GYM-BR-SESSIONS-AND-CLASSES@v1",
+            "GYM-BR-SERVICES-PRICES-CONTRACTS@v1"
+          ],
+          "steps": [
+            {
+              "action": "On the PT calendar, book a session on a contract in \"Chờ duyệt\"",
+              "expected": "The booking is refused; no session is created",
+              "testData": "",
+              "sourceRefs": [
+                "story:AC-11",
+                "GYM-BR-SESSIONS-AND-CLASSES@v1",
+                "GYM-BR-SERVICES-PRICES-CONTRACTS@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": []
+        },
+        {
+          "title": "A pending contract can still be edited",
+          "priority": "P2",
+          "level": "ui",
+          "manualReason": "",
+          "basis": "specified",
+          "techniques": [
+            "state_transition"
+          ],
+          "testTypes": [
+            "positive"
+          ],
+          "testConditions": [
+            "pending -> editable"
+          ],
+          "requirementRefs": [
+            "story:AC-11",
+            "GYM-BR-SERVICES-PRICES-CONTRACTS@v1"
+          ],
+          "steps": [
+            {
+              "action": "Edit the note of a contract in \"Chờ duyệt\" and save",
+              "expected": "The new note is saved",
+              "testData": "",
+              "sourceRefs": [
+                "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+                "story:AC-11"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": [
+            "step 1: no exact message, value or state in \"The new note is saved\""
+          ]
+        }
+      ],
+      "team": []
+    },
+    {
+      "story": "GYM-AC-12",
+      "criterion": "AC-12",
+      "text": "Deleting a contract with receipts is blocked and the receipts to delete first are listed; after deleting in the right order, total receipts and revenue fall by exactly the deleted amounts.",
+      "route": "DRAFT_CREATED",
+      "pending": null,
+      "question": null,
+      "reason": null,
+      "designNotes": [
+        "Deletion order (state): contract with receipts -> blocked, listed; receipts deleted -> contract deletable.",
+        "Metamorphic: totals after deletion = totals before - deleted amounts."
+      ],
+      "missingRequirements": [],
+      "drafts": [
+        {
+          "title": "Deleting a contract with receipts is blocked and lists them",
+          "priority": "P0",
+          "level": "ui",
+          "manualReason": "",
+          "basis": "specified",
+          "techniques": [
+            "state_transition"
+          ],
+          "testTypes": [
+            "negative"
+          ],
+          "testConditions": [
+            "contract with 2 receipts"
+          ],
+          "requirementRefs": [
+            "story:AC-12",
+            "GYM-BR-SERVICES-PRICES-CONTRACTS@v1"
+          ],
+          "steps": [
+            {
+              "action": "As Admin, delete a contract that has 2 receipts",
+              "expected": "The deletion is refused and the 2 receipts are listed",
+              "testData": "2 receipts of 1.000.000 and 2.000.000",
+              "sourceRefs": [
+                "story:AC-12",
+                "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+                "GYM-FR@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": []
+        },
+        {
+          "title": "After deleting the receipts and then the contract, totals fall by exactly the deleted amounts",
+          "priority": "P0",
+          "level": "manual",
+          "manualReason": "Needs arithmetic across displayed totals and changes shared money data.",
+          "basis": "specified",
+          "techniques": [
+            "metamorphic",
+            "use_case"
+          ],
+          "testTypes": [
+            "positive"
+          ],
+          "testConditions": [
+            "totals before - deleted = totals after"
+          ],
+          "requirementRefs": [
+            "story:AC-12",
+            "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+            "GYM-BR-MONEY@v1",
+            "GYM-BR-PLATFORM@v1"
+          ],
+          "steps": [
+            {
+              "action": "Note total receipts and revenue for the period",
+              "expected": "Both totals are shown",
+              "testData": "",
+              "sourceRefs": [
+                "story:AC-12"
+              ]
+            },
+            {
+              "action": "Delete the 2 receipts with a reason, then the contract",
+              "expected": "All 3 records move to the trash",
+              "testData": "",
+              "sourceRefs": [
+                "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+                "GYM-BR-PLATFORM@v1"
+              ]
+            },
+            {
+              "action": "Reopen the totals",
+              "expected": "Total receipts fall by exactly 3.000.000; revenue falls by exactly the contract value",
+              "testData": "",
+              "sourceRefs": [
+                "story:AC-12",
+                "GYM-BR-MONEY@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": [
+            "step 1: no exact message, value or state in \"Both totals are shown\""
+          ]
+        }
+      ],
+      "team": [
+        {
+          "id": "CON-22",
+          "title": "Deleting a contract with receipts is blocked and lists them",
+          "technique": "Decision table",
+          "steps": 2,
+          "automated": false
+        }
+      ]
+    },
+    {
+      "story": "GYM-AC-13",
+      "criterion": "AC-13",
+      "text": "Deleted data is in the trash with its reason, viewable only by management, and cannot be deleted.",
+      "route": "REVIEW_REQUESTED",
+      "pending": null,
+      "question": "For AC-13, who counts as \"management\" for viewing the trash: Admin only (as the seeded roles say), or the Fitness Manager too?",
+      "reason": "READINESS_CLARIFICATION",
+      "designNotes": [],
+      "missingRequirements": [],
+      "drafts": [],
+      "team": [
+        {
+          "id": "TRS-01",
+          "title": "Deleted data is in the trash with its reason and cannot be purged",
+          "technique": "Use case",
+          "steps": 2,
+          "automated": false
+        }
+      ]
+    },
+    {
+      "story": "GYM-AC-14",
+      "criterion": "AC-14",
+      "text": "A frozen contract cannot be booked or checked in; reactivation shows the frozen days and the proposed new end date; the end date changes only after admin confirms and is never extended twice; a freeze over 10 days reminds the manager.",
+      "route": "DRAFT_CREATED",
+      "pending": null,
+      "question": null,
+      "reason": null,
+      "designNotes": [
+        "State model: active -> frozen -> reactivated; while frozen: no booking, no check-in.",
+        "Boundary on freeze length: 10 days (no reminder) vs 11 days (reminder)."
+      ],
+      "missingRequirements": [],
+      "drafts": [
+        {
+          "title": "A frozen contract cannot be booked",
+          "priority": "P0",
+          "level": "ui",
+          "manualReason": "",
+          "basis": "specified",
+          "techniques": [
+            "state_transition"
+          ],
+          "testTypes": [
+            "negative"
+          ],
+          "testConditions": [
+            "frozen -> booking refused"
+          ],
+          "requirementRefs": [
+            "story:AC-14",
+            "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+            "GYM-BR-SESSIONS-AND-CLASSES@v1"
+          ],
+          "steps": [
+            {
+              "action": "Deactivate an active contract with a reason, then book a session on it",
+              "expected": "The booking is refused; no session is created",
+              "testData": "",
+              "sourceRefs": [
+                "story:AC-14",
+                "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+                "GYM-BR-SESSIONS-AND-CLASSES@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": []
+        },
+        {
+          "title": "Reactivation proposes extending by the frozen days, applied only after Admin confirms",
+          "priority": "P1",
+          "level": "manual",
+          "manualReason": "The expected dates depend on time passing between freeze and reactivation.",
+          "basis": "specified",
+          "techniques": [
+            "state_transition"
+          ],
+          "testTypes": [
+            "positive"
+          ],
+          "testConditions": [
+            "reactivation proposal -> admin accepts"
+          ],
+          "requirementRefs": [
+            "story:AC-14",
+            "GYM-FR@v1",
+            "GYM-BR-SERVICES-PRICES-CONTRACTS@v1"
+          ],
+          "steps": [
+            {
+              "action": "Reactivate a contract frozen for 7 days",
+              "expected": "The screen shows 7 frozen days, the old end date and the proposed end date (old + 7)",
+              "testData": "frozen 7 days",
+              "sourceRefs": [
+                "story:AC-14",
+                "GYM-FR@v1",
+                "GYM-BR-SERVICES-PRICES-CONTRACTS@v1"
+              ]
+            },
+            {
+              "action": "As Admin, accept the proposal",
+              "expected": "The end date becomes the proposed date",
+              "testData": "",
+              "sourceRefs": [
+                "GYM-BR-SERVICES-PRICES-CONTRACTS@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": [
+            "step 2: no exact message, value or state in \"The end date becomes the proposed date\""
+          ]
+        },
+        {
+          "title": "A freeze extends the end date at most once",
+          "priority": "P1",
+          "level": "manual",
+          "manualReason": "Depends on time passing (a freeze that has run).",
+          "basis": "specified",
+          "techniques": [
+            "state_transition",
+            "error_guessing"
+          ],
+          "testTypes": [
+            "negative"
+          ],
+          "testConditions": [
+            "second extension of the same freeze"
+          ],
+          "requirementRefs": [
+            "story:AC-14",
+            "GYM-BR-SERVICES-PRICES-CONTRACTS@v1"
+          ],
+          "steps": [
+            {
+              "action": "After accepting an extension, try to apply the same freeze again",
+              "expected": "The end date is unchanged; no second extension is offered",
+              "testData": "",
+              "sourceRefs": [
+                "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+                "story:AC-14"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": []
+        },
+        {
+          "title": "A freeze longer than 10 days creates a reminder task for the manager",
+          "priority": "P2",
+          "level": "manual",
+          "manualReason": "Depends on time passing; needs a controllable clock.",
+          "basis": "specified",
+          "techniques": [
+            "boundary_value_analysis"
+          ],
+          "testTypes": [
+            "boundary"
+          ],
+          "testConditions": [
+            "10 days: no task",
+            "11 days: task"
+          ],
+          "requirementRefs": [
+            "story:AC-14",
+            "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+            "GYM-FR@v1"
+          ],
+          "steps": [
+            {
+              "action": "Keep a contract frozen 10 days",
+              "expected": "No reminder task exists",
+              "testData": "10 days",
+              "sourceRefs": [
+                "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+                "story:AC-14"
+              ]
+            },
+            {
+              "action": "Keep it frozen an 11th day",
+              "expected": "A reminder task for the manager is created",
+              "testData": "11 days",
+              "sourceRefs": [
+                "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+                "GYM-FR@v1",
+                "story:AC-14"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": [
+            "step 1: no exact message, value or state in \"No reminder task exists\""
+          ]
+        }
+      ],
+      "team": [
+        {
+          "id": "CON-23",
+          "title": "Freezing and reactivating extend the end date once",
+          "technique": "State transition",
+          "steps": 3,
+          "automated": false
+        }
+      ]
+    },
+    {
+      "story": "GYM-AC-15",
+      "criterion": "AC-15",
+      "text": "\"Đã tập\" and no-show reduce sessions left by exactly 1 and credit the PT; \"Hủy lịch\" and delete do not; each status shows its color; booking is refused when no sessions are left, the contract has expired, or times overlap.",
+      "route": "DRAFT_CREATED",
+      "pending": null,
+      "question": null,
+      "reason": null,
+      "designNotes": [
+        "Decision table on status: Đã tập / Khách không đến (consume, credit) vs Hủy lịch / delete (neither).",
+        "Booking refusals: no sessions left, expired, overlap (BR-402, BR-403)."
+      ],
+      "missingRequirements": [],
+      "drafts": [
+        {
+          "title": "\"Đã tập\" and \"Khách không đến\" reduce sessions left by 1 and credit the PT",
+          "priority": "P0",
+          "level": "manual",
+          "manualReason": "Needs a booking created earlier in the test and arithmetic across displayed counts.",
+          "basis": "specified",
+          "techniques": [
+            "decision_table"
+          ],
+          "testTypes": [
+            "positive"
+          ],
+          "testConditions": [
+            "Đã tập",
+            "Khách không đến"
+          ],
+          "requirementRefs": [
+            "story:AC-15",
+            "GYM-BR-SESSIONS-AND-CLASSES@v1"
+          ],
+          "steps": [
+            {
+              "action": "Mark a booked session \"Đã tập\"",
+              "expected": "Sessions left fall by exactly 1 and the PT gets 1 credit",
+              "testData": "contract with 10 left",
+              "sourceRefs": [
+                "story:AC-15",
+                "GYM-BR-SESSIONS-AND-CLASSES@v1"
+              ]
+            },
+            {
+              "action": "Mark another booked session \"Khách không đến\"",
+              "expected": "Sessions left fall by exactly 1 more and the PT gets 1 more credit",
+              "testData": "",
+              "sourceRefs": [
+                "GYM-BR-SESSIONS-AND-CLASSES@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": []
+        },
+        {
+          "title": "\"Hủy lịch\" neither consumes nor credits",
+          "priority": "P1",
+          "level": "manual",
+          "manualReason": "Needs a booking created earlier in the test.",
+          "basis": "specified",
+          "techniques": [
+            "decision_table"
+          ],
+          "testTypes": [
+            "negative"
+          ],
+          "testConditions": [
+            "Hủy lịch"
+          ],
+          "requirementRefs": [
+            "story:AC-15",
+            "GYM-BR-SESSIONS-AND-CLASSES@v1"
+          ],
+          "steps": [
+            {
+              "action": "Cancel a booked session with \"Hủy lịch\"",
+              "expected": "Sessions left are unchanged and the PT gets no credit",
+              "testData": "",
+              "sourceRefs": [
+                "story:AC-15",
+                "GYM-BR-SESSIONS-AND-CLASSES@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": []
+        },
+        {
+          "title": "Booking is refused with no sessions left, on an expired contract, or on an overlap",
+          "priority": "P0",
+          "level": "ui",
+          "manualReason": "",
+          "basis": "specified",
+          "techniques": [
+            "decision_table",
+            "equivalence_partitioning"
+          ],
+          "testTypes": [
+            "negative"
+          ],
+          "testConditions": [
+            "0 left",
+            "expired",
+            "PT overlap",
+            "customer overlap"
+          ],
+          "requirementRefs": [
+            "story:AC-15",
+            "GYM-BR-SESSIONS-AND-CLASSES@v1"
+          ],
+          "steps": [
+            {
+              "action": "Book on a contract with 0 sessions left",
+              "expected": "The booking is refused; no session is created",
+              "testData": "0 sessions left",
+              "sourceRefs": [
+                "GYM-BR-SESSIONS-AND-CLASSES@v1",
+                "story:AC-15"
+              ]
+            },
+            {
+              "action": "Book on an expired contract",
+              "expected": "The booking is refused",
+              "testData": "end date in the past",
+              "sourceRefs": [
+                "GYM-BR-SESSIONS-AND-CLASSES@v1"
+              ]
+            },
+            {
+              "action": "Book the same PT at a time they already hold",
+              "expected": "The booking is refused",
+              "testData": "overlapping slot",
+              "sourceRefs": [
+                "GYM-BR-SESSIONS-AND-CLASSES@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": []
+        }
+      ],
+      "team": [
+        {
+          "id": "SES-11",
+          "title": "Each session status shows its configured color",
+          "technique": "Use case",
+          "steps": 1,
+          "automated": false
+        }
+      ]
+    },
+    {
+      "story": "GYM-AC-16",
+      "criterion": "AC-16",
+      "text": "A session in \"Đã tập\" cannot change status; when admin deletes it, the customer gets exactly 1 session back and the PT exactly 1 credit less; if its period was already paid, the next period has an adjustment line.",
+      "route": "DRAFT_CREATED",
+      "pending": null,
+      "question": null,
+      "reason": null,
+      "designNotes": [
+        "State: Đã tập is final; deletion by Admin refunds 1 session, removes 1 credit; paid period -> negative adjustment next period."
+      ],
+      "missingRequirements": [],
+      "drafts": [
+        {
+          "title": "A session in \"Đã tập\" offers no status change",
+          "priority": "P1",
+          "level": "ui",
+          "manualReason": "",
+          "basis": "specified",
+          "techniques": [
+            "state_transition"
+          ],
+          "testTypes": [
+            "negative"
+          ],
+          "testConditions": [
+            "Đã tập -> any status"
+          ],
+          "requirementRefs": [
+            "story:AC-16",
+            "GYM-BR-SESSIONS-AND-CLASSES@v1"
+          ],
+          "steps": [
+            {
+              "action": "Open a session in \"Đã tập\"",
+              "expected": "No status actions (Hủy lịch, Khách không đến) are offered",
+              "testData": "",
+              "sourceRefs": [
+                "story:AC-16",
+                "GYM-BR-SESSIONS-AND-CLASSES@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": [
+            "step 1: no exact message, value or state in \"No status actions (Hủy lịch, Khách không đến) are offered\""
+          ]
+        },
+        {
+          "title": "Admin deleting a recorded session refunds 1 session and removes 1 PT credit",
+          "priority": "P0",
+          "level": "manual",
+          "manualReason": "Changes shared money and session data (deletion); kept manual until scoped cleanup exists.",
+          "basis": "specified",
+          "techniques": [
+            "state_transition"
+          ],
+          "testTypes": [
+            "positive"
+          ],
+          "testConditions": [
+            "delete Đã tập session"
+          ],
+          "requirementRefs": [
+            "story:AC-16",
+            "GYM-BR-SESSIONS-AND-CLASSES@v1"
+          ],
+          "steps": [
+            {
+              "action": "As Admin, delete a \"Đã tập\" session from the check-in history with a reason",
+              "expected": "Sessions left rise by exactly 1, the PT has exactly 1 credit less, and the session is in the trash",
+              "testData": "",
+              "sourceRefs": [
+                "story:AC-16",
+                "GYM-BR-SESSIONS-AND-CLASSES@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": []
+        },
+        {
+          "title": "Deleting a session in a paid period adds an adjustment line to the next period",
+          "priority": "P1",
+          "level": "manual",
+          "manualReason": "Needs a paid payout period prepared first and arithmetic across periods.",
+          "basis": "specified",
+          "techniques": [
+            "use_case"
+          ],
+          "testTypes": [
+            "positive"
+          ],
+          "testConditions": [
+            "period already paid"
+          ],
+          "requirementRefs": [
+            "story:AC-16",
+            "GYM-BR-SESSIONS-AND-CLASSES@v1",
+            "GYM-BR-MONEY@v1"
+          ],
+          "steps": [
+            {
+              "action": "Delete a session whose period was already paid to the PT",
+              "expected": "The paid voucher is unchanged and the next period has a negative adjustment of 1 session",
+              "testData": "",
+              "sourceRefs": [
+                "story:AC-16",
+                "GYM-BR-SESSIONS-AND-CLASSES@v1",
+                "GYM-BR-MONEY@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": []
+        }
+      ],
+      "team": [
+        {
+          "id": "SES-07",
+          "title": "Deleting a recorded session refunds exactly one and emails the customer",
+          "technique": "Use case",
+          "steps": 1,
+          "automated": false
+        }
+      ]
+    },
+    {
+      "story": "GYM-AC-17",
+      "criterion": "AC-17",
+      "text": "Every credited or refunded session sends exactly one email to the customer, from the template and in the right language, with its sending status stored in the customer profile.",
+      "route": "DRAFT_CREATED",
+      "pending": null,
+      "question": null,
+      "reason": null,
+      "designNotes": [
+        "One email per credited or refunded session; language by nationality group; status stored on the customer."
+      ],
+      "missingRequirements": [],
+      "drafts": [
+        {
+          "title": "A credited session sends exactly one email in the customer's language",
+          "priority": "P1",
+          "level": "manual",
+          "manualReason": "Involves email delivery outside the browser.",
+          "basis": "assumption",
+          "techniques": [
+            "specification_based"
+          ],
+          "testTypes": [
+            "positive"
+          ],
+          "testConditions": [
+            "Vietnamese customer",
+            "foreign customer"
+          ],
+          "requirementRefs": [
+            "story:AC-17",
+            "GYM-BR-NOTIFICATIONS-AND-TASKS@v1",
+            "GYM-FR@v1"
+          ],
+          "steps": [
+            {
+              "action": "Mark \"Đã tập\" for a Vietnamese customer",
+              "expected": "Exactly 1 email is listed under \"Emails sent\", in Vietnamese, with its sending status",
+              "testData": "nationality Vietnam",
+              "sourceRefs": [
+                "story:AC-17",
+                "GYM-BR-NOTIFICATIONS-AND-TASKS@v1",
+                "GYM-FR@v1"
+              ]
+            },
+            {
+              "action": "Repeat for a foreign customer",
+              "expected": "Exactly 1 email, in English",
+              "testData": "nationality Japan",
+              "sourceRefs": [
+                "GYM-BR-NOTIFICATIONS-AND-TASKS@v1"
+              ]
+            }
+          ],
+          "assumptions": [
+            "The foreign-group language is taken to be English; the sources say only \"the language of their nationality group\"."
+          ],
+          "reviewFlags": []
+        },
+        {
+          "title": "Repeating the status change does not send a second email",
+          "priority": "P1",
+          "level": "manual",
+          "manualReason": "Needs two simultaneous requests and email inspection.",
+          "basis": "specified",
+          "techniques": [
+            "error_guessing"
+          ],
+          "testTypes": [
+            "negative"
+          ],
+          "testConditions": [
+            "double submit"
+          ],
+          "requirementRefs": [
+            "story:AC-17",
+            "GYM-BR-NOTIFICATIONS-AND-TASKS@v1",
+            "GYM-BR-SESSIONS-AND-CLASSES@v1"
+          ],
+          "steps": [
+            {
+              "action": "Send the \"Đã tập\" action twice for the same session",
+              "expected": "Still exactly 1 email for that session",
+              "testData": "",
+              "sourceRefs": [
+                "GYM-BR-NOTIFICATIONS-AND-TASKS@v1",
+                "story:AC-17",
+                "GYM-BR-SESSIONS-AND-CLASSES@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": []
+        }
+      ],
+      "team": [
+        {
+          "id": "MAIL-01",
+          "title": "Each credited or refunded session sends exactly one email",
+          "technique": "Use case",
+          "steps": 2,
+          "automated": false
+        }
+      ]
+    },
+    {
+      "story": "GYM-AC-18",
+      "criterion": "AC-18",
+      "text": "The PT revenue allocation report matches GymMaster's export on the same data; PT payout vouchers never pay a session twice.",
+      "route": "REVIEW_REQUESTED",
+      "pending": null,
+      "question": "Please provide the GymMaster PT revenue export (and the period and data set) that the allocation report must match.",
+      "reason": "READINESS_CLARIFICATION",
+      "designNotes": [],
+      "missingRequirements": [],
+      "drafts": [],
+      "team": [
+        {
+          "id": "MON-12",
+          "title": "A PT payout never pays a session twice",
+          "technique": "Error guessing",
+          "steps": 2,
+          "automated": false
+        },
+        {
+          "id": "RPT-02",
+          "title": "PT revenue allocation matches GymMaster",
+          "technique": "Use case",
+          "steps": 1,
+          "automated": false
+        }
+      ]
+    },
+    {
+      "story": "GYM-AC-19",
+      "criterion": "AC-19",
+      "text": "Each contract's paid amount and debt always equal the sum of its valid receipts; cash book closing balance equals opening balance plus receipts minus expenses.",
+      "route": "DRAFT_CREATED",
+      "pending": null,
+      "question": null,
+      "reason": null,
+      "designNotes": [
+        "Metamorphic relations: paid = sum of valid receipts; closing = opening + receipts - expenses (BR-602, BR-609)."
+      ],
+      "missingRequirements": [],
+      "drafts": [
+        {
+          "title": "A contract's paid amount and debt follow its valid receipts only",
+          "priority": "P0",
+          "level": "manual",
+          "manualReason": "Changes shared money data and needs approvals by a second person.",
+          "basis": "specified",
+          "techniques": [
+            "metamorphic",
+            "equivalence_partitioning"
+          ],
+          "testTypes": [
+            "positive"
+          ],
+          "testConditions": [
+            "approved receipt counts",
+            "pending receipt does not",
+            "deleted receipt does not"
+          ],
+          "requirementRefs": [
+            "story:AC-19",
+            "GYM-BR-MONEY@v1"
+          ],
+          "steps": [
+            {
+              "action": "Add an approved receipt of 2.000.000 and a pending one of 1.000.000 to a 5.000.000 contract",
+              "expected": "Paid shows 2.000.000 and debt 3.000.000",
+              "testData": "value 5.000.000; receipts 2.000.000 approved, 1.000.000 pending",
+              "sourceRefs": [
+                "story:AC-19",
+                "GYM-BR-MONEY@v1"
+              ]
+            },
+            {
+              "action": "Delete the approved receipt",
+              "expected": "Paid shows 0 and debt 5.000.000",
+              "testData": "",
+              "sourceRefs": [
+                "GYM-BR-MONEY@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": []
+        },
+        {
+          "title": "The cash book closes at opening plus receipts minus expenses",
+          "priority": "P0",
+          "level": "manual",
+          "manualReason": "Needs arithmetic across displayed values.",
+          "basis": "specified",
+          "techniques": [
+            "metamorphic"
+          ],
+          "testTypes": [
+            "positive"
+          ],
+          "testConditions": [
+            "one method and branch, one day"
+          ],
+          "requirementRefs": [
+            "story:AC-19",
+            "GYM-BR-MONEY@v1",
+            "GYM-FR@v1"
+          ],
+          "steps": [
+            {
+              "action": "Read the opening balance, receipts and expenses for one day, method and branch",
+              "expected": "Closing balance = opening + receipts - expenses, to the đồng",
+              "testData": "",
+              "sourceRefs": [
+                "story:AC-19",
+                "GYM-BR-MONEY@v1",
+                "GYM-FR@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": [
+            "step 1: no exact message, value or state in \"Closing balance = opening + receipts - expenses, to the đồng\""
+          ]
+        }
+      ],
+      "team": [
+        {
+          "id": "MON-08",
+          "title": "Paid and debt always equal the receipts",
+          "technique": "Use case",
+          "steps": 1,
+          "automated": false
+        },
+        {
+          "id": "MON-09",
+          "title": "The cash book balances",
+          "technique": "Use case",
+          "steps": 1,
+          "automated": false
+        }
+      ]
+    },
+    {
+      "story": "GYM-AC-20",
+      "criterion": "AC-20",
+      "text": "A customer's plans and every session log are visible in their profile, with plan and actual on the same row; choosing a Cardio exercise shows time, speed, and heart rate.",
+      "route": "DRAFT_CREATED",
+      "pending": null,
+      "question": null,
+      "reason": null,
+      "designNotes": [
+        "Specification: profile shows plans and logs; one row per set, plan read-only beside actual; Cardio fields differ."
+      ],
+      "missingRequirements": [],
+      "drafts": [
+        {
+          "title": "A customer's plans and session logs are in the profile, plan and actual on one row",
+          "priority": "P2",
+          "level": "ui",
+          "manualReason": "",
+          "basis": "specified",
+          "techniques": [
+            "specification_based"
+          ],
+          "testTypes": [
+            "positive"
+          ],
+          "testConditions": [
+            "Strength set row"
+          ],
+          "requirementRefs": [
+            "story:AC-20",
+            "GYM-BR-WORKOUTS@v1",
+            "GYM-FR@v1"
+          ],
+          "steps": [
+            {
+              "action": "Open a customer with a plan and a logged session, tab \"Session logs and progress\"",
+              "expected": "Each set is one row with the plan (read-only) and the actual side by side",
+              "testData": "",
+              "sourceRefs": [
+                "story:AC-20",
+                "GYM-BR-WORKOUTS@v1",
+                "GYM-FR@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": [
+            "step 1: no exact message, value or state in \"Each set is one row with the plan (read-only) and the actual side by side\""
+          ]
+        },
+        {
+          "title": "A Cardio exercise shows time, speed and heart rate instead of weights",
+          "priority": "P2",
+          "level": "ui",
+          "manualReason": "",
+          "basis": "specified",
+          "techniques": [
+            "equivalence_partitioning"
+          ],
+          "testTypes": [
+            "positive"
+          ],
+          "testConditions": [
+            "Strength vs Cardio"
+          ],
+          "requirementRefs": [
+            "story:AC-20",
+            "GYM-BR-WORKOUTS@v1"
+          ],
+          "steps": [
+            {
+              "action": "In a session log, choose a Cardio exercise",
+              "expected": "The row has the fields \"time\", \"speed\" and \"heart rate\" and no weight field",
+              "testData": "exercise type Cardio",
+              "sourceRefs": [
+                "story:AC-20",
+                "GYM-BR-WORKOUTS@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": []
+        }
+      ],
+      "team": [
+        {
+          "id": "WKO-01",
+          "title": "Plans and session logs show plan and actual on one row",
+          "technique": "Use case",
+          "steps": 1,
+          "automated": false
+        }
+      ]
+    },
+    {
+      "story": "GYM-AC-21",
+      "criterion": "AC-21",
+      "text": "Choosing Action \"Stop + Escalation\" notifies the manager and Master, and the item stays in the waiting list until handled; the weekly workout dashboard gives the right Flag and Action percentages.",
+      "route": "REVIEW_REQUESTED",
+      "pending": null,
+      "question": "For AC-21, how are the weekly Flag and Action percentages calculated: share of logged sets, of sessions, or of customers in the week?",
+      "reason": "READINESS_CLARIFICATION",
+      "designNotes": [],
+      "missingRequirements": [],
+      "drafts": [],
+      "team": [
+        {
+          "id": "WKO-03",
+          "title": "\"Stop + Escalation\" waits until a manager or Master handles it",
+          "technique": "State transition",
+          "steps": 2,
+          "automated": false
+        },
+        {
+          "id": "WKO-05",
+          "title": "The weekly workout dashboard gives the right Flag and Action percentages",
+          "technique": "Use case",
+          "steps": 1,
+          "automated": false
+        }
+      ]
+    },
+    {
+      "story": "GYM-AC-22",
+      "criterion": "AC-22",
+      "text": "Data imported from GymMaster matches the number of customers, contract value, paid amounts, and sessions left.",
+      "route": "REVIEW_REQUESTED",
+      "pending": null,
+      "question": "Please provide the GymMaster export (or its totals: customers, contract value, paid amounts, sessions left) that the import must match.",
+      "reason": "READINESS_CLARIFICATION",
+      "designNotes": [],
+      "missingRequirements": [],
+      "drafts": [],
+      "team": [
+        {
+          "id": "RPT-05",
+          "title": "GymMaster import reconciles",
+          "technique": "Use case",
+          "steps": 1,
+          "automated": false
+        }
+      ]
+    },
+    {
+      "story": "GYM-AC-23",
+      "criterion": "AC-23",
+      "text": "The lead, PT calendar, and session log screens work on a phone.",
+      "route": "REVIEW_REQUESTED",
+      "pending": null,
+      "question": "For AC-23, which phone width should be supported, and which tasks on the lead, PT calendar and session log screens must be completable there?",
+      "reason": "READINESS_CLARIFICATION",
+      "designNotes": [],
+      "missingRequirements": [],
+      "drafts": [],
+      "team": [
+        {
+          "id": "WKO-06",
+          "title": "The session log works on a phone",
+          "technique": "Use case",
+          "steps": 1,
+          "automated": false
+        }
+      ]
+    },
+    {
+      "story": "GYM-AC-24",
+      "criterion": "AC-24",
+      "text": "A PT can book outside the on-duty shift, and the grid colors in-shift and off-shift time differently (D-058).",
+      "route": "DRAFT_CREATED",
+      "pending": null,
+      "question": null,
+      "reason": null,
+      "designNotes": [
+        "Decision on shift: inside vs outside the on-duty shift; booking allowed in both; grid colours differ (BR-402: a shift never limits)."
+      ],
+      "missingRequirements": [],
+      "drafts": [
+        {
+          "title": "A PT can book outside the on-duty shift",
+          "priority": "P1",
+          "level": "manual",
+          "manualReason": "Needs a booking created on a calendar cell, which the executor does not drive yet.",
+          "basis": "specified",
+          "techniques": [
+            "equivalence_partitioning"
+          ],
+          "testTypes": [
+            "positive"
+          ],
+          "testConditions": [
+            "slot inside shift",
+            "slot outside shift"
+          ],
+          "requirementRefs": [
+            "story:AC-24",
+            "GYM-BR-SESSIONS-AND-CLASSES@v1"
+          ],
+          "steps": [
+            {
+              "action": "Book a session in a slot outside the PT's shift",
+              "expected": "The booking is accepted and the session is created",
+              "testData": "a slot after the shift ends",
+              "sourceRefs": [
+                "story:AC-24",
+                "GYM-BR-SESSIONS-AND-CLASSES@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": []
+        },
+        {
+          "title": "In-shift and off-shift cells have different colours",
+          "priority": "P3",
+          "level": "manual",
+          "manualReason": "Needs human judgement of colours.",
+          "basis": "specified",
+          "techniques": [
+            "specification_based"
+          ],
+          "testTypes": [
+            "ui"
+          ],
+          "testConditions": [
+            "colour of in-shift vs off-shift cells"
+          ],
+          "requirementRefs": [
+            "story:AC-24"
+          ],
+          "steps": [
+            {
+              "action": "Open the PT calendar for a day with a shift",
+              "expected": "In-shift cells and off-shift cells use 2 different colours",
+              "testData": "",
+              "sourceRefs": [
+                "story:AC-24"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": []
+        }
+      ],
+      "team": [
+        {
+          "id": "BKG-15",
+          "title": "A PT can book outside the on-duty shift",
+          "technique": "Use case",
+          "steps": 2,
+          "automated": false
+        }
+      ]
+    },
+    {
+      "story": "GYM-AC-25",
+      "criterion": "AC-25",
+      "text": "A lead needs only a name and a channel; the country is chosen from the list of countries and the email goes in the language derived from it (D-057, D-060).",
+      "route": "DRAFT_CREATED",
+      "pending": null,
+      "question": null,
+      "reason": null,
+      "designNotes": [
+        "EP on required fields: name+channel only (valid); missing either (invalid). Country from ISO list; email language from it."
+      ],
+      "missingRequirements": [],
+      "drafts": [
+        {
+          "title": "A lead with only a name and a channel is saved",
+          "priority": "P1",
+          "level": "ui",
+          "manualReason": "",
+          "basis": "specified",
+          "techniques": [
+            "equivalence_partitioning"
+          ],
+          "testTypes": [
+            "positive"
+          ],
+          "testConditions": [
+            "name + channel, nothing else"
+          ],
+          "requirementRefs": [
+            "story:AC-25",
+            "GYM-FR@v1"
+          ],
+          "steps": [
+            {
+              "action": "Open \"Thêm lead\", fill only the name and choose a channel, then save",
+              "expected": "The lead is created",
+              "testData": "name \"QA Tối Thiểu\", channel \"Walk-in\"",
+              "sourceRefs": [
+                "story:AC-25",
+                "GYM-FR@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": []
+        },
+        {
+          "title": "A lead without a channel or without a name is refused",
+          "priority": "P1",
+          "level": "ui",
+          "manualReason": "",
+          "basis": "specified",
+          "techniques": [
+            "equivalence_partitioning"
+          ],
+          "testTypes": [
+            "negative"
+          ],
+          "testConditions": [
+            "no channel",
+            "no name"
+          ],
+          "requirementRefs": [
+            "story:AC-25"
+          ],
+          "steps": [
+            {
+              "action": "Save with a name and no channel",
+              "expected": "The channel field is marked required and nothing is saved",
+              "testData": "channel empty",
+              "sourceRefs": [
+                "story:AC-25"
+              ]
+            },
+            {
+              "action": "Save with a channel and no name",
+              "expected": "The name field is marked required and nothing is saved",
+              "testData": "name empty",
+              "sourceRefs": [
+                "story:AC-25"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": [
+            "step 1: no exact message, value or state in \"The channel field is marked required and nothing is saved\"",
+            "step 2: no exact message, value or state in \"The name field is marked required and nothing is saved\""
+          ]
+        },
+        {
+          "title": "The country is chosen from the list and sets the email language",
+          "priority": "P2",
+          "level": "ui",
+          "manualReason": "",
+          "basis": "specified",
+          "techniques": [
+            "specification_based"
+          ],
+          "testTypes": [
+            "positive"
+          ],
+          "testConditions": [
+            "Vietnam -> Vietnamese",
+            "other country -> foreign group"
+          ],
+          "requirementRefs": [
+            "story:AC-25",
+            "GYM-FR@v1"
+          ],
+          "steps": [
+            {
+              "action": "In the nationality field, type \"Nhật\"",
+              "expected": "The field offers \"Nhật Bản\" from the country list; free text is not accepted",
+              "testData": "\"Nhật\"",
+              "sourceRefs": [
+                "GYM-FR@v1",
+                "story:AC-25"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": []
+        }
+      ],
+      "team": [
+        {
+          "id": "LEAD-01",
+          "title": "A lead is saved with only a name and a channel",
+          "technique": "Use case",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "LEAD-02",
+          "title": "An empty name is refused",
+          "technique": "Equivalence partitioning",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "LEAD-03",
+          "title": "A name of spaces only is refused",
+          "technique": "Error guessing",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "LEAD-04",
+          "title": "A one-character name is accepted (minimum)",
+          "technique": "Boundary value analysis",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "LEAD-05",
+          "title": "A 150-character name is accepted (maximum)",
+          "technique": "Boundary value analysis",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "LEAD-06",
+          "title": "A 151-character name is too long (maximum + 1)",
+          "technique": "Boundary value analysis",
+          "steps": 1,
+          "automated": true
+        },
+        {
+          "id": "LEAD-07",
+          "title": "A lead without a channel is refused",
+          "technique": "Equivalence partitioning",
+          "steps": 1,
+          "automated": true
+        }
+      ]
+    },
+    {
+      "story": "GYM-AC-26",
+      "criterion": "AC-26",
+      "text": "Leads are shared by turn weight; a lead not taken care of after 1 working hour moves on, never outside 08:30–20:30, and each move is in the history and the dashboard (D-050, D-052).",
+      "route": "DRAFT_CREATED",
+      "pending": null,
+      "question": null,
+      "reason": null,
+      "designNotes": [
+        "Round-robin with turn weights; reassignment after 60 working minutes; boundary on working hours 08:30–20:30."
+      ],
+      "missingRequirements": [],
+      "drafts": [
+        {
+          "title": "Leads are dealt by turn weight",
+          "priority": "P1",
+          "level": "manual",
+          "manualReason": "Changes shared assignment settings and needs several users.",
+          "basis": "specified",
+          "techniques": [
+            "decision_table"
+          ],
+          "testTypes": [
+            "positive"
+          ],
+          "testConditions": [
+            "weights 2 and 1 over 3 leads"
+          ],
+          "requirementRefs": [
+            "story:AC-26",
+            "GYM-FR@v1"
+          ],
+          "steps": [
+            {
+              "action": "Give consultant A weight 2 and B weight 1, then create 3 leads",
+              "expected": "A receives 2 leads and B receives 1",
+              "testData": "weights A=2, B=1; 3 leads",
+              "sourceRefs": [
+                "story:AC-26",
+                "GYM-FR@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": []
+        },
+        {
+          "title": "A lead untouched for 60 working minutes moves to the next consultant, inside 08:30–20:30 only",
+          "priority": "P1",
+          "level": "manual",
+          "manualReason": "Depends on time passing; needs a controllable clock.",
+          "basis": "specified",
+          "techniques": [
+            "boundary_value_analysis"
+          ],
+          "testTypes": [
+            "boundary"
+          ],
+          "testConditions": [
+            "59 vs 60 working minutes",
+            "a lead at 20:00 does not move at 21:00"
+          ],
+          "requirementRefs": [
+            "story:AC-26",
+            "GYM-FR@v1"
+          ],
+          "steps": [
+            {
+              "action": "Leave a lead untouched for 60 working minutes",
+              "expected": "It moves to the next consultant and the move is in its history",
+              "testData": "60 working minutes",
+              "sourceRefs": [
+                "story:AC-26",
+                "GYM-FR@v1"
+              ]
+            },
+            {
+              "action": "Create a lead at 20:00 and leave it",
+              "expected": "It does not move before 08:30 the next working day",
+              "testData": "20:00",
+              "sourceRefs": [
+                "GYM-FR@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": [
+            "step 1: no exact message, value or state in \"It moves to the next consultant and the move is in its history\""
+          ]
+        }
+      ],
+      "team": [
+        {
+          "id": "LEAD-32",
+          "title": "Leads are shared by turn weight among receiving consultants",
+          "technique": "Use case",
+          "steps": 1,
+          "automated": false
+        },
+        {
+          "id": "LEAD-33",
+          "title": "An untouched lead moves on after 1 working hour, never outside 08:30–20:30",
+          "technique": "Boundary value analysis",
+          "steps": 3,
+          "automated": false
+        }
+      ]
+    },
+    {
+      "story": "GYM-AC-27",
+      "criterion": "AC-27",
+      "text": "A ticked checklist step cannot be unticked; an overdue step past its grace period locks as \"Không thực hiện\" and cannot be ticked late (D-054).",
+      "route": "REVIEW_REQUESTED",
+      "pending": null,
+      "question": "For AC-27, how long is the grace period before an overdue step locks as \"Không thực hiện\", and does the Admin exception (untick with a reason) apply?",
+      "reason": "READINESS_CLARIFICATION",
+      "designNotes": [],
+      "missingRequirements": [],
+      "drafts": [],
+      "team": [
+        {
+          "id": "LEAD-38",
+          "title": "A ticked checklist step cannot be unticked except by Admin with a reason",
+          "technique": "State transition",
+          "steps": 2,
+          "automated": false
+        },
+        {
+          "id": "LEAD-39",
+          "title": "An overdue step locks after its grace period",
+          "technique": "Boundary value analysis",
+          "steps": 2,
+          "automated": false
+        }
+      ]
+    },
+    {
+      "story": "GYM-AC-28",
+      "criterion": "AC-28",
+      "text": "A task is reminded at all three points before its deadline through the bell, email, and phone, and a slow approval past 24 hours is told to the approver's direct manager (D-053, D-056, D-048).",
+      "route": "DRAFT_CREATED",
+      "pending": null,
+      "question": null,
+      "reason": null,
+      "designNotes": [
+        "Boundary on reminder points 24 h, 3 h, 1 h before the deadline; channels bell, email, phone; approval overdue after 24 h -> direct manager."
+      ],
+      "missingRequirements": [],
+      "drafts": [
+        {
+          "title": "A task is reminded at 24, 3 and 1 hours before its deadline on every channel",
+          "priority": "P2",
+          "level": "manual",
+          "manualReason": "Depends on time passing and on email and phone delivery.",
+          "basis": "specified",
+          "techniques": [
+            "boundary_value_analysis"
+          ],
+          "testTypes": [
+            "positive"
+          ],
+          "testConditions": [
+            "24 h",
+            "3 h",
+            "1 h"
+          ],
+          "requirementRefs": [
+            "story:AC-28",
+            "GYM-FR@v1"
+          ],
+          "steps": [
+            {
+              "action": "Create a task due in 25 hours and wait for each point",
+              "expected": "Reminders arrive at 24 h, 3 h and 1 h before the deadline, each by bell, email and phone",
+              "testData": "",
+              "sourceRefs": [
+                "story:AC-28",
+                "GYM-FR@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": []
+        },
+        {
+          "title": "An approval pending over 24 hours is reported to the approver's direct manager",
+          "priority": "P2",
+          "level": "manual",
+          "manualReason": "Depends on time passing.",
+          "basis": "specified",
+          "techniques": [
+            "boundary_value_analysis"
+          ],
+          "testTypes": [
+            "boundary"
+          ],
+          "testConditions": [
+            "23 h: no report",
+            "25 h: reported"
+          ],
+          "requirementRefs": [
+            "story:AC-28",
+            "GYM-BR-PLATFORM@v1",
+            "GYM-RBAC@v1"
+          ],
+          "steps": [
+            {
+              "action": "Leave an approval request pending 25 hours",
+              "expected": "The approver's direct manager receives a notice",
+              "testData": "",
+              "sourceRefs": [
+                "story:AC-28",
+                "GYM-BR-PLATFORM@v1",
+                "GYM-RBAC@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": [
+            "step 1: no exact message, value or state in \"The approver's direct manager receives a notice\""
+          ]
+        }
+      ],
+      "team": [
+        {
+          "id": "APR-04",
+          "title": "An approval pending over 24 hours goes to the approver's manager",
+          "technique": "Boundary value analysis",
+          "steps": 2,
+          "automated": false
+        },
+        {
+          "id": "TSK-04",
+          "title": "Reminders at 24, 3 and 1 hours before the deadline",
+          "technique": "Boundary value analysis",
+          "steps": 1,
+          "automated": false
+        }
+      ]
+    },
+    {
+      "story": "GYM-AC-29",
+      "criterion": "AC-29",
+      "text": "Simulated scans through the API: a pair of the customer and the right PT within 15 minutes and the pairing window turns the session to *Đã tập* and triggers the session taken, the PT credit, and the email; a missing side hangs the session with the right reason; a scan with no booking is an error; a customer training twice with two PTs needs a pair for each (D-069, D-070).",
+      "route": "REVIEW_REQUESTED",
+      "pending": null,
+      "question": "For AC-29, what reason should a session show when the customer scanned but the PT did not, and when the PT scanned but the customer did not?",
+      "reason": "READINESS_CLARIFICATION",
+      "designNotes": [],
+      "missingRequirements": [],
+      "drafts": [],
+      "team": [
+        {
+          "id": "CHK-01",
+          "title": "Paired scans within 15 minutes complete the session",
+          "technique": "Boundary value analysis",
+          "steps": 2,
+          "automated": false
+        },
+        {
+          "id": "CHK-02",
+          "title": "A scan with no booking is an error",
+          "technique": "Equivalence partitioning",
+          "steps": 1,
+          "automated": false
+        }
+      ]
+    },
+    {
+      "story": "GYM-AC-30",
+      "criterion": "AC-30",
+      "text": "A session without a full check-in is notified to its PT at the end of the day, and to the Studio Manager with a task after 24 hours (D-071).",
+      "route": "DRAFT_CREATED",
+      "pending": null,
+      "question": null,
+      "reason": null,
+      "designNotes": [
+        "Two time points for a session without full check-in: end of day -> PT; 24 hours -> Studio Manager task."
+      ],
+      "missingRequirements": [],
+      "drafts": [
+        {
+          "title": "A session without full check-in is notified to its PT at the end of the day and to the Studio Manager after 24 hours",
+          "priority": "P2",
+          "level": "manual",
+          "manualReason": "Depends on time passing; needs a controllable clock.",
+          "basis": "assumption",
+          "techniques": [
+            "state_transition"
+          ],
+          "testTypes": [
+            "positive"
+          ],
+          "testConditions": [
+            "end of day",
+            "after 24 h"
+          ],
+          "requirementRefs": [
+            "story:AC-30",
+            "GYM-BR-SESSIONS-AND-CLASSES@v1",
+            "GYM-FR@v1"
+          ],
+          "steps": [
+            {
+              "action": "Leave a booked session without a full check-in until the end of its day",
+              "expected": "The PT receives 1 notice for that session",
+              "testData": "",
+              "sourceRefs": [
+                "story:AC-30",
+                "GYM-BR-SESSIONS-AND-CLASSES@v1"
+              ]
+            },
+            {
+              "action": "Leave it 24 hours",
+              "expected": "A task is created for the Studio Manager",
+              "testData": "",
+              "sourceRefs": [
+                "story:AC-30",
+                "GYM-FR@v1"
+              ]
+            }
+          ],
+          "assumptions": [
+            "\"End of the day\" is taken as the end of the session's calendar day; the sources do not give a time."
+          ],
+          "reviewFlags": []
+        }
+      ],
+      "team": [
+        {
+          "id": "CHK-03",
+          "title": "A session without a full check-in is chased",
+          "technique": "Use case",
+          "steps": 1,
+          "automated": false
+        }
+      ]
+    }
+  ]
+}

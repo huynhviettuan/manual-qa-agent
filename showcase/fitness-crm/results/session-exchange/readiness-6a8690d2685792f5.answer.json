@@ -1,0 +1,12 @@
+{
+ "readiness": "clarification",
+ "missingExpectations": [
+  "AC-18: the expected allocation figures come from GymMaster's export on the same data, which is not among the sources."
+ ],
+ "clarificationQuestion": "Please provide the GymMaster PT revenue export (and the period and data set) that the allocation report must match.",
+ "citedSourceIds": [
+  "GYM-AC@v1",
+  "GYM-BR-MONEY@v1",
+  "GYM-FR@v1"
+ ]
+}

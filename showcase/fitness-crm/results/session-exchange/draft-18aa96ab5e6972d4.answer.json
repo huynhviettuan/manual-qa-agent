@@ -1,0 +1,178 @@
+{
+ "designNotes": [
+  "Use case per configurable area named in the criterion: permissions, approval thresholds, price tiers, timers, session status rules.",
+  "Each case checks the change takes effect without a deployment and that only Admin can make it (Configuration: Admin only)."
+ ],
+ "cases": [
+  {
+   "title": "Granting a permission on screen takes effect at the next request",
+   "priority": "P1",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "As Admin, add lead.export to a custom role on the Roles screen and save",
+     "expected": "The role shows lead.export as granted",
+     "sourceRefs": [
+      "story:AC-02",
+      "GYM-RBAC@v1"
+     ],
+     "testData": "Custom role \"QA export\" without lead.export"
+    },
+    {
+     "action": "As a user of that role, reload the leads list",
+     "expected": "The \"Xuất Excel\" button is shown without any deployment",
+     "sourceRefs": [
+      "story:AC-02",
+      "GYM-RBAC@v1"
+     ],
+     "testData": ""
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-02",
+    "GYM-RBAC@v1"
+   ],
+   "techniques": [
+    "use_case",
+    "state_transition"
+   ],
+   "testTypes": [
+    "positive"
+   ],
+   "testConditions": [
+    "Role without lead.export -> granted -> export available"
+   ],
+   "module": "Configuration",
+   "level": "ui",
+   "manualReason": ""
+  },
+  {
+   "title": "Changing a role's discount threshold changes who approves",
+   "priority": "P1",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "As Admin, set the Fitness Manager discount threshold from 10% to 15%",
+     "expected": "The role screen shows 15%",
+     "sourceRefs": [
+      "GYM-RBAC@v1"
+     ],
+     "testData": "10% -> 15%"
+    },
+    {
+     "action": "Submit a contract with a 12% discount",
+     "expected": "The approval request goes to the Fitness Manager, not to Admin",
+     "sourceRefs": [
+      "story:AC-02",
+      "GYM-RBAC@v1"
+     ],
+     "testData": "discount 12%"
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-02",
+    "GYM-RBAC@v1"
+   ],
+   "techniques": [
+    "decision_table"
+   ],
+   "testTypes": [
+    "positive",
+    "boundary"
+   ],
+   "testConditions": [
+    "Fitness Manager threshold 10% -> 15%: a 12% discount moves from Admin to Fitness Manager"
+   ],
+   "module": "Configuration",
+   "level": "ui",
+   "manualReason": ""
+  },
+  {
+   "title": "A new price tier version applies to contracts created after it",
+   "priority": "P2",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "As Admin, change the PT tier unit price for 1-10 sessions and save",
+     "expected": "The tier list shows the new unit price",
+     "sourceRefs": [
+      "GYM-FR@v1",
+      "story:AC-02"
+     ],
+     "testData": "PT 1-10 sessions"
+    },
+    {
+     "action": "Open a new PT contract for 10 sessions",
+     "expected": "The unit price on the form equals the new tier price",
+     "sourceRefs": [
+      "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+      "story:AC-02"
+     ],
+     "testData": "10 sessions"
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-02",
+    "GYM-FR@v1",
+    "GYM-BR-SERVICES-PRICES-CONTRACTS@v1"
+   ],
+   "techniques": [
+    "use_case"
+   ],
+   "testTypes": [
+    "positive"
+   ],
+   "testConditions": [
+    "Tier unit price changed by Admin"
+   ],
+   "module": "Configuration",
+   "level": "ui",
+   "manualReason": ""
+  },
+  {
+   "title": "Only Admin can change configuration",
+   "priority": "P0",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "As Fitness Manager, open the system parameters screen",
+     "expected": "The screen is refused; no parameter can be saved",
+     "sourceRefs": [
+      "GYM-RBAC@v1",
+      "story:AC-02"
+     ],
+     "testData": "Fitness Manager"
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-02",
+    "GYM-RBAC@v1"
+   ],
+   "techniques": [
+    "permission_matrix"
+   ],
+   "testTypes": [
+    "security",
+    "negative"
+   ],
+   "testConditions": [
+    "Configuration: Admin granted, Fitness Manager refused"
+   ],
+   "module": "Configuration",
+   "level": "ui",
+   "manualReason": ""
+  }
+ ]
+}

@@ -22,6 +22,7 @@ export * from './grounding.ts';
 export * from './heuristic.ts';
 export * from './jev.ts';
 export * from './openai.ts';
+export * from './session.ts';
 export * from './prompts.ts';
 export * from './types.ts';
 

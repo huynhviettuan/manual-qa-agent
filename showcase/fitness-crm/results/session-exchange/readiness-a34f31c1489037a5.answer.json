@@ -1,0 +1,11 @@
+{
+ "readiness": "clarification",
+ "missingExpectations": [
+  "AC-23: \"work on a phone\" has no measurable criterion (screen width, which tasks must be completable, what counts as not working)."
+ ],
+ "clarificationQuestion": "For AC-23, which phone width should be supported, and which tasks on the lead, PT calendar and session log screens must be completable there?",
+ "citedSourceIds": [
+  "GYM-AC@v1",
+  "GYM-FR@v1"
+ ]
+}

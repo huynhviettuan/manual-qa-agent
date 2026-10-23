@@ -2,3 +2,4 @@ node_modules
 pnpm-lock.yaml
 docs
 *.md
+showcase/*/results

@@ -1,0 +1,140 @@
+{
+ "designNotes": [
+  "Option list lifecycle (state transition): active -> deactivated; new option -> active.",
+  "Old records keep a deactivated option (BR-102)."
+ ],
+ "cases": [
+  {
+   "title": "A consulting step result is chosen from a drop-down",
+   "priority": "P2",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "Open a lead's consulting checklist and set a step result",
+     "expected": "The result field is a drop-down with the configured options; free text cannot be typed into it",
+     "sourceRefs": [
+      "story:AC-03",
+      "GYM-BR-PLATFORM@v1"
+     ],
+     "testData": ""
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-03",
+    "GYM-BR-PLATFORM@v1"
+   ],
+   "techniques": [
+    "specification_based"
+   ],
+   "testTypes": [
+    "positive"
+   ],
+   "testConditions": [
+    "Step result field type"
+   ],
+   "module": "Leads and consulting",
+   "level": "ui",
+   "manualReason": ""
+  },
+  {
+   "title": "An option added by Admin appears at once",
+   "priority": "P2",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "As Admin, add the option \"QA mới\" to the consulting step result list",
+     "expected": "The list shows \"QA mới\" as active",
+     "sourceRefs": [
+      "GYM-FR@v1",
+      "story:AC-03"
+     ],
+     "testData": "option \"QA mới\""
+    },
+    {
+     "action": "Reload a lead's checklist as Consulting",
+     "expected": "The result drop-down includes \"QA mới\"",
+     "sourceRefs": [
+      "story:AC-03"
+     ],
+     "testData": ""
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-03",
+    "GYM-FR@v1"
+   ],
+   "techniques": [
+    "state_transition"
+   ],
+   "testTypes": [
+    "positive"
+   ],
+   "testConditions": [
+    "New option -> active"
+   ],
+   "module": "Configuration",
+   "level": "ui",
+   "manualReason": ""
+  },
+  {
+   "title": "A deactivated option disappears from new choices but stays on old records",
+   "priority": "P1",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "Record a step result \"QA mới\" on a lead",
+     "expected": "The lead shows \"QA mới\"",
+     "sourceRefs": [
+      "story:AC-03"
+     ],
+     "testData": ""
+    },
+    {
+     "action": "As Admin, deactivate \"QA mới\"",
+     "expected": "The option is marked inactive",
+     "sourceRefs": [
+      "GYM-FR@v1",
+      "GYM-BR-PLATFORM@v1"
+     ],
+     "testData": ""
+    },
+    {
+     "action": "Open the drop-down on another lead, then reopen the first lead",
+     "expected": "The drop-down no longer offers \"QA mới\"; the first lead still shows \"QA mới\" unchanged",
+     "sourceRefs": [
+      "GYM-BR-PLATFORM@v1",
+      "story:AC-03"
+     ],
+     "testData": ""
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-03",
+    "GYM-BR-PLATFORM@v1",
+    "GYM-FR@v1"
+   ],
+   "techniques": [
+    "state_transition"
+   ],
+   "testTypes": [
+    "positive",
+    "regression"
+   ],
+   "testConditions": [
+    "Active -> deactivated; old record keeps it"
+   ],
+   "module": "Configuration",
+   "level": "ui",
+   "manualReason": ""
+  }
+ ]
+}
