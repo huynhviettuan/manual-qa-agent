@@ -138,7 +138,7 @@ curl -s -X POST $API/api/manual-runs -H "x-api-key: $QA_KEY" -H "content-type: a
 
 The answer is `"status":"FAILED","failedStep":2`. Attach a screenshot with `POST /api/manual-runs/<id>/evidence` (`name`, `contentType`, `dataBase64`), read the history with `GET /api/test-cases/$CASE/manual-runs`, and when the case was part of a suite run, pass `suiteRunId` so the suite report shows the manual result beside the automated ones. The AI agent key cannot record results.
 
-The same stored cases feed `GET /api/coverage` (which requirements the cases cite, and the gaps), the tester workbook `GET /api/export/test-cases.csv` (the team's 20-column schema; execution columns only from recorded runs) and `GET /api/export/traceability.csv`. Open questions from clarification reviews are listed by `GET /api/questions`, where QA can record what the product does today ([ADR-0018](docs/adr/0018-manual-test-management.md)).
+Testers don't need `curl`: open `http://127.0.0.1:3000/tester`, enter your API key, pick a suite run and record each step; the page posts to the same endpoint and shows the status the server derived ([ADR-0019](docs/adr/0019-tester-screen.md)). The same stored cases feed `GET /api/coverage` (which requirements the cases cite, and the gaps), the tester workbook `GET /api/export/test-cases.csv` (the team's 20-column schema; execution columns only from recorded runs) and `GET /api/export/traceability.csv`. Open questions from clarification reviews are listed by `GET /api/questions`, where QA can record what the product does today ([ADR-0018](docs/adr/0018-manual-test-management.md)).
 
 ### 5. Triage a failing test
 
@@ -324,6 +324,7 @@ pnpm eval                                          # labeled pilot set; fails on
 | 1. Requirements and review | Approved-source registry, full-text + exact-ID retrieval, readiness check, cited drafts as one case per test condition with named techniques and a coverage check, review queue, knowledge feedback, evaluation set | Vector search (ADR-0005), reviewer web UI |
 | 2. Execution and evidence | Constrained steps (ADR-0008) with date-relative values and values captured between steps (ADR-0015), Playwright executor with host allowlist and pinned locale, deterministic verdicts, leased workers, immutable evidence with retention, test suites (sections, suite runs, per-case report) | S3 evidence storage, AI-proposed steps, arithmetic on values, values read from API responses |
 | 3. Triage and integration | Advisory triage with security escalation (ADR-0009), reproduction write-up, Jira Cloud filing (off by default), decision cache, metrics and drift alerts, propose-only MCP tool server for AI assistants (ADR-0011) | Live Jira verification, test-management sync |
+| 3b. Manual testing | Manual execution records with derived status and evidence (ADR-0017), full case schema, coverage, tester workbook and traceability exports, question register (ADR-0018), tester screen (ADR-0019) | Reviewer UI for approving and editing drafts |
 | 4. Scale | — | Per-project budgets, scheduled runs, more frameworks; only with measured benefit ([docs/08](docs/08-implementation-plan.md)) |
 
 The backlog with per-issue status is in [docs/12](docs/12-github-backlog.md).
