@@ -16,11 +16,12 @@ case drafted by the agent and a case designed by hand name the same techniques.
 
 Claude Code reads skills from `~/.claude/skills/<name>`. Point each one at this folder so there is one source:
 
-```bash
-# Git Bash on Windows (a directory junction needs no administrator rights)
-for s in manual-test-design sdet-framework-architect qa-reporting; do
-  cmd //c mklink /J "$(cygpath -w ~/.claude/skills/$s)" "$(cygpath -w "$PWD/skills/$s")"
-done
+```powershell
+# Windows, from the repository root (a directory junction needs no administrator rights;
+# use PowerShell, since Git Bash rewrites mklink's /J switch as a path)
+foreach ($s in 'manual-test-design','sdet-framework-architect','qa-reporting') {
+  New-Item -ItemType Junction -Path "$env:USERPROFILE\.claude\skills\$s" -Target "$PWD\skills\$s"
+}
 ```
 
 ```bash
