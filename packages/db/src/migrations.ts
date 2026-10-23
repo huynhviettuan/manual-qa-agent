@@ -461,6 +461,49 @@ CREATE TABLE suite_run_items (
 );
 `,
   },
+  {
+    id: '0006_manual_runs',
+    sql: /* sql */ `
+-- A tester's observed result for one approved case revision (ADR-0017). Immutable: executing
+-- again adds a record. The status is derived in code from the step results.
+CREATE TABLE manual_runs (
+  id text PRIMARY KEY,
+  tenant_id text NOT NULL,
+  project_id text NOT NULL,
+  case_id text NOT NULL REFERENCES test_cases(id),
+  case_revision integer NOT NULL,
+  suite_run_id text REFERENCES suite_runs(id),
+  environment_id text NOT NULL,
+  build text NOT NULL DEFAULT '',
+  tester_id text NOT NULL,
+  status text NOT NULL CHECK (status IN ('PASSED','FAILED','BLOCKED')),
+  failed_step integer,
+  reason text NOT NULL DEFAULT '',
+  steps jsonb NOT NULL,
+  notes text NOT NULL DEFAULT '',
+  defect_ref text,
+  started_at timestamptz NOT NULL,
+  finished_at timestamptz NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  CHECK ((status = 'FAILED') = (failed_step IS NOT NULL)),
+  CHECK (finished_at >= started_at)
+);
+CREATE INDEX manual_runs_case ON manual_runs (case_id, created_at DESC);
+CREATE INDEX manual_runs_suite_run ON manual_runs (suite_run_id, case_id, created_at DESC);
+
+-- Evidence belongs to exactly one run, automated or manual.
+ALTER TABLE evidence_artifacts ALTER COLUMN run_id DROP NOT NULL;
+ALTER TABLE evidence_artifacts ADD COLUMN manual_run_id text REFERENCES manual_runs(id);
+ALTER TABLE evidence_artifacts ADD CONSTRAINT evidence_one_owner CHECK ((run_id IS NULL) <> (manual_run_id IS NULL));
+`,
+  },
+  {
+    id: '0007_question_register',
+    sql: /* sql */ `
+-- What the product does today for an open question (ADR-0018): observed by a person, never a requirement.
+ALTER TABLE review_tasks ADD COLUMN observed_behaviour text;
+`,
+  },
 ];
 
 export async function migrate(db: Db): Promise<string[]> {

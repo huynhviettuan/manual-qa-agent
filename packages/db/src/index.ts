@@ -1,5 +1,7 @@
 export * from './db.ts';
 export * from './execution-repos.ts';
+export * from './manual-run-repos.ts';
+export * from './coverage-repos.ts';
 export * from './migrations.ts';
 export * from './phase3-repos.ts';
 export * from './repos.ts';

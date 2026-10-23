@@ -78,6 +78,9 @@ importers:
       '@qa/demo-sut':
         specifier: workspace:*
         version: link:../demo-sut
+      playwright:
+        specifier: 1.64.0
+        version: 1.64.0
 
   apps/cli:
     dependencies:

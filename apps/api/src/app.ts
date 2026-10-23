@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises';
 import Fastify, {
   type FastifyBaseLogger,
   type FastifyInstance,
@@ -23,6 +24,7 @@ import {
   type Actor,
   DomainError,
   hasRole,
+  ManualRunInput,
   newId,
   REVIEW_STATUSES,
   Role,
@@ -38,6 +40,17 @@ import {
   DEFAULT_THRESHOLDS,
   getSuiteDetail,
   getSuiteRunReport,
+  listSuiteRunSummaries,
+  getCoverage,
+  listQuestions,
+  recordObservation,
+  testCasesCsv,
+  traceabilityCsv,
+  attachManualEvidence,
+  getManualRunDetail,
+  listManualRuns,
+  MAX_ATTACHMENT_BYTES,
+  recordManualRun,
   runSuite,
   driftAlerts,
   getRunReport,
@@ -74,6 +87,8 @@ export type AppOptions = {
   tracker?: BugTracker | null;
   logger?: Logger;
   rateLimitPerMinute?: number;
+  /** Retention for evidence attached to manual runs (days; default 30). */
+  evidenceRetentionDays?: number;
 };
 
 const ExecutableBody = z.object({ spec: z.unknown() });
@@ -170,7 +185,7 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
     req.correlationId =
       typeof incoming === 'string' && /^[\w-]{1,100}$/.test(incoming) ? incoming : newId('corr');
     reply.header('x-correlation-id', req.correlationId);
-    if (req.url === '/healthz') return;
+    if (req.url === '/healthz' || req.url === '/tester' || req.url.startsWith('/tester/')) return;
     // Identity and roles come only from the server-side key lookup, never from the request body.
     const key = apiKeyFrom(req);
     const actor = key ? await findActorByApiKey(db, key) : null;
@@ -198,6 +213,28 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
     ...deps,
     logger: req.log as unknown as Logger,
   });
+
+  // ---------------------------------------------------------------- tester screen (ADR-0019)
+  // Static files read once; no framework, no inline script, and a CSP that keeps data calls same-origin.
+  const testerDir = new URL('./tester/', import.meta.url);
+  const testerPage = await readFile(new URL('index.html', testerDir), 'utf8');
+  const testerScript = await readFile(new URL('app.js', testerDir), 'utf8');
+  const testerHeaders = (reply: FastifyReply, type: string) =>
+    reply
+      .header('content-type', type)
+      .header(
+        'content-security-policy',
+        "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' blob: data:; form-action 'self'; base-uri 'none'; frame-ancestors 'none'",
+      )
+      .header('x-content-type-options', 'nosniff')
+      .header('referrer-policy', 'no-referrer')
+      .header('cache-control', 'no-store');
+  app.get('/tester', async (_req, reply) =>
+    testerHeaders(reply, 'text/html; charset=utf-8').send(testerPage),
+  );
+  app.get('/tester/app.js', async (_req, reply) =>
+    testerHeaders(reply, 'text/javascript; charset=utf-8').send(testerScript),
+  );
 
   app.get('/healthz', async () => ({ ok: true }));
 
@@ -447,10 +484,88 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
     return reply.code(202).send(await runSuite({ db }, req.actor, id, { environmentId }));
   });
 
+  app.get('/api/suites/:id/runs', async (req) => {
+    const { id } = IdParams.parse(req.params);
+    return { items: await listSuiteRunSummaries(db, scope(req), id) };
+  });
+
   app.get('/api/suite-runs/:id', async (req) => {
     const { id } = IdParams.parse(req.params);
     return getSuiteRunReport(db, scope(req), id);
   });
+
+  // ---------------------------------------------------------------- coverage, exports, questions (ADR-0018)
+
+  app.get('/api/coverage', async (req) => getCoverage(db, scope(req)));
+
+  const csv = (reply: FastifyReply, name: string, body: string) =>
+    reply
+      .header('content-type', 'text/csv; charset=utf-8')
+      .header('content-disposition', `attachment; filename="${name}"`)
+      .header('cache-control', 'no-store')
+      .send(body);
+
+  app.get('/api/export/test-cases.csv', async (req, reply) => {
+    const { suiteId } = z.object({ suiteId: z.string().min(1).max(100).optional() }).parse(req.query);
+    return csv(reply, 'test-cases.csv', await testCasesCsv(db, scope(req), { suiteId }));
+  });
+
+  app.get('/api/export/traceability.csv', async (req, reply) =>
+    csv(reply, 'traceability.csv', await traceabilityCsv(db, scope(req))),
+  );
+
+  app.get('/api/questions', async (req) => {
+    if (hasRole(req.actor, 'AI_AGENT'))
+      throw new DomainError('FORBIDDEN', 'the AI agent cannot read reviews');
+    return { items: await listQuestions(db, scope(req)) };
+  });
+
+  app.post('/api/reviews/:id/observation', async (req) => {
+    const { id } = IdParams.parse(req.params);
+    const { currentBehaviour } = z.object({ currentBehaviour: z.string().min(1).max(4000) }).parse(req.body);
+    return recordObservation(db, req.actor, id, currentBehaviour);
+  });
+
+  // ---------------------------------------------------------------- manual execution (ADR-0017)
+
+  app.post('/api/manual-runs', async (req, reply) => {
+    return reply.code(201).send(await recordManualRun(db, req.actor, ManualRunInput.parse(req.body)));
+  });
+
+  app.get('/api/manual-runs/:id', async (req) => {
+    const { id } = IdParams.parse(req.params);
+    return getManualRunDetail(db, scope(req), id);
+  });
+
+  app.get('/api/test-cases/:id/manual-runs', async (req) => {
+    const { id } = IdParams.parse(req.params);
+    return { items: await listManualRuns(db, scope(req), id) };
+  });
+
+  // JSON with base64 content: no multipart dependency, and the size limit is explicit.
+  app.post(
+    '/api/manual-runs/:id/evidence',
+    { bodyLimit: Math.ceil((MAX_ATTACHMENT_BYTES * 4) / 3) + 4096 },
+    async (req, reply) => {
+      const { id } = IdParams.parse(req.params);
+      const body = z
+        .object({
+          name: z.string().min(1).max(128),
+          contentType: z.string().min(1).max(100),
+          dataBase64: z.string().min(1),
+        })
+        .parse(req.body);
+      const data = Buffer.from(body.dataBase64, 'base64');
+      const deps = { db, store: requireStore(), evidenceRetentionDays: opts.evidenceRetentionDays };
+      return reply.code(201).send(
+        await attachManualEvidence(deps, req.actor, id, {
+          name: body.name,
+          contentType: body.contentType,
+          data,
+        }),
+      );
+    },
+  );
 
   return app;
 }

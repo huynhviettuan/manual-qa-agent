@@ -154,6 +154,7 @@ describe('ClaudeProvider.generate (mocked API)', () => {
         action: 'Fail login 5 times',
         expected: 'Account locked for 15 minutes',
         sourceRefs: ['AC-LOGIN@v2'],
+        testData: 'five wrong passwords',
       },
     ],
     assumptions: [],
@@ -162,9 +163,21 @@ describe('ClaudeProvider.generate (mocked API)', () => {
     techniques: ['boundary_value_analysis', 'state_transition'],
     testTypes: ['negative', 'boundary'],
     testConditions: ['failed logins: 5 locks the account (boundary)'],
+    module: 'Sign-in',
+    level: 'ui',
+    manualReason: '',
   };
   /** The model answers a set (ADR-0016); most checks need only one case in it. */
   const set = (...cases: unknown[]) => ({ designNotes: ['boundary at 5 failures'], cases });
+
+  it('flags, in code, an expected result a tester could not verify as written', async () => {
+    const vague = { ...draft.steps[0]!, expected: 'The account is handled correctly' };
+    const { p } = provider(() => messageReply(set({ ...draft, steps: [draft.steps[0]!, vague] })));
+    const out = await p.generate({ story, sources: [source] });
+    expect(out.ok && out.value.cases[0]!.reviewFlags).toEqual([
+      'step 2: the word "correctly" leaves the judgement to the tester in "The account is handled correctly"',
+    ]);
+  });
 
   it('returns a validated draft set whose steps cite retrieved sources', async () => {
     const { p } = provider(() => messageReply(set(draft)));

@@ -34,7 +34,7 @@ Decision-API providers (OpenAI, Jev) share one question plan and answer mapping 
 | Are requirements sufficiently unambiguous? | `readiness`: `ready` / `clarification` / `blocked` / `other` | Routing to draft vs review |
 | Which expectations are missing? | `missingExpectations[]`, `clarificationQuestion` | Content of the review task |
 | Which sources support the classification? | `citedSourceIds[]` | Grounding check (code) |
-| Draft test cases | `designNotes[]`, `cases[]` (1–12), each with `steps[].sourceRefs[]`, `requirementRefs[]`, `techniques[]`, `testTypes[]`, `testConditions[]`, `assumptions[]`, `missingRequirements[]` | One case per test condition (ADR-0016); every step cites a retrieved source, techniques are named (ADR-0014), and code reports any acceptance criterion no case covers as a coverage gap |
+| Draft test cases | `designNotes[]`, `cases[]` (1–12), each with `steps[].sourceRefs[]`, `steps[].testData`, `requirementRefs[]`, `techniques[]`, `testTypes[]`, `testConditions[]`, `module`, `level`, `manualReason`, `assumptions[]`, `missingRequirements[]` | One case per test condition (ADR-0016); every step cites a retrieved source, techniques are named (ADR-0014), and code reports any acceptance criterion no case covers as a coverage gap |
 
 **Do not** ask the model to declare an HTTP assertion successful or approve deleting customer data. Code and policy answer those questions.
 

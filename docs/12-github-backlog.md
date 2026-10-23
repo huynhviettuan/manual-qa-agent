@@ -52,6 +52,12 @@ Create a project board with fields `Status` (Backlog, Ready, In Progress, In Rev
 | QA-025 | Test-design techniques in drafts | P1 | Drafts name techniques, test types, derived conditions and traced requirements; unknown traces rejected; uncovered ACs reported by code. **Done (ADR-0014)** |
 | QA-026 | One case per test condition | P1 | A story drafts a bounded set of cases with design notes; duplicate titles and empty sets rejected; coverage judged across the set; one DRAFT revision per case. **Done (ADR-0016)** |
 | QA-027 | Run-scoped values in executable steps | P1 | Declared date values derived once per run; `capture` step from text or URL; `{ var }` and `{{name}}` references validated before approval; filled paths re-checked at run time. **Done (ADR-0015)** |
+| QA-028 | Manual execution records | P1 | Testers record per-step results; status derived in code; immutable history; evidence through the evidence store; suite reports show manual beside automated; AI agent refused. **Done (ADR-0017)** |
+| QA-029 | Observability check on expected results | P2 | Steps whose expected result cannot be verified as written are flagged for the reviewer (`reviewFlags`). **Done (ADR-0017)** |
+| QA-030 | Full manual case schema | P1 | module, level and manual reason, per-step test data from the model (draft-v5); basis derived; openQuestions, refs and smoke set by people. **Done (ADR-0018)** |
+| QA-031 | Coverage, tester workbook and traceability from the agent | P1 | `GET /api/coverage`, CSV exports with execution columns from recorded runs only. **Done (ADR-0018)** |
+| QA-032 | Open-question register | P2 | Clarification reviews with observed current behaviour recorded by QA; cases link to them. **Done (ADR-0018)** |
+| QA-033 | Tester screen | P1 | Static page served by the API: suite runs, step-by-step recording, evidence upload, questions, exports; the server derives every status; browser-tested. **Done (ADR-0019)** |
 
 ## Example issue template
 

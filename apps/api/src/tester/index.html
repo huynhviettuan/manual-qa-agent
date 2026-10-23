@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Manual QA tester</title>
+    <style>
+      :root {
+        --bg: #f6f7f5;
+        --fg: #1d2420;
+        --mute: #5c6660;
+        --line: #d8ddd9;
+        --card: #fff;
+        --accent: #0f6b5c;
+        --ok: #1f7a4d;
+        --ok-bg: #e3f3ea;
+        --bad: #b3261e;
+        --bad-bg: #fbe7e5;
+        --warn: #8a5a00;
+        --warn-bg: #fff2d6;
+        --skip: #5c6660;
+        --skip-bg: #eceeec;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #141917;
+          --fg: #e7ebe8;
+          --mute: #9aa49e;
+          --line: #2a332e;
+          --card: #1b221e;
+          --accent: #5cc4ae;
+          --ok: #6fd394;
+          --ok-bg: #133022;
+          --bad: #ff8a7d;
+          --bad-bg: #3a1714;
+          --warn: #f2b85c;
+          --warn-bg: #36270f;
+          --skip: #9aa49e;
+          --skip-bg: #24302c;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font:
+          15px/1.5 system-ui,
+          'Segoe UI',
+          sans-serif;
+      }
+      header {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px 20px;
+        align-items: center;
+        padding: 12px 20px;
+        border-bottom: 1px solid var(--line);
+        background: var(--card);
+      }
+      header h1 {
+        font-size: 17px;
+        margin: 0;
+      }
+      header nav a {
+        margin-right: 14px;
+        color: var(--accent);
+        text-decoration: none;
+        font-weight: 600;
+      }
+      header nav a[aria-current='page'] {
+        text-decoration: underline;
+      }
+      #who {
+        color: var(--mute);
+        font-size: 13px;
+        margin-left: auto;
+      }
+      main {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 16px 18px;
+        margin-bottom: 16px;
+      }
+      h2 {
+        font-size: 18px;
+        margin: 0 0 10px;
+      }
+      h3 {
+        font-size: 15px;
+        margin: 14px 0 6px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 7px 8px;
+        border-bottom: 1px solid var(--line);
+        vertical-align: top;
+      }
+      th {
+        color: var(--mute);
+        font-weight: 600;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .num {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+      .pill {
+        display: inline-block;
+        padding: 1px 8px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .PASSED {
+        color: var(--ok);
+        background: var(--ok-bg);
+      }
+      .FAILED {
+        color: var(--bad);
+        background: var(--bad-bg);
+      }
+      .BLOCKED,
+      .INCONCLUSIVE {
+        color: var(--warn);
+        background: var(--warn-bg);
+      }
+      .NOT_AUTOMATED,
+      .SKIPPED,
+      .PENDING,
+      .NOT_APPROVED {
+        color: var(--skip);
+        background: var(--skip-bg);
+      }
+      button,
+      .btn {
+        font: inherit;
+        padding: 7px 14px;
+        border-radius: 7px;
+        border: 1px solid var(--accent);
+        background: var(--accent);
+        color: #fff;
+        cursor: pointer;
+      }
+      button.secondary {
+        background: transparent;
+        color: var(--accent);
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+      input[type='text'],
+      input[type='password'],
+      textarea,
+      select {
+        font: inherit;
+        width: 100%;
+        padding: 7px 9px;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        background: var(--bg);
+        color: var(--fg);
+      }
+      textarea {
+        min-height: 60px;
+        resize: vertical;
+      }
+      label {
+        display: block;
+        font-size: 13px;
+        color: var(--mute);
+        margin: 10px 0 4px;
+      }
+      .row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .row > * {
+        flex: 1 1 220px;
+        min-width: 0;
+      }
+      .step {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px 12px;
+        margin: 10px 0;
+      }
+      .step .what {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      @media (max-width: 700px) {
+        .step .what {
+          grid-template-columns: 1fr;
+        }
+      }
+      .step .choices label {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        margin: 6px 14px 0 0;
+        color: var(--fg);
+        font-size: 14px;
+      }
+      .muted {
+        color: var(--mute);
+        font-size: 13px;
+      }
+      .flag {
+        color: var(--warn);
+        font-size: 13px;
+      }
+      .clickable {
+        cursor: pointer;
+        color: var(--accent);
+        font-weight: 600;
+        background: none;
+        border: 0;
+        padding: 0;
+        font: inherit;
+      }
+      .error {
+        color: var(--bad);
+        background: var(--bad-bg);
+        padding: 8px 12px;
+        border-radius: 7px;
+        margin: 8px 0;
+      }
+      .ok {
+        color: var(--ok);
+        background: var(--ok-bg);
+        padding: 8px 12px;
+        border-radius: 7px;
+        margin: 8px 0;
+      }
+      .thumbs img {
+        max-height: 120px;
+        margin: 6px 6px 0 0;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+      }
+      [hidden] {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Manual QA tester</h1>
+      <nav aria-label="Sections">
+        <a href="#/suites" data-nav="suites">Suite runs</a>
+        <a href="#/questions" data-nav="questions">Open questions</a>
+        <a href="#/exports" data-nav="exports">Coverage and exports</a>
+      </nav>
+      <span id="who"></span>
+      <button id="signout" class="secondary" hidden>Change key</button>
+    </header>
+    <main id="app" aria-live="polite"></main>
+    <script src="/tester/app.js"></script>
+  </body>
+</html>

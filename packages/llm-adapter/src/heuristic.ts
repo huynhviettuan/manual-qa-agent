@@ -1,4 +1,4 @@
-import type { DraftOutput, DraftSetOutput } from '@qa/domain';
+import { type DraftOutput, type DraftSetOutput, MEASURABLE, VAGUE } from '@qa/domain';
 import type { ReadinessAssessment, SuspectedCause, TriageFacts } from './types.ts';
 
 /** The decoded `<untrusted_data>` payload every provider receives (see prompts.ts). */
@@ -13,10 +13,6 @@ export type PromptPayload = {
 };
 
 export const HEURISTIC_MODEL = 'mock-heuristic-v1';
-
-const VAGUE =
-  /\b(quick(ly)?|fast|multiple|several|some|many|few|appropriate(ly)?|user[- ]friendly|reasonable|soon|large|small|etc)\b/i;
-const MEASURABLE = /\d|"[^"]+"|'[^']+'/;
 
 /**
  * Deterministic stand-in for a model, used when QA_LIVE_LLM is not set. An acceptance criterion
@@ -83,6 +79,7 @@ export function heuristicDraft(payload: PromptPayload): DraftSetOutput {
             .flatMap((s) => s.content.split('\n'))
             .find((l) => MEASURABLE.test(l.replaceAll(ac.id, ''))) ?? ac.text,
         sourceRefs: support.length > 0 ? support.map((s) => s.ref) : [`story:${ac.id}`],
+        testData: '',
       };
     }),
     assumptions: [],
@@ -92,6 +89,9 @@ export function heuristicDraft(payload: PromptPayload): DraftSetOutput {
     techniques: ['specification_based'],
     testTypes: ['positive'],
     testConditions: acs.map((ac) => `${ac.id}: behaviour as stated`),
+    module: '',
+    level: 'manual',
+    manualReason: 'Automation not assessed by the keyless stand-in.',
   });
   const acs = story.acceptanceCriteria;
   return {

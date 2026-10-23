@@ -30,7 +30,22 @@ describe('draft content (ADR-0014)', () => {
       testTypes: ['boundary'],
       testConditions: ['5 failed logins'],
     };
-    expect(DraftOutput.safeParse(v2).success).toBe(true);
+    // draft-v5 also needs the management fields and per-step test data.
+    expect(DraftOutput.safeParse(v2).success).toBe(false);
+    const v5 = {
+      ...v2,
+      steps: v2.steps.map((s) => ({ ...s, testData: 'wrong password x5' })),
+      module: 'Sign-in',
+      level: 'ui',
+      manualReason: '',
+    };
+    expect(DraftOutput.safeParse(v5).success).toBe(true);
+    expect(DraftContent.parse(v1)).toMatchObject({
+      level: 'manual',
+      basis: 'specified',
+      smoke: false,
+      openQuestions: [],
+    });
   });
 
   it('accepts only known techniques and test types', () => {

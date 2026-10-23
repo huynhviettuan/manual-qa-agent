@@ -133,6 +133,26 @@ export async function insertSuiteRunItem(
   );
 }
 
+export type SuiteRunSummaryRow = SuiteRunRow & { manualPending: number; manualRecorded: number };
+
+/** A suite's runs, newest first, with how many manual cases still await a tester (ADR-0019). */
+export async function listSuiteRuns(
+  db: Db,
+  scope: TenantScope,
+  suiteId: string,
+): Promise<SuiteRunSummaryRow[]> {
+  return db.query<SuiteRunSummaryRow>(
+    `SELECT sr.id, sr.suite_id AS "suiteId", sr.environment_id AS "environmentId", sr.requested_by AS "requestedBy",
+       sr.created_at AS "createdAt",
+       (SELECT count(*)::int FROM suite_run_items i WHERE i.suite_run_id = sr.id AND i.outcome = 'NOT_AUTOMATED'
+          AND NOT EXISTS (SELECT 1 FROM manual_runs m WHERE m.suite_run_id = sr.id AND m.case_id = i.case_id)) AS "manualPending",
+       (SELECT count(DISTINCT m.case_id)::int FROM manual_runs m WHERE m.suite_run_id = sr.id) AS "manualRecorded"
+     FROM suite_runs sr WHERE sr.suite_id = $1 AND sr.tenant_id = $2 AND sr.project_id = $3
+     ORDER BY sr.created_at DESC, sr.id DESC`,
+    [suiteId, scope.tenantId, scope.projectId],
+  );
+}
+
 export async function getSuiteRun(db: Db, scope: TenantScope, id: string): Promise<SuiteRunRow | null> {
   const rows = await db.query<SuiteRunRow>(
     `SELECT id, suite_id AS "suiteId", environment_id AS "environmentId", requested_by AS "requestedBy",
