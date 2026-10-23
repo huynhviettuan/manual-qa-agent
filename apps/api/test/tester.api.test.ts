@@ -96,4 +96,16 @@ describe('the tester screen (ADR-0019)', () => {
     ]);
     expect((await call('qa', 'GET', '/api/suites/suite_none/runs')).statusCode).toBe(404);
   });
+
+  it("lists the project's cases by status for the review view", async () => {
+    const call = (actor: string, url: string) =>
+      app.inject({ method: 'GET', url, headers: { 'x-api-key': `key-p-${actor}` } });
+    const approved = (await call('qa', '/api/test-cases?status=APPROVED')).json();
+    expect(approved.items.map((c: { title: string }) => c.title)).toContain('By hand');
+    expect(approved.items[0]).toMatchObject({ story: 'T-1', revision: 1, level: 'manual', reviewFlags: 0 });
+    const drafts = (await call('qa', '/api/test-cases?status=DRAFT')).json();
+    expect(drafts.items.map((c: { title: string }) => c.title)).not.toContain('By hand');
+    expect((await call('qa', '/api/test-cases?status=WHATEVER')).statusCode).toBe(400);
+    expect((await call('qa', '/api/test-cases')).json().items.length).toBeGreaterThanOrEqual(1);
+  });
 });

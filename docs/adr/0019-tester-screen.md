@@ -32,11 +32,21 @@ source.
   (sign in, open a run, record a failed step, see the derived status and the history). Locators follow the team's
   rules: scoped through the page's main region, strict.
 
+## Amendment, 2026-10-23: draft review on the same page
+
+The screen gained a "Drafts to review" view over `GET /api/test-cases?status=` (new): the list of a project's
+cases by status, and for one case its design (techniques, conditions, requirements verified), steps with sources,
+assumptions, missing requirements and review flags. A reviewer approves, rejects with a reason, or edits through a
+form that writes a new `DRAFT` revision via the existing `EDIT` decision, including the management fields of
+ADR-0018 (`module`, `level`, `manualReason`, `smoke`, `openQuestions`, `refs`); `basis` is recomputed from the
+assumptions when saving. Review rules are unchanged and enforced by the API (roles, state transitions); the page
+only submits decisions. Covered by the browser test.
+
 ## Consequences
 
-- Testers can execute, record and attach evidence without `curl`; QA engineers can keep the question register
-  from the same page.
-- The page is deliberately plain. A richer reviewer UI (approving drafts, editing cases) remains unimplemented and
-  would be a separate decision, probably with a framework.
+- Testers can execute, record and attach evidence without `curl`; QA engineers can review drafts and keep the
+  question register from the same page.
+- The page is deliberately plain: one HTML file and one script. If the review workload grows (bulk actions,
+  diffing revisions), a framework would be a separate decision.
 - A key in `sessionStorage` is readable by scripts on the page's origin; the CSP keeps that to the API's own
   script. Serve the API over TLS and keep keys per person, as `docs/11` already requires.

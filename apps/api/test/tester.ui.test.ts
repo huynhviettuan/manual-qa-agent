@@ -123,4 +123,61 @@ describe('tester screen in a browser', () => {
     await expect.poll(() => main.locator('tbody .pill.FAILED').count()).toBe(1);
     await context.close();
   }, 60_000);
+
+  it('reviews a draft: sharpens an expected result in the edit form, then approves the new revision', async () => {
+    const draft = await createTestCase(db, S, {
+      storyId: 'story_ui',
+      workflowId: null,
+      content: {
+        title: 'Lead without a channel',
+        priority: 'P2',
+        preconditions: [],
+        testData: [],
+        steps: [
+          { action: 'Save a lead with no channel', expected: 'An error is shown', sourceRefs: ['BR-201@v1'] },
+        ],
+        assumptions: [],
+        missingRequirements: [],
+        reviewFlags: ['step 1: no exact message, value or state in "An error is shown"'],
+      },
+      sourceRefs: ['BR-201@v1'],
+      authorId: a.agent.id,
+    });
+    const context = await browser.newContext({ baseURL: baseUrl, locale: 'en-US' });
+    const page = await context.newPage();
+    await page.goto('/tester');
+    const main = page.getByRole('main');
+    await main.getByLabel('API key', { exact: true }).fill('key-p-qa');
+    await main.getByRole('button', { name: 'Continue' }).click();
+    await expect.poll(() => page.locator('#who').textContent()).toContain('QA_ENGINEER');
+
+    await page.goto('/tester#/drafts');
+    await main.getByRole('link', { name: 'Lead without a channel' }).click();
+    await expect.poll(() => main.locator('.flag').count()).toBeGreaterThanOrEqual(1);
+    await main.getByRole('button', { name: 'Edit…' }).click();
+    await main.locator('#s-expected-0').fill('The field shows "Bắt buộc nhập." and no lead is created');
+    await main.locator('#e-note').fill('Exact message from BR-201');
+    await main.getByRole('button', { name: 'Save revision' }).click();
+    await expect.poll(() => main.locator('#edit-result .ok').textContent()).toContain('Saved revision 2');
+
+    await expect.poll(() => main.getByRole('button', { name: 'Approve' }).count()).toBe(1);
+    await main.getByRole('button', { name: 'Approve' }).click();
+    await expect.poll(() => main.locator('#decision .ok').textContent()).toContain('is now APPROVED');
+
+    const rows = await db.query<{
+      revision: number;
+      status: string;
+      content: { steps: Array<{ expected: string }> };
+    }>(`SELECT revision, status, content FROM test_case_revisions WHERE case_id = $1 ORDER BY revision`, [
+      draft.caseId,
+    ]);
+    expect(rows.map((r) => [r.revision, r.status])).toEqual([
+      [1, 'DRAFT'],
+      [2, 'APPROVED'],
+    ]);
+    expect(rows[1]!.content.steps[0]!.expected).toBe(
+      'The field shows "Bắt buộc nhập." and no lead is created',
+    );
+    await context.close();
+  }, 60_000);
 });

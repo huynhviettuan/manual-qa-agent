@@ -14,6 +14,7 @@ import {
   getReview,
   latestTriage,
   getWorkflow,
+  listLatestCases,
   listRevisions,
   listSuites,
   workflowUsage,
@@ -22,7 +23,9 @@ import {
 import {
   AcceptanceCriterion,
   type Actor,
+  CASE_STATUSES,
   DomainError,
+  DraftContent,
   hasRole,
   ManualRunInput,
   newId,
@@ -276,6 +279,32 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
       correlationId: req.correlationId,
     });
     return reply.code(result.deduplicated ? 200 : 201).send(result);
+  });
+
+  // The project's cases, latest revision each, for review queues and exports (ADR-0019 amendment).
+  app.get('/api/test-cases', async (req) => {
+    const { status } = z.object({ status: z.enum(CASE_STATUSES).optional() }).parse(req.query);
+    const cases = await listLatestCases(db, scope(req));
+    return {
+      items: cases
+        .filter((c) => !status || c.status === status)
+        .map((c) => {
+          const d = DraftContent.safeParse(c.content).data;
+          return {
+            caseId: c.caseId,
+            story: c.storyExternalId,
+            revision: c.revision,
+            status: c.status,
+            title: d?.title ?? c.caseId,
+            priority: d?.priority ?? '',
+            module: d?.module ?? '',
+            level: d?.level ?? 'manual',
+            techniques: d?.techniques ?? [],
+            reviewFlags: d?.reviewFlags.length ?? 0,
+            missingRequirements: d?.missingRequirements.length ?? 0,
+          };
+        }),
+    };
   });
 
   app.get('/api/test-cases/:id', async (req) => {

@@ -269,6 +269,170 @@
       .join('')}</tbody></table>`;
   }
 
+  // ---- draft review (ADR-0019, amendment): approve, reject or edit; the page never approves on its own.
+  const STATUSES = ['DRAFT', 'NEEDS_CLARIFICATION', 'IN_REVIEW', 'APPROVED', 'REJECTED'];
+
+  async function viewDrafts(status) {
+    const current = STATUSES.includes(status) ? status : 'DRAFT';
+    const { items } = await api('GET', `/api/test-cases?status=${current}`);
+    app.innerHTML = h`
+      <section class="card" aria-labelledby="h-drafts">
+        <h2 id="h-drafts">Cases to review</h2>
+        <p class="muted">Drafted by the agent from approved sources. Read each one against its requirements; approve it, send it back with a reason, or edit it. Flags were found in code, not by the model.</p>
+        <p>${STATUSES.map((st) => h`<a class="clickable" href="#/drafts?status=${st}" ${st === current ? 'aria-current="page"' : ''}>${st === current ? `<b>${st}</b>` : st}</a>`).join(' · ')}</p>
+        ${
+          items.length === 0
+            ? `<p>No cases in ${esc(current)}.</p>`
+            : `<table><thead><tr><th>Case</th><th>Story</th><th>Priority</th><th>Level</th><th>Techniques</th><th>Flags</th></tr></thead><tbody>${items
+                .map(
+                  (c) => h`<tr>
+                <td><a class="clickable" href="#/review/${esc(c.caseId)}">${esc(c.title)}</a><div class="muted">${esc(c.caseId)} · r${c.revision}</div></td>
+                <td>${esc(c.story)}</td><td>${esc(c.priority)}</td><td>${esc(c.level)}</td>
+                <td class="muted">${esc(c.techniques.join(', '))}</td>
+                <td>${c.reviewFlags ? `<span class="flag">⚑ ${c.reviewFlags}</span>` : ''}${c.missingRequirements ? `<span class="flag"> · ${c.missingRequirements} missing</span>` : ''}</td></tr>`,
+                )
+                .join('')}</tbody></table>`
+        }
+      </section>`;
+  }
+
+  const lines = (xs) => (xs || []).join('\n');
+  const splitLines = (v) =>
+    v
+      .split('\n')
+      .map((x) => x.trim())
+      .filter(Boolean);
+  const splitList = (v) =>
+    v
+      .split(/[,\n]/)
+      .map((x) => x.trim())
+      .filter(Boolean);
+
+  async function viewReview(caseId) {
+    const detail = await api('GET', `/api/test-cases/${caseId}`);
+    const rev = latestRevision(detail);
+    const c = rev.content;
+    const editable = ['DRAFT', 'REJECTED', 'NEEDS_CLARIFICATION'].includes(rev.status);
+    const option = (v, cur) => h`<option value="${v}" ${v === cur ? 'selected' : ''}>${v}</option>`;
+    app.innerHTML = h`
+      <section class="card" aria-labelledby="h-review">
+        <p><a class="clickable" href="#/drafts">← cases to review</a></p>
+        <h2 id="h-review">${esc(c.title)}</h2>
+        <p class="muted">${esc(caseId)} · revision ${rev.revision} ${pill(rev.status)} · story ${esc(detail.storyId)} · basis ${esc(c.basis || 'specified')}</p>
+        ${(c.reviewFlags || []).map((f) => `<p class="flag">⚑ ${esc(f)}</p>`).join('')}
+        ${(c.missingRequirements || []).map((m) => `<p class="flag">Missing: ${esc(m)}</p>`).join('')}
+        <h3>Design</h3>
+        <p class="muted">Techniques: ${esc((c.techniques || []).join(', ')) || '—'} · Types: ${esc((c.testTypes || []).join(', ')) || '—'} · Verifies: ${esc((c.requirementRefs || []).join(', ')) || '—'}</p>
+        ${c.testConditions?.length ? `<ul>${c.testConditions.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}
+        <h3>Steps as drafted</h3>
+        <table><thead><tr><th>#</th><th>Action</th><th>Expected</th><th>Data</th><th>Sources</th></tr></thead><tbody>${c.steps
+          .map(
+            (st, i) =>
+              h`<tr><td>${i + 1}</td><td>${esc(st.action)}</td><td>${esc(st.expected)}</td><td class="muted">${esc(st.testData || '')}</td><td class="muted">${esc((st.sourceRefs || []).join(', '))}</td></tr>`,
+          )
+          .join('')}</tbody></table>
+        ${c.assumptions?.length ? `<h3>Assumptions</h3><ul>${c.assumptions.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}
+        <div id="actions" ${rev.status === 'DRAFT' || rev.status === 'IN_REVIEW' ? '' : 'hidden'}>
+          <h3>Decision</h3>
+          <p><button id="approve">Approve</button> <button id="reject" class="secondary">Reject…</button> <button id="edit" class="secondary" ${editable ? '' : 'disabled'}>Edit…</button></p>
+          <div id="reject-box" hidden><label for="reject-reason">Reason for rejecting</label><textarea id="reject-reason"></textarea><p><button id="reject-send" class="secondary">Send back</button></p></div>
+          <div id="decision"></div>
+        </div>
+        <form id="editform" hidden>
+          <h3>Edit (saves a new revision in DRAFT)</h3>
+          <div class="row">
+            <div><label for="e-title">Title</label><input id="e-title" type="text" value="${esc(c.title)}" required></div>
+            <div><label for="e-priority">Priority</label><select id="e-priority">${['P0', 'P1', 'P2', 'P3'].map((p) => option(p, c.priority)).join('')}</select></div>
+            <div><label for="e-module">Module</label><input id="e-module" type="text" value="${esc(c.module || '')}"></div>
+          </div>
+          <div class="row">
+            <div><label for="e-level">Level</label><select id="e-level">${['api', 'ui', 'manual'].map((p) => option(p, c.level || 'manual')).join('')}</select></div>
+            <div><label for="e-reason">Why it stays manual</label><input id="e-reason" type="text" value="${esc(c.manualReason || '')}"></div>
+            <div><label for="e-smoke">Smoke set</label><input id="e-smoke" type="checkbox" ${c.smoke ? 'checked' : ''}></div>
+          </div>
+          <label for="e-pre">Preconditions (one per line)</label><textarea id="e-pre">${esc(lines(c.preconditions))}</textarea>
+          <label for="e-data">Test data (one per line)</label><textarea id="e-data">${esc(lines(c.testData))}</textarea>
+          <h3>Steps</h3>
+          ${c.steps
+            .map(
+              (
+                st,
+                i,
+              ) => h`<div class="step"><b>Step ${i + 1}</b> <span class="muted">sources: ${esc((st.sourceRefs || []).join(', '))}</span>
+              <label for="s-action-${i}">Action</label><textarea id="s-action-${i}">${esc(st.action)}</textarea>
+              <label for="s-expected-${i}">Expected (exact message, value or state)</label><textarea id="s-expected-${i}">${esc(st.expected)}</textarea>
+              <label for="s-data-${i}">Test data for this step</label><input id="s-data-${i}" type="text" value="${esc(st.testData || '')}"></div>`,
+            )
+            .join('')}
+          <label for="e-assume">Assumptions (one per line)</label><textarea id="e-assume">${esc(lines(c.assumptions))}</textarea>
+          <label for="e-questions">Open questions it depends on (review ids, comma-separated)</label><input id="e-questions" type="text" value="${esc((c.openQuestions || []).join(', '))}">
+          <label for="e-refs">References (comma-separated)</label><input id="e-refs" type="text" value="${esc((c.refs || []).join(', '))}">
+          <label for="e-note">Reason for the edit</label><input id="e-note" type="text">
+          <p><button type="submit">Save revision</button> <button type="button" id="edit-cancel" class="secondary">Cancel</button></p>
+          <div id="edit-result"></div>
+        </form>
+      </section>`;
+
+    const decide = async (body) => {
+      try {
+        const out = await api('POST', `/api/test-cases/${caseId}/review`, body);
+        el('decision').innerHTML =
+          `<div class="ok">Revision ${out.revision} is now ${esc(out.status)}.</div>`;
+        setTimeout(() => viewReview(caseId), 600);
+      } catch (err) {
+        el('decision').innerHTML = `<div class="error">${esc(err.message)}</div>`;
+      }
+    };
+    el('approve')?.addEventListener('click', () => decide({ decision: 'APPROVE' }));
+    el('reject')?.addEventListener('click', () => (el('reject-box').hidden = false));
+    el('reject-send')?.addEventListener('click', () =>
+      decide({ decision: 'REJECT', reason: el('reject-reason').value.trim() }),
+    );
+    el('edit')?.addEventListener('click', () => {
+      el('editform').hidden = false;
+      el('actions').hidden = true;
+    });
+    el('edit-cancel').addEventListener('click', () => {
+      el('editform').hidden = true;
+      el('actions').hidden = false;
+    });
+    el('editform').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const content = {
+        ...c,
+        title: el('e-title').value.trim(),
+        priority: el('e-priority').value,
+        module: el('e-module').value.trim(),
+        level: el('e-level').value,
+        manualReason: el('e-reason').value.trim(),
+        smoke: el('e-smoke').checked,
+        preconditions: splitLines(el('e-pre').value),
+        testData: splitLines(el('e-data').value),
+        steps: c.steps.map((st, i) => ({
+          ...st,
+          action: el(`s-action-${i}`).value.trim(),
+          expected: el(`s-expected-${i}`).value.trim(),
+          testData: el(`s-data-${i}`).value.trim(),
+        })),
+        assumptions: splitLines(el('e-assume').value),
+        openQuestions: splitList(el('e-questions').value),
+        refs: splitList(el('e-refs').value),
+      };
+      content.basis = content.assumptions.length ? 'assumption' : 'specified';
+      try {
+        const out = await api('POST', `/api/test-cases/${caseId}/review`, {
+          decision: 'EDIT',
+          content,
+          reason: el('e-note').value.trim() || undefined,
+        });
+        el('edit-result').innerHTML = `<div class="ok">Saved revision ${out.revision}.</div>`;
+        setTimeout(() => viewReview(caseId), 600);
+      } catch (err) {
+        el('edit-result').innerHTML = `<div class="error">${esc(err.message)}</div>`;
+      }
+    });
+  }
+
   async function viewQuestions() {
     const { items } = await api('GET', '/api/questions');
     app.innerHTML = h`
@@ -365,11 +529,14 @@
     const [path, query] = location.hash.replace(/^#/, '').split('?');
     const params = new URLSearchParams(query || '');
     const seg = path.split('/').filter(Boolean);
-    const nav = seg[0] === 'suite-runs' || seg[0] === 'execute' ? 'suites' : seg[0];
+    const nav =
+      seg[0] === 'suite-runs' || seg[0] === 'execute' ? 'suites' : seg[0] === 'review' ? 'drafts' : seg[0];
     document.querySelector(`[data-nav="${nav}"]`)?.setAttribute('aria-current', 'page');
     try {
       if (seg[0] === 'suite-runs' && seg[1]) await viewSuiteRun(seg[1]);
       else if (seg[0] === 'execute' && seg[1]) await viewExecute(seg[1], params.get('run'));
+      else if (seg[0] === 'drafts') await viewDrafts(params.get('status'));
+      else if (seg[0] === 'review' && seg[1]) await viewReview(seg[1]);
       else if (seg[0] === 'questions') await viewQuestions();
       else if (seg[0] === 'exports') await viewExports();
       else await viewSuites();
