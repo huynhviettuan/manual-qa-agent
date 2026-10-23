@@ -316,6 +316,8 @@ pnpm eval                                          # labeled pilot set; fails on
 
 The backlog with per-issue status is in [docs/12](docs/12-github-backlog.md).
 
+The team's Claude Code skills for test design, automation architecture and QA reporting live in [skills/](skills/README.md); the agent's draft vocabulary follows them.
+
 ## Documentation
 
 | File | Purpose |

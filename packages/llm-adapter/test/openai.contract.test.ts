@@ -181,7 +181,7 @@ describe('OpenAIResponsesDrafter via Responses API (mocked)', () => {
     expect(out).toMatchObject({
       ok: true,
       value: { title: 'Lockout' },
-      meta: { model: 'gpt-test-draft', promptVersion: 'draft-v2' },
+      meta: { model: 'gpt-test-draft', promptVersion: 'draft-v3' },
     });
     const body = fetch.calls[0]!.body;
     expect(fetch.calls[0]!.endpoint).toBe('responses');

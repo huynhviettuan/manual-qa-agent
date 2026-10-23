@@ -1,0 +1,79 @@
+[
+  {
+    "query": "found 3 new issues today testing the payouts: a 500 on a malformed id, raw zod messages on POST /customers with empty body, and the reminder job timing out. add them to reports/flow-fitness-bug-report.md as round 16",
+    "should_trigger": true
+  },
+  {
+    "query": "dev says BUG-020 and BUG-021 are fixed on branch fix/qa-round12 @ a981386. retest and update the report",
+    "should_trigger": true
+  },
+  {
+    "query": "i ran the full suite against staging tonight: 227/227 passed, 2 are expected failures for open bugs. write the test report for the build",
+    "should_trigger": true
+  },
+  {
+    "query": "the PM wants a QA status for tomorrow's standup: what's open, what's verified, what's blocked. everything is in the bug report md",
+    "should_trigger": true
+  },
+  {
+    "query": "is this a bug or a doc issue? doc 02 says checkin.review opens the hanging sessions but the api gives them to every booking.view role, and the api behaviour seems right",
+    "should_trigger": true
+  },
+  {
+    "query": "how severe is 'VAT rounds half down instead of half up on amounts ending in 500'? money is involved but it's 1 đ per contract",
+    "should_trigger": true
+  },
+  {
+    "query": "the lead found that 'Đã tập' can be set on a booking 3 months in the future. she wants it written up properly so the dev can reproduce it, with the request and the rule it breaks (A-377)",
+    "should_trigger": true
+  },
+  {
+    "query": "round 2 is done, 71 api cases: 67 pass, 3 fail, 1 needs clarification. the results are in reports/results.json. summarise by technique like round 1",
+    "should_trigger": true
+  },
+  { "query": "write the test cases for the freeze feature from the user story", "should_trigger": false },
+  {
+    "query": "fix BUG-023 — validate the id param in POST /api-keys/{id}/revoke like the other controllers do",
+    "should_trigger": false
+  },
+  {
+    "query": "build a dashboard page showing pass rate per module over the last 10 runs from reports/*.json, something i can share with the team",
+    "should_trigger": false
+  },
+  {
+    "query": "make the gym crm showcase report into a nicer html page with charts for the client presentation",
+    "should_trigger": false
+  },
+  {
+    "query": "write the release notes for v2.3 from the merged PRs since the last tag",
+    "should_trigger": false
+  },
+  {
+    "query": "the test 'CON-007: 1001 sessions refused' fails with 'expected 400 got 200'. debug it",
+    "should_trigger": false
+  },
+  {
+    "query": "create a jira ticket template for our team's bug reports with the fields we always forget",
+    "should_trigger": false
+  },
+  {
+    "query": "explain the difference between severity and priority to a new tester, 3 sentences",
+    "should_trigger": false
+  },
+  {
+    "query": "generate the coverage report for the unit tests (vitest --coverage) and tell me which files are under 80%",
+    "should_trigger": false
+  },
+  {
+    "query": "our playwright html report shows 12 flaky tests, how do i make them stable",
+    "should_trigger": false
+  },
+  {
+    "query": "write a postmortem for last week's production incident where payouts ran twice",
+    "should_trigger": false
+  },
+  {
+    "query": "file the three open bugs from the report into jira project FF with the right severity",
+    "should_trigger": false
+  }
+]

@@ -1,0 +1,79 @@
+[
+  {
+    "query": "starting a new automation repo for our fitness CRM, black-box, api + ui with playwright. how should i structure it so it doesn't turn into the mess the last one became",
+    "should_trigger": true
+  },
+  {
+    "query": "review src/pages/*.ts in D:\\flow-fitness-qa — every page object has its own toast handling and some use page.locator('#save') directly. what should change",
+    "should_trigger": true
+  },
+  {
+    "query": "tests pass alone but fail when run with 4 workers, usually on the booking calendar. 2 tests book the same slot i think. how do we fix this properly without making it serial",
+    "should_trigger": true
+  },
+  {
+    "query": "RestAssured framework in java, testng parallel=methods. our WebDriver/RequestSpec is a static field and tests randomly use each other's sessions. what's the right pattern",
+    "should_trigger": true
+  },
+  {
+    "query": "we have 233 test cases documented in a csv and 219 playwright tests. they keep drifting apart — someone renames a test and the doc still has the old one. how do other teams link the two",
+    "should_trigger": true
+  },
+  {
+    "query": "the app rate limits sign in to 20/min and our suite logs in in every test so half of them get 429. retry on 429?",
+    "should_trigger": true
+  },
+  {
+    "query": "should the teardown that deletes test customers go in afterEach or at the end of the test body? and what if the product has no delete endpoint",
+    "should_trigger": true
+  },
+  {
+    "query": "a locator matches 2 elements (the main page and a hidden dialog) so i added .first(). my colleague says that's wrong, is it?",
+    "should_trigger": true
+  },
+  {
+    "query": "designing the api service layer for cypress — one file per endpoint or one per resource? and where does auth go",
+    "should_trigger": true
+  },
+  {
+    "query": "write the test cases for the contract freeze feature from this user story, with techniques and traceability",
+    "should_trigger": false
+  },
+  {
+    "query": "write up BUG-024 — the overdue approval reminder times out when there's a backlog — for the bug report, severity, steps, evidence",
+    "should_trigger": false
+  },
+  {
+    "query": "refactor src/services/payment.service.ts in the product (not the tests) to follow SOLID, it's a 900 line class",
+    "should_trigger": false
+  },
+  {
+    "query": "add a playwright test that checks the login page shows an error for a wrong password, same style as tests/ui/login.spec.ts",
+    "should_trigger": false
+  },
+  { "query": "install playwright and run the example test so i can see it working", "should_trigger": false },
+  {
+    "query": "k6 load test for POST /bookings, 200 virtual users ramping over 2 minutes, p95 under 500ms",
+    "should_trigger": false
+  },
+  {
+    "query": "explain what the page object model is, for a junior tester joining monday",
+    "should_trigger": false
+  },
+  {
+    "query": "our github actions workflow for the test suite takes 40 minutes, how can i cache node_modules and the playwright browsers",
+    "should_trigger": false
+  },
+  {
+    "query": "set up eslint and prettier for the test repo with the same rules as the main app",
+    "should_trigger": false
+  },
+  {
+    "query": "compare playwright vs cypress vs selenium for a team that knows java, write a one page recommendation for my manager",
+    "should_trigger": false
+  },
+  {
+    "query": "mock the payment gateway in our nestjs unit tests for the order service — jest, we want to assert the gateway client was called with the right amount",
+    "should_trigger": false
+  }
+]
