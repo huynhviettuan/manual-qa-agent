@@ -86,10 +86,20 @@ export function checkDraftSet(
       // reviewer decides whether to sharpen it or send the story back.
       cases: out.value.cases.map((c) => ({
         ...DraftContent.parse(c),
-        reviewFlags: c.steps.flatMap((s, i) => {
-          const problem = unobservableExpectation(s.expected);
-          return problem ? [`step ${i + 1}: ${problem}`] : [];
-        }),
+        // Basis is derived, never claimed: any assumption makes the case assumption-based.
+        basis: c.assumptions.length > 0 ? ('assumption' as const) : ('specified' as const),
+        reviewFlags: [
+          ...c.steps.flatMap((s, i) => {
+            const problem = unobservableExpectation(s.expected);
+            return problem ? [`step ${i + 1}: ${problem}`] : [];
+          }),
+          ...(c.level === 'manual' && !c.manualReason.trim()
+            ? ['no reason given for keeping the case manual']
+            : []),
+          ...(c.level !== 'manual' && c.manualReason.trim()
+            ? [`manualReason given although level is ${c.level}`]
+            : []),
+        ],
       })),
       coverageGaps,
     },

@@ -166,13 +166,23 @@ describe('OpenAIResponsesDrafter via Responses API (mocked)', () => {
     priority: 'P1',
     preconditions: [],
     testData: [],
-    steps: [{ action: 'Fail login 5 times', expected: 'Locked 15 minutes', sourceRefs: ['AC-LOGIN@v2'] }],
+    steps: [
+      {
+        action: 'Fail login 5 times',
+        expected: 'Locked 15 minutes',
+        sourceRefs: ['AC-LOGIN@v2'],
+        testData: '',
+      },
+    ],
     assumptions: [],
     missingRequirements: [],
     requirementRefs: ['story:AC-LOGIN-04'],
     techniques: ['state_transition'],
     testTypes: ['negative'],
     testConditions: ['5 failed logins: locked'],
+    module: 'Sign-in',
+    level: 'api',
+    manualReason: '',
   };
   const set = (...cases: unknown[]) => ({ designNotes: [], cases });
 
@@ -182,7 +192,7 @@ describe('OpenAIResponsesDrafter via Responses API (mocked)', () => {
     expect(out).toMatchObject({
       ok: true,
       value: { cases: [{ title: 'Lockout' }], coverageGaps: [] },
-      meta: { model: 'gpt-test-draft', promptVersion: 'draft-v4' },
+      meta: { model: 'gpt-test-draft', promptVersion: 'draft-v5' },
     });
     const body = fetch.calls[0]!.body;
     expect(fetch.calls[0]!.endpoint).toBe('responses');

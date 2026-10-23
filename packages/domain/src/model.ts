@@ -84,18 +84,21 @@ export const TestType = z.enum([
 ]);
 export type TestType = z.infer<typeof TestType>;
 
+export const CaseLevel = z.enum(['api', 'ui', 'manual']);
+export type CaseLevel = z.infer<typeof CaseLevel>;
+
+const stepOutput = z.object({
+  action: z.string(),
+  expected: z.string(),
+  sourceRefs: z.array(z.string()),
+  /** The concrete values this step uses, naming the partition or boundary each represents. */
+  testData: z.string(),
+});
 const draftFields = {
   title: z.string(),
   priority: z.enum(['P0', 'P1', 'P2', 'P3']),
   preconditions: z.array(z.string()),
   testData: z.array(z.string()),
-  steps: z.array(
-    z.object({
-      action: z.string(),
-      expected: z.string(),
-      sourceRefs: z.array(z.string()),
-    }),
-  ),
   assumptions: z.array(z.string()),
   missingRequirements: z.array(z.string()),
 };
@@ -107,12 +110,25 @@ const designFields = {
   /** Conditions derived with the techniques: partitions, boundaries, rule columns, transitions. */
   testConditions: z.array(z.string()),
 };
+const managementFields = {
+  /** The product area the case belongs to, as the sources name it. */
+  module: z.string(),
+  /** Where it could run: through the API, in a browser, or only by hand. */
+  level: CaseLevel,
+  /** Why it stays manual (empty when `level` is not `manual`). */
+  manualReason: z.string(),
+};
 
 /**
  * What the model must emit for a draft (draft-v2 and later). Every field is required so it maps cleanly
  * onto provider structured-output schemas; business rules are checked in code (grounding.ts).
  */
-export const DraftOutput = z.object({ ...draftFields, ...designFields });
+export const DraftOutput = z.object({
+  ...draftFields,
+  steps: z.array(stepOutput),
+  ...designFields,
+  ...managementFields,
+});
 export type DraftOutput = z.infer<typeof DraftOutput>;
 
 /**
@@ -121,10 +137,22 @@ export type DraftOutput = z.infer<typeof DraftOutput>;
  */
 export const DraftContent = z.object({
   ...draftFields,
+  steps: z.array(stepOutput.extend({ testData: z.string().default('') })),
   requirementRefs: designFields.requirementRefs.default([]),
   techniques: designFields.techniques.default([]),
   testTypes: designFields.testTypes.default([]),
   testConditions: designFields.testConditions.default([]),
+  module: managementFields.module.default(''),
+  level: managementFields.level.default('manual'),
+  manualReason: managementFields.manualReason.default(''),
+  /** `specified` when every expected result follows from the cited sources; otherwise `assumption` (see `assumptions`). */
+  basis: z.enum(['specified', 'assumption']).default('specified'),
+  /** Review ids of the open questions this case depends on; until answered it checks today's behaviour. */
+  openQuestions: z.array(z.string()).default([]),
+  /** Other references: customer feedback, defects, the product's own test ids. */
+  refs: z.array(z.string()).default([]),
+  /** Part of the per-pull-request smoke set (a QA decision, never the model's). */
+  smoke: z.boolean().default(false),
   /** Problems found in code for the reviewer (for example an expected result that cannot be observed). */
   reviewFlags: z.array(z.string()).default([]),
 });

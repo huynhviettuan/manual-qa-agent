@@ -138,6 +138,8 @@ curl -s -X POST $API/api/manual-runs -H "x-api-key: $QA_KEY" -H "content-type: a
 
 The answer is `"status":"FAILED","failedStep":2`. Attach a screenshot with `POST /api/manual-runs/<id>/evidence` (`name`, `contentType`, `dataBase64`), read the history with `GET /api/test-cases/$CASE/manual-runs`, and when the case was part of a suite run, pass `suiteRunId` so the suite report shows the manual result beside the automated ones. The AI agent key cannot record results.
 
+The same stored cases feed `GET /api/coverage` (which requirements the cases cite, and the gaps), the tester workbook `GET /api/export/test-cases.csv` (the team's 20-column schema; execution columns only from recorded runs) and `GET /api/export/traceability.csv`. Open questions from clarification reviews are listed by `GET /api/questions`, where QA can record what the product does today ([ADR-0018](docs/adr/0018-manual-test-management.md)).
+
 ### 5. Triage a failing test
 
 Restart the demo app with a planted bug: its error message now reveals whether an account exists (`DEMO_BUG_1042=1`). Then run the "wrong password" test:

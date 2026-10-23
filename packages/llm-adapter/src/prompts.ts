@@ -2,7 +2,7 @@ import { redactSecrets, sourceRef, type EvidenceChunk } from '@qa/domain';
 import type { StoryInput, TriageFacts } from './types.ts';
 
 export const READINESS_PROMPT_VERSION = 'readiness-v1';
-export const DRAFT_PROMPT_VERSION = 'draft-v4';
+export const DRAFT_PROMPT_VERSION = 'draft-v5';
 
 // Stable system prompts (cacheable prefix). Volatile data goes only in the user message.
 const DATA_RULES = `The user message contains a single <untrusted_data> block holding a JSON object with a user story,
@@ -54,6 +54,12 @@ Put the refs of every acceptance criterion and source rule each case verifies in
 same formats as sourceRefs; across the set, every acceptance criterion is either verified by a case or named in
 missingRequirements. Priority by risk: P0 release-blocking, P1 major function or high risk, P2 normal, P3 minor.
 Each expected result must be specific and observable: an exact message, state, value or URL, never "works correctly".
+Give each step the concrete values it uses in testData, naming the partition or boundary each value represents
+("sessions = 1001, first value above the top tier"); use an empty string when a step needs none.
+Set module to the product area the sources name. Set level to "api" or "ui" when a black-box test could run the case
+through the API or a browser, and to "manual" when it cannot, with manualReason naming the obstacle (depends on
+today's date, two people in sequence, time passing, email or devices, human judgement of layout or wording); keep
+manualReason empty otherwise.
 Put anything you had to assume in "assumptions" and any requirement you could not find in "missingRequirements";
 never silently invent expected behaviour.`;
 

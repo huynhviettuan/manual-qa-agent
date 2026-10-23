@@ -497,6 +497,13 @@ ALTER TABLE evidence_artifacts ADD COLUMN manual_run_id text REFERENCES manual_r
 ALTER TABLE evidence_artifacts ADD CONSTRAINT evidence_one_owner CHECK ((run_id IS NULL) <> (manual_run_id IS NULL));
 `,
   },
+  {
+    id: '0007_question_register',
+    sql: /* sql */ `
+-- What the product does today for an open question (ADR-0018): observed by a person, never a requirement.
+ALTER TABLE review_tasks ADD COLUMN observed_behaviour text;
+`,
+  },
 ];
 
 export async function migrate(db: Db): Promise<string[]> {

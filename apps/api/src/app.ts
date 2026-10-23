@@ -39,6 +39,11 @@ import {
   DEFAULT_THRESHOLDS,
   getSuiteDetail,
   getSuiteRunReport,
+  getCoverage,
+  listQuestions,
+  recordObservation,
+  testCasesCsv,
+  traceabilityCsv,
   attachManualEvidence,
   getManualRunDetail,
   listManualRuns,
@@ -458,6 +463,38 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
   app.get('/api/suite-runs/:id', async (req) => {
     const { id } = IdParams.parse(req.params);
     return getSuiteRunReport(db, scope(req), id);
+  });
+
+  // ---------------------------------------------------------------- coverage, exports, questions (ADR-0018)
+
+  app.get('/api/coverage', async (req) => getCoverage(db, scope(req)));
+
+  const csv = (reply: FastifyReply, name: string, body: string) =>
+    reply
+      .header('content-type', 'text/csv; charset=utf-8')
+      .header('content-disposition', `attachment; filename="${name}"`)
+      .header('cache-control', 'no-store')
+      .send(body);
+
+  app.get('/api/export/test-cases.csv', async (req, reply) => {
+    const { suiteId } = z.object({ suiteId: z.string().min(1).max(100).optional() }).parse(req.query);
+    return csv(reply, 'test-cases.csv', await testCasesCsv(db, scope(req), { suiteId }));
+  });
+
+  app.get('/api/export/traceability.csv', async (req, reply) =>
+    csv(reply, 'traceability.csv', await traceabilityCsv(db, scope(req))),
+  );
+
+  app.get('/api/questions', async (req) => {
+    if (hasRole(req.actor, 'AI_AGENT'))
+      throw new DomainError('FORBIDDEN', 'the AI agent cannot read reviews');
+    return { items: await listQuestions(db, scope(req)) };
+  });
+
+  app.post('/api/reviews/:id/observation', async (req) => {
+    const { id } = IdParams.parse(req.params);
+    const { currentBehaviour } = z.object({ currentBehaviour: z.string().min(1).max(4000) }).parse(req.body);
+    return recordObservation(db, req.actor, id, currentBehaviour);
   });
 
   // ---------------------------------------------------------------- manual execution (ADR-0017)

@@ -154,6 +154,7 @@ describe('ClaudeProvider.generate (mocked API)', () => {
         action: 'Fail login 5 times',
         expected: 'Account locked for 15 minutes',
         sourceRefs: ['AC-LOGIN@v2'],
+        testData: 'five wrong passwords',
       },
     ],
     assumptions: [],
@@ -162,6 +163,9 @@ describe('ClaudeProvider.generate (mocked API)', () => {
     techniques: ['boundary_value_analysis', 'state_transition'],
     testTypes: ['negative', 'boundary'],
     testConditions: ['failed logins: 5 locks the account (boundary)'],
+    module: 'Sign-in',
+    level: 'ui',
+    manualReason: '',
   };
   /** The model answers a set (ADR-0016); most checks need only one case in it. */
   const set = (...cases: unknown[]) => ({ designNotes: ['boundary at 5 failures'], cases });

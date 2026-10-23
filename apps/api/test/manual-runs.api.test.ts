@@ -118,5 +118,31 @@ describe('manual runs over HTTP', () => {
 
     const history = await call('qa', 'GET', `/api/test-cases/${c.caseId}/manual-runs`);
     expect(history.body.items).toHaveLength(1);
+
+    // ADR-0018: coverage, the tester workbook and traceability come from the same stored cases.
+    const coverage = await call('qa', 'GET', '/api/coverage');
+    expect(coverage.body.totals).toMatchObject({ cases: 1, approvedCases: 1 });
+    const workbook = await app.inject({
+      method: 'GET',
+      url: '/api/export/test-cases.csv',
+      headers: { 'x-api-key': 'key-p-qa' },
+    });
+    expect(workbook.statusCode).toBe(200);
+    expect(workbook.headers['content-type']).toContain('text/csv');
+    expect(workbook.headers['content-disposition']).toContain('test-cases.csv');
+    expect(workbook.body).toContain('Lead with a duplicate phone');
+    expect(workbook.body).toContain('Fail');
+    expect(workbook.body).toContain('BUG-006');
+    const trace = await app.inject({
+      method: 'GET',
+      url: '/api/export/traceability.csv',
+      headers: { 'x-api-key': 'key-p-qa' },
+    });
+    expect(trace.body).toContain('AC-1@v1,1,1,');
+    expect((await call('agent', 'GET', '/api/questions')).status).toBe(403);
+    expect((await call('qa', 'GET', '/api/questions')).body.items).toEqual([]);
+    expect(
+      (await call('qa', 'POST', '/api/reviews/rev_none/observation', { currentBehaviour: 'x' })).status,
+    ).toBe(404);
   });
 });

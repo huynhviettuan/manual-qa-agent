@@ -79,6 +79,7 @@ export function heuristicDraft(payload: PromptPayload): DraftSetOutput {
             .flatMap((s) => s.content.split('\n'))
             .find((l) => MEASURABLE.test(l.replaceAll(ac.id, ''))) ?? ac.text,
         sourceRefs: support.length > 0 ? support.map((s) => s.ref) : [`story:${ac.id}`],
+        testData: '',
       };
     }),
     assumptions: [],
@@ -88,6 +89,9 @@ export function heuristicDraft(payload: PromptPayload): DraftSetOutput {
     techniques: ['specification_based'],
     testTypes: ['positive'],
     testConditions: acs.map((ac) => `${ac.id}: behaviour as stated`),
+    module: '',
+    level: 'manual',
+    manualReason: 'Automation not assessed by the keyless stand-in.',
   });
   const acs = story.acceptanceCriteria;
   return {

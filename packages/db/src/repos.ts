@@ -565,9 +565,12 @@ export type ReviewRow = {
   createdAt: Date;
   resolvedAt: Date | null;
   expiresAt: Date | null;
+  /** For questions: the product's current behaviour, observed by a person (ADR-0018). */
+  observedBehaviour: string | null;
 };
 
 const REVIEW_COLS = `id, workflow_id AS "workflowId", kind, subject_type AS "subjectType", subject_id AS "subjectId",
+  observed_behaviour AS "observedBehaviour",
   question, reason, source_refs AS "sourceRefs", risk, status, assigned_role AS "assignedRole",
   assignee_id AS "assigneeId", recommended_action AS "recommendedAction", model_suggestion AS "modelSuggestion",
   target_environment AS "targetEnvironment", proposed_action_hash AS "proposedActionHash",
@@ -576,8 +579,37 @@ const REVIEW_COLS = `id, workflow_id AS "workflowId", kind, subject_type AS "sub
 
 export type ReviewInsert = Omit<
   ReviewRow,
-  'id' | 'status' | 'assigneeId' | 'resolution' | 'resolvedBy' | 'createdAt' | 'resolvedAt'
+  | 'id'
+  | 'status'
+  | 'assigneeId'
+  | 'resolution'
+  | 'resolvedBy'
+  | 'createdAt'
+  | 'resolvedAt'
+  | 'observedBehaviour'
 >;
+
+export async function setReviewObservation(
+  db: Db,
+  scope: TenantScope,
+  id: string,
+  observedBehaviour: string,
+): Promise<ReviewRow> {
+  const rows = await db.query<ReviewRow>(
+    `UPDATE review_tasks SET observed_behaviour = $4 WHERE id = $1 AND tenant_id = $2 AND project_id = $3
+     RETURNING ${REVIEW_COLS}`,
+    [id, scope.tenantId, scope.projectId, observedBehaviour],
+  );
+  return rows[0]!;
+}
+
+export async function listReviewsByKind(db: Db, scope: TenantScope, kinds: string[]): Promise<ReviewRow[]> {
+  return db.query<ReviewRow>(
+    `SELECT ${REVIEW_COLS} FROM review_tasks WHERE tenant_id = $1 AND project_id = $2 AND kind = ANY($3::text[])
+      ORDER BY created_at ASC`,
+    [scope.tenantId, scope.projectId, kinds],
+  );
+}
 
 export async function insertReview(db: Db, scope: TenantScope, r: ReviewInsert): Promise<ReviewRow> {
   const rows = await db.query<ReviewRow>(

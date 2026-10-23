@@ -564,3 +564,6 @@ export * from './bugs.ts';
 export * from './metrics.ts';
 export * from './suites.ts';
 export * from './manual-runs.ts';
+export * from './coverage.ts';
+export * from './exports.ts';
+export * from './questions.ts';
