@@ -1,6 +1,7 @@
 import {
   auto,
   customerRow,
+  gymDate,
   main,
   manual,
   newContractForm,
@@ -312,7 +313,8 @@ const cases: SuiteCase[] = [
       { id: 'range-message', type: 'expectText', target: priceSection, text: RANGE },
     ],
   }),
-  manual({
+  // Automated with run-scoped dates (ADR-0015): the expected end dates are derived from the run day.
+  auto({
     id: 'CON-08',
     section: SK,
     priority: 'P1',
@@ -321,10 +323,30 @@ const cases: SuiteCase[] = [
     requirement: {
       id: 'BR-301',
       statement:
-        "A contract's end date is computed from the tier: PT 24 sessions ends 181 days after the start.",
+        "A contract's end date is computed from the tier: PT 24 sessions has 181 days of validity counting the start day (A-108), so the contract ends 180 days after its start; with no start date typed, the start is today.",
     },
-    steps: [['24 sessions starting today', 'End date = today + 181 days']],
-    why: WHY.date,
+    steps: [
+      ['New PT contract, 24 sessions, no start date typed', 'Ngày kết thúc = today + 180 days'],
+      ['Type a start date of today + 10', 'Ngày kết thúc = today + 190 days'],
+    ],
+    values: { start: gymDate(10), end_from_today: gymDate(180), end_from_start: gymDate(190) },
+    spec: [
+      ...signIn('manager'),
+      ...newContractForm('24'),
+      { id: 'end-from-today', type: 'expectText', target: priceSection, text: '{{end_from_today}}' },
+      {
+        id: 'start-date',
+        type: 'fill',
+        target: { by: 'label', label: 'Ngày bắt đầu', exact: true, within: serviceSection },
+        value: { var: 'start' },
+      },
+      {
+        id: 'leave-start-date',
+        type: 'click',
+        target: { by: 'role', role: 'heading', name: 'Giá hợp đồng', exact: true, within: main },
+      },
+      { id: 'end-from-start', type: 'expectText', target: priceSection, text: '{{end_from_start}}' },
+    ],
   }),
   manual({
     id: 'CON-09',

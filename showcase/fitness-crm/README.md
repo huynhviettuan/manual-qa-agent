@@ -36,4 +36,4 @@ The agent tested the Gym CRM sample (`D:\fitness-crm`, fictional *Demo Gym* data
 
 Each run creates a few leads in the instance. Sign-in is rate limited, so avoid running the showcase in a tight loop.
 
-SEC-01's spec was changed after the published run (it now asserts the "Không tìm thấy" heading instead of the ambiguous `main`); `results/` still shows the run before that change, where it was INCONCLUSIVE.
+Third run (2026-10-23, draft sets per story and run-scoped values): SEC-01 asserts the "Không tìm thấy" heading and passes; CON-08 is automated with derived dates (`values` in its spec). 131 automated: 130 passed, 1 failed (CON-07), identically in two suite runs.

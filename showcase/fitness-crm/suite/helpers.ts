@@ -33,7 +33,7 @@ export type SuiteCase = {
   requirement: { id: string; statement: string };
   preconditions: string[];
   steps: Array<{ action: string; expected: string }>;
-  spec?: { steps: Step[] };
+  spec?: { steps: Step[]; values?: Record<string, unknown> };
   manualReason?: string;
   /** Narrower wording a QA engineer submits if the agent asks for the story to be narrowed. */
   narrowedStatement?: string;
@@ -272,13 +272,20 @@ export function auto(
     pre?: string[];
     steps: Array<[string, string]>;
     spec: Step[];
+    /** Values derived once per run (today ± n days), referenced as `{ var }` or `{{name}}` (ADR-0015). */
+    values?: Record<string, unknown>;
   },
 ): SuiteCase {
-  const { pre, steps, spec, ...rest } = base;
+  const { pre, steps, spec, values, ...rest } = base;
   return {
     ...rest,
     preconditions: pre ?? [],
     steps: steps.map(([action, expected]) => ({ action, expected })),
-    spec: { steps: spec },
+    spec: values ? { steps: spec, values } : { steps: spec },
   };
 }
+
+/** A calendar date relative to the run day, as Gym CRM shows and accepts dates. */
+export const gymDate = (offsetDays: number) => ({
+  date: { offsetDays, format: 'dd/MM/yyyy', timeZone: 'Asia/Ho_Chi_Minh' },
+});

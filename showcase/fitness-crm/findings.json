@@ -54,11 +54,11 @@
     },
     {
       "title": "The not-found page has two main landmarks (SEC-01)",
-      "detail": "Opening a record id that does not exist renders one <main> nested inside another, both holding \"Không tìm thấy\". A page should have a single main landmark for assistive technology. The automated check came back INCONCLUSIVE because its strict locator refused to guess between them; asserting the \"Không tìm thấy\" heading instead would let it run.",
+      "detail": "Opening a record id that does not exist renders one <main> nested inside another, both holding \"Không tìm thấy\". A page should have a single main landmark for assistive technology. In the first two runs the automated check came back INCONCLUSIVE because its strict locator refused to guess between them; it now asserts the \"Không tìm thấy\" heading and passes, and the nested landmarks remain to be fixed.",
       "kind": "Accessibility"
     },
     {
-      "title": "128 of 130 automated checks pass, identically in two runs",
+      "title": "130 of 131 automated checks pass, identically in two runs (third run)",
       "detail": "Sign-in, every page of the permission matrix (60 checks across 30 pages and 6 roles, all matching docs/09), lead validation and boundaries, duplicates, search, customer standings, contract pricing boundaries, locked and derived contract values, finance access and API refusals behave as the requirements say.",
       "kind": "Confirmed"
     },

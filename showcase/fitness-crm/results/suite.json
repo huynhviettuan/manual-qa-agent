@@ -8,33 +8,100 @@
         {
           "technique": "Equivalence partitioning",
           "title": "Sign-in credentials",
-          "columns": ["Partition", "Example", "Expected", "Cases"],
+          "columns": [
+            "Partition",
+            "Example",
+            "Expected",
+            "Cases"
+          ],
           "rows": [
-            ["Valid email + correct password", "demo-manager + password", "Dashboard", "AUTH-01"],
-            ["Valid email + wrong password", "demo-manager + wrong", "Generic message", "AUTH-02"],
-            ["Unknown email", "nobody@…", "Same generic message", "AUTH-03"],
-            ["Disabled account", "disabled user", "Same generic message", "AUTH-08"],
-            ["Outside allowed hours", "restricted user", "Refused, logged", "AUTH-07"]
+            [
+              "Valid email + correct password",
+              "demo-manager + password",
+              "Dashboard",
+              "AUTH-01"
+            ],
+            [
+              "Valid email + wrong password",
+              "demo-manager + wrong",
+              "Generic message",
+              "AUTH-02"
+            ],
+            [
+              "Unknown email",
+              "nobody@…",
+              "Same generic message",
+              "AUTH-03"
+            ],
+            [
+              "Disabled account",
+              "disabled user",
+              "Same generic message",
+              "AUTH-08"
+            ],
+            [
+              "Outside allowed hours",
+              "restricted user",
+              "Refused, logged",
+              "AUTH-07"
+            ]
           ]
         },
         {
           "technique": "State transition",
           "title": "Session",
-          "columns": ["From", "Event", "To", "Cases"],
+          "columns": [
+            "From",
+            "Event",
+            "To",
+            "Cases"
+          ],
           "rows": [
-            ["Signed out", "Open a protected page", "Login page", "AUTH-04, AUTH-05"],
-            ["Signed out", "Valid sign-in", "Signed in (dashboard)", "AUTH-01"],
-            ["Signed in", "Đăng xuất", "Signed out", "AUTH-06"],
-            ["Signed in", "12 h without activity", "Signed out", "AUTH-11"]
+            [
+              "Signed out",
+              "Open a protected page",
+              "Login page",
+              "AUTH-04, AUTH-05"
+            ],
+            [
+              "Signed out",
+              "Valid sign-in",
+              "Signed in (dashboard)",
+              "AUTH-01"
+            ],
+            [
+              "Signed in",
+              "Đăng xuất",
+              "Signed out",
+              "AUTH-06"
+            ],
+            [
+              "Signed in",
+              "12 h without activity",
+              "Signed out",
+              "AUTH-11"
+            ]
           ]
         },
         {
           "technique": "Boundary value analysis",
           "title": "Sign-in rate limit (20 per 60 s per IP)",
-          "columns": ["Attempt in the window", "Expected", "Case"],
+          "columns": [
+            "Attempt in the window",
+            "Expected",
+            "Case"
+          ],
           "rows": [
-            ["20th", "Processed", "AUTH-10"],
-            ["21st", "HTTP 429", "AUTH-10"]
+            [
+              "20th",
+              "Processed",
+              "AUTH-10"
+            ],
+            [
+              "21st",
+              "HTTP 429",
+              "AUTH-10"
+            ]
           ]
         },
         {
@@ -48,22 +115,118 @@
             "Cases"
           ],
           "rows": [
-            ["/admin/users", "user.manage", "Admin", "Fitness Manager", "RBAC-01A/B"],
-            ["/admin/roles", "role.manage", "Admin", "Fitness Manager", "RBAC-02A/B"],
-            ["/admin/options", "config.manage", "Admin", "Fitness Manager", "RBAC-03A/B"],
-            ["/admin/parameters", "config.manage", "Admin", "Fitness Manager", "RBAC-04A/B"],
-            ["/admin/trash", "trash.view", "Admin", "Fitness Manager", "RBAC-05A/B"],
-            ["/admin/audit", "audit.view", "Admin", "Fitness Manager", "RBAC-06A/B"],
-            ["/admin/system", "system.view", "Admin", "Fitness Manager", "RBAC-07A/B"],
-            ["/admin/approvals", "approval.manage", "Admin", "Fitness Manager", "RBAC-08A/B"],
-            ["/admin/email-templates", "mail.template", "Admin", "Fitness Manager", "RBAC-09A/B"],
-            ["/admin/intake", "intake.manage", "Admin", "Fitness Manager", "RBAC-10A/B"],
-            ["/admin/promotions", "config.manage", "Admin", "Receptionist", "RBAC-11A/B"],
-            ["/admin/services", "service.view", "Receptionist", "PT", "RBAC-12A/B"],
-            ["/leads", "lead.view", "Receptionist", "PT", "RBAC-13A/B"],
-            ["/leads/audit", "lead.audit", "Fitness Manager", "Receptionist", "RBAC-14A/B"],
-            ["/leads/receivers", "lead.assign", "Fitness Manager", "Consulting", "RBAC-15A/B"],
-            ["/employees", "employee.view", "PT", "Receptionist", "RBAC-16A/B"],
+            [
+              "/admin/users",
+              "user.manage",
+              "Admin",
+              "Fitness Manager",
+              "RBAC-01A/B"
+            ],
+            [
+              "/admin/roles",
+              "role.manage",
+              "Admin",
+              "Fitness Manager",
+              "RBAC-02A/B"
+            ],
+            [
+              "/admin/options",
+              "config.manage",
+              "Admin",
+              "Fitness Manager",
+              "RBAC-03A/B"
+            ],
+            [
+              "/admin/parameters",
+              "config.manage",
+              "Admin",
+              "Fitness Manager",
+              "RBAC-04A/B"
+            ],
+            [
+              "/admin/trash",
+              "trash.view",
+              "Admin",
+              "Fitness Manager",
+              "RBAC-05A/B"
+            ],
+            [
+              "/admin/audit",
+              "audit.view",
+              "Admin",
+              "Fitness Manager",
+              "RBAC-06A/B"
+            ],
+            [
+              "/admin/system",
+              "system.view",
+              "Admin",
+              "Fitness Manager",
+              "RBAC-07A/B"
+            ],
+            [
+              "/admin/approvals",
+              "approval.manage",
+              "Admin",
+              "Fitness Manager",
+              "RBAC-08A/B"
+            ],
+            [
+              "/admin/email-templates",
+              "mail.template",
+              "Admin",
+              "Fitness Manager",
+              "RBAC-09A/B"
+            ],
+            [
+              "/admin/intake",
+              "intake.manage",
+              "Admin",
+              "Fitness Manager",
+              "RBAC-10A/B"
+            ],
+            [
+              "/admin/promotions",
+              "config.manage",
+              "Admin",
+              "Receptionist",
+              "RBAC-11A/B"
+            ],
+            [
+              "/admin/services",
+              "service.view",
+              "Receptionist",
+              "PT",
+              "RBAC-12A/B"
+            ],
+            [
+              "/leads",
+              "lead.view",
+              "Receptionist",
+              "PT",
+              "RBAC-13A/B"
+            ],
+            [
+              "/leads/audit",
+              "lead.audit",
+              "Fitness Manager",
+              "Receptionist",
+              "RBAC-14A/B"
+            ],
+            [
+              "/leads/receivers",
+              "lead.assign",
+              "Fitness Manager",
+              "Consulting",
+              "RBAC-15A/B"
+            ],
+            [
+              "/employees",
+              "employee.view",
+              "PT",
+              "Receptionist",
+              "RBAC-16A/B"
+            ],
             [
               "/reports/pt-revenue",
               "report.ptRevenue",
@@ -71,19 +234,97 @@
               "Receptionist",
               "RBAC-17A/B"
             ],
-            ["/reports/pt-payouts", "payout.view", "Kế toán (custom role)", "Receptionist", "RBAC-18A/B"],
-            ["/reports/bookings", "report.bookings", "Receptionist", "Consulting", "RBAC-19A/B"],
-            ["/reports/tasks", "report.tasks", "Fitness Manager", "Receptionist", "RBAC-20A/B"],
-            ["/reports/workouts", "report.workouts", "Fitness Manager", "PT", "RBAC-21A/B"],
-            ["/reports/lead-analysis", "report.leadAnalysis", "Fitness Manager", "Consulting", "RBAC-22A/B"],
-            ["/reports/consulting", "report.consulting", "Consulting", "Receptionist", "RBAC-23A/B"],
-            ["/reports/cash-book", "report.cashBook", "Kế toán (custom role)", "Receptionist", "RBAC-24A/B"],
-            ["/finance/cash", "cash.manage", "Kế toán (custom role)", "Receptionist", "RBAC-25A/B"],
-            ["/finance/payments", "payment.view", "Consulting", "PT", "RBAC-26A/B"],
-            ["/workouts/plans", "workout.view", "PT", "Receptionist", "RBAC-27A/B"],
-            ["/admin/workout-catalog", "workout.view", "PT", "Consulting", "RBAC-28A/B"],
-            ["/calendar", "booking.view", "PT", "Consulting", "RBAC-29A/B"],
-            ["/classes", "class.view", "Receptionist", "Consulting", "RBAC-30A/B"]
+            [
+              "/reports/pt-payouts",
+              "payout.view",
+              "Kế toán (custom role)",
+              "Receptionist",
+              "RBAC-18A/B"
+            ],
+            [
+              "/reports/bookings",
+              "report.bookings",
+              "Receptionist",
+              "Consulting",
+              "RBAC-19A/B"
+            ],
+            [
+              "/reports/tasks",
+              "report.tasks",
+              "Fitness Manager",
+              "Receptionist",
+              "RBAC-20A/B"
+            ],
+            [
+              "/reports/workouts",
+              "report.workouts",
+              "Fitness Manager",
+              "PT",
+              "RBAC-21A/B"
+            ],
+            [
+              "/reports/lead-analysis",
+              "report.leadAnalysis",
+              "Fitness Manager",
+              "Consulting",
+              "RBAC-22A/B"
+            ],
+            [
+              "/reports/consulting",
+              "report.consulting",
+              "Consulting",
+              "Receptionist",
+              "RBAC-23A/B"
+            ],
+            [
+              "/reports/cash-book",
+              "report.cashBook",
+              "Kế toán (custom role)",
+              "Receptionist",
+              "RBAC-24A/B"
+            ],
+            [
+              "/finance/cash",
+              "cash.manage",
+              "Kế toán (custom role)",
+              "Receptionist",
+              "RBAC-25A/B"
+            ],
+            [
+              "/finance/payments",
+              "payment.view",
+              "Consulting",
+              "PT",
+              "RBAC-26A/B"
+            ],
+            [
+              "/workouts/plans",
+              "workout.view",
+              "PT",
+              "Receptionist",
+              "RBAC-27A/B"
+            ],
+            [
+              "/admin/workout-catalog",
+              "workout.view",
+              "PT",
+              "Consulting",
+              "RBAC-28A/B"
+            ],
+            [
+              "/calendar",
+              "booking.view",
+              "PT",
+              "Consulting",
+              "RBAC-29A/B"
+            ],
+            [
+              "/classes",
+              "class.view",
+              "Receptionist",
+              "Consulting",
+              "RBAC-30A/B"
+            ]
           ]
         }
       ],
@@ -98,7 +339,9 @@
             "id": "BR-107",
             "statement": "A user with valid credentials signs in with email and password and lands on the dashboard \"Tổng quan\"."
           },
-          "preconditions": ["Demo manager account"],
+          "preconditions": [
+            "Demo manager account"
+          ],
           "steps": [
             {
               "action": "Sign in as the manager",
@@ -117,7 +360,9 @@
             "id": "BR-107",
             "statement": "A wrong password is refused with \"The email or password is wrong, or the account is disabled.\" and the user stays on /login."
           },
-          "preconditions": ["Demo manager account"],
+          "preconditions": [
+            "Demo manager account"
+          ],
           "steps": [
             {
               "action": "Sign in as the manager with a wrong password",
@@ -136,7 +381,9 @@
             "id": "BR-107",
             "statement": "Signing in with an email that has no account shows the same \"The email or password is wrong, or the account is disabled.\" message."
           },
-          "preconditions": ["No account for nobody@fitness-crm.test"],
+          "preconditions": [
+            "No account for nobody@fitness-crm.test"
+          ],
           "steps": [
             {
               "action": "Sign in as nobody@fitness-crm.test",
@@ -155,7 +402,9 @@
             "id": "AC-01",
             "statement": "A visitor who is not signed in and opens /dashboard by direct URL is sent to /login."
           },
-          "preconditions": ["Not signed in"],
+          "preconditions": [
+            "Not signed in"
+          ],
           "steps": [
             {
               "action": "Open /dashboard",
@@ -174,7 +423,9 @@
             "id": "AC-01",
             "statement": "A visitor who is not signed in and opens /contracts by direct URL is sent to /login."
           },
-          "preconditions": ["Not signed in"],
+          "preconditions": [
+            "Not signed in"
+          ],
           "steps": [
             {
               "action": "Open /contracts",
@@ -193,7 +444,9 @@
             "id": "BR-107",
             "statement": "After \"Đăng xuất\" from the account menu, opening /dashboard sends the user to /login."
           },
-          "preconditions": ["Signed in as the manager"],
+          "preconditions": [
+            "Signed in as the manager"
+          ],
           "steps": [
             {
               "action": "Account menu \"Tài khoản\" > \"Đăng xuất\"",
@@ -216,7 +469,9 @@
             "id": "BR-107",
             "statement": "Accounts can sign in only within their allowed hours and days."
           },
-          "preconditions": ["A user whose allowed hours exclude the current time"],
+          "preconditions": [
+            "A user whose allowed hours exclude the current time"
+          ],
           "steps": [
             {
               "action": "Sign in outside the allowed window",
@@ -240,7 +495,9 @@
             "id": "BR-107",
             "statement": "A disabled account is refused with the generic sign-in message."
           },
-          "preconditions": ["Admin disables a test user"],
+          "preconditions": [
+            "Admin disables a test user"
+          ],
           "steps": [
             {
               "action": "Sign in as the disabled user",
@@ -260,7 +517,9 @@
             "id": "BR-107",
             "statement": "Sign-ins are recorded with device and IP in the login history."
           },
-          "preconditions": ["Admin can open Users > a user > Login history"],
+          "preconditions": [
+            "Admin can open Users > a user > Login history"
+          ],
           "steps": [
             {
               "action": "Sign in once with a wrong and once with the right password",
@@ -280,7 +539,9 @@
             "id": "BR-107",
             "statement": "The sign-in endpoint allows 20 attempts per 60 seconds per IP; the 21st is refused."
           },
-          "preconditions": ["A clean rate-limit window"],
+          "preconditions": [
+            "A clean rate-limit window"
+          ],
           "steps": [
             {
               "action": "Make 20 sign-in attempts within a minute",
@@ -308,7 +569,9 @@
             "id": "BR-107",
             "statement": "A session lasts one working day (12 hours) without activity."
           },
-          "preconditions": ["Signed in"],
+          "preconditions": [
+            "Signed in"
+          ],
           "steps": [
             {
               "action": "Stay inactive for just under 12 hours",
@@ -332,7 +595,9 @@
             "id": "AC-01",
             "statement": "Users, roles, permissions: Admin only: Admin opens /admin/users (\"Người dùng\"); Fitness Manager sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Admin account"],
+          "preconditions": [
+            "Demo Admin account"
+          ],
           "steps": [
             {
               "action": "Sign in as Admin and open /admin/users",
@@ -351,7 +616,9 @@
             "id": "AC-01",
             "statement": "Users, roles, permissions: Admin only: Admin opens /admin/users (\"Người dùng\"); Fitness Manager sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Fitness Manager account"],
+          "preconditions": [
+            "Demo Fitness Manager account"
+          ],
           "steps": [
             {
               "action": "Sign in as Fitness Manager and open /admin/users directly",
@@ -370,7 +637,9 @@
             "id": "AC-01",
             "statement": "Users, roles, permissions: Admin only: Admin opens /admin/roles (\"Vai trò và phân quyền\"); Fitness Manager sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Admin account"],
+          "preconditions": [
+            "Demo Admin account"
+          ],
           "steps": [
             {
               "action": "Sign in as Admin and open /admin/roles",
@@ -389,7 +658,9 @@
             "id": "AC-01",
             "statement": "Users, roles, permissions: Admin only: Admin opens /admin/roles (\"Vai trò và phân quyền\"); Fitness Manager sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Fitness Manager account"],
+          "preconditions": [
+            "Demo Fitness Manager account"
+          ],
           "steps": [
             {
               "action": "Sign in as Fitness Manager and open /admin/roles directly",
@@ -408,7 +679,9 @@
             "id": "AC-01",
             "statement": "Configuration: Admin only: Admin opens /admin/options (\"Danh mục lựa chọn\"); Fitness Manager sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Admin account"],
+          "preconditions": [
+            "Demo Admin account"
+          ],
           "steps": [
             {
               "action": "Sign in as Admin and open /admin/options",
@@ -427,7 +700,9 @@
             "id": "AC-01",
             "statement": "Configuration: Admin only: Admin opens /admin/options (\"Danh mục lựa chọn\"); Fitness Manager sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Fitness Manager account"],
+          "preconditions": [
+            "Demo Fitness Manager account"
+          ],
           "steps": [
             {
               "action": "Sign in as Fitness Manager and open /admin/options directly",
@@ -446,7 +721,9 @@
             "id": "AC-01",
             "statement": "Configuration: Admin only: Admin opens /admin/parameters (\"Tham số hệ thống\"); Fitness Manager sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Admin account"],
+          "preconditions": [
+            "Demo Admin account"
+          ],
           "steps": [
             {
               "action": "Sign in as Admin and open /admin/parameters",
@@ -465,7 +742,9 @@
             "id": "AC-01",
             "statement": "Configuration: Admin only: Admin opens /admin/parameters (\"Tham số hệ thống\"); Fitness Manager sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Fitness Manager account"],
+          "preconditions": [
+            "Demo Fitness Manager account"
+          ],
           "steps": [
             {
               "action": "Sign in as Fitness Manager and open /admin/parameters directly",
@@ -484,7 +763,9 @@
             "id": "AC-01",
             "statement": "Trash: view, Admin only (AC-13): Admin opens /admin/trash (\"Thùng rác\"); Fitness Manager sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Admin account"],
+          "preconditions": [
+            "Demo Admin account"
+          ],
           "steps": [
             {
               "action": "Sign in as Admin and open /admin/trash",
@@ -503,7 +784,9 @@
             "id": "AC-01",
             "statement": "Trash: view, Admin only (AC-13): Admin opens /admin/trash (\"Thùng rác\"); Fitness Manager sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Fitness Manager account"],
+          "preconditions": [
+            "Demo Fitness Manager account"
+          ],
           "steps": [
             {
               "action": "Sign in as Fitness Manager and open /admin/trash directly",
@@ -522,7 +805,9 @@
             "id": "AC-01",
             "statement": "History: audit.view, Admin only: Admin opens /admin/audit (\"Lịch sử thao tác\"); Fitness Manager sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Admin account"],
+          "preconditions": [
+            "Demo Admin account"
+          ],
           "steps": [
             {
               "action": "Sign in as Admin and open /admin/audit",
@@ -541,7 +826,9 @@
             "id": "AC-01",
             "statement": "History: audit.view, Admin only: Admin opens /admin/audit (\"Lịch sử thao tác\"); Fitness Manager sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Fitness Manager account"],
+          "preconditions": [
+            "Demo Fitness Manager account"
+          ],
           "steps": [
             {
               "action": "Sign in as Fitness Manager and open /admin/audit directly",
@@ -560,7 +847,9 @@
             "id": "AC-01",
             "statement": "System status: Admin only: Admin opens /admin/system (\"Tình trạng hệ thống\"); Fitness Manager sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Admin account"],
+          "preconditions": [
+            "Demo Admin account"
+          ],
           "steps": [
             {
               "action": "Sign in as Admin and open /admin/system",
@@ -579,7 +868,9 @@
             "id": "AC-01",
             "statement": "System status: Admin only: Admin opens /admin/system (\"Tình trạng hệ thống\"); Fitness Manager sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Fitness Manager account"],
+          "preconditions": [
+            "Demo Fitness Manager account"
+          ],
           "steps": [
             {
               "action": "Sign in as Fitness Manager and open /admin/system directly",
@@ -598,7 +889,9 @@
             "id": "AC-01",
             "statement": "Approval matrix: Admin only: Admin opens /admin/approvals (\"Ma trận phê duyệt\"); Fitness Manager sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Admin account"],
+          "preconditions": [
+            "Demo Admin account"
+          ],
           "steps": [
             {
               "action": "Sign in as Admin and open /admin/approvals",
@@ -617,7 +910,9 @@
             "id": "AC-01",
             "statement": "Approval matrix: Admin only: Admin opens /admin/approvals (\"Ma trận phê duyệt\"); Fitness Manager sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Fitness Manager account"],
+          "preconditions": [
+            "Demo Fitness Manager account"
+          ],
           "steps": [
             {
               "action": "Sign in as Fitness Manager and open /admin/approvals directly",
@@ -636,7 +931,9 @@
             "id": "AC-01",
             "statement": "Email templates: Admin only: Admin opens /admin/email-templates (\"Mẫu email gửi khách\"); Fitness Manager sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Admin account"],
+          "preconditions": [
+            "Demo Admin account"
+          ],
           "steps": [
             {
               "action": "Sign in as Admin and open /admin/email-templates",
@@ -655,7 +952,9 @@
             "id": "AC-01",
             "statement": "Email templates: Admin only: Admin opens /admin/email-templates (\"Mẫu email gửi khách\"); Fitness Manager sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Fitness Manager account"],
+          "preconditions": [
+            "Demo Fitness Manager account"
+          ],
           "steps": [
             {
               "action": "Sign in as Fitness Manager and open /admin/email-templates directly",
@@ -674,7 +973,9 @@
             "id": "AC-01",
             "statement": "Lead sources: Admin only: Admin opens /admin/intake (\"Nguồn nhận lead\"); Fitness Manager sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Admin account"],
+          "preconditions": [
+            "Demo Admin account"
+          ],
           "steps": [
             {
               "action": "Sign in as Admin and open /admin/intake",
@@ -693,7 +994,9 @@
             "id": "AC-01",
             "statement": "Lead sources: Admin only: Admin opens /admin/intake (\"Nguồn nhận lead\"); Fitness Manager sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Fitness Manager account"],
+          "preconditions": [
+            "Demo Fitness Manager account"
+          ],
           "steps": [
             {
               "action": "Sign in as Fitness Manager and open /admin/intake directly",
@@ -712,7 +1015,9 @@
             "id": "AC-01",
             "statement": "Promotions: managed by Admin; reception has no page to manage them: Admin opens /admin/promotions (\"Khuyến mãi và voucher\"); Receptionist sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Admin account"],
+          "preconditions": [
+            "Demo Admin account"
+          ],
           "steps": [
             {
               "action": "Sign in as Admin and open /admin/promotions",
@@ -731,7 +1036,9 @@
             "id": "AC-01",
             "statement": "Promotions: managed by Admin; reception has no page to manage them: Admin opens /admin/promotions (\"Khuyến mãi và voucher\"); Receptionist sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Receptionist account"],
+          "preconditions": [
+            "Demo Receptionist account"
+          ],
           "steps": [
             {
               "action": "Sign in as Receptionist and open /admin/promotions directly",
@@ -750,7 +1057,9 @@
             "id": "AC-01",
             "statement": "Read services and price tiers: Admin, Fitness Manager, Consulting, Receptionist: Receptionist opens /admin/services (\"Dịch vụ và bậc giá\"); PT sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Receptionist account"],
+          "preconditions": [
+            "Demo Receptionist account"
+          ],
           "steps": [
             {
               "action": "Sign in as Receptionist and open /admin/services",
@@ -769,7 +1078,9 @@
             "id": "AC-01",
             "statement": "Read services and price tiers: Admin, Fitness Manager, Consulting, Receptionist: Receptionist opens /admin/services (\"Dịch vụ và bậc giá\"); PT sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo PT account"],
+          "preconditions": [
+            "Demo PT account"
+          ],
           "steps": [
             {
               "action": "Sign in as PT and open /admin/services directly",
@@ -788,7 +1099,9 @@
             "id": "AC-01",
             "statement": "Leads: view: Admin, Fitness Manager, Consulting (own), Receptionist: Receptionist opens /leads (\"Lead\"); PT sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Receptionist account"],
+          "preconditions": [
+            "Demo Receptionist account"
+          ],
           "steps": [
             {
               "action": "Sign in as Receptionist and open /leads",
@@ -807,7 +1120,9 @@
             "id": "AC-01",
             "statement": "Leads: view: Admin, Fitness Manager, Consulting (own), Receptionist: Receptionist opens /leads (\"Lead\"); PT sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo PT account"],
+          "preconditions": [
+            "Demo PT account"
+          ],
           "steps": [
             {
               "action": "Sign in as PT and open /leads directly",
@@ -826,7 +1141,9 @@
             "id": "AC-01",
             "statement": "Consulting audit: Admin, Fitness Manager: Fitness Manager opens /leads/audit (\"Audit tư vấn\"); Receptionist sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Fitness Manager account"],
+          "preconditions": [
+            "Demo Fitness Manager account"
+          ],
           "steps": [
             {
               "action": "Sign in as Fitness Manager and open /leads/audit",
@@ -845,7 +1162,9 @@
             "id": "AC-01",
             "statement": "Consulting audit: Admin, Fitness Manager: Fitness Manager opens /leads/audit (\"Audit tư vấn\"); Receptionist sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Receptionist account"],
+          "preconditions": [
+            "Demo Receptionist account"
+          ],
           "steps": [
             {
               "action": "Sign in as Receptionist and open /leads/audit directly",
@@ -864,7 +1183,9 @@
             "id": "AC-01",
             "statement": "Leads: reassign and receivers: Admin, Fitness Manager: Fitness Manager opens /leads/receivers (\"Nhận lead\"); Consulting sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Fitness Manager account"],
+          "preconditions": [
+            "Demo Fitness Manager account"
+          ],
           "steps": [
             {
               "action": "Sign in as Fitness Manager and open /leads/receivers",
@@ -883,7 +1204,9 @@
             "id": "AC-01",
             "statement": "Leads: reassign and receivers: Admin, Fitness Manager: Fitness Manager opens /leads/receivers (\"Nhận lead\"); Consulting sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Consulting account"],
+          "preconditions": [
+            "Demo Consulting account"
+          ],
           "steps": [
             {
               "action": "Sign in as Consulting and open /leads/receivers directly",
@@ -902,7 +1225,9 @@
             "id": "AC-01",
             "statement": "Employees and PT schedules: Admin, Fitness Manager, PT (own schedule): PT opens /employees (\"Nhân viên\"); Receptionist sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo PT account"],
+          "preconditions": [
+            "Demo PT account"
+          ],
           "steps": [
             {
               "action": "Sign in as PT and open /employees",
@@ -921,7 +1246,9 @@
             "id": "AC-01",
             "statement": "Employees and PT schedules: Admin, Fitness Manager, PT (own schedule): PT opens /employees (\"Nhân viên\"); Receptionist sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Receptionist account"],
+          "preconditions": [
+            "Demo Receptionist account"
+          ],
           "steps": [
             {
               "action": "Sign in as Receptionist and open /employees directly",
@@ -940,7 +1267,9 @@
             "id": "AC-01",
             "statement": "PT revenue: Admin, Fitness Manager, Accountant: Kế toán (custom role) opens /reports/pt-revenue (\"Doanh thu phân bổ PT\"); Receptionist sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Kế toán (custom role) account"],
+          "preconditions": [
+            "Demo Kế toán (custom role) account"
+          ],
           "steps": [
             {
               "action": "Sign in as Kế toán (custom role) and open /reports/pt-revenue",
@@ -959,7 +1288,9 @@
             "id": "AC-01",
             "statement": "PT revenue: Admin, Fitness Manager, Accountant: Kế toán (custom role) opens /reports/pt-revenue (\"Doanh thu phân bổ PT\"); Receptionist sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Receptionist account"],
+          "preconditions": [
+            "Demo Receptionist account"
+          ],
           "steps": [
             {
               "action": "Sign in as Receptionist and open /reports/pt-revenue directly",
@@ -978,7 +1309,9 @@
             "id": "AC-01",
             "statement": "PT payouts: Admin, Fitness Manager, Accountant: Kế toán (custom role) opens /reports/pt-payouts (\"Chi trả PT\"); Receptionist sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Kế toán (custom role) account"],
+          "preconditions": [
+            "Demo Kế toán (custom role) account"
+          ],
           "steps": [
             {
               "action": "Sign in as Kế toán (custom role) and open /reports/pt-payouts",
@@ -997,7 +1330,9 @@
             "id": "AC-01",
             "statement": "PT payouts: Admin, Fitness Manager, Accountant: Kế toán (custom role) opens /reports/pt-payouts (\"Chi trả PT\"); Receptionist sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Receptionist account"],
+          "preconditions": [
+            "Demo Receptionist account"
+          ],
           "steps": [
             {
               "action": "Sign in as Receptionist and open /reports/pt-payouts directly",
@@ -1016,7 +1351,9 @@
             "id": "AC-01",
             "statement": "Booking report: Admin, Fitness Manager, Receptionist: Receptionist opens /reports/bookings (\"Báo cáo booking\"); Consulting sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Receptionist account"],
+          "preconditions": [
+            "Demo Receptionist account"
+          ],
           "steps": [
             {
               "action": "Sign in as Receptionist and open /reports/bookings",
@@ -1035,7 +1372,9 @@
             "id": "AC-01",
             "statement": "Booking report: Admin, Fitness Manager, Receptionist: Receptionist opens /reports/bookings (\"Báo cáo booking\"); Consulting sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Consulting account"],
+          "preconditions": [
+            "Demo Consulting account"
+          ],
           "steps": [
             {
               "action": "Sign in as Consulting and open /reports/bookings directly",
@@ -1054,7 +1393,9 @@
             "id": "AC-01",
             "statement": "Tasks report: Admin, Fitness Manager: Fitness Manager opens /reports/tasks (\"Giao việc\"); Receptionist sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Fitness Manager account"],
+          "preconditions": [
+            "Demo Fitness Manager account"
+          ],
           "steps": [
             {
               "action": "Sign in as Fitness Manager and open /reports/tasks",
@@ -1073,7 +1414,9 @@
             "id": "AC-01",
             "statement": "Tasks report: Admin, Fitness Manager: Fitness Manager opens /reports/tasks (\"Giao việc\"); Receptionist sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Receptionist account"],
+          "preconditions": [
+            "Demo Receptionist account"
+          ],
           "steps": [
             {
               "action": "Sign in as Receptionist and open /reports/tasks directly",
@@ -1092,7 +1435,9 @@
             "id": "AC-01",
             "statement": "Workout dashboard: Admin, Fitness Manager, Master: Fitness Manager opens /reports/workouts (\"Dashboard giáo án theo tuần\"); PT sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Fitness Manager account"],
+          "preconditions": [
+            "Demo Fitness Manager account"
+          ],
           "steps": [
             {
               "action": "Sign in as Fitness Manager and open /reports/workouts",
@@ -1111,7 +1456,9 @@
             "id": "AC-01",
             "statement": "Workout dashboard: Admin, Fitness Manager, Master: Fitness Manager opens /reports/workouts (\"Dashboard giáo án theo tuần\"); PT sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo PT account"],
+          "preconditions": [
+            "Demo PT account"
+          ],
           "steps": [
             {
               "action": "Sign in as PT and open /reports/workouts directly",
@@ -1130,7 +1477,9 @@
             "id": "AC-01",
             "statement": "Lead analysis: refused to a consultant (A-093): Fitness Manager opens /reports/lead-analysis (\"Phân tích lead\"); Consulting sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Fitness Manager account"],
+          "preconditions": [
+            "Demo Fitness Manager account"
+          ],
           "steps": [
             {
               "action": "Sign in as Fitness Manager and open /reports/lead-analysis",
@@ -1149,7 +1498,9 @@
             "id": "AC-01",
             "statement": "Lead analysis: refused to a consultant (A-093): Fitness Manager opens /reports/lead-analysis (\"Phân tích lead\"); Consulting sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Consulting account"],
+          "preconditions": [
+            "Demo Consulting account"
+          ],
           "steps": [
             {
               "action": "Sign in as Consulting and open /reports/lead-analysis directly",
@@ -1168,7 +1519,9 @@
             "id": "AC-01",
             "statement": "Consulting dashboard: a consultant sees their own; a receptionist does not (A-093): Consulting opens /reports/consulting (\"Dashboard tư vấn\"); Receptionist sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Consulting account"],
+          "preconditions": [
+            "Demo Consulting account"
+          ],
           "steps": [
             {
               "action": "Sign in as Consulting and open /reports/consulting",
@@ -1187,7 +1540,9 @@
             "id": "AC-01",
             "statement": "Consulting dashboard: a consultant sees their own; a receptionist does not (A-093): Consulting opens /reports/consulting (\"Dashboard tư vấn\"); Receptionist sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Receptionist account"],
+          "preconditions": [
+            "Demo Receptionist account"
+          ],
           "steps": [
             {
               "action": "Sign in as Receptionist and open /reports/consulting directly",
@@ -1206,7 +1561,9 @@
             "id": "AC-01",
             "statement": "Cash book report: refused to a receptionist: Kế toán (custom role) opens /reports/cash-book (\"Sổ quỹ\"); Receptionist sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Kế toán (custom role) account"],
+          "preconditions": [
+            "Demo Kế toán (custom role) account"
+          ],
           "steps": [
             {
               "action": "Sign in as Kế toán (custom role) and open /reports/cash-book",
@@ -1225,7 +1582,9 @@
             "id": "AC-01",
             "statement": "Cash book report: refused to a receptionist: Kế toán (custom role) opens /reports/cash-book (\"Sổ quỹ\"); Receptionist sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Receptionist account"],
+          "preconditions": [
+            "Demo Receptionist account"
+          ],
           "steps": [
             {
               "action": "Sign in as Receptionist and open /reports/cash-book directly",
@@ -1244,7 +1603,9 @@
             "id": "AC-01",
             "statement": "Income and expenses: not for a receptionist: Kế toán (custom role) opens /finance/cash (\"Tài chính\"); Receptionist sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Kế toán (custom role) account"],
+          "preconditions": [
+            "Demo Kế toán (custom role) account"
+          ],
           "steps": [
             {
               "action": "Sign in as Kế toán (custom role) and open /finance/cash",
@@ -1263,7 +1624,9 @@
             "id": "AC-01",
             "statement": "Income and expenses: not for a receptionist: Kế toán (custom role) opens /finance/cash (\"Tài chính\"); Receptionist sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Receptionist account"],
+          "preconditions": [
+            "Demo Receptionist account"
+          ],
           "steps": [
             {
               "action": "Sign in as Receptionist and open /finance/cash directly",
@@ -1282,7 +1645,9 @@
             "id": "AC-01",
             "statement": "Receipts: Admin, Fitness Manager, Consulting, Receptionist: Consulting opens /finance/payments (\"Tài chính\"); PT sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Consulting account"],
+          "preconditions": [
+            "Demo Consulting account"
+          ],
           "steps": [
             {
               "action": "Sign in as Consulting and open /finance/payments",
@@ -1301,7 +1666,9 @@
             "id": "AC-01",
             "statement": "Receipts: Admin, Fitness Manager, Consulting, Receptionist: Consulting opens /finance/payments (\"Tài chính\"); PT sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo PT account"],
+          "preconditions": [
+            "Demo PT account"
+          ],
           "steps": [
             {
               "action": "Sign in as PT and open /finance/payments directly",
@@ -1320,7 +1687,9 @@
             "id": "AC-01",
             "statement": "Workout plans: Admin, Fitness Manager, Master, PT (own): PT opens /workouts/plans (\"Giáo án của khách\"); Receptionist sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo PT account"],
+          "preconditions": [
+            "Demo PT account"
+          ],
           "steps": [
             {
               "action": "Sign in as PT and open /workouts/plans",
@@ -1339,7 +1708,9 @@
             "id": "AC-01",
             "statement": "Workout plans: Admin, Fitness Manager, Master, PT (own): PT opens /workouts/plans (\"Giáo án của khách\"); Receptionist sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Receptionist account"],
+          "preconditions": [
+            "Demo Receptionist account"
+          ],
           "steps": [
             {
               "action": "Sign in as Receptionist and open /workouts/plans directly",
@@ -1358,7 +1729,9 @@
             "id": "AC-01",
             "statement": "Workout catalogs: read with workout.view: PT opens /admin/workout-catalog (\"Danh mục giáo án\"); Consulting sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo PT account"],
+          "preconditions": [
+            "Demo PT account"
+          ],
           "steps": [
             {
               "action": "Sign in as PT and open /admin/workout-catalog",
@@ -1377,7 +1750,9 @@
             "id": "AC-01",
             "statement": "Workout catalogs: read with workout.view: PT opens /admin/workout-catalog (\"Danh mục giáo án\"); Consulting sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Consulting account"],
+          "preconditions": [
+            "Demo Consulting account"
+          ],
           "steps": [
             {
               "action": "Sign in as Consulting and open /admin/workout-catalog directly",
@@ -1396,7 +1771,9 @@
             "id": "AC-01",
             "statement": "PT schedule: Admin, Fitness Manager, PT (own), Receptionist: PT opens /calendar (\"Lịch PT\"); Consulting sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo PT account"],
+          "preconditions": [
+            "Demo PT account"
+          ],
           "steps": [
             {
               "action": "Sign in as PT and open /calendar",
@@ -1415,7 +1792,9 @@
             "id": "AC-01",
             "statement": "PT schedule: Admin, Fitness Manager, PT (own), Receptionist: PT opens /calendar (\"Lịch PT\"); Consulting sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Consulting account"],
+          "preconditions": [
+            "Demo Consulting account"
+          ],
           "steps": [
             {
               "action": "Sign in as Consulting and open /calendar directly",
@@ -1434,7 +1813,9 @@
             "id": "AC-01",
             "statement": "Classes: everyone who has booking.view: Receptionist opens /classes (\"Lịch lớp\"); Consulting sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Receptionist account"],
+          "preconditions": [
+            "Demo Receptionist account"
+          ],
           "steps": [
             {
               "action": "Sign in as Receptionist and open /classes",
@@ -1453,7 +1834,9 @@
             "id": "AC-01",
             "statement": "Classes: everyone who has booking.view: Receptionist opens /classes (\"Lịch lớp\"); Consulting sees \"Bạn không có quyền xem trang này\"."
           },
-          "preconditions": ["Demo Consulting account"],
+          "preconditions": [
+            "Demo Consulting account"
+          ],
           "steps": [
             {
               "action": "Sign in as Consulting and open /classes directly",
@@ -1472,7 +1855,9 @@
             "id": "AC-01",
             "statement": "An account without permission for a module does not see its menu: a PT has no \"Tài chính\" entry."
           },
-          "preconditions": ["Demo PT account"],
+          "preconditions": [
+            "Demo PT account"
+          ],
           "steps": [
             {
               "action": "Sign in as the PT",
@@ -1491,7 +1876,9 @@
             "id": "AC-01",
             "statement": "A Fitness Manager, who has finance permissions, sees the menu entry \"Tài chính\"."
           },
-          "preconditions": ["Demo manager account"],
+          "preconditions": [
+            "Demo manager account"
+          ],
           "steps": [
             {
               "action": "Sign in as the manager",
@@ -1510,7 +1897,9 @@
             "id": "AC-01",
             "statement": "Reception reads services and prices but has no \"Thêm dịch vụ\" button."
           },
-          "preconditions": ["Demo receptionist account"],
+          "preconditions": [
+            "Demo receptionist account"
+          ],
           "steps": [
             {
               "action": "Open Services as the receptionist",
@@ -1529,7 +1918,9 @@
             "id": "AC-01",
             "statement": "An Admin sees the \"Thêm dịch vụ\" action on Services."
           },
-          "preconditions": ["Admin account"],
+          "preconditions": [
+            "Admin account"
+          ],
           "steps": [
             {
               "action": "Open Services as Admin",
@@ -1548,7 +1939,9 @@
             "id": "BR-101",
             "statement": "Data scope \"own\": a consultant sees leads added by them or in their charge; another consultant's lead says who has it, with no way in."
           },
-          "preconditions": ["Two consultants, each with a lead"],
+          "preconditions": [
+            "Two consultants, each with a lead"
+          ],
           "steps": [
             {
               "action": "Sign in as consultant A; open the lead list",
@@ -1572,7 +1965,9 @@
             "id": "AC-01",
             "statement": "A role with phone numbers hidden never sees them on any screen or export."
           },
-          "preconditions": ["A role with the customer phone field hidden (e.g. Marketing)"],
+          "preconditions": [
+            "A role with the customer phone field hidden (e.g. Marketing)"
+          ],
           "steps": [
             {
               "action": "Open customers and a customer as that role",
@@ -1596,7 +1991,9 @@
             "id": "FR-PLT-003",
             "statement": "Admin switches individual permissions on or off per user; the change applies immediately."
           },
-          "preconditions": ["Admin and a receptionist"],
+          "preconditions": [
+            "Admin and a receptionist"
+          ],
           "steps": [
             {
               "action": "Admin removes payment.view from the receptionist",
@@ -1616,7 +2013,9 @@
             "id": "BR-101",
             "statement": "Every business record belongs to a branch; a user sees and acts only in the branches granted to them."
           },
-          "preconditions": ["Two branches with data; a user granted one"],
+          "preconditions": [
+            "Two branches with data; a user granted one"
+          ],
           "steps": [
             {
               "action": "Open lists as that user",
@@ -1635,79 +2034,295 @@
         {
           "technique": "Equivalence partitioning",
           "title": "Lead name",
-          "columns": ["Partition", "Example", "Expected", "Case"],
+          "columns": [
+            "Partition",
+            "Example",
+            "Expected",
+            "Case"
+          ],
           "rows": [
-            ["Valid (1–150)", "\"QA LEAD-01\"", "Saved", "LEAD-01, LEAD-04, LEAD-05"],
-            ["Empty", "\"\"", "Bắt buộc nhập.", "LEAD-02"],
-            ["Spaces only", "\"   \"", "Bắt buộc nhập.", "LEAD-03"],
-            ["Too long (>150)", "151 × Q", "Quá dài.", "LEAD-06"],
-            ["Markup", "<b>…</b>", "Shown as text", "LEAD-27"],
-            ["Control characters", "\\u0007", "Có ký tự không hợp lệ.", "LEAD-28"]
+            [
+              "Valid (1–150)",
+              "\"QA LEAD-01\"",
+              "Saved",
+              "LEAD-01, LEAD-04, LEAD-05"
+            ],
+            [
+              "Empty",
+              "\"\"",
+              "Bắt buộc nhập.",
+              "LEAD-02"
+            ],
+            [
+              "Spaces only",
+              "\"   \"",
+              "Bắt buộc nhập.",
+              "LEAD-03"
+            ],
+            [
+              "Too long (>150)",
+              "151 × Q",
+              "Quá dài.",
+              "LEAD-06"
+            ],
+            [
+              "Markup",
+              "<b>…</b>",
+              "Shown as text",
+              "LEAD-27"
+            ],
+            [
+              "Control characters",
+              "\\u0007",
+              "Có ký tự không hợp lệ.",
+              "LEAD-28"
+            ]
           ]
         },
         {
           "technique": "Boundary value analysis",
           "title": "Lead name length (1–150) and phone digits (8–15)",
-          "columns": ["Field", "Value", "Expected", "Case"],
+          "columns": [
+            "Field",
+            "Value",
+            "Expected",
+            "Case"
+          ],
           "rows": [
-            ["Name", "0 chars", "Bắt buộc nhập.", "LEAD-02"],
-            ["Name", "1 char", "Accepted", "LEAD-04"],
-            ["Name", "150 chars", "Accepted", "LEAD-05"],
-            ["Name", "151 chars", "Quá dài.", "LEAD-06"],
-            ["Phone", "7 digits", "Số điện thoại không hợp lệ.", "LEAD-08"],
-            ["Phone", "8 digits", "Accepted", "LEAD-09"],
-            ["Phone", "15 digits", "Accepted", "LEAD-10"],
-            ["Phone", "16 digits", "Số điện thoại không hợp lệ.", "LEAD-11"]
+            [
+              "Name",
+              "0 chars",
+              "Bắt buộc nhập.",
+              "LEAD-02"
+            ],
+            [
+              "Name",
+              "1 char",
+              "Accepted",
+              "LEAD-04"
+            ],
+            [
+              "Name",
+              "150 chars",
+              "Accepted",
+              "LEAD-05"
+            ],
+            [
+              "Name",
+              "151 chars",
+              "Quá dài.",
+              "LEAD-06"
+            ],
+            [
+              "Phone",
+              "7 digits",
+              "Số điện thoại không hợp lệ.",
+              "LEAD-08"
+            ],
+            [
+              "Phone",
+              "8 digits",
+              "Accepted",
+              "LEAD-09"
+            ],
+            [
+              "Phone",
+              "15 digits",
+              "Accepted",
+              "LEAD-10"
+            ],
+            [
+              "Phone",
+              "16 digits",
+              "Số điện thoại không hợp lệ.",
+              "LEAD-11"
+            ]
           ]
         },
         {
           "technique": "Equivalence partitioning",
           "title": "Lead phone",
-          "columns": ["Partition", "Example", "Expected", "Case"],
+          "columns": [
+            "Partition",
+            "Example",
+            "Expected",
+            "Case"
+          ],
           "rows": [
-            ["Empty (optional)", "\"\"", "Saved", "LEAD-01"],
-            ["Digits only", "09123456", "Accepted", "LEAD-09"],
-            ["With spaces", "0912 345 678", "Normalized, accepted", "LEAD-13"],
-            ["International", "+84912345678", "Accepted", "LEAD-14"],
-            ["With letters", "09abc45678", "Invalid", "LEAD-12"],
-            ["Already a customer's", "0909123456", "Merge prompt", "LEAD-18"],
-            ["Already a lead's", "0901234508", "Merge prompt", "LEAD-19"]
+            [
+              "Empty (optional)",
+              "\"\"",
+              "Saved",
+              "LEAD-01"
+            ],
+            [
+              "Digits only",
+              "09123456",
+              "Accepted",
+              "LEAD-09"
+            ],
+            [
+              "With spaces",
+              "0912 345 678",
+              "Normalized, accepted",
+              "LEAD-13"
+            ],
+            [
+              "International",
+              "+84912345678",
+              "Accepted",
+              "LEAD-14"
+            ],
+            [
+              "With letters",
+              "09abc45678",
+              "Invalid",
+              "LEAD-12"
+            ],
+            [
+              "Already a customer's",
+              "0909123456",
+              "Merge prompt",
+              "LEAD-18"
+            ],
+            [
+              "Already a lead's",
+              "0901234508",
+              "Merge prompt",
+              "LEAD-19"
+            ]
           ]
         },
         {
           "technique": "Decision table",
           "title": "Channel \"Khác\" and the note (AC-04)",
-          "columns": ["Channel is \"Khác\"", "Note given", "Expected", "Case"],
+          "columns": [
+            "Channel is \"Khác\"",
+            "Note given",
+            "Expected",
+            "Case"
+          ],
           "rows": [
-            ["Yes", "No", "Refused: Đã chọn \"Khác\" thì phải ghi rõ.", "LEAD-15"],
-            ["Yes", "Yes", "Saved", "LEAD-16"],
-            ["No", "— (no field)", "Saved", "LEAD-17"],
-            ["None chosen", "—", "Bắt buộc nhập.", "LEAD-07"]
+            [
+              "Yes",
+              "No",
+              "Refused: Đã chọn \"Khác\" thì phải ghi rõ.",
+              "LEAD-15"
+            ],
+            [
+              "Yes",
+              "Yes",
+              "Saved",
+              "LEAD-16"
+            ],
+            [
+              "No",
+              "— (no field)",
+              "Saved",
+              "LEAD-17"
+            ],
+            [
+              "None chosen",
+              "—",
+              "Bắt buộc nhập.",
+              "LEAD-07"
+            ]
           ]
         },
         {
           "technique": "Decision table",
           "title": "Converting a lead at Show (BR-206)",
-          "columns": ["ID document", "Birth date", "Nationality", "Email", "Expected"],
+          "columns": [
+            "ID document",
+            "Birth date",
+            "Nationality",
+            "Email",
+            "Expected"
+          ],
           "rows": [
-            ["✓", "✓", "✓", "✓", "Converted, same ID"],
-            ["—", "✓", "✓", "✓", "Refused"],
-            ["✓", "—", "✓", "✓", "Refused"],
-            ["✓", "✓", "—", "✓", "Refused"],
-            ["✓", "✓", "✓", "—", "Refused"]
+            [
+              "✓",
+              "✓",
+              "✓",
+              "✓",
+              "Converted, same ID"
+            ],
+            [
+              "—",
+              "✓",
+              "✓",
+              "✓",
+              "Refused"
+            ],
+            [
+              "✓",
+              "—",
+              "✓",
+              "✓",
+              "Refused"
+            ],
+            [
+              "✓",
+              "✓",
+              "—",
+              "✓",
+              "Refused"
+            ],
+            [
+              "✓",
+              "✓",
+              "✓",
+              "—",
+              "Refused"
+            ]
           ]
         },
         {
           "technique": "State transition",
           "title": "Lead status (BR-204)",
-          "columns": ["From", "Event", "To", "Cases"],
+          "columns": [
+            "From",
+            "Event",
+            "To",
+            "Cases"
+          ],
           "rows": [
-            ["Mới", "Start consulting", "Đang tư vấn", "LEAD-34"],
-            ["Đang tư vấn", "Appointment", "Đã đặt lịch", "LEAD-34"],
-            ["Đã đặt lịch", "Came", "Show → customer", "LEAD-37"],
-            ["Đã đặt lịch", "Did not come", "No show → re-care", "LEAD-36"],
-            ["Any open", "Refused + reason", "Từ chối → re-care +15 days", "LEAD-35"],
-            ["Any open", "No answer", "Chưa phản hồi → re-care", "LEAD-36"]
+            [
+              "Mới",
+              "Start consulting",
+              "Đang tư vấn",
+              "LEAD-34"
+            ],
+            [
+              "Đang tư vấn",
+              "Appointment",
+              "Đã đặt lịch",
+              "LEAD-34"
+            ],
+            [
+              "Đã đặt lịch",
+              "Came",
+              "Show → customer",
+              "LEAD-37"
+            ],
+            [
+              "Đã đặt lịch",
+              "Did not come",
+              "No show → re-care",
+              "LEAD-36"
+            ],
+            [
+              "Any open",
+              "Refused + reason",
+              "Từ chối → re-care +15 days",
+              "LEAD-35"
+            ],
+            [
+              "Any open",
+              "No answer",
+              "Chưa phản hồi → re-care",
+              "LEAD-36"
+            ]
           ]
         }
       ],
@@ -1722,7 +2337,9 @@
             "id": "AC-25",
             "statement": "A lead needs only a name and a channel: name \"QA LEAD-01\" and channel \"Zalo\" save and open the new lead."
           },
-          "preconditions": ["Signed in as the manager"],
+          "preconditions": [
+            "Signed in as the manager"
+          ],
           "steps": [
             {
               "action": "Leads > \"Thêm lead\": name and channel Zalo only; save",
@@ -2049,7 +2666,9 @@
             "id": "BR-202",
             "statement": "A new lead with a customer's phone (0909123456, KH000001 Nguyễn Văn An) opens \"Số điện thoại đã có hồ sơ\" naming that record and offering \"Gộp vào hồ sơ này\"."
           },
-          "preconditions": ["Customer KH000001 Nguyễn Văn An, phone 0909123456"],
+          "preconditions": [
+            "Customer KH000001 Nguyễn Văn An, phone 0909123456"
+          ],
           "steps": [
             {
               "action": "Add a lead with phone 0909123456; save",
@@ -2068,7 +2687,9 @@
             "id": "BR-202",
             "statement": "A new lead with another lead's phone (0901234508, Tạ Thu Uyên) opens \"Số điện thoại đã có hồ sơ\" naming that lead."
           },
-          "preconditions": ["Lead Tạ Thu Uyên, phone 0901234508"],
+          "preconditions": [
+            "Lead Tạ Thu Uyên, phone 0901234508"
+          ],
           "steps": [
             {
               "action": "Add a lead with phone 0901234508; save",
@@ -2327,7 +2948,9 @@
             "id": "AC-26",
             "statement": "Leads are shared by turn weight; each move is in the history."
           },
-          "preconditions": ["A branch with two receiving consultants, weights 2 and 1"],
+          "preconditions": [
+            "A branch with two receiving consultants, weights 2 and 1"
+          ],
           "steps": [
             {
               "action": "Add three leads",
@@ -2598,62 +3221,206 @@
         {
           "technique": "Equivalence partitioning",
           "title": "Customer standing (BR-207, A-131)",
-          "columns": ["Partition", "Demo customer", "Expected badge", "Case"],
+          "columns": [
+            "Partition",
+            "Demo customer",
+            "Expected badge",
+            "Case"
+          ],
           "rows": [
-            ["A contract running", "Lê Minh Tuấn", "Đang tập", "CUS-01"],
-            ["Ends within 30 days", "Đinh Công Sơn (30 days)", "Sắp hết hạn", "CUS-02"],
-            ["All contracts ended", "Ngô Gia Bảo", "Hết hạn", "CUS-03"],
-            ["No approved contract (cancelled)", "Phan Thị Kim Ngân", "Chưa có hợp đồng", "CUS-04"],
-            ["Customer inactive", "Lý Thị Hoa", "Ngừng hoạt động", "CUS-05"]
+            [
+              "A contract running",
+              "Lê Minh Tuấn",
+              "Đang tập",
+              "CUS-01"
+            ],
+            [
+              "Ends within 30 days",
+              "Đinh Công Sơn (30 days)",
+              "Sắp hết hạn",
+              "CUS-02"
+            ],
+            [
+              "All contracts ended",
+              "Ngô Gia Bảo",
+              "Hết hạn",
+              "CUS-03"
+            ],
+            [
+              "No approved contract (cancelled)",
+              "Phan Thị Kim Ngân",
+              "Chưa có hợp đồng",
+              "CUS-04"
+            ],
+            [
+              "Customer inactive",
+              "Lý Thị Hoa",
+              "Ngừng hoạt động",
+              "CUS-05"
+            ]
           ]
         },
         {
           "technique": "Boundary value analysis",
           "title": "Sessions on a new contract (1–1000)",
-          "columns": ["Value", "Expected", "Case"],
+          "columns": [
+            "Value",
+            "Expected",
+            "Case"
+          ],
           "rows": [
-            ["0", "Refused on save: Nhập một số nguyên từ 1 đến 1000.", "CON-04"],
-            ["1", "PT 1 buổi, 500.000 ₫", "CON-01"],
-            ["24 (typical)", "PT 24 buổi, 12.000.000 ₫", "CON-02"],
-            ["1000", "PT 1000 buổi, 500.000.000 ₫", "CON-03"],
-            ["1001", "Refused on save; preview explains the range", "CON-05, CON-07"],
-            ["abc", "Refused on save", "CON-06"]
+            [
+              "0",
+              "Refused on save: Nhập một số nguyên từ 1 đến 1000.",
+              "CON-04"
+            ],
+            [
+              "1",
+              "PT 1 buổi, 500.000 ₫",
+              "CON-01"
+            ],
+            [
+              "24 (typical)",
+              "PT 24 buổi, 12.000.000 ₫",
+              "CON-02"
+            ],
+            [
+              "1000",
+              "PT 1000 buổi, 500.000.000 ₫",
+              "CON-03"
+            ],
+            [
+              "1001",
+              "Refused on save; preview explains the range",
+              "CON-05, CON-07"
+            ],
+            [
+              "abc",
+              "Refused on save",
+              "CON-06"
+            ]
           ]
         },
         {
           "technique": "Boundary value analysis",
           "title": "Expiring soon (30 days, A-131)",
-          "columns": ["Days to the end", "Expected", "Case"],
+          "columns": [
+            "Days to the end",
+            "Expected",
+            "Case"
+          ],
           "rows": [
-            ["31", "Đang tập", "CUS-06"],
-            ["30", "Sắp hết hạn", "CUS-02, CUS-06"],
-            ["−1", "Hết hạn", "CUS-06"]
+            [
+              "31",
+              "Đang tập",
+              "CUS-06"
+            ],
+            [
+              "30",
+              "Sắp hết hạn",
+              "CUS-02, CUS-06"
+            ],
+            [
+              "−1",
+              "Hết hạn",
+              "CUS-06"
+            ]
           ]
         },
         {
           "technique": "State transition",
           "title": "Contract status",
-          "columns": ["From", "Event", "To", "Cases"],
+          "columns": [
+            "From",
+            "Event",
+            "To",
+            "Cases"
+          ],
           "rows": [
-            ["—", "Create", "Chờ duyệt (editable)", "CON-19"],
-            ["Chờ duyệt", "Approved by another person", "Đang hiệu lực (locked)", "CON-12, CON-19"],
-            ["Chờ duyệt", "Rejected with reason", "Đã từ chối", "CON-20"],
-            ["Đang hiệu lực", "Unapprove (no receipts/sessions)", "Chờ duyệt", "CON-21"],
-            ["Đang hiệu lực", "Deactivate with reason", "Tạm vô hiệu", "CON-23"],
-            ["Tạm vô hiệu", "Reactivate (admin confirms)", "Đang hiệu lực, end + frozen days once", "CON-23"],
-            ["Đang hiệu lực", "End date passes", "Hết hạn", "CON-13"],
-            ["Đang hiệu lực", "Cancellation approved", "Đã hủy", "CON-14, CON-27"]
+            [
+              "—",
+              "Create",
+              "Chờ duyệt (editable)",
+              "CON-19"
+            ],
+            [
+              "Chờ duyệt",
+              "Approved by another person",
+              "Đang hiệu lực (locked)",
+              "CON-12, CON-19"
+            ],
+            [
+              "Chờ duyệt",
+              "Rejected with reason",
+              "Đã từ chối",
+              "CON-20"
+            ],
+            [
+              "Đang hiệu lực",
+              "Unapprove (no receipts/sessions)",
+              "Chờ duyệt",
+              "CON-21"
+            ],
+            [
+              "Đang hiệu lực",
+              "Deactivate with reason",
+              "Tạm vô hiệu",
+              "CON-23"
+            ],
+            [
+              "Tạm vô hiệu",
+              "Reactivate (admin confirms)",
+              "Đang hiệu lực, end + frozen days once",
+              "CON-23"
+            ],
+            [
+              "Đang hiệu lực",
+              "End date passes",
+              "Hết hạn",
+              "CON-13"
+            ],
+            [
+              "Đang hiệu lực",
+              "Cancellation approved",
+              "Đã hủy",
+              "CON-14, CON-27"
+            ]
           ]
         },
         {
           "technique": "Decision table",
           "title": "Deleting a contract (BR-306)",
-          "columns": ["Has receipts", "Has sessions", "Has change vouchers", "Expected"],
+          "columns": [
+            "Has receipts",
+            "Has sessions",
+            "Has change vouchers",
+            "Expected"
+          ],
           "rows": [
-            ["No", "No", "No", "Deleted to the trash with reason (Admin approval)"],
-            ["Yes", "—", "—", "Blocked; receipts listed"],
-            ["—", "Yes", "—", "Blocked"],
-            ["—", "—", "Yes", "Blocked"]
+            [
+              "No",
+              "No",
+              "No",
+              "Deleted to the trash with reason (Admin approval)"
+            ],
+            [
+              "Yes",
+              "—",
+              "—",
+              "Blocked; receipts listed"
+            ],
+            [
+              "—",
+              "Yes",
+              "—",
+              "Blocked"
+            ],
+            [
+              "—",
+              "—",
+              "Yes",
+              "Blocked"
+            ]
           ]
         }
       ],
@@ -2668,7 +3435,9 @@
             "id": "BR-207",
             "statement": "Customer status is derived from contracts: Lê Minh Tuấn (a contract running) shows \"Đang tập\" in the customer list."
           },
-          "preconditions": ["Lê Minh Tuấn in the demo data: a contract running"],
+          "preconditions": [
+            "Lê Minh Tuấn in the demo data: a contract running"
+          ],
           "steps": [
             {
               "action": "Open Customers",
@@ -2687,7 +3456,9 @@
             "id": "BR-207",
             "statement": "Customer status is derived from contracts: Đinh Công Sơn (the longest contract ends in exactly 30 days) shows \"Sắp hết hạn\" in the customer list."
           },
-          "preconditions": ["Đinh Công Sơn in the demo data: the longest contract ends in exactly 30 days"],
+          "preconditions": [
+            "Đinh Công Sơn in the demo data: the longest contract ends in exactly 30 days"
+          ],
           "steps": [
             {
               "action": "Open Customers",
@@ -2706,7 +3477,9 @@
             "id": "BR-207",
             "statement": "Customer status is derived from contracts: Ngô Gia Bảo (every contract has ended) shows \"Hết hạn\" in the customer list."
           },
-          "preconditions": ["Ngô Gia Bảo in the demo data: every contract has ended"],
+          "preconditions": [
+            "Ngô Gia Bảo in the demo data: every contract has ended"
+          ],
           "steps": [
             {
               "action": "Open Customers",
@@ -2725,7 +3498,9 @@
             "id": "BR-207",
             "statement": "Customer status is derived from contracts: Phan Thị Kim Ngân (the only contract was cancelled) shows \"Chưa có hợp đồng\" in the customer list."
           },
-          "preconditions": ["Phan Thị Kim Ngân in the demo data: the only contract was cancelled"],
+          "preconditions": [
+            "Phan Thị Kim Ngân in the demo data: the only contract was cancelled"
+          ],
           "steps": [
             {
               "action": "Open Customers",
@@ -2744,7 +3519,9 @@
             "id": "BR-207",
             "statement": "Customer status is derived from contracts: Lý Thị Hoa (customer set inactive) shows \"Ngừng hoạt động\" in the customer list."
           },
-          "preconditions": ["Lý Thị Hoa in the demo data: customer set inactive"],
+          "preconditions": [
+            "Lý Thị Hoa in the demo data: customer set inactive"
+          ],
           "steps": [
             {
               "action": "Open Customers",
@@ -2999,7 +3776,9 @@
             "id": "AC-10",
             "statement": "Entering 1 sessions of PT (tier 500.000 ₫ per session) gives the name \"PT 1 buổi\" and the total 500.000 ₫."
           },
-          "preconditions": ["Signed in as the manager; customer Phan Thị Kim Ngân has no running contract"],
+          "preconditions": [
+            "Signed in as the manager; customer Phan Thị Kim Ngân has no running contract"
+          ],
           "steps": [
             {
               "action": "New contract, service PT, 1 sessions",
@@ -3018,7 +3797,9 @@
             "id": "AC-10",
             "statement": "Entering 24 sessions of PT (tier 500.000 ₫ per session) gives the name \"PT 24 buổi\" and the total 12.000.000 ₫."
           },
-          "preconditions": ["Signed in as the manager; customer Phan Thị Kim Ngân has no running contract"],
+          "preconditions": [
+            "Signed in as the manager; customer Phan Thị Kim Ngân has no running contract"
+          ],
           "steps": [
             {
               "action": "New contract, service PT, 24 sessions",
@@ -3037,7 +3818,9 @@
             "id": "AC-10",
             "statement": "Entering 1000 sessions of PT (tier 500.000 ₫ per session) gives the name \"PT 1000 buổi\" and the total 500.000.000 ₫."
           },
-          "preconditions": ["Signed in as the manager; customer Phan Thị Kim Ngân has no running contract"],
+          "preconditions": [
+            "Signed in as the manager; customer Phan Thị Kim Ngân has no running contract"
+          ],
           "steps": [
             {
               "action": "New contract, service PT, 1000 sessions",
@@ -3130,17 +3913,20 @@
           "title": "The end date is the start plus the tier's validity",
           "requirement": {
             "id": "BR-301",
-            "statement": "A contract's end date is computed from the tier: PT 24 sessions ends 181 days after the start."
+            "statement": "A contract's end date is computed from the tier: PT 24 sessions has 181 days of validity counting the start day (A-108), so the contract ends 180 days after its start; with no start date typed, the start is today."
           },
           "preconditions": [],
           "steps": [
             {
-              "action": "24 sessions starting today",
-              "expected": "End date = today + 181 days"
+              "action": "New PT contract, 24 sessions, no start date typed",
+              "expected": "Ngày kết thúc = today + 180 days"
+            },
+            {
+              "action": "Type a start date of today + 10",
+              "expected": "Ngày kết thúc = today + 190 days"
             }
           ],
-          "manualReason": "Expected values depend on today's date; needs date-relative inputs and assertions in the executor.",
-          "automated": false
+          "automated": true
         },
         {
           "id": "CON-09",
@@ -3224,7 +4010,9 @@
             "id": "BR-305",
             "statement": "An approved contract \"Đang hiệu lực\" is never edited: its page has no \"Sửa hợp đồng\"."
           },
-          "preconditions": ["HD000007 approved and active"],
+          "preconditions": [
+            "HD000007 approved and active"
+          ],
           "steps": [
             {
               "action": "Open HD000007",
@@ -3632,46 +4420,212 @@
             "Case"
           ],
           "rows": [
-            ["Y", "Y", "Y", "Y", "Y", "Y", "Y", "Booked", "BKG-01"],
-            ["N", "—", "—", "—", "—", "—", "—", "Không ở trạng thái hiệu lực", "BKG-02"],
-            ["Y (expired)", "—", "—", "N", "—", "—", "—", "Không ở trạng thái hiệu lực", "BKG-03"],
-            ["Y (cancelled)", "—", "—", "—", "—", "—", "—", "Không ở trạng thái hiệu lực", "BKG-04"],
-            ["Y", "N (frozen)", "—", "—", "—", "—", "—", "Hợp đồng đang bị khóa", "BKG-05"],
-            ["Y", "Y", "N", "—", "—", "—", "—", "Không còn buổi tập", "BKG-06"],
-            ["Y", "Y", "Y", "N", "—", "—", "—", "Ngoài thời hạn", "BKG-07"],
-            ["Y", "Y", "Y", "Y", "N", "—", "—", "Ngoài khung giờ", "BKG-08"],
-            ["Y", "Y", "Y", "Y", "Y", "N", "—", "Huấn luyện viên trùng giờ", "BKG-10"],
-            ["Y", "Y", "Y", "Y", "Y", "Y", "N", "Khách trùng giờ", "BKG-11"]
+            [
+              "Y",
+              "Y",
+              "Y",
+              "Y",
+              "Y",
+              "Y",
+              "Y",
+              "Booked",
+              "BKG-01"
+            ],
+            [
+              "N",
+              "—",
+              "—",
+              "—",
+              "—",
+              "—",
+              "—",
+              "Không ở trạng thái hiệu lực",
+              "BKG-02"
+            ],
+            [
+              "Y (expired)",
+              "—",
+              "—",
+              "N",
+              "—",
+              "—",
+              "—",
+              "Không ở trạng thái hiệu lực",
+              "BKG-03"
+            ],
+            [
+              "Y (cancelled)",
+              "—",
+              "—",
+              "—",
+              "—",
+              "—",
+              "—",
+              "Không ở trạng thái hiệu lực",
+              "BKG-04"
+            ],
+            [
+              "Y",
+              "N (frozen)",
+              "—",
+              "—",
+              "—",
+              "—",
+              "—",
+              "Hợp đồng đang bị khóa",
+              "BKG-05"
+            ],
+            [
+              "Y",
+              "Y",
+              "N",
+              "—",
+              "—",
+              "—",
+              "—",
+              "Không còn buổi tập",
+              "BKG-06"
+            ],
+            [
+              "Y",
+              "Y",
+              "Y",
+              "N",
+              "—",
+              "—",
+              "—",
+              "Ngoài thời hạn",
+              "BKG-07"
+            ],
+            [
+              "Y",
+              "Y",
+              "Y",
+              "Y",
+              "N",
+              "—",
+              "—",
+              "Ngoài khung giờ",
+              "BKG-08"
+            ],
+            [
+              "Y",
+              "Y",
+              "Y",
+              "Y",
+              "Y",
+              "N",
+              "—",
+              "Huấn luyện viên trùng giờ",
+              "BKG-10"
+            ],
+            [
+              "Y",
+              "Y",
+              "Y",
+              "Y",
+              "Y",
+              "Y",
+              "N",
+              "Khách trùng giờ",
+              "BKG-11"
+            ]
           ]
         },
         {
           "technique": "Decision table",
           "title": "Session status rules (BR-404)",
-          "columns": ["Status", "Consumes a session", "Credits the PT", "Case"],
+          "columns": [
+            "Status",
+            "Consumes a session",
+            "Credits the PT",
+            "Case"
+          ],
           "rows": [
-            ["Đã tập", "Yes", "Yes", "SES-02"],
-            ["Khách không đến", "Yes", "Yes", "SES-03"],
-            ["Hủy lịch", "No", "No", "SES-04"],
-            ["Deleted", "No (refunded)", "No (credit removed)", "SES-07"],
-            ["Burn Show", "Yes", "Yes", "SES-09"]
+            [
+              "Đã tập",
+              "Yes",
+              "Yes",
+              "SES-02"
+            ],
+            [
+              "Khách không đến",
+              "Yes",
+              "Yes",
+              "SES-03"
+            ],
+            [
+              "Hủy lịch",
+              "No",
+              "No",
+              "SES-04"
+            ],
+            [
+              "Deleted",
+              "No (refunded)",
+              "No (credit removed)",
+              "SES-07"
+            ],
+            [
+              "Burn Show",
+              "Yes",
+              "Yes",
+              "SES-09"
+            ]
           ]
         },
         {
           "technique": "State transition",
           "title": "Session",
-          "columns": ["From", "Event", "To", "Cases"],
+          "columns": [
+            "From",
+            "Event",
+            "To",
+            "Cases"
+          ],
           "rows": [
-            ["—", "Book", "Booked (nothing consumed)", "SES-01"],
-            ["Booked", "Check-in pair", "Đã tập", "CHK-01"],
-            ["Booked", "Mark", "Đã tập / Khách không đến / Hủy lịch", "SES-02..04"],
-            ["Đã tập", "Any change", "Refused (final)", "SES-05"],
-            ["Đã tập", "Admin delete with reason", "Deleted, refunded", "SES-07"]
+            [
+              "—",
+              "Book",
+              "Booked (nothing consumed)",
+              "SES-01"
+            ],
+            [
+              "Booked",
+              "Check-in pair",
+              "Đã tập",
+              "CHK-01"
+            ],
+            [
+              "Booked",
+              "Mark",
+              "Đã tập / Khách không đến / Hủy lịch",
+              "SES-02..04"
+            ],
+            [
+              "Đã tập",
+              "Any change",
+              "Refused (final)",
+              "SES-05"
+            ],
+            [
+              "Đã tập",
+              "Admin delete with reason",
+              "Deleted, refunded",
+              "SES-07"
+            ]
           ]
         },
         {
           "technique": "Boundary value analysis",
           "title": "Time boundaries",
-          "columns": ["Rule", "Below", "At", "Above", "Cases"],
+          "columns": [
+            "Rule",
+            "Below",
+            "At",
+            "Above",
+            "Cases"
+          ],
           "rows": [
             [
               "Overlap (same PT)",
@@ -3680,9 +4634,27 @@
               "17:30 start refused",
               "BKG-12"
             ],
-            ["End after start", "end < start refused", "end = start refused", "end > start OK", "BKG-13"],
-            ["Scan pairing window", "14 min paired", "15 min paired", "16 min not paired", "CHK-01"],
-            ["Class capacity 10", "9 → enroll OK", "10 → full", "11th refused", "CLS-01"]
+            [
+              "End after start",
+              "end < start refused",
+              "end = start refused",
+              "end > start OK",
+              "BKG-13"
+            ],
+            [
+              "Scan pairing window",
+              "14 min paired",
+              "15 min paired",
+              "16 min not paired",
+              "CHK-01"
+            ],
+            [
+              "Class capacity 10",
+              "9 → enroll OK",
+              "10 → full",
+              "11th refused",
+              "CLS-01"
+            ]
           ]
         }
       ],
@@ -3697,7 +4669,9 @@
             "id": "BR-402",
             "statement": "A booking on an approved, active contract with sessions left, within its dates and the service hours, is created."
           },
-          "preconditions": ["An active contract with sessions left"],
+          "preconditions": [
+            "An active contract with sessions left"
+          ],
           "steps": [
             {
               "action": "Book a free cell within the contract dates",
@@ -3717,7 +4691,9 @@
             "id": "BR-402",
             "statement": "A booking requires an approved, active contract with sessions left, not expired and not frozen, inside the service's hours: a contract still \"Chờ duyệt\" is refused with \"Hợp đồng không ở trạng thái hiệu lực (đang nháp, đã hủy hoặc đã hết hạn).\""
           },
-          "preconditions": ["a contract still \"Chờ duyệt\""],
+          "preconditions": [
+            "a contract still \"Chờ duyệt\""
+          ],
           "steps": [
             {
               "action": "PT calendar: book a session on it",
@@ -3737,7 +4713,9 @@
             "id": "BR-402",
             "statement": "A booking requires an approved, active contract with sessions left, not expired and not frozen, inside the service's hours: an expired contract (HD000009) is refused with \"Hợp đồng không ở trạng thái hiệu lực (đang nháp, đã hủy hoặc đã hết hạn).\""
           },
-          "preconditions": ["an expired contract (HD000009)"],
+          "preconditions": [
+            "an expired contract (HD000009)"
+          ],
           "steps": [
             {
               "action": "PT calendar: book a session on it",
@@ -3757,7 +4735,9 @@
             "id": "BR-402",
             "statement": "A booking requires an approved, active contract with sessions left, not expired and not frozen, inside the service's hours: a cancelled contract (HD000010) is refused with \"Hợp đồng không ở trạng thái hiệu lực (đang nháp, đã hủy hoặc đã hết hạn).\""
           },
-          "preconditions": ["a cancelled contract (HD000010)"],
+          "preconditions": [
+            "a cancelled contract (HD000010)"
+          ],
           "steps": [
             {
               "action": "PT calendar: book a session on it",
@@ -3777,7 +4757,9 @@
             "id": "BR-402",
             "statement": "A booking requires an approved, active contract with sessions left, not expired and not frozen, inside the service's hours: a contract \"Tạm vô hiệu\" is refused with \"Hợp đồng đang bị khóa. Hãy kích hoạt lại trước.\""
           },
-          "preconditions": ["a contract \"Tạm vô hiệu\""],
+          "preconditions": [
+            "a contract \"Tạm vô hiệu\""
+          ],
           "steps": [
             {
               "action": "PT calendar: book a session on it",
@@ -3797,7 +4779,9 @@
             "id": "BR-402",
             "statement": "A booking requires an approved, active contract with sessions left, not expired and not frozen, inside the service's hours: a contract with 0 sessions left is refused with \"Hợp đồng không còn buổi tập nào khả dụng.\""
           },
-          "preconditions": ["a contract with 0 sessions left"],
+          "preconditions": [
+            "a contract with 0 sessions left"
+          ],
           "steps": [
             {
               "action": "PT calendar: book a session on it",
@@ -3817,7 +4801,9 @@
             "id": "BR-402",
             "statement": "A booking requires an approved, active contract with sessions left, not expired and not frozen, inside the service's hours: a date after the contract's end date is refused with \"Ngày tập nằm ngoài thời hạn của hợp đồng.\""
           },
-          "preconditions": ["a date after the contract's end date"],
+          "preconditions": [
+            "a date after the contract's end date"
+          ],
           "steps": [
             {
               "action": "PT calendar: book a session on it",
@@ -3837,7 +4823,9 @@
             "id": "BR-402",
             "statement": "A booking requires an approved, active contract with sessions left, not expired and not frozen, inside the service's hours: a time outside the service's allowed hours is refused with \"Giờ này nằm ngoài khung giờ được dùng dịch vụ.\""
           },
-          "preconditions": ["a time outside the service's allowed hours"],
+          "preconditions": [
+            "a time outside the service's allowed hours"
+          ],
           "steps": [
             {
               "action": "PT calendar: book a session on it",
@@ -3857,7 +4845,9 @@
             "id": "BR-402",
             "statement": "A booking requires an approved, active contract with sessions left, not expired and not frozen, inside the service's hours: a second session in a day for a service limited to one per day is refused with \"Dịch vụ không cho thêm buổi nào cho khách trong ngày này.\""
           },
-          "preconditions": ["a second session in a day for a service limited to one per day"],
+          "preconditions": [
+            "a second session in a day for a service limited to one per day"
+          ],
           "steps": [
             {
               "action": "PT calendar: book a session on it",
@@ -3877,7 +4867,9 @@
             "id": "BR-403",
             "statement": "A PT cannot have two sessions at once: \"Huấn luyện viên đã có lịch trùng giờ này.\""
           },
-          "preconditions": ["Trainer Khoa has a session at 17:00 today"],
+          "preconditions": [
+            "Trainer Khoa has a session at 17:00 today"
+          ],
           "steps": [
             {
               "action": "Book another customer with Khoa at 17:00",
@@ -4447,70 +5439,216 @@
         {
           "technique": "Boundary value analysis",
           "title": "Receipt amount on a contract owing 12.000.000 ₫ (BR-603, BR-604)",
-          "columns": ["Amount", "Expected", "Case"],
+          "columns": [
+            "Amount",
+            "Expected",
+            "Case"
+          ],
           "rows": [
-            ["0", "Số tiền phải lớn hơn 0.", "MON-01"],
-            ["1", "Accepted", "MON-02"],
-            ["12.000.000 (= debt)", "Accepted", "MON-03"],
-            ["12.000.001 (debt + 1)", "Vượt giá trị hợp đồng", "MON-04"]
+            [
+              "0",
+              "Số tiền phải lớn hơn 0.",
+              "MON-01"
+            ],
+            [
+              "1",
+              "Accepted",
+              "MON-02"
+            ],
+            [
+              "12.000.000 (= debt)",
+              "Accepted",
+              "MON-03"
+            ],
+            [
+              "12.000.001 (debt + 1)",
+              "Vượt giá trị hợp đồng",
+              "MON-04"
+            ]
           ]
         },
         {
           "technique": "Decision table",
           "title": "Does a receipt count toward paid and debt? (BR-602)",
-          "columns": ["Approved", "Deleted", "Counts", "Case"],
+          "columns": [
+            "Approved",
+            "Deleted",
+            "Counts",
+            "Case"
+          ],
           "rows": [
-            ["No (pending)", "No", "No", "MON-07"],
-            ["Yes", "No", "Yes", "MON-07"],
-            ["Yes", "Yes", "No", "MON-07, MON-11"]
+            [
+              "No (pending)",
+              "No",
+              "No",
+              "MON-07"
+            ],
+            [
+              "Yes",
+              "No",
+              "Yes",
+              "MON-07"
+            ],
+            [
+              "Yes",
+              "Yes",
+              "No",
+              "MON-07, MON-11"
+            ]
           ]
         },
         {
           "technique": "Decision table",
           "title": "Approval of a submitted action (BR-103)",
-          "columns": ["Action in the matrix", "Approver is the submitter", "Expected", "Case"],
+          "columns": [
+            "Action in the matrix",
+            "Approver is the submitter",
+            "Expected",
+            "Case"
+          ],
           "rows": [
-            ["Yes", "Yes", "Refused", "APR-01"],
-            ["Yes", "No", "Takes effect on approval", "APR-01, APR-02"],
-            ["No (switched off)", "—", "Takes effect at once", "APR-05"]
+            [
+              "Yes",
+              "Yes",
+              "Refused",
+              "APR-01"
+            ],
+            [
+              "Yes",
+              "No",
+              "Takes effect on approval",
+              "APR-01, APR-02"
+            ],
+            [
+              "No (switched off)",
+              "—",
+              "Takes effect at once",
+              "APR-05"
+            ]
           ]
         },
         {
           "technique": "State transition",
           "title": "Task",
-          "columns": ["From", "Event", "To", "Case"],
+          "columns": [
+            "From",
+            "Event",
+            "To",
+            "Case"
+          ],
           "rows": [
-            ["New", "Assignee accepts", "Accepted", "TSK-02"],
-            ["Accepted", "Starts", "In progress", "TSK-02"],
-            ["In progress", "Finishes", "Done", "TSK-02"],
-            ["New", "Assigner cancels", "Cancelled", "TSK-02"],
-            ["Any open", "Deadline passes", "Overdue (highlighted)", "TSK-03"]
+            [
+              "New",
+              "Assignee accepts",
+              "Accepted",
+              "TSK-02"
+            ],
+            [
+              "Accepted",
+              "Starts",
+              "In progress",
+              "TSK-02"
+            ],
+            [
+              "In progress",
+              "Finishes",
+              "Done",
+              "TSK-02"
+            ],
+            [
+              "New",
+              "Assigner cancels",
+              "Cancelled",
+              "TSK-02"
+            ],
+            [
+              "Any open",
+              "Deadline passes",
+              "Overdue (highlighted)",
+              "TSK-03"
+            ]
           ]
         },
         {
           "technique": "Boundary value analysis",
           "title": "Other limits",
-          "columns": ["Field", "Values", "Case"],
+          "columns": [
+            "Field",
+            "Values",
+            "Case"
+          ],
           "rows": [
-            ["Task title (1–200)", "0 / 200 / 201", "TSK-01"],
-            ["Discount threshold (0–100)", "100 / 101", "CFG-04"],
-            ["Approval escalation (24 h)", "23 h 59 / 24 h", "APR-04"],
-            ["Task reminders", "24 h / 3 h / 1 h", "TSK-04"]
+            [
+              "Task title (1–200)",
+              "0 / 200 / 201",
+              "TSK-01"
+            ],
+            [
+              "Discount threshold (0–100)",
+              "100 / 101",
+              "CFG-04"
+            ],
+            [
+              "Approval escalation (24 h)",
+              "23 h 59 / 24 h",
+              "APR-04"
+            ],
+            [
+              "Task reminders",
+              "24 h / 3 h / 1 h",
+              "TSK-04"
+            ]
           ]
         },
         {
           "technique": "Error guessing",
           "title": "Attacks and mistakes tried",
-          "columns": ["Guess", "Expected", "Case"],
+          "columns": [
+            "Guess",
+            "Expected",
+            "Case"
+          ],
           "rows": [
-            ["Unknown record id in the URL", "Không tìm thấy", "SEC-01"],
-            ["API call without a session", "401", "SEC-02"],
-            ["Admin API as receptionist", "403", "SEC-03"],
-            ["Lead API as trainer", "403", "SEC-04"],
-            ["SQL-like search text", "Treated as text", "LEAD-26"],
-            ["Markup in a name", "Shown as text", "LEAD-27"],
-            ["Double submit", "One record", "LEAD-29"],
-            ["Unknown email at sign-in", "Generic message", "AUTH-03"]
+            [
+              "Unknown record id in the URL",
+              "Không tìm thấy",
+              "SEC-01"
+            ],
+            [
+              "API call without a session",
+              "401",
+              "SEC-02"
+            ],
+            [
+              "Admin API as receptionist",
+              "403",
+              "SEC-03"
+            ],
+            [
+              "Lead API as trainer",
+              "403",
+              "SEC-04"
+            ],
+            [
+              "SQL-like search text",
+              "Treated as text",
+              "LEAD-26"
+            ],
+            [
+              "Markup in a name",
+              "Shown as text",
+              "LEAD-27"
+            ],
+            [
+              "Double submit",
+              "One record",
+              "LEAD-29"
+            ],
+            [
+              "Unknown email at sign-in",
+              "Generic message",
+              "AUTH-03"
+            ]
           ]
         }
       ],

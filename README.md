@@ -215,20 +215,21 @@ What happened, in the order the agent works:
 
 Techniques used: permission matrix (77 cases), use case (46), boundary value analysis (35), equivalence partitioning (34), decision table (28), error guessing (21), state transition (20).
 
-**Results.** 128 passed, 1 failed and 1 was inconclusive.
+**Results.** 130 passed and 1 failed, identically in two runs (a third run, after the executor learned date-relative values; the first two runs had 128 passed, 1 failed, 1 inconclusive).
 - **CON-07 failed:** a real defect. Entering 1001 sessions on a new contract shows the raw English message "Too big: expected number to be <=1000" in the Vietnamese price preview.
-- **SEC-01 was inconclusive:** the not-found page nests two `main` landmarks, so the check refused to guess which one was meant.
+- **SEC-01 was inconclusive in the first runs:** the not-found page nests two `main` landmarks, so the check refused to guess which one was meant. It now asserts the "Không tìm thấy" heading and passes; the nested landmarks stay logged as an accessibility finding.
+- **CON-08 moved from manual to automated** with run-scoped dates ([ADR-0015](docs/adr/0015-run-scoped-values.md)): the expected end dates (today + 180, and start + 180 after typing a start date) are derived when the run starts.
 
-The 131 manual cases each record why they are not automated: date-relative values, two users in sequence, a controllable clock, email, and so on. Together these reasons form the executor's backlog.
+The 130 manual cases each record why they are not automated: date-relative values, two users in sequence, a controllable clock, email, and so on. Together these reasons form the executor's backlog.
 
 **Compared with manual testing**, on the team's numbers (3 min to run a case by hand, weekly regression):
 
 | | Manual | With the agent |
 | --- | ---: | ---: |
-| One regression run | 13 h 03 min (261 × 3 min) | 6 h 36 min (131 cases by hand + 3 min 15 s of browser time) |
-| Per year | 678 h | 343 h (about 335 h saved) |
+| One regression run | 13 h 03 min (261 × 3 min) | 6 h 33 min (130 cases by hand + 3 min 23 s of browser time) |
+| Per year | 678 h | 341 h (about 337 h saved) |
 
-The 130 automated cases took about 3 min 15 s of browser time in total. Gym CRM limits sign-ins to 20 per minute, so the run waited about 7 minutes on top of that; reusing one session per role would remove the wait. Writing the executable specs was a one-time cost that was not timed. The report shows the payback.
+The 131 automated cases took about 3 min 23 s of browser time in total. Gym CRM limits sign-ins to 20 per minute, so the run waited about 7 minutes on top of that; reusing one session per role would remove the wait. Writing the executable specs was a one-time cost that was not timed. The report shows the payback.
 
 The showcase also found and fixed four agent issues: the locale-dependent login labels, a screenshot race on client redirects, secret placeholders being redacted, and the context budget dropping exact requirement matches ([ADR-0010](docs/adr/0010-budget-keeps-exact-matches.md)). This run used the keyless stand-in model. To repeat it with live Claude (billed), use `QA_LIVE_LLM=1 pnpm showcase:gym`.
 
