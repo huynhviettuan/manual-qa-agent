@@ -72,12 +72,70 @@ export const Locator: z.ZodType<LocatorShape, LocatorShape> = z.lazy(() =>
 );
 export type Locator = LocatorShape;
 
-/** A literal, or a reference resolved at run time and never stored in specs, prompts or evidence. */
+/** Name of a run-scoped value: declared in `spec.values` or captured by a `capture` step (ADR-0015). */
+const VarName = z.string().regex(/^[a-z][a-z0-9_]{0,63}$/);
+
+/**
+ * A literal, a secret reference resolved at run time and never stored in specs, prompts or
+ * evidence, or a run-scoped value (`{ var }`) resolved from the run's value table.
+ */
 export const InputValue = z.union([
   z.string().max(2000),
   z.object({ secret: z.string().regex(/^[A-Z][A-Z0-9_]{1,63}$/) }),
+  z.object({ var: VarName }),
 ]);
 export type InputValue = z.infer<typeof InputValue>;
+
+export const DATE_FORMATS = ['yyyy-MM-dd', 'dd/MM/yyyy', 'MM/dd/yyyy', 'd/M/yyyy'] as const;
+
+/**
+ * A value derived once, when the run starts, so every step sees the same one. Dates are relative
+ * to the run's start in the given time zone (default UTC); the executor never reads the clock twice.
+ */
+export const DerivedValue = z.object({
+  date: z.object({
+    offsetDays: z.number().int().min(-3660).max(3660),
+    format: z.enum(DATE_FORMATS),
+    timeZone: z.string().min(1).max(64).optional(),
+  }),
+});
+export type DerivedValue = z.infer<typeof DerivedValue>;
+
+/** `{{name}}` placeholders in paths and expected text, filled from the run's value table. */
+const TEMPLATE_TOKEN = /\{\{([a-z][a-z0-9_]{0,63})\}\}/g;
+export function templateVars(text: string): string[] {
+  return [...text.matchAll(TEMPLATE_TOKEN)].map((m) => m[1]!);
+}
+/** Fills a template; throws naming the first value that is not in the table. */
+export function renderTemplate(text: string, values: ReadonlyMap<string, string>): string {
+  return text.replace(TEMPLATE_TOKEN, (_, name: string) => {
+    const v = values.get(name);
+    if (v === undefined) throw new Error(`undefined value {{${name}}}`);
+    return v;
+  });
+}
+/** A relative path that may carry `{{name}}` placeholders; validated as if each were filled. */
+const PathTemplate = z
+  .string()
+  .min(1)
+  .max(500)
+  .refine(
+    (p) => RelativePath.safeParse(p.replace(TEMPLATE_TOKEN, 'x')).success,
+    'must be a path starting with "/" (placeholders allowed), without whitespace or backslashes',
+  );
+
+/** A regular expression with exactly one capturing group, used to pick a value out of text or a URL. */
+const CapturePattern = z
+  .string()
+  .min(1)
+  .max(200)
+  .refine((p) => {
+    try {
+      return new RegExp(`${p}|`).exec('')!.length === 2;
+    } catch {
+      return false;
+    }
+  }, 'must be a valid regular expression with exactly one capturing group');
 
 const base = {
   id: z.string().regex(/^[a-z0-9][a-z0-9_-]{0,63}$/),
@@ -88,7 +146,7 @@ const base = {
 const HttpMethod = z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']);
 
 export const ExecutableStep = z.discriminatedUnion('type', [
-  z.object({ ...base, type: z.literal('navigate'), path: RelativePath }),
+  z.object({ ...base, type: z.literal('navigate'), path: PathTemplate }),
   z.object({
     ...base,
     type: z.literal('click'),
@@ -110,18 +168,33 @@ export const ExecutableStep = z.discriminatedUnion('type', [
   z.object({
     ...base,
     type: z.literal('expectUrl'),
-    path: RelativePath,
+    path: PathTemplate,
     match: z.enum(['exact', 'prefix']).default('exact'),
   }),
   z.object({
     ...base,
     type: z.literal('apiRequest'),
     method: HttpMethod,
-    path: RelativePath,
+    path: PathTemplate,
     body: z.record(z.string(), InputValue).optional(),
     expectStatus: z.number().int().min(100).max(599).optional(),
     /** DELETE is always treated as destructive; other methods may opt in. */
     destructive: z.boolean().default(false),
+  }),
+  /**
+   * Reads a value from the page (the text of a strict locator, or the current URL) into the run's
+   * value table, for later steps: a new record's id in the URL, a generated code in a cell. Not an
+   * assertion: a pattern that does not match is a step error (INCONCLUSIVE), never a failure.
+   */
+  z.object({
+    ...base,
+    type: z.literal('capture'),
+    as: VarName,
+    from: z.discriminatedUnion('kind', [
+      z.object({ kind: z.literal('text'), target: Locator }),
+      z.object({ kind: z.literal('url') }),
+    ]),
+    pattern: CapturePattern.optional(),
   }),
 ]);
 export type ExecutableStep = z.infer<typeof ExecutableStep>;
@@ -134,8 +207,26 @@ export const ExecutableSpec = z
     steps: z.array(ExecutableStep).min(1).max(200),
     /** Always runs (even after failures) to clean up test data the spec created. */
     teardown: z.array(ExecutableStep).max(50).default([]),
+    /** Values derived once at run start (today + n days, formatted), referenced as `{ var }` or `{{name}}`. */
+    values: z.record(VarName, DerivedValue).default({}),
   })
   .superRefine((spec, ctx) => {
+    // Every value a step uses is declared, or captured by an earlier step of the same or an earlier phase.
+    const known = new Set(Object.keys(spec.values));
+    for (const step of [...spec.setup, ...spec.steps, ...spec.teardown]) {
+      for (const name of stepVars(step)) {
+        if (!known.has(name))
+          ctx.addIssue({ code: 'custom', message: `step ${step.id} uses undefined value {{${name}}}` });
+      }
+      if (step.type === 'capture') {
+        if (step.as in spec.values)
+          ctx.addIssue({
+            code: 'custom',
+            message: `step ${step.id} captures ${step.as}, which is a declared value`,
+          });
+        known.add(step.as);
+      }
+    }
     const ids = [...spec.setup, ...spec.steps, ...spec.teardown].map((s) => s.id);
     const dupes = ids.filter((id, i) => ids.indexOf(id) !== i);
     if (dupes.length)
@@ -160,12 +251,67 @@ export function destructiveSteps(spec: ExecutableSpec): string[] {
 /** Secret names a spec references (resolved only by the executor at run time). */
 export function referencedSecrets(spec: ExecutableSpec): string[] {
   const names = new Set<string>();
-  const visit = (v: InputValue) => typeof v === 'object' && names.add(v.secret);
+  const visit = (v: InputValue) => typeof v === 'object' && 'secret' in v && names.add(v.secret);
   for (const s of [...spec.setup, ...spec.steps, ...spec.teardown]) {
     if (s.type === 'fill') visit(s.value);
     if (s.type === 'apiRequest' && s.body) Object.values(s.body).forEach(visit);
   }
   return [...names];
+}
+
+/** Run-scoped value names one step reads (`{ var }` inputs and `{{name}}` placeholders). */
+export function stepVars(step: ExecutableStep): string[] {
+  const names = new Set<string>();
+  const input = (v: InputValue) => typeof v === 'object' && 'var' in v && names.add(v.var);
+  const text = (t: string) => templateVars(t).forEach((n) => names.add(n));
+  switch (step.type) {
+    case 'navigate':
+    case 'expectUrl':
+      text(step.path);
+      break;
+    case 'fill':
+      input(step.value);
+      break;
+    case 'expectText':
+      text(step.text);
+      break;
+    case 'apiRequest':
+      text(step.path);
+      if (step.body) Object.values(step.body).forEach(input);
+      break;
+  }
+  return [...names];
+}
+
+/**
+ * Formats an instant as a calendar date in a time zone, after adding whole days in that zone.
+ * Pure, so the executor and the tests agree on every value.
+ */
+export function deriveValue(def: DerivedValue, now: Date): string {
+  const { offsetDays, format, timeZone = 'UTC' } = def.date;
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(now);
+  const get = (type: string) => Number(parts.find((p) => p.type === type)!.value);
+  // Shift in calendar days of the zone's local date, so a DST change never moves the day.
+  const local = new Date(Date.UTC(get('year'), get('month') - 1, get('day') + offsetDays));
+  const y = local.getUTCFullYear();
+  const m = local.getUTCMonth() + 1;
+  const d = local.getUTCDate();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  switch (format) {
+    case 'yyyy-MM-dd':
+      return `${y}-${pad(m)}-${pad(d)}`;
+    case 'dd/MM/yyyy':
+      return `${pad(d)}/${pad(m)}/${y}`;
+    case 'MM/dd/yyyy':
+      return `${pad(m)}/${pad(d)}/${y}`;
+    case 'd/M/yyyy':
+      return `${d}/${m}/${y}`;
+  }
 }
 
 /** Stable hash binding approvals and runs to the exact spec content. */

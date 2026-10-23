@@ -804,7 +804,13 @@ const security: SuiteCase[] = [
     spec: [
       ...signIn('manager'),
       { id: 'open', type: 'navigate', path: '/contracts/00000000-0000-4000-8000-000000000000' },
-      { id: 'not-found', type: 'expectText', target: main, text: 'Không tìm thấy' },
+      // The not-found page nests two main landmarks (logged in findings.json), so `main` is ambiguous
+      // there; the heading is the one element that names the state.
+      {
+        id: 'not-found',
+        type: 'expectVisible',
+        target: { by: 'role', role: 'heading', name: 'Không tìm thấy', exact: true },
+      },
     ],
   }),
   auto({

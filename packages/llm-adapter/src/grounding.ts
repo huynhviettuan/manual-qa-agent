@@ -1,4 +1,4 @@
-import { type DraftContent, sourceRef } from '@qa/domain';
+import { DraftContent, type DraftSet, type DraftSetOutput, sourceRef } from '@qa/domain';
 import { storyRefs } from './prompts.ts';
 import type { DraftInput, ProviderOutcome, ReadinessAssessment, ReadinessInput } from './types.ts';
 
@@ -29,47 +29,56 @@ export function checkReadiness(
   return out;
 }
 
-export function checkDraft(
+export function checkDraftSet(
   input: DraftInput,
-  out: ProviderOutcome<DraftContent>,
-): ProviderOutcome<DraftContent> {
+  out: ProviderOutcome<DraftSetOutput>,
+): ProviderOutcome<DraftSet> {
   if (!out.ok) return out;
-  if (out.value.steps.length === 0) {
-    return { ok: false, failure: 'MALFORMED', detail: 'draft has no steps', meta: out.meta };
-  }
+  const fail = (failure: 'MALFORMED' | 'UNGROUNDED', detail: string) =>
+    ({ ok: false, failure, detail, meta: out.meta }) as const;
   const allowed = new Set([
     ...input.sources.map((s) => sourceRef(s.sourceId, s.version)),
     ...storyRefs(input.story),
   ]);
-  if (out.value.techniques.length === 0) {
-    return {
-      ok: false,
-      failure: 'MALFORMED',
-      detail: 'draft names no test-design technique',
-      meta: out.meta,
-    };
-  }
-  const problems = out.value.steps.flatMap((step, i) => {
-    if (step.sourceRefs.length === 0) return [`step ${i + 1} has no source`];
-    return step.sourceRefs.filter((r) => !allowed.has(r)).map((r) => `step ${i + 1} cites unknown ${r}`);
+
+  const titles = new Set<string>();
+  const malformed: string[] = [];
+  out.value.cases.forEach((c, n) => {
+    if (c.steps.length === 0) malformed.push(`case ${n + 1} has no steps`);
+    if (c.techniques.length === 0) malformed.push(`case ${n + 1} names no test-design technique`);
+    const title = c.title.trim().toLowerCase();
+    if (titles.has(title)) malformed.push(`case ${n + 1} repeats the title "${c.title}"`);
+    titles.add(title);
   });
-  problems.push(
-    ...out.value.requirementRefs.filter((r) => !allowed.has(r)).map((r) => `traces to unknown ${r}`),
-  );
-  if (problems.length > 0) {
-    return { ok: false, failure: 'UNGROUNDED', detail: problems.join('; '), meta: out.meta };
-  }
-  // Coverage is checked in code, not taken from the model: an acceptance criterion the draft
-  // neither traces nor reports as missing is surfaced to the reviewer as a gap.
-  const traced = new Set(out.value.requirementRefs);
-  const gaps = input.story.acceptanceCriteria
+  if (malformed.length > 0) return fail('MALFORMED', malformed.join('; '));
+
+  const ungrounded = out.value.cases.flatMap((c, n) => [
+    ...c.steps.flatMap((step, i) =>
+      step.sourceRefs.length === 0
+        ? [`case ${n + 1} step ${i + 1} has no source`]
+        : step.sourceRefs
+            .filter((r) => !allowed.has(r))
+            .map((r) => `case ${n + 1} step ${i + 1} cites unknown ${r}`),
+    ),
+    ...c.requirementRefs.filter((r) => !allowed.has(r)).map((r) => `case ${n + 1} traces to unknown ${r}`),
+  ]);
+  if (ungrounded.length > 0) return fail('UNGROUNDED', ungrounded.join('; '));
+
+  // Coverage is checked in code across the whole set, not taken from the model: an acceptance
+  // criterion no case traces and no case reports as missing is surfaced to the reviewer as a gap.
+  const traced = new Set(out.value.cases.flatMap((c) => c.requirementRefs));
+  const reported = out.value.cases.flatMap((c) => c.missingRequirements);
+  const coverageGaps = input.story.acceptanceCriteria
     .filter((ac) => !traced.has(`story:${ac.id}`))
-    .filter((ac) => !out.value.missingRequirements.some((m) => mentions(m, ac.id)))
-    .map((ac) => `${ac.id}: not covered by this draft (coverage check)`);
-  if (gaps.length === 0) return out;
+    .filter((ac) => !reported.some((m) => mentions(m, ac.id)))
+    .map((ac) => `${ac.id}: not covered by any drafted case (coverage check)`);
   return {
     ...out,
-    value: { ...out.value, missingRequirements: [...out.value.missingRequirements, ...gaps] },
+    value: {
+      designNotes: out.value.designNotes,
+      cases: out.value.cases.map((c) => DraftContent.parse(c)),
+      coverageGaps,
+    },
   };
 }
 

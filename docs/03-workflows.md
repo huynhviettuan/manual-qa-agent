@@ -34,7 +34,8 @@ sequenceDiagram
 
 - Story/AC IDs, selected source IDs/versions, retrieval confidence information.
 - Test title, priority suggestion, test preconditions, data needs, steps and expected outcomes.
-- Test-design techniques used, derived test conditions (partitions, boundaries, rule combinations, transitions), test types and the requirements the case verifies (ADR-0014).
+- Test-design techniques used, derived test conditions (partitions, boundaries, rule combinations, transitions), test types and the requirements each case verifies (ADR-0014).
+- A set of cases, one per test condition, with the design notes they come from; coverage of the acceptance criteria is checked across the set (ADR-0016).
 - Explicit assumptions and missing requirements, not silent guesses.
 - Cost/usage and policy trace ID.
 

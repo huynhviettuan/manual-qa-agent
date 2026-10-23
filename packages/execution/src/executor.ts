@@ -1,5 +1,6 @@
 import { type BrowserContext, chromium, type Locator as PwLocator, type Page } from 'playwright';
 import {
+  deriveValue,
   describeLocator,
   type ExecutableSpec,
   type ExecutableStep,
@@ -7,6 +8,7 @@ import {
   type Locator,
   redactSecrets,
   referencedSecrets,
+  renderTemplate,
   type TenantScope,
 } from '@qa/domain';
 import { evidenceKey, type EvidenceStore, type StoredObject } from '@qa/evidence';
@@ -150,9 +152,38 @@ export class PlaywrightExecutor implements Executor {
       for (const v of secretValues) t = t.split(v).join('[REDACTED_SECRET]');
       return redactSecrets(t).text;
     };
-    const valueOf = (v: InputValue) => (typeof v === 'string' ? v : resolved.get(v.secret)!);
+    // The run's value table (ADR-0015): declared values are derived once, from one clock reading, so
+    // every step sees the same date; capture steps add to it as the run goes.
+    const startedAt = new Date();
+    const vars = new Map<string, string>();
+    for (const [name, def] of Object.entries(spec.values)) vars.set(name, deriveValue(def, startedAt));
+    const valueOf = (v: InputValue) => {
+      if (typeof v === 'string') return v;
+      if ('secret' in v) return resolved.get(v.secret)!;
+      const value = vars.get(v.var);
+      if (value === undefined) throw new StepError(`undefined value {{${v.var}}}`);
+      return value;
+    };
     const show = (v: InputValue) =>
-      typeof v === 'string' ? JSON.stringify(redact(v)) : `[secret:${v.secret}]`;
+      typeof v === 'string'
+        ? JSON.stringify(redact(v))
+        : 'secret' in v
+          ? `[secret:${v.secret}]`
+          : `{{${v.var}}}`;
+    const render = (template: string) => {
+      try {
+        return renderTemplate(template, vars);
+      } catch (err) {
+        throw new StepError(err instanceof Error ? err.message : String(err));
+      }
+    };
+    // A filled path must still be relative: a captured value can never redirect the run off the target.
+    const relative = (path: string) => {
+      if (!path.startsWith('/') || path.startsWith('//') || /[\s\\]/.test(path)) {
+        throw new StepError(`filled path is not a relative path: ${redact(path).slice(0, 100)}`);
+      }
+      return path;
+    };
 
     const network: Array<Record<string, unknown>> = [];
     let shotIndex = 0;
@@ -243,7 +274,15 @@ export class PlaywrightExecutor implements Executor {
           }
           const started = performance.now();
           try {
-            const assertion = await this.runStep(page, context!, step, base, valueOf, masked, timeout);
+            const assertion = await this.runStep(page, context!, step, base, {
+              valueOf,
+              render,
+              relative,
+              vars,
+              masked,
+              timeout,
+              note: (text) => (log.note = redact(text).slice(0, 200)),
+            });
             if (assertion) {
               out.assertions.push(assertion);
               if (assertion.passed !== true) log.status = 'failed';
@@ -361,10 +400,17 @@ export class PlaywrightExecutor implements Executor {
     context: BrowserContext,
     step: ExecutableStep,
     base: URL,
-    valueOf: (v: InputValue) => string,
-    masked: PwLocator[],
-    timeout: number,
+    run: {
+      valueOf: (v: InputValue) => string;
+      render: (template: string) => string;
+      relative: (path: string) => string;
+      vars: Map<string, string>;
+      masked: PwLocator[];
+      timeout: number;
+      note: (text: string) => void;
+    },
   ): Promise<Assertion | null> {
+    const { valueOf, render, relative, vars, masked, timeout } = run;
     const assertion = (expected: unknown, actual: unknown, passed: boolean | null): Assertion => ({
       stepId: step.id,
       name: step.type,
@@ -376,7 +422,8 @@ export class PlaywrightExecutor implements Executor {
 
     switch (step.type) {
       case 'navigate': {
-        const res = await page.goto(new URL(step.path, base).toString(), { waitUntil: 'load' });
+        const path = relative(render(step.path));
+        const res = await page.goto(new URL(path, base).toString(), { waitUntil: 'load' });
         if (!res) throw new StepError('navigation produced no response');
         return null;
       }
@@ -394,19 +441,36 @@ export class PlaywrightExecutor implements Executor {
         return null;
       case 'expectText': {
         const target = this.locate(page, step.target);
+        const text = render(step.text);
         const re =
-          step.match === 'exact'
-            ? new RegExp(`^\\s*${escapeRe(step.text)}\\s*$`)
-            : new RegExp(escapeRe(step.text));
+          step.match === 'exact' ? new RegExp(`^\\s*${escapeRe(text)}\\s*$`) : new RegExp(escapeRe(text));
         try {
           // Waits on the real signal (the target containing the text), never a fixed sleep.
           await target.filter({ hasText: re }).waitFor({ state: 'visible', timeout });
-          return assertion(step.text, step.text, true);
+          return assertion(text, text, true);
         } catch (err) {
           if (!timedOut(err)) throw err;
           const actual = await target.innerText({ timeout: 1000 }).catch(() => null);
-          return assertion(step.text, actual?.trim() ?? null, actual === null ? null : false);
+          return assertion(text, actual?.trim() ?? null, actual === null ? null : false);
         }
+      }
+      case 'capture': {
+        // Reads a value for later steps. Strict locator: two matches are an error, never a guess.
+        const source =
+          step.from.kind === 'url'
+            ? page.url()
+            : (await this.locate(page, step.from.target).innerText({ timeout })).trim();
+        let value = source;
+        if (step.pattern) {
+          const m = new RegExp(step.pattern).exec(source);
+          if (!m || m[1] === undefined) {
+            throw new StepError(`pattern /${step.pattern}/ did not match ${step.from.kind}`);
+          }
+          value = m[1];
+        }
+        vars.set(step.as, value);
+        run.note(`${step.as} = ${JSON.stringify(value)}`);
+        return null;
       }
       case 'expectVisible':
       case 'expectHidden': {
@@ -420,22 +484,23 @@ export class PlaywrightExecutor implements Executor {
         }
       }
       case 'expectUrl': {
+        const path = relative(render(step.path));
         const matches = (u: URL) =>
           u.host === base.host &&
-          (step.match === 'exact' ? u.pathname === step.path : u.pathname.startsWith(step.path));
+          (step.match === 'exact' ? u.pathname === path : u.pathname.startsWith(path));
         try {
           await page.waitForURL(matches, { timeout, waitUntil: 'commit' });
-          return assertion(step.path, step.path, true);
+          return assertion(path, path, true);
         } catch (err) {
           if (!timedOut(err)) throw err;
-          return assertion(step.path, new URL(page.url()).pathname, false);
+          return assertion(path, new URL(page.url()).pathname, false);
         }
       }
       case 'apiRequest': {
         const data = step.body
           ? Object.fromEntries(Object.entries(step.body).map(([k, v]) => [k, valueOf(v)]))
           : undefined;
-        const res = await context.request.fetch(new URL(step.path, base).toString(), {
+        const res = await context.request.fetch(new URL(relative(render(step.path)), base).toString(), {
           method: step.method,
           ...(data ? { data } : {}),
           maxRedirects: 0,
@@ -469,5 +534,7 @@ function describe(step: ExecutableStep, show: (v: InputValue) => string): string
       return `expect URL ${step.match} ${step.path}`;
     case 'apiRequest':
       return `${step.method} ${step.path}${step.expectStatus ? ` expect ${step.expectStatus}` : ''}`;
+    case 'capture':
+      return `capture ${step.as} from ${step.from.kind === 'url' ? 'the URL' : `text of ${describeLocator(step.from.target)}`}${step.pattern ? ` matching /${step.pattern}/` : ''}`;
   }
 }

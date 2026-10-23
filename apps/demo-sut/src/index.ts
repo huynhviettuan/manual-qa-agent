@@ -86,6 +86,11 @@ export function createDemoApp(opts: DemoOptions = {}): FastifyInstance {
   };
 
   app.get('/', async (_req, reply) => reply.redirect('/login'));
+  // Echoes a query value, so executor tests can prove a derived or captured value reached the page.
+  app.get('/echo', async (req, reply) => {
+    const q = String((req.query as Record<string, unknown>).q ?? '');
+    return reply.type('text/html').send(page('Echo', `<h1>Echo</h1><p data-testid="echo">${esc(q)}</p>`));
+  });
   app.get('/login', async (_req, reply) => reply.type('text/html').send(loginPage()));
 
   app.post('/login', async (req, reply) => {

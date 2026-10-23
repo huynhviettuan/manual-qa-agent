@@ -174,14 +174,15 @@ describe('OpenAIResponsesDrafter via Responses API (mocked)', () => {
     testTypes: ['negative'],
     testConditions: ['5 failed logins: locked'],
   };
+  const set = (...cases: unknown[]) => ({ designNotes: [], cases });
 
   it('returns a validated draft; requests strict JSON schema and no response storage', async () => {
-    const { p, fetch } = provider(() => responsesReply(draft, { model: 'gpt-test-draft' }));
+    const { p, fetch } = provider(() => responsesReply(set(draft), { model: 'gpt-test-draft' }));
     const out = await p.generate({ story, sources: [source] });
     expect(out).toMatchObject({
       ok: true,
-      value: { title: 'Lockout' },
-      meta: { model: 'gpt-test-draft', promptVersion: 'draft-v3' },
+      value: { cases: [{ title: 'Lockout' }], coverageGaps: [] },
+      meta: { model: 'gpt-test-draft', promptVersion: 'draft-v4' },
     });
     const body = fetch.calls[0]!.body;
     expect(fetch.calls[0]!.endpoint).toBe('responses');
@@ -206,7 +207,7 @@ describe('OpenAIResponsesDrafter via Responses API (mocked)', () => {
 
   it('ungrounded step references -> UNGROUNDED (shared check)', async () => {
     const { p } = provider(() =>
-      responsesReply({ ...draft, steps: [{ ...draft.steps[0], sourceRefs: ['MADE-UP@v1'] }] }),
+      responsesReply(set({ ...draft, steps: [{ ...draft.steps[0], sourceRefs: ['MADE-UP@v1'] }] })),
     );
     expect(await p.generate({ story, sources: [source] })).toMatchObject({ failure: 'UNGROUNDED' });
   });

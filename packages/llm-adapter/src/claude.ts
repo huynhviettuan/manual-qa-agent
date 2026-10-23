@@ -1,8 +1,8 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { betaZodOutputFormat } from '@anthropic-ai/sdk/helpers/beta/zod';
 import { z } from 'zod';
-import { canonicalJson, type DraftContent, DraftOutput, Readiness, sha256 } from '@qa/domain';
-import { checkDraft, checkReadiness } from './grounding.ts';
+import { canonicalJson, type DraftSet, DraftSetOutput, Readiness, sha256 } from '@qa/domain';
+import { checkDraftSet, checkReadiness } from './grounding.ts';
 import {
   buildPayload,
   DRAFT_PROMPT_VERSION,
@@ -207,14 +207,15 @@ export class ClaudeProvider implements ReadinessClassifier, DraftGenerator, Tria
     };
   }
 
-  async generate(input: DraftInput): Promise<ProviderOutcome<DraftContent>> {
+  async generate(input: DraftInput): Promise<ProviderOutcome<DraftSet>> {
+    // A set of up to 12 cases needs room; max_tokens exhausted is still MALFORMED, never a partial set.
     const out = await this.call(
       DRAFT_PROMPT_VERSION,
       DRAFT_SYSTEM,
       buildPayload(input.story, input.sources),
-      DraftOutput,
-      16000,
+      DraftSetOutput,
+      32000,
     );
-    return checkDraft(input, out);
+    return checkDraftSet(input, out);
   }
 }

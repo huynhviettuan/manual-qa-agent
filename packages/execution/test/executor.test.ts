@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { startDemoApp } from '@qa/demo-sut';
 import { deleteAccountSpec, lockoutSpec, loginInvalidSpec, loginValidSpec } from '@qa/demo-sut/specs';
-import { ExecutableSpec, newId, type ExecutableSpecInput } from '@qa/domain';
+import { deriveValue, ExecutableSpec, newId, type ExecutableSpecInput } from '@qa/domain';
 import { LocalEvidenceStore, type EvidenceStore } from '@qa/evidence';
 import { PlaywrightExecutor, type ExecuteInput } from '../src/index.ts';
 
@@ -240,5 +240,79 @@ describe('PlaywrightExecutor redirects', () => {
     expect(out, JSON.stringify(out.steps.map((s) => s.error).filter(Boolean))).toMatchObject({
       verdict: 'PASSED',
     });
+  });
+});
+
+describe('PlaywrightExecutor run-scoped values (ADR-0015)', () => {
+  it('derives a date once, captures from text and URL, and fills templates with both', async () => {
+    const { target } = await demo();
+    const errors = (out: Awaited<ReturnType<typeof executor.execute>>) =>
+      JSON.stringify(out.steps.map((s) => s.error ?? s.note).filter(Boolean));
+    const spec: ExecutableSpecInput = {
+      values: { in_30: { date: { offsetDays: 30, format: 'dd/MM/yyyy', timeZone: 'Asia/Ho_Chi_Minh' } } },
+      steps: [
+        { id: 'open-login', type: 'navigate', path: '/login' },
+        { id: 'email', type: 'fill', target: { by: 'label', label: 'Email' }, value: 'qa@example.test' },
+        {
+          id: 'password',
+          type: 'fill',
+          target: { by: 'label', label: 'Password' },
+          value: { secret: 'DEMO_PASSWORD' },
+        },
+        { id: 'sign-in', type: 'click', target: { by: 'role', role: 'button', name: 'Sign in' } },
+        { id: 'page', type: 'capture', as: 'page', from: { kind: 'url' }, pattern: '/([a-z]+)$' },
+        {
+          id: 'who',
+          type: 'capture',
+          as: 'who',
+          from: { kind: 'text', target: { by: 'testId', testId: 'welcome' } },
+          pattern: 'Welcome back, (.+)',
+        },
+        { id: 'back', type: 'navigate', path: '/{{page}}' },
+        {
+          id: 'greets',
+          type: 'expectText',
+          target: { by: 'testId', testId: 'welcome' },
+          text: 'back, {{who}}',
+        },
+        { id: 'echo-date', type: 'navigate', path: '/echo?q={{in_30}}' },
+        {
+          id: 'date-shown',
+          type: 'expectText',
+          target: { by: 'testId', testId: 'echo' },
+          text: '{{in_30}}',
+          match: 'exact',
+        },
+      ],
+    };
+    const out = await executor.execute(input(spec, target));
+    expect(out, errors(out)).toMatchObject({ verdict: 'PASSED' });
+    const expected = deriveValue(
+      { date: { offsetDays: 30, format: 'dd/MM/yyyy', timeZone: 'Asia/Ho_Chi_Minh' } },
+      new Date(),
+    );
+    expect(out.assertions.find((a) => a.stepId === 'date-shown')).toMatchObject({
+      expected,
+      actual: expected,
+      passed: true,
+    });
+    expect(out.steps.find((s) => s.id === 'who')?.note).toBe('who = "QA Tester"');
+    expect(out.steps.find((s) => s.id === 'page')?.note).toBe('page = "dashboard"');
+  });
+
+  it('a capture whose pattern does not match is a step error (INCONCLUSIVE), not a failure', async () => {
+    const { target } = await demo();
+    const spec: ExecutableSpecInput = {
+      steps: [
+        { id: 'open-login', type: 'navigate', path: '/login' },
+        { id: 'id', type: 'capture', as: 'id', from: { kind: 'url' }, pattern: '/customers/(\\d+)' },
+        { id: 'reopen', type: 'navigate', path: '/customers/{{id}}' },
+        { id: 'ok', type: 'expectVisible', target: { by: 'role', role: 'heading', name: 'Sign in' } },
+      ],
+    };
+    const out = await executor.execute(input(spec, target));
+    expect(out).toMatchObject({ verdict: 'INCONCLUSIVE', reason: 'STEP_ERROR:id' });
+    expect(out.steps.find((s) => s.id === 'id')?.error).toContain('did not match url');
+    expect(out.steps.find((s) => s.id === 'reopen')?.status).toBe('skipped');
   });
 });

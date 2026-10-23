@@ -1,4 +1,4 @@
-import type { AcceptanceCriterion, DraftContent, EvidenceChunk, Readiness } from '@qa/domain';
+import type { AcceptanceCriterion, DraftSet, EvidenceChunk, Readiness } from '@qa/domain';
 
 export type Usage = {
   inputTokens: number;
@@ -56,7 +56,7 @@ export interface ReadinessClassifier {
 }
 
 export interface DraftGenerator {
-  generate(input: DraftInput): Promise<ProviderOutcome<DraftContent>>;
+  generate(input: DraftInput): Promise<ProviderOutcome<DraftSet>>;
 }
 
 // ------------------------------------------------------------------ failure triage (ADR-0009)

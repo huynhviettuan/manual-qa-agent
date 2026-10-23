@@ -2,6 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-10-09
+- **Extended by:** ADR-0015 (run-scoped values: declared dates, a `capture` step, `{ var }` and `{{name}}` references)
 
 ## Context
 

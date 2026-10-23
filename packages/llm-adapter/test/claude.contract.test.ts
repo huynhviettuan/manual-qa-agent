@@ -163,73 +163,113 @@ describe('ClaudeProvider.generate (mocked API)', () => {
     testTypes: ['negative', 'boundary'],
     testConditions: ['failed logins: 5 locks the account (boundary)'],
   };
+  /** The model answers a set (ADR-0016); most checks need only one case in it. */
+  const set = (...cases: unknown[]) => ({ designNotes: ['boundary at 5 failures'], cases });
 
-  it('returns a validated draft whose steps cite retrieved sources', async () => {
-    const { p } = provider(() => messageReply(draft));
+  it('returns a validated draft set whose steps cite retrieved sources', async () => {
+    const { p } = provider(() => messageReply(set(draft)));
     const out = await p.generate({ story, sources: [source] });
-    expect(out).toMatchObject({ ok: true, value: { title: 'Lockout after failed logins' } });
+    expect(out).toMatchObject({
+      ok: true,
+      value: {
+        designNotes: ['boundary at 5 failures'],
+        cases: [{ title: 'Lockout after failed logins' }],
+        coverageGaps: [],
+      },
+    });
+  });
+
+  it('rejects an empty set, more than 12 cases, and two cases with the same title', async () => {
+    const { p } = provider(() => messageReply(set()));
+    expect(await p.generate({ story, sources: [source] })).toMatchObject({ failure: 'MALFORMED' });
+    const { p: p2 } = provider(() =>
+      messageReply(set(...Array.from({ length: 13 }, (_, i) => ({ ...draft, title: `Case ${i}` })))),
+    );
+    expect(await p2.generate({ story, sources: [source] })).toMatchObject({ failure: 'MALFORMED' });
+    const { p: p3 } = provider(() =>
+      messageReply(set(draft, { ...draft, title: ' lockout after FAILED logins ' })),
+    );
+    expect(await p3.generate({ story, sources: [source] })).toMatchObject({
+      failure: 'MALFORMED',
+      detail: 'case 2 repeats the title " lockout after FAILED logins "',
+    });
   });
 
   it('accepts story AC references', async () => {
     const { p } = provider(() =>
-      messageReply({ ...draft, steps: [{ ...draft.steps[0], sourceRefs: ['story:AC-LOGIN-04'] }] }),
+      messageReply(set({ ...draft, steps: [{ ...draft.steps[0], sourceRefs: ['story:AC-LOGIN-04'] }] })),
     );
     expect((await p.generate({ story, sources: [source] })).ok).toBe(true);
   });
 
   it('rejects steps without a source or with unknown sources', async () => {
-    const { p } = provider(() => messageReply({ ...draft, steps: [{ ...draft.steps[0], sourceRefs: [] }] }));
+    const { p } = provider(() =>
+      messageReply(set({ ...draft, steps: [{ ...draft.steps[0], sourceRefs: [] }] })),
+    );
     expect(await p.generate({ story, sources: [source] })).toMatchObject({ failure: 'UNGROUNDED' });
     const { p: p2 } = provider(() =>
-      messageReply({ ...draft, steps: [{ ...draft.steps[0], sourceRefs: ['X@v1'] }] }),
+      messageReply(set({ ...draft, steps: [{ ...draft.steps[0], sourceRefs: ['X@v1'] }] })),
     );
     expect(await p2.generate({ story, sources: [source] })).toMatchObject({ failure: 'UNGROUNDED' });
   });
 
   it('rejects an empty draft', async () => {
-    const { p } = provider(() => messageReply({ ...draft, steps: [] }));
+    const { p } = provider(() => messageReply(set({ ...draft, steps: [] })));
     expect(await p.generate({ story, sources: [source] })).toMatchObject({ failure: 'MALFORMED' });
   });
 
   it('rejects a draft without test-design fields (draft-v1 shape) or naming no technique', async () => {
     const { requirementRefs, techniques, testTypes, testConditions, ...v1 } = draft;
     void [requirementRefs, techniques, testTypes, testConditions];
-    const { p } = provider(() => messageReply(v1));
+    const { p } = provider(() => messageReply(set(v1)));
     expect(await p.generate({ story, sources: [source] })).toMatchObject({ failure: 'MALFORMED' });
-    const { p: p2 } = provider(() => messageReply({ ...draft, techniques: [] }));
+    const { p: p2 } = provider(() => messageReply(set({ ...draft, techniques: [] })));
     expect(await p2.generate({ story, sources: [source] })).toMatchObject({
       failure: 'MALFORMED',
-      detail: 'draft names no test-design technique',
+      detail: 'case 1 names no test-design technique',
     });
   });
 
   it('rejects traceability to a requirement that was not supplied', async () => {
-    const { p } = provider(() => messageReply({ ...draft, requirementRefs: ['story:AC-OTHER', 'X@v9'] }));
+    const { p } = provider(() =>
+      messageReply(set({ ...draft, requirementRefs: ['story:AC-OTHER', 'X@v9'] })),
+    );
     expect(await p.generate({ story, sources: [source] })).toMatchObject({
       failure: 'UNGROUNDED',
-      detail: 'traces to unknown story:AC-OTHER; traces to unknown X@v9',
+      detail: 'case 1 traces to unknown story:AC-OTHER; case 1 traces to unknown X@v9',
     });
   });
 
-  it('reports an acceptance criterion the draft neither traces nor lists as missing', async () => {
+  it('reports an acceptance criterion that no case traces and no case lists as missing', async () => {
     const twoAcs = {
       ...story,
       acceptanceCriteria: [...story.acceptanceCriteria, { id: 'AC-LOGIN-0', text: 'Unlock by admin' }],
     };
-    const { p } = provider(() => messageReply({ ...draft, requirementRefs: [] }));
+    const { p } = provider(() => messageReply(set({ ...draft, requirementRefs: [] })));
     const out = await p.generate({ story: twoAcs, sources: [source] });
-    expect(out.ok && out.value.missingRequirements).toEqual([
-      'AC-LOGIN-04: not covered by this draft (coverage check)',
-      'AC-LOGIN-0: not covered by this draft (coverage check)',
+    expect(out.ok && out.value.coverageGaps).toEqual([
+      'AC-LOGIN-04: not covered by any drafted case (coverage check)',
+      'AC-LOGIN-0: not covered by any drafted case (coverage check)',
     ]);
-    // Listed by the model as missing: not repeated. An id inside a longer id does not count.
+    // Listed by one case as missing: not repeated. An id inside a longer id does not count.
     const { p: p2 } = provider(() =>
-      messageReply({ ...draft, missingRequirements: ['AC-LOGIN-04: unlock rule not found'] }),
+      messageReply(set({ ...draft, missingRequirements: ['AC-LOGIN-04: unlock rule not found'] })),
     );
     const out2 = await p2.generate({ story: twoAcs, sources: [source] });
-    expect(out2.ok && out2.value.missingRequirements).toEqual([
-      'AC-LOGIN-04: unlock rule not found',
-      'AC-LOGIN-0: not covered by this draft (coverage check)',
+    expect(out2.ok && out2.value.coverageGaps).toEqual([
+      'AC-LOGIN-0: not covered by any drafted case (coverage check)',
+    ]);
+    // Coverage is judged across the set: a second case covering the other criterion closes the gap.
+    const { p: p3 } = provider(() =>
+      messageReply(
+        set(draft, { ...draft, title: 'Admin unlocks the account', requirementRefs: ['story:AC-LOGIN-0'] }),
+      ),
+    );
+    const out3 = await p3.generate({ story: twoAcs, sources: [source] });
+    expect(out3.ok && out3.value.coverageGaps).toEqual([]);
+    expect(out3.ok && out3.value.cases.map((c) => c.title)).toEqual([
+      'Lockout after failed logins',
+      'Admin unlocks the account',
     ]);
   });
 });
@@ -251,7 +291,7 @@ describe('heuristic responder (keyless dev mode)', () => {
   it('drafts the measurable source line as the expected result, not the AC heading', async () => {
     const { p } = provider(heuristicResponder);
     const out = await p.generate({ story, sources: [source] });
-    expect(out.ok && out.value.steps[0]!.expected).toBe(
+    expect(out.ok && out.value.cases[0]!.steps[0]!.expected).toBe(
       'After 5 failed logins the account is locked for 15 minutes.',
     );
   });

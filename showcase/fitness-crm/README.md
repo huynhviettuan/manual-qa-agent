@@ -35,3 +35,5 @@ The agent tested the Gym CRM sample (`D:\fitness-crm`, fictional *Demo Gym* data
    Add `QA_LIVE_LLM=1` and `ANTHROPIC_API_KEY` for a live Claude run (billed). Without them the AI is the keyless stand-in, and the report says so.
 
 Each run creates a few leads in the instance. Sign-in is rate limited, so avoid running the showcase in a tight loop.
+
+SEC-01's spec was changed after the published run (it now asserts the "Không tìm thấy" heading instead of the ambiguous `main`); `results/` still shows the run before that change, where it was INCONCLUSIVE.
