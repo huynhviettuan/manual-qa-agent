@@ -53,7 +53,7 @@ had the whole project in context.
 | Clarification questions | 0 | 10 |
 | Draft cases | 30 (one restatement per story) | 53 (one per test condition) |
 | Techniques used | specification-based only | 11 (state transition 15, equivalence partitioning 9, decision table 8, …) |
-| Cases the observability check flagged | — | 20 of 53 |
+| Cases the observability check flagged | — | 2 of 53 (20 before ADR-0022) |
 
 **The clarifications are real gaps in the Gym CRM documents.** For example: AC-13 says the trash is "viewable only
 by management", but the seeded roles keep it from the Fitness Manager (Admin only); AC-27 locks an overdue step
@@ -61,13 +61,39 @@ by management", but the seeded roles keep it from the Fitness Manager (Admin onl
 files that are not among the sources. The team's designed suite has cases on 9 of these 10 criteria, written
 against today's behaviour rather than a stated rule.
 
-**Against the team's cases on the 20 drafted criteria** (110 cases, 74 of them the AC-01 permission matrix):
-outside AC-01 the session drafted 49 cases where the team designed 36, often splitting one requirement by
-condition. The team's suite is broader on permissions; the drafts are broader on state transitions and money
-relations. 23 drafts are marked manual with a reason (time passing, email, shared data), 29 UI, 1 API.
+**Against the team's cases, condition by condition** (ADR-0022). `npx tsx showcase/fitness-crm/compare.ts` checks
+and counts the pairing in [`comparison/condition-map.json`](comparison/condition-map.json): the team's cases on each
+criterion grouped by the condition they test (AC-01's 60 page-access cases are one condition with 30 data rows), and
+each agent case placed against them. The pairing itself is a judgement, made by Claude in the session from the case
+titles and the criterion text, and recorded with that label; the script only checks that every case is placed
+exactly once. Results are in `results/comparison.json`.
 
-**The observability check over-flags.** About half of its 20 flags are fair (an expected value the sources do not
-give, such as a tier price or the exact required-field message). The other half are false positives on absence and
-relations: "No edit action is offered", "No reminder task exists", "Closing balance = opening + receipts −
-expenses". The check is lexical; teaching it absence and arithmetic relations is a follow-up, not done here so the
-drafts are not tuned to the checker.
+| On the 20 drafted criteria | |
+| --- | ---: |
+| Team conditions (110 cases) | 36 |
+| Covered by an agent case | 25 |
+| Covered in part (AC-01: one refusal against the team's 30 pages × allowed and refused) | 1 |
+| Missed | 10, of which 1 written in the criterion (AC-15's status colours) |
+| Conditions the agent tested that the team did not file under the criterion | 23, of which 20 written in the criterion |
+
+The ten misses are where people are strong: boundaries beyond the stated range (0 and non-numeric session counts,
+1/150/151-character names), the other column of a decision table (a choice other than "Khác" needs no note), and
+adjacent permission layers (signed-out access, actions inside a module, the API). The 20 extras written in the
+criterion are clauses the team left without a case under that criterion id, for example AC-15's consumption rules
+and booking refusals, AC-11 entirely, AC-05's "no effect until approved". The team may test some of them under
+another requirement id; this comparison counts only cases filed under the same criterion.
+
+**On the 10 criteria the agent asked about**, the team has 13 cases. 7 of them restate the gap the agent asked
+about as their expected result ("Same counts and rates", "Locked after the grace period" with no length, "Usable
+without sideways scrolling"), and 6 test a clear clause of the same criterion. That points at the agent's
+weakness: **it routes a whole criterion to a question, so 11 clear clauses in 7 criteria were not drafted** (for
+example AC-29's paired scans and "a scan with no booking is an error"). Drafting the clear clauses and asking about
+the rest is the next change to the drafting workflow.
+
+**The observability check** (after ADR-0022). The first run flagged 20 of 53 cases (23 flags). Going flag by flag,
+2 leave the value unnamed ("The tier list shows the new unit price", "Both totals are shown"); 4 more name a state
+the documents do not spell out ("marked required"); the rest were absences ("No edit action is offered"),
+relations ("equals the new tier price", "closing = opening + receipts − expenses") and recipients ("goes to Admin").
+The check now knows absences, relations and those states, and the replay flags 2 cases, exactly the 2 above. The
+check was tuned on these same drafts, so this shows it handles these shapes, not its rate on drafts it has not
+seen.

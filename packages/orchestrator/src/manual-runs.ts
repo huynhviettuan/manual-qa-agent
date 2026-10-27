@@ -1,3 +1,4 @@
+import { openRetestReviewIfDue } from './lifecycle.ts';
 import {
   getEnvironment,
   getManualRun,
@@ -137,6 +138,14 @@ export async function recordManualRun(db: Db, actor: Actor, raw: ManualRunReques
     approvalId: null,
     outcome: derived.status,
   });
+  if (derived.status === 'PASSED') {
+    await openRetestReviewIfDue(db, scope, actor.id, {
+      caseId: input.caseId,
+      environmentId: input.environmentId,
+      build: input.build,
+      runRef: `manual run ${row.id}`,
+    });
+  }
   return row;
 }
 

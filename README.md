@@ -233,6 +233,14 @@ The 131 automated cases took about 3 min 23 s of browser time in total. Gym CRM 
 
 The showcase also found and fixed four agent issues: the locale-dependent login labels, a screenshot race on client redirects, secret placeholders being redacted, and the context budget dropping exact requirement matches ([ADR-0010](docs/adr/0010-budget-keeps-exact-matches.md)). This run used the keyless stand-in model. To repeat it with live Claude (billed), use `QA_LIVE_LLM=1 pnpm showcase:gym`.
 
+### Measured against the team's cases
+
+Claude drafted the 30 acceptance-criteria stories through the agent's own prompts and checks in an interactive session (ADR-0020); the drafts were then compared with the team's cases on the same criteria, condition by condition ([details](showcase/fitness-crm/README.md#drafted-by-claude-in-an-interactive-session-adr-0020)). On the 20 criteria it drafted, the agent covered 25 of the team's 36 conditions (one more in part) and missed 10, only one of them written in the criterion; it also tested 23 conditions the team had not filed under those criteria, 20 of them written there. On the 10 it asked about, 7 of the team's 13 cases restate the same gap as their expected result, but the agent left 11 clear clauses of those criteria undrafted: drafting the clear part and asking about the rest is the next change. The pairing is Claude's judgement, recorded as data and checked for completeness by a script.
+
+### Showcase: a team's catalogue imported
+
+The Flow Fitness pilot's 376 designed and executed cases imported as they are, against the pilot's 386-id requirement catalogue: nothing rejected, codes kept, a re-import is a no-op, and the report names the 5 ids and 2 techniques the agent could not map ([showcase/flow-fitness](showcase/flow-fitness/README.md), ADR-0022).
+
 ## Roles and API keys
 
 `pnpm qa seed` creates one user per role and prints their API keys once (only hashes are stored). Send a key as `x-api-key: <key>` or `Authorization: Bearer <key>`. Roles come only from the server, never from the request.
@@ -326,7 +334,7 @@ pnpm eval                                          # labeled pilot set; fails on
 | 2. Execution and evidence | Constrained steps (ADR-0008) with date-relative values and values captured between steps (ADR-0015), Playwright executor with host allowlist and pinned locale, deterministic verdicts, leased workers, immutable evidence with retention, test suites (sections, suite runs, per-case report) | S3 evidence storage, AI-proposed steps, arithmetic on values, values read from API responses |
 | 3. Triage and integration | Advisory triage with security escalation (ADR-0009), reproduction write-up, Jira Cloud filing (off by default), decision cache, metrics and drift alerts, propose-only MCP tool server for AI assistants (ADR-0011) | Live Jira verification, test-management sync |
 | 3b. Manual testing | Manual execution records with derived status and evidence (ADR-0017), full case schema, coverage, tester workbook and traceability exports, question register (ADR-0018), tester screen with draft review (ADR-0019) | Bulk review actions, revision diffs |
-| 3c. Case lifecycle | Case codes, known bugs labelled in reports (verdicts unchanged), stale cases and per-requirement regression scope, suite preflight that blocks a run before it queues, exclusive runs, build under test, test-design document export (ADR-0021) | Per-environment bootstrap of test accounts (product-specific) |
+| 3c. Case lifecycle | Case codes, known bugs labelled in reports (verdicts unchanged), stale cases and per-requirement regression scope, suite preflight that blocks a run before it queues, exclusive runs, build under test, test-design document export (ADR-0021); catalogue import from the 20-column workbook, retest reviews for known bugs, code backfill, manual effort metrics, grid and menu locators, a preflight case that holds a suite's automated runs until the environment is proven ready (ADR-0022) | — |
 | 4. Scale | — | Per-project budgets, scheduled runs, more frameworks; only with measured benefit ([docs/08](docs/08-implementation-plan.md)) |
 
 The backlog with per-issue status is in [docs/12](docs/12-github-backlog.md).

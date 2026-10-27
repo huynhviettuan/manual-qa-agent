@@ -47,9 +47,10 @@ function labelOf(o: WorkflowOutcome): Label {
       MISSING_KNOWLEDGE: 'MISSING_KNOWLEDGE',
       PROVIDER_FAILURE: 'PROVIDER_FAILURE',
       ACTION_APPROVAL: 'DENIED',
-      // Run-triage reviews never come out of story workflows.
+      // Run-triage and retest reviews never come out of story workflows.
       FAILURE_TRIAGE: 'DENIED',
       SECURITY_TRIAGE: 'DENIED',
+      KNOWN_BUG_RETEST: 'DENIED',
     } as const satisfies Record<ReviewKind, Label>
   )[o.kind];
 }

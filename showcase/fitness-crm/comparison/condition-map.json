@@ -1,0 +1,677 @@
+{
+  "judge": "Claude (claude-opus-5-5) in the interactive Claude Code session of 2026-10-27, from each case's title and the criterion text; a person should spot-check it",
+  "method": "Team cases are grouped by the condition they test (several data rows of one condition form one group). A group is covered when an agent case tests the same condition, partial when it tests it with fewer rows or one side only, missed otherwise. Agent cases matching no group are extras. statedInCriterion says whether the condition is written in the acceptance criterion itself. Only team cases filed under the same criterion id are compared; a condition the team tests under another requirement id counts here as not tested by the team.",
+  "drafted": {
+    "AC-01": {
+      "groups": [
+        {
+          "condition": "Signed-out access is sent to the login page",
+          "team": ["AUTH-04", "AUTH-05"],
+          "agent": [],
+          "verdict": "missed",
+          "statedInCriterion": false
+        },
+        {
+          "condition": "Each protected page opens for an allowed role and is refused to a refused role",
+          "team": [
+            "RBAC-01A",
+            "RBAC-01B",
+            "RBAC-02A",
+            "RBAC-02B",
+            "RBAC-03A",
+            "RBAC-03B",
+            "RBAC-04A",
+            "RBAC-04B",
+            "RBAC-05A",
+            "RBAC-05B",
+            "RBAC-06A",
+            "RBAC-06B",
+            "RBAC-07A",
+            "RBAC-07B",
+            "RBAC-08A",
+            "RBAC-08B",
+            "RBAC-09A",
+            "RBAC-09B",
+            "RBAC-10A",
+            "RBAC-10B",
+            "RBAC-11A",
+            "RBAC-11B",
+            "RBAC-12A",
+            "RBAC-12B",
+            "RBAC-13A",
+            "RBAC-13B",
+            "RBAC-14A",
+            "RBAC-14B",
+            "RBAC-15A",
+            "RBAC-15B",
+            "RBAC-16A",
+            "RBAC-16B",
+            "RBAC-17A",
+            "RBAC-17B",
+            "RBAC-18A",
+            "RBAC-18B",
+            "RBAC-19A",
+            "RBAC-19B",
+            "RBAC-20A",
+            "RBAC-20B",
+            "RBAC-21A",
+            "RBAC-21B",
+            "RBAC-22A",
+            "RBAC-22B",
+            "RBAC-23A",
+            "RBAC-23B",
+            "RBAC-24A",
+            "RBAC-24B",
+            "RBAC-25A",
+            "RBAC-25B",
+            "RBAC-26A",
+            "RBAC-26B",
+            "RBAC-27A",
+            "RBAC-27B",
+            "RBAC-28A",
+            "RBAC-28B",
+            "RBAC-29A",
+            "RBAC-29B",
+            "RBAC-30A",
+            "RBAC-30B"
+          ],
+          "agent": ["A2"],
+          "verdict": "partial",
+          "statedInCriterion": true,
+          "note": "the agent checks one refusal; the team checks 30 pages, allowed and refused"
+        },
+        {
+          "condition": "A menu entry is hidden without the permission and shown with it",
+          "team": ["RBAC-M1", "RBAC-M2"],
+          "agent": ["A1"],
+          "verdict": "covered",
+          "statedInCriterion": true
+        },
+        {
+          "condition": "Action-level permissions inside a module the role can open",
+          "team": ["RBAC-M3", "RBAC-M4", "CON-17", "CON-18", "MON-14", "MON-15"],
+          "agent": [],
+          "verdict": "missed",
+          "statedInCriterion": false
+        },
+        {
+          "condition": "Phone numbers stay hidden on screens and in exports",
+          "team": ["RBAC-M6"],
+          "agent": ["A3", "A4"],
+          "verdict": "covered",
+          "statedInCriterion": true
+        },
+        {
+          "condition": "The API refuses a request without a session or with the wrong role",
+          "team": ["SEC-02", "SEC-03", "SEC-04"],
+          "agent": [],
+          "verdict": "missed",
+          "statedInCriterion": false
+        }
+      ],
+      "extras": []
+    },
+    "AC-02": {
+      "groups": [
+        {
+          "condition": "A parameter change takes effect without a developer",
+          "team": ["CFG-03"],
+          "agent": ["A2"],
+          "verdict": "covered",
+          "statedInCriterion": true
+        },
+        {
+          "condition": "Only Admin changes configuration",
+          "team": ["CFG-09"],
+          "agent": ["A4"],
+          "verdict": "covered",
+          "statedInCriterion": true
+        }
+      ],
+      "extras": [
+        {
+          "case": "A1",
+          "statedInCriterion": true,
+          "note": "a granted permission takes effect"
+        },
+        {
+          "case": "A3",
+          "statedInCriterion": true,
+          "note": "a new price tier applies"
+        }
+      ],
+      "note": "Neither side tests timers or session status rules taking effect."
+    },
+    "AC-03": {
+      "groups": [
+        {
+          "condition": "An added option shows at once; old data is unchanged",
+          "team": ["CFG-01"],
+          "agent": ["A2", "A3"],
+          "verdict": "covered",
+          "statedInCriterion": true
+        }
+      ],
+      "extras": [
+        {
+          "case": "A1",
+          "statedInCriterion": true,
+          "note": "the result is a drop-down"
+        }
+      ]
+    },
+    "AC-04": {
+      "groups": [
+        {
+          "condition": "\"Khác\" without a note is refused",
+          "team": ["LEAD-15"],
+          "agent": ["A1"],
+          "verdict": "covered",
+          "statedInCriterion": true
+        },
+        {
+          "condition": "\"Khác\" with a note is saved",
+          "team": ["LEAD-16"],
+          "agent": ["A3"],
+          "verdict": "covered",
+          "statedInCriterion": true
+        },
+        {
+          "condition": "Another choice needs no note",
+          "team": ["LEAD-17"],
+          "agent": [],
+          "verdict": "missed",
+          "statedInCriterion": false,
+          "note": "the other column of the decision table"
+        }
+      ],
+      "extras": [
+        {
+          "case": "A2",
+          "statedInCriterion": false,
+          "note": "whitespace-only note, error guessing"
+        }
+      ]
+    },
+    "AC-05": {
+      "groups": [
+        {
+          "condition": "The submitter cannot approve their own request",
+          "team": ["APR-01"],
+          "agent": ["A2"],
+          "verdict": "covered",
+          "statedInCriterion": true
+        },
+        {
+          "condition": "Admin switches approval on or off per action",
+          "team": ["APR-05"],
+          "agent": ["A3"],
+          "verdict": "covered",
+          "statedInCriterion": true
+        }
+      ],
+      "extras": [
+        {
+          "case": "A1",
+          "statedInCriterion": true,
+          "note": "no effect until approved"
+        },
+        {
+          "case": "A4",
+          "statedInCriterion": true,
+          "note": "changing the approver"
+        }
+      ]
+    },
+    "AC-09": {
+      "groups": [],
+      "extras": [
+        {
+          "case": "A1",
+          "statedInCriterion": true
+        }
+      ]
+    },
+    "AC-10": {
+      "groups": [
+        {
+          "condition": "The tier unit price at 1, 24 and 1000 sessions",
+          "team": ["CON-01", "CON-02", "CON-03"],
+          "agent": ["A1"],
+          "verdict": "covered",
+          "statedInCriterion": true
+        },
+        {
+          "condition": "Zero sessions is refused",
+          "team": ["CON-04"],
+          "agent": [],
+          "verdict": "missed",
+          "statedInCriterion": false,
+          "note": "lower boundary"
+        },
+        {
+          "condition": "1001 sessions is refused",
+          "team": ["CON-05"],
+          "agent": ["A2"],
+          "verdict": "covered",
+          "statedInCriterion": true
+        },
+        {
+          "condition": "A non-numeric count is refused",
+          "team": ["CON-06"],
+          "agent": [],
+          "verdict": "missed",
+          "statedInCriterion": false
+        },
+        {
+          "condition": "The live price explains the allowed range",
+          "team": ["CON-07"],
+          "agent": [],
+          "verdict": "missed",
+          "statedInCriterion": false
+        }
+      ],
+      "extras": [
+        {
+          "case": "A3",
+          "statedInCriterion": true,
+          "note": "an exception price waits for approval"
+        }
+      ]
+    },
+    "AC-11": {
+      "groups": [],
+      "extras": [
+        {
+          "case": "A1",
+          "statedInCriterion": true
+        },
+        {
+          "case": "A2",
+          "statedInCriterion": true
+        },
+        {
+          "case": "A3",
+          "statedInCriterion": false,
+          "note": "the inverse: a pending contract stays editable"
+        }
+      ]
+    },
+    "AC-12": {
+      "groups": [
+        {
+          "condition": "Deleting a contract with receipts is blocked and lists them",
+          "team": ["CON-22"],
+          "agent": ["A1"],
+          "verdict": "covered",
+          "statedInCriterion": true
+        }
+      ],
+      "extras": [
+        {
+          "case": "A2",
+          "statedInCriterion": true,
+          "note": "totals fall by exactly the deleted amounts"
+        }
+      ]
+    },
+    "AC-14": {
+      "groups": [
+        {
+          "condition": "Reactivation extends the end date once, after confirmation",
+          "team": ["CON-23"],
+          "agent": ["A2", "A3"],
+          "verdict": "covered",
+          "statedInCriterion": true
+        }
+      ],
+      "extras": [
+        {
+          "case": "A1",
+          "statedInCriterion": true,
+          "note": "a frozen contract cannot be booked"
+        },
+        {
+          "case": "A4",
+          "statedInCriterion": true,
+          "note": "a freeze over 10 days reminds the manager"
+        }
+      ]
+    },
+    "AC-15": {
+      "groups": [
+        {
+          "condition": "Each session status shows its colour",
+          "team": ["SES-11"],
+          "agent": [],
+          "verdict": "missed",
+          "statedInCriterion": true
+        }
+      ],
+      "extras": [
+        {
+          "case": "A1",
+          "statedInCriterion": true,
+          "note": "consumption and PT credit"
+        },
+        {
+          "case": "A2",
+          "statedInCriterion": true,
+          "note": "a cancellation consumes nothing"
+        },
+        {
+          "case": "A3",
+          "statedInCriterion": true,
+          "note": "the three booking refusals"
+        }
+      ]
+    },
+    "AC-16": {
+      "groups": [
+        {
+          "condition": "Deleting a recorded session refunds exactly one",
+          "team": ["SES-07"],
+          "agent": ["A2"],
+          "verdict": "covered",
+          "statedInCriterion": true
+        }
+      ],
+      "extras": [
+        {
+          "case": "A1",
+          "statedInCriterion": true,
+          "note": "no status change from Đã tập"
+        },
+        {
+          "case": "A3",
+          "statedInCriterion": true,
+          "note": "adjustment line in the next period"
+        }
+      ]
+    },
+    "AC-17": {
+      "groups": [
+        {
+          "condition": "A credited or refunded session sends exactly one email",
+          "team": ["MAIL-01"],
+          "agent": ["A1"],
+          "verdict": "covered",
+          "statedInCriterion": true
+        }
+      ],
+      "extras": [
+        {
+          "case": "A2",
+          "statedInCriterion": false,
+          "note": "repeating the change sends no second email"
+        }
+      ]
+    },
+    "AC-19": {
+      "groups": [
+        {
+          "condition": "Paid and debt equal the valid receipts",
+          "team": ["MON-08"],
+          "agent": ["A1"],
+          "verdict": "covered",
+          "statedInCriterion": true
+        },
+        {
+          "condition": "The cash book balances",
+          "team": ["MON-09"],
+          "agent": ["A2"],
+          "verdict": "covered",
+          "statedInCriterion": true
+        }
+      ],
+      "extras": []
+    },
+    "AC-20": {
+      "groups": [
+        {
+          "condition": "Plan and actual on one row in the profile",
+          "team": ["WKO-01"],
+          "agent": ["A1"],
+          "verdict": "covered",
+          "statedInCriterion": true
+        }
+      ],
+      "extras": [
+        {
+          "case": "A2",
+          "statedInCriterion": true,
+          "note": "Cardio fields"
+        }
+      ]
+    },
+    "AC-24": {
+      "groups": [
+        {
+          "condition": "A PT can book outside the on-duty shift",
+          "team": ["BKG-15"],
+          "agent": ["A1"],
+          "verdict": "covered",
+          "statedInCriterion": true
+        }
+      ],
+      "extras": [
+        {
+          "case": "A2",
+          "statedInCriterion": true,
+          "note": "shift colours"
+        }
+      ]
+    },
+    "AC-25": {
+      "groups": [
+        {
+          "condition": "Name and channel are the only required fields",
+          "team": ["LEAD-01", "LEAD-02", "LEAD-07"],
+          "agent": ["A1", "A2"],
+          "verdict": "covered",
+          "statedInCriterion": true
+        },
+        {
+          "condition": "A name of spaces only is refused",
+          "team": ["LEAD-03"],
+          "agent": [],
+          "verdict": "missed",
+          "statedInCriterion": false
+        },
+        {
+          "condition": "Name length at 1, 150 and 151 characters",
+          "team": ["LEAD-04", "LEAD-05", "LEAD-06"],
+          "agent": [],
+          "verdict": "missed",
+          "statedInCriterion": false,
+          "note": "boundary values"
+        }
+      ],
+      "extras": [
+        {
+          "case": "A3",
+          "statedInCriterion": true,
+          "note": "country list and email language"
+        }
+      ]
+    },
+    "AC-26": {
+      "groups": [
+        {
+          "condition": "Leads are shared by turn weight",
+          "team": ["LEAD-32"],
+          "agent": ["A1"],
+          "verdict": "covered",
+          "statedInCriterion": true
+        },
+        {
+          "condition": "An untouched lead moves on after 1 working hour, inside 08:30-20:30",
+          "team": ["LEAD-33"],
+          "agent": ["A2"],
+          "verdict": "covered",
+          "statedInCriterion": true
+        }
+      ],
+      "extras": []
+    },
+    "AC-28": {
+      "groups": [
+        {
+          "condition": "Reminders at 24, 3 and 1 hours",
+          "team": ["TSK-04"],
+          "agent": ["A1"],
+          "verdict": "covered",
+          "statedInCriterion": true
+        },
+        {
+          "condition": "An approval pending over 24 hours goes to the approver's manager",
+          "team": ["APR-04"],
+          "agent": ["A2"],
+          "verdict": "covered",
+          "statedInCriterion": true
+        }
+      ],
+      "extras": []
+    },
+    "AC-30": {
+      "groups": [
+        {
+          "condition": "A session without full check-in is chased",
+          "team": ["CHK-03"],
+          "agent": ["A1"],
+          "verdict": "covered",
+          "statedInCriterion": true
+        }
+      ],
+      "extras": []
+    }
+  },
+  "clarified": {
+    "AC-06": {
+      "team": [],
+      "clearClausesNotDrafted": ["the manager is notified"]
+    },
+    "AC-07": {
+      "team": [
+        {
+          "case": "LEAD-40",
+          "expectedVerifiable": false,
+          "note": "\"created at the right times\": the gap the agent asked about"
+        }
+      ],
+      "clearClausesNotDrafted": [
+        "overdue steps appear in \"Today's tasks\" and count as late",
+        "\"Báo Studio\" creates a task for the coach manager"
+      ]
+    },
+    "AC-08": {
+      "team": [
+        {
+          "case": "RPT-01",
+          "expectedVerifiable": false,
+          "note": "\"Same counts and rates\" against files neither side has"
+        }
+      ],
+      "clearClausesNotDrafted": []
+    },
+    "AC-13": {
+      "team": [
+        {
+          "case": "TRS-01",
+          "expectedVerifiable": true,
+          "note": "leaves out who may view the trash, the clause the agent asked about"
+        }
+      ],
+      "clearClausesNotDrafted": [
+        "deleted data is in the trash with its reason",
+        "trash entries cannot be deleted"
+      ]
+    },
+    "AC-18": {
+      "team": [
+        {
+          "case": "MON-12",
+          "expectedVerifiable": true,
+          "note": "the clear clause"
+        },
+        {
+          "case": "RPT-02",
+          "expectedVerifiable": false,
+          "note": "\"Same totals per PT\" against an export neither side has"
+        }
+      ],
+      "clearClausesNotDrafted": ["PT payout vouchers never pay a session twice"]
+    },
+    "AC-21": {
+      "team": [
+        {
+          "case": "WKO-03",
+          "expectedVerifiable": true,
+          "note": "the clear clause"
+        },
+        {
+          "case": "WKO-05",
+          "expectedVerifiable": false,
+          "note": "\"match a hand count\" with no formula"
+        }
+      ],
+      "clearClausesNotDrafted": [
+        "\"Stop + Escalation\" notifies the manager and Master and waits until handled"
+      ]
+    },
+    "AC-22": {
+      "team": [
+        {
+          "case": "RPT-05",
+          "expectedVerifiable": false,
+          "note": "\"All metrics match\" against an export neither side has"
+        }
+      ],
+      "clearClausesNotDrafted": []
+    },
+    "AC-23": {
+      "team": [
+        {
+          "case": "WKO-06",
+          "expectedVerifiable": false,
+          "note": "\"Usable without sideways scrolling\": one assumed criterion, no width"
+        }
+      ],
+      "clearClausesNotDrafted": []
+    },
+    "AC-27": {
+      "team": [
+        {
+          "case": "LEAD-38",
+          "expectedVerifiable": true,
+          "note": "applies the Admin exception from GYM-FR the agent asked about"
+        },
+        {
+          "case": "LEAD-39",
+          "expectedVerifiable": false,
+          "note": "no grace period length"
+        }
+      ],
+      "clearClausesNotDrafted": ["a ticked checklist step cannot be unticked"]
+    },
+    "AC-29": {
+      "team": [
+        {
+          "case": "CHK-01",
+          "expectedVerifiable": true,
+          "note": "the clear clause"
+        },
+        {
+          "case": "CHK-02",
+          "expectedVerifiable": true,
+          "note": "the clear clause"
+        }
+      ],
+      "clearClausesNotDrafted": [
+        "paired scans within 15 minutes complete the session",
+        "a scan with no booking is an error",
+        "two PTs need a pair each"
+      ]
+    }
+  }
+}

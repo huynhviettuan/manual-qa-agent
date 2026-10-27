@@ -316,3 +316,97 @@ describe('PlaywrightExecutor run-scoped values (ADR-0015)', () => {
     expect(out.steps.find((s) => s.id === 'reopen')?.status).toBe('skipped');
   });
 });
+
+describe('PlaywrightExecutor grids and menus (ADR-0022)', () => {
+  // A PT calendar is a grid of slots and row actions sit in menus; both are reached through their
+  // owning parent, strictly, like every other locator.
+  const page = `<main>
+    <div role="grid" aria-label="PT calendar">
+      <div role="row"><span role="columnheader">Trainer</span><span role="columnheader">Mon 09:00</span><span role="columnheader">Mon 10:00</span></div>
+      <div role="row"><span role="rowheader">Minh</span>
+        <span role="gridcell" aria-label="Minh Mon 09:00"><button onclick="document.getElementById('out').textContent='Booked Minh 09:00'">Book</button></span>
+        <span role="gridcell" aria-label="Minh Mon 10:00"><button>Book</button></span></div>
+    </div>
+    <button aria-haspopup="menu" onclick="document.getElementById('m').hidden=false">Actions</button>
+    <div role="menu" id="m" hidden><div role="menuitem" onclick="document.getElementById('out').textContent='Cancelled'">Hủy lịch</div></div>
+    <p role="status" id="out"></p></main>`;
+  let target: { baseUrl: string; allowedHosts: string[] };
+  beforeAll(async () => {
+    const server = createServer((_req, res) => {
+      res.setHeader('content-type', 'text/html; charset=utf-8');
+      res.end(page);
+    });
+    await new Promise<void>((r) => server.listen(0, '127.0.0.1', r));
+    apps.push({ close: () => new Promise((r) => server.close(r)) });
+    const baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+    target = { baseUrl, allowedHosts: [new URL(baseUrl).host] };
+  });
+
+  const slot = (name: string) => ({
+    by: 'role' as const,
+    role: 'button' as const,
+    name: 'Book',
+    within: {
+      by: 'role' as const,
+      role: 'gridcell' as const,
+      name,
+      within: { by: 'role' as const, role: 'grid' as const, name: 'PT calendar' },
+    },
+  });
+
+  it('books a slot through its gridcell and picks a menu item', async () => {
+    const spec: ExecutableSpecInput = {
+      steps: [
+        { id: 'open', type: 'navigate', path: '/' },
+        { id: 'book', type: 'click', target: slot('Minh Mon 09:00') },
+        {
+          id: 'booked',
+          type: 'expectText',
+          target: { by: 'role', role: 'status' },
+          text: 'Booked Minh 09:00',
+          match: 'exact',
+        },
+        { id: 'menu', type: 'click', target: { by: 'role', role: 'button', name: 'Actions' } },
+        {
+          id: 'cancel',
+          type: 'click',
+          target: { by: 'role', role: 'menuitem', name: 'Hủy lịch', within: { by: 'role', role: 'menu' } },
+        },
+        {
+          id: 'cancelled',
+          type: 'expectText',
+          target: { by: 'role', role: 'status' },
+          text: 'Cancelled',
+          match: 'exact',
+        },
+      ],
+    };
+    const out = await executor.execute(input(spec, target));
+    expect(out, JSON.stringify(out.steps.map((s) => s.error).filter(Boolean))).toMatchObject({
+      verdict: 'PASSED',
+    });
+  });
+
+  it('a Book button looked up in the whole grid matches two slots: inconclusive, never the first', async () => {
+    const spec: ExecutableSpecInput = {
+      steps: [
+        { id: 'open', type: 'navigate', path: '/' },
+        {
+          id: 'book',
+          type: 'click',
+          target: { by: 'role', role: 'button', name: 'Book', within: { by: 'role', role: 'grid' } },
+        },
+        {
+          id: 'booked',
+          type: 'expectText',
+          target: { by: 'role', role: 'status' },
+          text: 'Booked',
+          match: 'contains',
+        },
+      ],
+    };
+    const out = await executor.execute(input(spec, target));
+    expect(out.verdict).toBe('INCONCLUSIVE');
+    expect(out.reason).toBe('STEP_ERROR:book');
+  });
+});

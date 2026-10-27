@@ -37,6 +37,18 @@ const AriaRole = z.enum([
   'listbox',
   'option',
   'alertdialog',
+  // Calendars, data grids and menus (ADR-0022): a booking slot is a gridcell, an action list a menu.
+  'grid',
+  'gridcell',
+  'columnheader',
+  'rowheader',
+  'table',
+  'menu',
+  'menubar',
+  'menuitemcheckbox',
+  'menuitemradio',
+  'tabpanel',
+  'switch',
 ]);
 
 type LocatorShape =

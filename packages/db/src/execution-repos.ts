@@ -126,6 +126,8 @@ export type RunRow = {
   leaseUntil: Date | null;
   /** Has its environment to itself while it runs (ADR-0021). */
   exclusive: boolean;
+  /** Waits for this run (a suite's preflight, ADR-0022) and runs only if it PASSED. */
+  afterRunId: string | null;
   createdAt: Date;
   startedAt: Date | null;
   finishedAt: Date | null;
@@ -135,7 +137,7 @@ const RUN_COLS = `id, tenant_id AS "tenantId", project_id AS "projectId", case_i
   executable_id AS "executableId", spec_hash AS "specHash", environment_id AS "environmentId", state, reason,
   idempotency_key AS "idempotencyKey", requested_by AS "requestedBy", approval_id AS "approvalId", review_id AS "reviewId",
   assertions, cleanup_failed AS "cleanupFailed", blocked_requests AS "blockedRequests", lease_owner AS "leaseOwner",
-  lease_until AS "leaseUntil", exclusive, created_at AS "createdAt", started_at AS "startedAt", finished_at AS "finishedAt"`;
+  lease_until AS "leaseUntil", exclusive, after_run_id AS "afterRunId", created_at AS "createdAt", started_at AS "startedAt", finished_at AS "finishedAt"`;
 
 /** Idempotent: the same key in the same scope returns the existing run. */
 export async function createOrGetRun(
@@ -151,12 +153,12 @@ export async function createOrGetRun(
     | 'idempotencyKey'
     | 'requestedBy'
     | 'approvalId'
-  > & { exclusive?: boolean },
+  > & { exclusive?: boolean; afterRunId?: string | null },
 ): Promise<{ run: RunRow; created: boolean }> {
   const inserted = await db.query<RunRow>(
     `INSERT INTO test_runs (id, tenant_id, project_id, case_id, case_revision, executable_id, spec_hash, environment_id,
-       state, idempotency_key, requested_by, approval_id, exclusive)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'QUEUED',$9,$10,$11,$12)
+       state, idempotency_key, requested_by, approval_id, exclusive, after_run_id)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'QUEUED',$9,$10,$11,$12,$13)
      ON CONFLICT (tenant_id, project_id, idempotency_key) DO NOTHING RETURNING ${RUN_COLS}`,
     [
       newId('run'),
@@ -171,6 +173,7 @@ export async function createOrGetRun(
       r.requestedBy,
       r.approvalId,
       r.exclusive ?? false,
+      r.afterRunId ?? null,
     ],
   );
   if (inserted[0]) return { run: inserted[0], created: true };
@@ -211,6 +214,9 @@ export async function claimNextRun(db: Db, workerId: string, leaseMs: number): P
                WHERE a.state IN ('POLICY_CHECK','RUNNING') AND a.tenant_id = r.tenant_id
                  AND a.project_id = r.project_id AND a.environment_id = r.environment_id
                  AND (a.exclusive OR r.exclusive))
+            -- ADR-0022: a run behind a preflight waits until the preflight PASSED.
+            AND (r.after_run_id IS NULL
+                 OR EXISTS (SELECT 1 FROM test_runs p WHERE p.id = r.after_run_id AND p.state = 'PASSED'))
           ORDER BY r.created_at LIMIT 1 FOR UPDATE SKIP LOCKED)
           AND state = 'QUEUED'
         RETURNING ${RUN_COLS}`,
@@ -218,6 +224,22 @@ export async function claimNextRun(db: Db, workerId: string, leaseMs: number): P
     );
     return rows[0] ?? null;
   });
+}
+
+/** Queued runs whose preflight finished without passing (ADR-0022): they must not run. */
+export async function runsBehindFailedPreflight(
+  db: Db,
+): Promise<Array<RunRow & { preflightState: RunStatus }>> {
+  const pairs = await db.query<{ id: string; preflightState: RunStatus }>(
+    `SELECT r.id, p.state AS "preflightState" FROM test_runs r JOIN test_runs p ON p.id = r.after_run_id
+      WHERE r.state = 'QUEUED' AND p.state IN ('FAILED','INCONCLUSIVE','BLOCKED','CANCELLED')`,
+  );
+  if (!pairs.length) return [];
+  const state = new Map(pairs.map((x) => [x.id, x.preflightState]));
+  const rows = await db.query<RunRow>(`SELECT ${RUN_COLS} FROM test_runs WHERE id = ANY($1)`, [
+    pairs.map((x) => x.id),
+  ]);
+  return rows.map((r) => ({ ...r, preflightState: state.get(r.id)! }));
 }
 
 /** Runs whose worker lease expired mid-flight (crash). They are never re-executed blindly. */

@@ -1,6 +1,6 @@
 {
   "model": "claude-opus-5-5 (interactive Claude Code session)",
-  "generatedAt": "2026-10-23T06:44:18.440Z",
+  "generatedAt": "2026-10-27T10:41:13.162Z",
   "summary": {
     "stories": 30,
     "drafted": 20,
@@ -8,7 +8,7 @@
     "pending": 0,
     "cases": 53,
     "steps": 80,
-    "flaggedCases": 20,
+    "flaggedCases": 2,
     "automatable": 30,
     "techniques": {
       "permission_matrix": 6,
@@ -762,9 +762,7 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": [
-            "step 1: no exact message, value or state in \"The role shows lead.export as granted\""
-          ]
+          "reviewFlags": []
         },
         {
           "title": "Changing a role's discount threshold changes who approves",
@@ -806,9 +804,7 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": [
-            "step 2: no exact message, value or state in \"The approval request goes to the Fitness Manager, not to Admin\""
-          ]
+          "reviewFlags": []
         },
         {
           "title": "A new price tier version applies to contracts created after it",
@@ -852,8 +848,7 @@
           ],
           "assumptions": [],
           "reviewFlags": [
-            "step 1: no exact message, value or state in \"The tier list shows the new unit price\"",
-            "step 2: no exact message, value or state in \"The unit price on the form equals the new tier price\""
+            "step 1: no exact message, value or state in \"The tier list shows the new unit price\""
           ]
         },
         {
@@ -953,9 +948,7 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": [
-            "step 1: no exact message, value or state in \"The result field is a drop-down with the configured options; free text cannot...\""
-          ]
+          "reviewFlags": []
         },
         {
           "title": "An option added by Admin appears at once",
@@ -1048,9 +1041,7 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": [
-            "step 2: no exact message, value or state in \"The option is marked inactive\""
-          ]
+          "reviewFlags": []
         }
       ],
       "team": [
@@ -1333,9 +1324,7 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": [
-            "step 1: no exact message, value or state in \"The approval matrix shows receipts as not requiring approval\""
-          ]
+          "reviewFlags": []
         },
         {
           "title": "Admin changes the approver of an action type",
@@ -1368,9 +1357,7 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": [
-            "step 1: no exact message, value or state in \"The approval task goes to Admin, not to the Fitness Manager\""
-          ]
+          "reviewFlags": []
         }
       ],
       "team": [
@@ -1516,10 +1503,7 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": [
-            "step 2: no exact message, value or state in \"The lead becomes a customer with the same ID\"",
-            "step 3: no exact message, value or state in \"The contract and the session belong to the customer with that same ID\""
-          ]
+          "reviewFlags": []
         }
       ],
       "team": []
@@ -1582,9 +1566,7 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": [
-            "step 2: no exact message, value or state in \"The unit price changes to the next tier's price\""
-          ]
+          "reviewFlags": []
         },
         {
           "title": "A count above the highest tier is refused",
@@ -1775,9 +1757,7 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": [
-            "step 1: no exact message, value or state in \"No edit action is offered\""
-          ]
+          "reviewFlags": []
         },
         {
           "title": "A pending contract cannot be booked",
@@ -1845,9 +1825,7 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": [
-            "step 1: no exact message, value or state in \"The new note is saved\""
-          ]
+          "reviewFlags": []
         }
       ],
       "team": []
@@ -2077,9 +2055,7 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": [
-            "step 2: no exact message, value or state in \"The end date becomes the proposed date\""
-          ]
+          "reviewFlags": []
         },
         {
           "title": "A freeze extends the end date at most once",
@@ -2158,9 +2134,7 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": [
-            "step 1: no exact message, value or state in \"No reminder task exists\""
-          ]
+          "reviewFlags": []
         }
       ],
       "team": [
@@ -2370,9 +2344,7 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": [
-            "step 1: no exact message, value or state in \"No status actions (Hủy lịch, Khách không đến) are offered\""
-          ]
+          "reviewFlags": []
         },
         {
           "title": "Admin deleting a recorded session refunds 1 session and removes 1 PT credit",
@@ -2676,9 +2648,7 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": [
-            "step 1: no exact message, value or state in \"Closing balance = opening + receipts - expenses, to the đồng\""
-          ]
+          "reviewFlags": []
         }
       ],
       "team": [
@@ -2744,9 +2714,7 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": [
-            "step 1: no exact message, value or state in \"Each set is one row with the plan (read-only) and the actual side by side\""
-          ]
+          "reviewFlags": []
         },
         {
           "title": "A Cardio exercise shows time, speed and heart rate instead of weights",
@@ -3035,10 +3003,7 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": [
-            "step 1: no exact message, value or state in \"The channel field is marked required and nothing is saved\"",
-            "step 2: no exact message, value or state in \"The name field is marked required and nothing is saved\""
-          ]
+          "reviewFlags": []
         },
         {
           "title": "The country is chosen from the list and sets the email language",
@@ -3213,9 +3178,7 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": [
-            "step 1: no exact message, value or state in \"It moves to the next consultant and the move is in its history\""
-          ]
+          "reviewFlags": []
         }
       ],
       "team": [
@@ -3345,9 +3308,7 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": [
-            "step 1: no exact message, value or state in \"The approver's direct manager receives a notice\""
-          ]
+          "reviewFlags": []
         }
       ],
       "team": [

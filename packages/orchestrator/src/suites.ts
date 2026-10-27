@@ -1,6 +1,7 @@
 import {
   approvedExecutableForCase,
   getEnvironment,
+  getRun,
   getSuite,
   getSuiteRun,
   insertAuditEvent,
@@ -14,6 +15,7 @@ import {
   listSuiteCases,
   listSuiteRunItems,
   listSuiteRuns,
+  setSuiteRunPreflight,
   upsertSuiteCase,
   type Db,
   type EnvironmentRow,
@@ -150,6 +152,12 @@ export async function preflight(
       const probe = deps.probe ?? httpProbe;
       if (!(await probe(environment.baseUrl))) reasons.push('TARGET_UNREACHABLE');
     }
+    // ADR-0022: a named preflight case must be runnable, or the environment cannot be proven ready.
+    if (environment.preflightCaseId) {
+      const c = await latestRevision(deps.db, scope, environment.preflightCaseId);
+      const exe = c ? await approvedExecutableForCase(deps.db, scope, c.caseId) : null;
+      if (!c || c.status !== 'APPROVED' || !exe) reasons.push('PREFLIGHT_CASE_NOT_EXECUTABLE');
+    }
   }
   return { environment, reasons };
 }
@@ -189,6 +197,18 @@ export async function runSuite(
     reason: blocked ? `PREFLIGHT:${check.reasons.join(',')}` : null,
     requestedBy: actor.id,
   });
+  // ADR-0022: the environment's preflight case runs first; the automated runs wait for it.
+  let afterRunId: string | undefined;
+  const preflightCaseId = check.environment?.preflightCaseId;
+  if (!blocked && automated.size > 0 && preflightCaseId) {
+    const pre = await requestRun(deps, actor, {
+      caseId: preflightCaseId,
+      environmentId: input.environmentId,
+      idempotencyKey: `${suiteRun.id}:preflight`,
+    });
+    await setSuiteRunPreflight(db, suiteRun.id, pre.id);
+    afterRunId = pre.id;
+  }
   for (const c of cases) {
     let outcome: SuiteRunItemOutcome = 'NOT_APPROVED';
     let runId: string | null = null;
@@ -199,6 +219,7 @@ export async function runSuite(
           caseId: c.caseId,
           environmentId: input.environmentId,
           idempotencyKey: `${suiteRun.id}:${c.caseId}`,
+          afterRunId,
         });
         outcome = 'REQUESTED';
         runId = run.id;
@@ -274,6 +295,7 @@ export async function getSuiteRunReport(db: Db, scope: TenantScope, suiteRunId: 
   );
   const count = (s: string) => items.filter((i) => i.status === s).length;
   const requested = items.filter((i) => i.runId);
+  const pre = suiteRun.preflightRunId ? await getRun(db, scope, suiteRun.preflightRunId) : null;
   return {
     id: suiteRun.id,
     suiteId: suiteRun.suiteId,
@@ -281,9 +303,11 @@ export async function getSuiteRunReport(db: Db, scope: TenantScope, suiteRunId: 
     build: suiteRun.build,
     status: suiteRun.status,
     reason: suiteRun.reason,
+    /** The environment's preflight case run (ADR-0022): the automated runs ran only if it PASSED. */
+    preflight: pre ? { runId: pre.id, caseId: pre.caseId, status: pre.state, reason: pre.reason } : null,
     requestedBy: suiteRun.requestedBy,
     createdAt: suiteRun.createdAt,
-    complete: requested.every((i) => TERMINAL.has(i.status)),
+    complete: requested.every((i) => TERMINAL.has(i.status)) && (!pre || TERMINAL.has(pre.state)),
     totals: {
       cases: items.length,
       passed: count('PASSED'),

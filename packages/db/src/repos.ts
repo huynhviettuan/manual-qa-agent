@@ -62,14 +62,17 @@ export type EnvironmentRow = {
   /** Execution target (Phase 2). Runs may only reach `allowedHosts`. */
   baseUrl?: string | null;
   allowedHosts?: string[];
+  /** An approved case a suite run executes first, to prove the environment ready (ADR-0022). */
+  preflightCaseId?: string | null;
 };
 
 export async function upsertEnvironment(db: Db, scope: TenantScope, e: EnvironmentRow) {
   await db.query(
-    `INSERT INTO environments (id, tenant_id, project_id, kind, allowed_actions, base_url, allowed_hosts)
-     VALUES ($1,$2,$3,$4,$5,$6,$7)
+    `INSERT INTO environments (id, tenant_id, project_id, kind, allowed_actions, base_url, allowed_hosts, preflight_case_id)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
      ON CONFLICT (tenant_id, project_id, id) DO UPDATE SET kind = EXCLUDED.kind,
-       allowed_actions = EXCLUDED.allowed_actions, base_url = EXCLUDED.base_url, allowed_hosts = EXCLUDED.allowed_hosts`,
+       allowed_actions = EXCLUDED.allowed_actions, base_url = EXCLUDED.base_url, allowed_hosts = EXCLUDED.allowed_hosts,
+       preflight_case_id = EXCLUDED.preflight_case_id`,
     [
       e.id,
       scope.tenantId,
@@ -78,13 +81,15 @@ export async function upsertEnvironment(db: Db, scope: TenantScope, e: Environme
       e.allowedActions,
       e.baseUrl ?? null,
       e.allowedHosts ?? [],
+      e.preflightCaseId ?? null,
     ],
   );
 }
 
 export async function getEnvironment(db: Db, scope: TenantScope, id: string): Promise<EnvironmentRow | null> {
   const rows = await db.query<EnvironmentRow>(
-    `SELECT id, kind, allowed_actions AS "allowedActions", base_url AS "baseUrl", allowed_hosts AS "allowedHosts"
+    `SELECT id, kind, allowed_actions AS "allowedActions", base_url AS "baseUrl", allowed_hosts AS "allowedHosts",
+       preflight_case_id AS "preflightCaseId"
        FROM environments WHERE id = $1 AND tenant_id = $2 AND project_id = $3`,
     [id, scope.tenantId, scope.projectId],
   );
@@ -512,20 +517,31 @@ async function nextCaseCode(tx: Db, scope: TenantScope, prefix: string): Promise
 export async function createTestCase(
   db: Db,
   scope: TenantScope,
-  c: { storyId: string; workflowId: string | null; content: unknown; sourceRefs: string[]; authorId: string },
+  c: {
+    storyId: string;
+    workflowId: string | null;
+    content: unknown;
+    sourceRefs: string[];
+    authorId: string;
+    /** A code to keep (an imported catalogue's own id, ADR-0022); otherwise one is assigned. */
+    code?: string;
+    /** Revision 1's status; DRAFT unless an importing reviewer brings already-approved cases. */
+    status?: 'DRAFT' | 'APPROVED';
+  },
 ): Promise<CaseRevisionRow> {
   return db.transaction(async (tx) => {
     const caseId = newId('case');
     const module = (c.content as { module?: unknown } | null)?.module;
-    const code = await nextCaseCode(tx, scope, caseCodePrefix(typeof module === 'string' ? module : ''));
+    const code =
+      c.code ?? (await nextCaseCode(tx, scope, caseCodePrefix(typeof module === 'string' ? module : '')));
     await tx.query(
       'INSERT INTO test_cases (id, tenant_id, project_id, story_id, workflow_id, code) VALUES ($1,$2,$3,$4,$5,$6)',
       [caseId, scope.tenantId, scope.projectId, c.storyId, c.workflowId, code],
     );
     await tx.query(
       `INSERT INTO test_case_revisions (id, case_id, revision, status, content, source_refs, author_id)
-       VALUES ($1,$2,1,'DRAFT',$3::text::jsonb,$4,$5)`,
-      [newId('rev'), caseId, json(c.content), c.sourceRefs, c.authorId],
+       VALUES ($1,$2,1,$6,$3::text::jsonb,$4,$5)`,
+      [newId('rev'), caseId, json(c.content), c.sourceRefs, c.authorId, c.status ?? 'DRAFT'],
     );
     return (await latestRevision(tx, scope, caseId))!;
   });
@@ -566,6 +582,42 @@ export async function addRevision(
       [newId('rev'), caseId, latest.revision + 1, r.status, json(r.content), r.sourceRefs, r.authorId],
     );
     return (await latestRevision(tx, scope, caseId))!;
+  });
+}
+
+/** Codes already taken in the project (ADR-0022: an import keeps a catalogue's codes when free). */
+export async function listCaseCodes(db: Db, scope: TenantScope): Promise<Set<string>> {
+  const rows = await db.query<{ code: string }>(
+    'SELECT code FROM test_cases WHERE tenant_id = $1 AND project_id = $2 AND code IS NOT NULL',
+    [scope.tenantId, scope.projectId],
+  );
+  return new Set(rows.map((r) => r.code));
+}
+
+/**
+ * Gives every case created before codes existed (ADR-0021) a code, oldest first, from its latest
+ * revision's module. Idempotent: cases that have a code are left alone.
+ */
+export async function assignMissingCaseCodes(
+  db: Db,
+  scope: TenantScope,
+): Promise<Array<{ caseId: string; code: string }>> {
+  return db.transaction(async (tx) => {
+    const rows = await tx.query<{ caseId: string; content: unknown }>(
+      `SELECT c.id AS "caseId",
+         (SELECT r.content FROM test_case_revisions r WHERE r.case_id = c.id ORDER BY r.revision DESC LIMIT 1) AS content
+       FROM test_cases c WHERE c.tenant_id = $1 AND c.project_id = $2 AND c.code IS NULL
+       ORDER BY c.created_at, c.id`,
+      [scope.tenantId, scope.projectId],
+    );
+    const out: Array<{ caseId: string; code: string }> = [];
+    for (const r of rows) {
+      const module = (r.content as { module?: unknown } | null)?.module;
+      const code = await nextCaseCode(tx, scope, caseCodePrefix(typeof module === 'string' ? module : ''));
+      await tx.query('UPDATE test_cases SET code = $2 WHERE id = $1 AND code IS NULL', [r.caseId, code]);
+      out.push({ caseId: r.caseId, code });
+    }
+    return out;
   });
 }
 

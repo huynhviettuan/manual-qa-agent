@@ -1,0 +1,370 @@
+{
+  "summary": {
+    "judge": "Claude (claude-opus-5-5) in the interactive Claude Code session of 2026-10-27, from each case's title and the criterion text; a person should spot-check it",
+    "agentModel": "claude-opus-5-5 (interactive Claude Code session)",
+    "drafted": {
+      "criteria": 20,
+      "agentCases": 53,
+      "teamCases": 110,
+      "teamConditions": 36,
+      "covered": 25,
+      "partial": 1,
+      "missed": 10,
+      "missedStatedInCriterion": 1,
+      "agentExtraConditions": 23,
+      "agentExtrasStatedInCriterion": 20
+    },
+    "clarified": {
+      "criteria": 10,
+      "teamCases": 13,
+      "teamCasesWithVerifiableExpectation": 6,
+      "criteriaWithClearClausesNotDrafted": 7,
+      "clearClausesNotDrafted": 11
+    }
+  },
+  "missed": [
+    {
+      "criterion": "AC-01",
+      "condition": "Signed-out access is sent to the login page",
+      "team": [
+        "AUTH-04",
+        "AUTH-05"
+      ],
+      "statedInCriterion": false
+    },
+    {
+      "criterion": "AC-01",
+      "condition": "Action-level permissions inside a module the role can open",
+      "team": [
+        "RBAC-M3",
+        "RBAC-M4",
+        "CON-17",
+        "CON-18",
+        "MON-14",
+        "MON-15"
+      ],
+      "statedInCriterion": false
+    },
+    {
+      "criterion": "AC-01",
+      "condition": "The API refuses a request without a session or with the wrong role",
+      "team": [
+        "SEC-02",
+        "SEC-03",
+        "SEC-04"
+      ],
+      "statedInCriterion": false
+    },
+    {
+      "criterion": "AC-04",
+      "condition": "Another choice needs no note",
+      "team": [
+        "LEAD-17"
+      ],
+      "statedInCriterion": false,
+      "note": "the other column of the decision table"
+    },
+    {
+      "criterion": "AC-10",
+      "condition": "Zero sessions is refused",
+      "team": [
+        "CON-04"
+      ],
+      "statedInCriterion": false,
+      "note": "lower boundary"
+    },
+    {
+      "criterion": "AC-10",
+      "condition": "A non-numeric count is refused",
+      "team": [
+        "CON-06"
+      ],
+      "statedInCriterion": false
+    },
+    {
+      "criterion": "AC-10",
+      "condition": "The live price explains the allowed range",
+      "team": [
+        "CON-07"
+      ],
+      "statedInCriterion": false
+    },
+    {
+      "criterion": "AC-15",
+      "condition": "Each session status shows its colour",
+      "team": [
+        "SES-11"
+      ],
+      "statedInCriterion": true
+    },
+    {
+      "criterion": "AC-25",
+      "condition": "A name of spaces only is refused",
+      "team": [
+        "LEAD-03"
+      ],
+      "statedInCriterion": false
+    },
+    {
+      "criterion": "AC-25",
+      "condition": "Name length at 1, 150 and 151 characters",
+      "team": [
+        "LEAD-04",
+        "LEAD-05",
+        "LEAD-06"
+      ],
+      "statedInCriterion": false,
+      "note": "boundary values"
+    }
+  ],
+  "partial": [
+    {
+      "criterion": "AC-01",
+      "condition": "Each protected page opens for an allowed role and is refused to a refused role",
+      "agent": [
+        "A2"
+      ],
+      "note": "the agent checks one refusal; the team checks 30 pages, allowed and refused"
+    }
+  ],
+  "extras": [
+    {
+      "case": "A1",
+      "statedInCriterion": true,
+      "note": "a granted permission takes effect",
+      "criterion": "AC-02",
+      "title": "Granting a permission on screen takes effect at the next request"
+    },
+    {
+      "case": "A3",
+      "statedInCriterion": true,
+      "note": "a new price tier applies",
+      "criterion": "AC-02",
+      "title": "A new price tier version applies to contracts created after it"
+    },
+    {
+      "case": "A1",
+      "statedInCriterion": true,
+      "note": "the result is a drop-down",
+      "criterion": "AC-03",
+      "title": "A consulting step result is chosen from a drop-down"
+    },
+    {
+      "case": "A2",
+      "statedInCriterion": false,
+      "note": "whitespace-only note, error guessing",
+      "criterion": "AC-04",
+      "title": "\"Khác\" with a whitespace-only note cannot be saved"
+    },
+    {
+      "case": "A1",
+      "statedInCriterion": true,
+      "note": "no effect until approved",
+      "criterion": "AC-05",
+      "title": "A contract has no effect until approved"
+    },
+    {
+      "case": "A4",
+      "statedInCriterion": true,
+      "note": "changing the approver",
+      "criterion": "AC-05",
+      "title": "Admin changes the approver of an action type"
+    },
+    {
+      "case": "A1",
+      "statedInCriterion": true,
+      "criterion": "AC-09",
+      "title": "One person keeps one record from lead to first session"
+    },
+    {
+      "case": "A3",
+      "statedInCriterion": true,
+      "note": "an exception price waits for approval",
+      "criterion": "AC-10",
+      "title": "A price different from the tier makes an exception price that waits for approval"
+    },
+    {
+      "case": "A1",
+      "statedInCriterion": true,
+      "criterion": "AC-11",
+      "title": "An approved contract cannot be edited, even by Admin"
+    },
+    {
+      "case": "A2",
+      "statedInCriterion": true,
+      "criterion": "AC-11",
+      "title": "A pending contract cannot be booked"
+    },
+    {
+      "case": "A3",
+      "statedInCriterion": false,
+      "note": "the inverse: a pending contract stays editable",
+      "criterion": "AC-11",
+      "title": "A pending contract can still be edited"
+    },
+    {
+      "case": "A2",
+      "statedInCriterion": true,
+      "note": "totals fall by exactly the deleted amounts",
+      "criterion": "AC-12",
+      "title": "After deleting the receipts and then the contract, totals fall by exactly the deleted amounts"
+    },
+    {
+      "case": "A1",
+      "statedInCriterion": true,
+      "note": "a frozen contract cannot be booked",
+      "criterion": "AC-14",
+      "title": "A frozen contract cannot be booked"
+    },
+    {
+      "case": "A4",
+      "statedInCriterion": true,
+      "note": "a freeze over 10 days reminds the manager",
+      "criterion": "AC-14",
+      "title": "A freeze longer than 10 days creates a reminder task for the manager"
+    },
+    {
+      "case": "A1",
+      "statedInCriterion": true,
+      "note": "consumption and PT credit",
+      "criterion": "AC-15",
+      "title": "\"Đã tập\" and \"Khách không đến\" reduce sessions left by 1 and credit the PT"
+    },
+    {
+      "case": "A2",
+      "statedInCriterion": true,
+      "note": "a cancellation consumes nothing",
+      "criterion": "AC-15",
+      "title": "\"Hủy lịch\" neither consumes nor credits"
+    },
+    {
+      "case": "A3",
+      "statedInCriterion": true,
+      "note": "the three booking refusals",
+      "criterion": "AC-15",
+      "title": "Booking is refused with no sessions left, on an expired contract, or on an overlap"
+    },
+    {
+      "case": "A1",
+      "statedInCriterion": true,
+      "note": "no status change from Đã tập",
+      "criterion": "AC-16",
+      "title": "A session in \"Đã tập\" offers no status change"
+    },
+    {
+      "case": "A3",
+      "statedInCriterion": true,
+      "note": "adjustment line in the next period",
+      "criterion": "AC-16",
+      "title": "Deleting a session in a paid period adds an adjustment line to the next period"
+    },
+    {
+      "case": "A2",
+      "statedInCriterion": false,
+      "note": "repeating the change sends no second email",
+      "criterion": "AC-17",
+      "title": "Repeating the status change does not send a second email"
+    },
+    {
+      "case": "A2",
+      "statedInCriterion": true,
+      "note": "Cardio fields",
+      "criterion": "AC-20",
+      "title": "A Cardio exercise shows time, speed and heart rate instead of weights"
+    },
+    {
+      "case": "A2",
+      "statedInCriterion": true,
+      "note": "shift colours",
+      "criterion": "AC-24",
+      "title": "In-shift and off-shift cells have different colours"
+    },
+    {
+      "case": "A3",
+      "statedInCriterion": true,
+      "note": "country list and email language",
+      "criterion": "AC-25",
+      "title": "The country is chosen from the list and sets the email language"
+    }
+  ],
+  "clarified": [
+    {
+      "criterion": "AC-06",
+      "teamCases": 0,
+      "verifiable": 0,
+      "clearClausesNotDrafted": [
+        "the manager is notified"
+      ]
+    },
+    {
+      "criterion": "AC-07",
+      "teamCases": 1,
+      "verifiable": 0,
+      "clearClausesNotDrafted": [
+        "overdue steps appear in \"Today's tasks\" and count as late",
+        "\"Báo Studio\" creates a task for the coach manager"
+      ]
+    },
+    {
+      "criterion": "AC-08",
+      "teamCases": 1,
+      "verifiable": 0,
+      "clearClausesNotDrafted": []
+    },
+    {
+      "criterion": "AC-13",
+      "teamCases": 1,
+      "verifiable": 1,
+      "clearClausesNotDrafted": [
+        "deleted data is in the trash with its reason",
+        "trash entries cannot be deleted"
+      ]
+    },
+    {
+      "criterion": "AC-18",
+      "teamCases": 2,
+      "verifiable": 1,
+      "clearClausesNotDrafted": [
+        "PT payout vouchers never pay a session twice"
+      ]
+    },
+    {
+      "criterion": "AC-21",
+      "teamCases": 2,
+      "verifiable": 1,
+      "clearClausesNotDrafted": [
+        "\"Stop + Escalation\" notifies the manager and Master and waits until handled"
+      ]
+    },
+    {
+      "criterion": "AC-22",
+      "teamCases": 1,
+      "verifiable": 0,
+      "clearClausesNotDrafted": []
+    },
+    {
+      "criterion": "AC-23",
+      "teamCases": 1,
+      "verifiable": 0,
+      "clearClausesNotDrafted": []
+    },
+    {
+      "criterion": "AC-27",
+      "teamCases": 2,
+      "verifiable": 1,
+      "clearClausesNotDrafted": [
+        "a ticked checklist step cannot be unticked"
+      ]
+    },
+    {
+      "criterion": "AC-29",
+      "teamCases": 2,
+      "verifiable": 2,
+      "clearClausesNotDrafted": [
+        "paired scans within 15 minutes complete the session",
+        "a scan with no booking is an error",
+        "two PTs need a pair each"
+      ]
+    }
+  ]
+}

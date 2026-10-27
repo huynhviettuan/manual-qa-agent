@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
+  assignMissingCaseCodes,
   claimNextRun,
   createOrGetRun,
   createTestCase,
@@ -19,6 +20,7 @@ import {
   addSuiteCases,
   createSuite,
   getCoverage,
+  projectMetrics,
   getSuiteRunReport,
   proposeExecutable,
   recordManualRun,
@@ -349,5 +351,59 @@ describe('test-design document', () => {
     expect(md).toContain('**Stale cases (');
     expect(md).toContain('BR-404@v1 | SUPERSEDED');
     expect(md).toMatch(/Cases guarding a defect \(\d+\):.*BUG-007/);
+  });
+});
+
+describe('retest reviews, code backfill and manual effort (ADR-0022)', () => {
+  it('opens one retest review when a known-bug case passes, and closes it when the mark is cleared', async () => {
+    const c = await newCase('Retest me', ['BR-404@v2']);
+    await setKnownBug(db, a.qa, c.caseId, 'BUG-090');
+    const run = (startedAt: Date, finishedAt: Date) =>
+      recordManualRun(db, a.qa, {
+        caseId: c.caseId,
+        environmentId: 'staging',
+        build: 'b7',
+        steps: pass(1),
+        startedAt,
+        finishedAt,
+      });
+    await run(new Date('2026-10-27T09:00:00Z'), new Date('2026-10-27T09:04:00Z'));
+    await run(new Date('2026-10-27T10:00:00Z'), new Date('2026-10-27T10:02:00Z'));
+    const open = await db.query<{ id: string; status: string; question: string; assigned_role: string }>(
+      `SELECT id, status, question, assigned_role FROM review_tasks WHERE kind = 'KNOWN_BUG_RETEST' AND subject_id = $1`,
+      [c.caseId],
+    );
+    expect(open).toHaveLength(1); // one per case, however many passes
+    expect(open[0]).toMatchObject({ status: 'OPEN', assigned_role: 'QA_ENGINEER' });
+    expect(open[0]!.question).toContain(`${c.code} passed on staging build b7`);
+    expect(open[0]!.question).toContain('BUG-090');
+
+    await setKnownBug(db, a.qa, c.caseId, null);
+    const closed = await db.query<{ status: string }>(`SELECT status FROM review_tasks WHERE id = $1`, [
+      open[0]!.id,
+    ]);
+    expect(closed[0]!.status).toBe('APPROVED');
+
+    // No mark, no review.
+    await run(new Date('2026-10-27T11:00:00Z'), new Date('2026-10-27T11:01:00Z'));
+    expect(
+      await db.query(
+        `SELECT 1 FROM review_tasks WHERE kind = 'KNOWN_BUG_RETEST' AND status = 'OPEN' AND subject_id = $1`,
+        [c.caseId],
+      ),
+    ).toHaveLength(0);
+
+    const m = (await projectMetrics(db, S, 3650)).manual;
+    expect(m.runs).toBeGreaterThanOrEqual(3);
+    expect(m.byTester.find((t) => t.testerId === a.qa.id)!.minutes).toBeGreaterThanOrEqual(7);
+    expect(m.medianMinutesPerRun).not.toBeNull();
+  });
+
+  it('gives a code to cases created without one, once', async () => {
+    const c = await newCase('Created before codes', ['BR-404@v2'], { module: 'Legacy area' }, false);
+    await db.query('UPDATE test_cases SET code = NULL WHERE id = $1', [c.caseId]);
+    const done = await assignMissingCaseCodes(db, S);
+    expect(done).toEqual([{ caseId: c.caseId, code: 'LEGACY-001' }]);
+    expect(await assignMissingCaseCodes(db, S)).toEqual([]);
   });
 });

@@ -5,6 +5,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   createTestCase,
   createTestDb,
+  getEnvironment,
   seedProject,
   upsertEnvironment,
   type Db,
@@ -164,6 +165,65 @@ describe('test suites', () => {
       sourceRefs: ['AC-LOGIN@v1'],
     });
     expect(report.items.find((i) => i.caseId === passing)!.evidence).toBeGreaterThan(0);
+  });
+
+  it('runs the environment preflight case first and blocks the automated runs unless it passes (ADR-0022)', async () => {
+    const ready = await testCase('Preflight: QA can sign in', 'automated', loginValidSpec);
+    const broken = await testCase('Preflight: wrong page', 'automated', {
+      steps: [
+        { id: 'open', type: 'navigate', path: '/login' },
+        {
+          id: 'nope',
+          type: 'expectText',
+          target: { by: 'testId', testId: 'login-form' },
+          text: 'Not on this page',
+          match: 'exact',
+        },
+      ],
+    });
+    const behind = await testCase('Behind the preflight', 'automated');
+    const manual = await testCase('Manual beside the preflight', 'manual');
+    const suite = await createSuite(db, a.qa, { name: 'Preflighted' });
+    await addSuiteCases(db, a.qa, suite.id, [{ caseId: behind }, { caseId: manual }]);
+    const staging = (await getEnvironment(db, S, 'staging'))!;
+    const drain = async () => {
+      while (await workOnce(deps, 'suite-worker')) {
+        /* drain */
+      }
+    };
+    try {
+      await upsertEnvironment(db, S, { ...staging, preflightCaseId: ready });
+      const ok = await runSuite(deps, a.qa, suite.id, { environmentId: 'staging' });
+      expect(ok.preflight).toMatchObject({ caseId: ready, status: 'QUEUED' });
+      expect(ok.complete).toBe(false);
+      await drain();
+      const passed = await getSuiteRunReport(db, S, ok.id);
+      expect(passed.preflight).toMatchObject({ status: 'PASSED' });
+      expect(passed.items.map((i) => i.status)).toEqual(['PASSED', 'NOT_AUTOMATED']);
+      expect(passed.complete).toBe(true);
+
+      await upsertEnvironment(db, S, { ...staging, preflightCaseId: broken });
+      const bad = await runSuite(deps, a.qa, suite.id, { environmentId: 'staging' });
+      await drain();
+      const failed = await getSuiteRunReport(db, S, bad.id);
+      expect(failed.preflight).toMatchObject({ status: 'FAILED' });
+      expect(failed.items[0]).toMatchObject({ status: 'BLOCKED', reason: 'PREFLIGHT_FAILED:FAILED' });
+      expect(failed.items[1]).toMatchObject({ status: 'NOT_AUTOMATED' }); // people decide on manual cases
+      const audits = await db.query(
+        `SELECT 1 FROM audit_events WHERE action_kind = 'RUN_BLOCKED' AND target = $1 AND outcome = 'PREFLIGHT_FAILED:FAILED'`,
+        [failed.items[0]!.runId],
+      );
+      expect(audits).toHaveLength(1);
+
+      await upsertEnvironment(db, S, { ...staging, preflightCaseId: manual });
+      const unrunnable = await runSuite(deps, a.qa, suite.id, { environmentId: 'staging' });
+      expect(unrunnable).toMatchObject({
+        status: 'BLOCKED',
+        reason: 'PREFLIGHT:PREFLIGHT_CASE_NOT_EXECUTABLE',
+      });
+    } finally {
+      await upsertEnvironment(db, S, { ...staging, preflightCaseId: null });
+    }
   });
 
   it('a second suite run requests new runs; the first report is unchanged', async () => {

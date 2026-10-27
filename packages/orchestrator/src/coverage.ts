@@ -38,7 +38,7 @@ const refsOf = (c: LatestCaseRow) =>
 
 /**
  * Approved cases whose cited source versions are no longer the active ones (superseded by a newer
- * approved version, revoked, or unknown to the registry). Their expected results were approved
+ * approved version, revoked, or unknown to the registry). Bare identifiers are never stale. Their expected results were approved
  * against text that no longer governs: review them against the current version.
  */
 export async function staleCases(db: Db, scope: TenantScope) {
@@ -47,8 +47,10 @@ export async function staleCases(db: Db, scope: TenantScope) {
   const out: Array<CoverageCase & { refs: Array<{ ref: string; status: string }> }> = [];
   for (const c of cases) {
     if (c.status !== 'APPROVED') continue;
+    // Only a versioned citation (`sourceId@version`) can go stale; a bare identifier or source id
+    // (an imported catalogue's `A-342`) follows whichever version is active.
     const refs = [...refsOf(c)]
-      .filter((ref) => !ref.startsWith('story:'))
+      .filter((ref) => !ref.startsWith('story:') && ref.includes('@'))
       .map((ref) => ({ ref, status: byRef.get(ref) ?? 'UNKNOWN' }))
       .filter((r) => r.status !== 'ACTIVE');
     if (refs.length) out.push({ ...summary(c), refs });
@@ -127,6 +129,8 @@ export async function getCoverage(db: Db, scope: TenantScope) {
       };
     }),
   );
+  // Identifiers a case names itself (an imported catalogue's `A-342`), beside coverage through sources.
+  const named = new Set(cases.flatMap((c) => [...refsOf(c)]));
   const identifiers = new Map<string, Set<string>>(); // identifier -> case ids, through its sources
   for (const s of bySource) {
     for (const id of s.identifiers) {
@@ -144,6 +148,8 @@ export async function getCoverage(db: Db, scope: TenantScope) {
       criteriaCovered: byCriterion.filter((c) => c.cases.length > 0).length,
       identifiers: identifiers.size,
       identifiersCovered: [...identifiers.values()].filter((s) => s.size > 0).length,
+      /** Identifiers some case cites by name (ADR-0022); covered-through-a-source is coarser. */
+      identifiersNamed: [...identifiers.keys()].filter((id) => named.has(id)).length,
       cases: cases.length,
       approvedCases: cases.filter((c) => c.status === 'APPROVED').length,
       staleCases: stale.length,
@@ -152,6 +158,7 @@ export async function getCoverage(db: Db, scope: TenantScope) {
       sources: bySource.filter((s) => s.cases.length === 0).map((s) => `${s.sourceId}@${s.version}`),
       criteria: byCriterion.filter((c) => c.cases.length === 0).map((c) => `${c.story}:${c.criterion}`),
       identifiers: [...identifiers.entries()].filter(([, s]) => s.size === 0).map(([id]) => id),
+      identifiersNotNamed: [...identifiers.keys()].filter((id) => !named.has(id)),
     },
     /** Approved cases citing a source version that is no longer active (ADR-0021). */
     stale,

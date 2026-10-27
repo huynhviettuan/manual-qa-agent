@@ -1,6 +1,7 @@
 import {
   approvedExecutableForCase,
   claimNextRun,
+  runsBehindFailedPreflight,
   createOrGetRun,
   deleteEvidenceRow,
   expiredEvidence,
@@ -40,6 +41,7 @@ import type { TriageClassifier } from '@qa/llm-adapter';
 import { silentLogger, type Logger } from '@qa/observability';
 import { evaluate, type PolicyResult } from '@qa/policy-engine';
 import { openReview } from '@qa/review';
+import { openRetestReviewIfDue } from './lifecycle.ts';
 import { triageRun } from './triage.ts';
 
 export type RunDeps = {
@@ -272,6 +274,8 @@ export type RunRequest = {
   environmentId: string;
   approvalId?: string;
   idempotencyKey?: string;
+  /** Run only after this run PASSED (a suite's preflight, ADR-0022). */
+  afterRunId?: string;
 };
 
 /**
@@ -297,6 +301,7 @@ export async function requestRun(deps: Pick<RunDeps, 'db'>, actor: Actor, req: R
     approvalId: req.approvalId ?? null,
     // ADR-0021: the worker keeps an exclusive run alone on its environment.
     exclusive: ExecutableSpec.parse(exe.spec).exclusive,
+    afterRunId: req.afterRunId ?? null,
   });
   if (!created) return run;
 
@@ -413,6 +418,15 @@ async function executeClaimed(deps: RunDeps, claimed: RunRow, log: Logger): Prom
     policy.approvalId,
   );
   log.info({ runId: claimed.id, verdict: outcome.verdict, reason: outcome.reason }, 'run finished');
+  if (done.state === 'PASSED') {
+    // ADR-0022: a pass on a known-bug case asks a person to retest; the verdict is already recorded.
+    await openRetestReviewIfDue(db, scope, actor.id, {
+      caseId: done.caseId,
+      environmentId: done.environmentId,
+      build: '',
+      runRef: `run ${done.id}`,
+    }).catch((err) => log.error({ err, runId: done.id }, 'retest review failed'));
+  }
   if (deps.triager && (done.state === 'FAILED' || done.state === 'INCONCLUSIVE')) {
     // Advisory only: a triage problem is logged and never affects the recorded verdict.
     await triageRun(
@@ -454,6 +468,24 @@ export async function workOnce(
       await audit(deps.db, scope, stale.leaseOwner ?? workerId, 'RUN_LEASE_LOST', null, stale.id, state);
     } catch (err) {
       // Only a concurrent update by another worker is expected here.
+      if (!(err instanceof DomainError && err.code === 'CONFLICT')) throw err;
+    }
+  }
+  // ADR-0022: runs behind a preflight that did not pass never run; they are blocked with its state.
+  for (const behind of await runsBehindFailedPreflight(deps.db)) {
+    const scope = scopeOf(behind);
+    const reason = `PREFLIGHT_FAILED:${behind.preflightState}`;
+    try {
+      const checking = await updateRunState(deps.db, scope, behind.id, 'QUEUED', {
+        state: transitionRun('QUEUED', 'POLICY_CHECK'),
+      });
+      await updateRunState(deps.db, scope, behind.id, checking.state, {
+        state: transitionRun(checking.state, 'BLOCKED'),
+        reason,
+        finished: true,
+      });
+      await audit(deps.db, scope, workerId, 'RUN_BLOCKED', null, behind.id, reason);
+    } catch (err) {
       if (!(err instanceof DomainError && err.code === 'CONFLICT')) throw err;
     }
   }

@@ -1,0 +1,55 @@
+{
+  "importedAt": "2026-10-27T10:51:17.682Z",
+  "catalogue": {
+    "requirements": 386
+  },
+  "import": {
+    "rows": 376,
+    "imported": 376,
+    "skipped": 0,
+    "rejected": [],
+    "status": "APPROVED",
+    "durationMs": 582,
+    "unresolvedRefs": {
+      "NFR-SEC": 25,
+      "API-ERR": 19,
+      "API-LIST": 1,
+      "NFR-A11Y": 1,
+      "BR-402a": 1
+    },
+    "unmappedTechniques": {
+      "CRUD": 12,
+      "Random": 2
+    },
+    "unmappedTestTypes": {},
+    "expectedOnLastStep": 132,
+    "executionsIgnored": 353
+  },
+  "reimport": {
+    "imported": 0,
+    "skipped": 376
+  },
+  "catalogueIds": {
+    "total": 386,
+    "citedByName": 384,
+    "notCited": [
+      "BR-603",
+      "A-013"
+    ]
+  },
+  "coverage": {
+    "totals": {
+      "sources": 5,
+      "sourcesCovered": 4,
+      "criteria": 0,
+      "criteriaCovered": 0,
+      "identifiers": 490,
+      "identifiersCovered": 490,
+      "identifiersNamed": 379,
+      "cases": 376,
+      "approvedCases": 376,
+      "staleCases": 0
+    },
+    "identifiersNotReached": []
+  }
+}

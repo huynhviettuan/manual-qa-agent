@@ -63,6 +63,7 @@ import {
   publishBug,
   revertBug,
   triageRun,
+  importCases,
   regressionScope,
   requestRun,
   resolveReviewAndContinue,
@@ -530,6 +531,20 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
   app.get('/api/regression', async (req) => {
     const { ref } = z.object({ ref: z.string().min(1).max(200) }).parse(req.query);
     return regressionScope(db, scope(req), ref);
+  });
+  // ADR-0022: an existing catalogue in the workbook's columns. Reviewers only; the report says what was not mapped.
+  app.post('/api/test-cases/import', { bodyLimit: 4 * 1024 * 1024 }, async (req, reply) => {
+    const body = z
+      .object({
+        csv: z
+          .string()
+          .min(1)
+          .max(3 * 1024 * 1024),
+        label: z.string().min(1).max(64),
+        approve: z.boolean().optional(),
+      })
+      .parse(req.body);
+    return reply.code(201).send(await importCases(db, req.actor, body));
   });
   app.post('/api/test-cases/:id/known-bug', async (req) => {
     const { id } = IdParams.parse(req.params);

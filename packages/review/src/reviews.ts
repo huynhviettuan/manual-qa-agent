@@ -31,6 +31,8 @@ export const REVIEW_KINDS = [
   'ACTION_APPROVAL',
   'FAILURE_TRIAGE',
   'SECURITY_TRIAGE',
+  // ADR-0022: a case marked with a known bug passed; retest the defect and clear the mark.
+  'KNOWN_BUG_RETEST',
 ] as const;
 export type ReviewKind = (typeof REVIEW_KINDS)[number];
 
@@ -44,6 +46,7 @@ const ROUTING: Record<ReviewKind, { role: Role; risk: ReviewRow['risk'] }> = {
   FAILURE_TRIAGE: { role: 'QA_ENGINEER', risk: 'MEDIUM' },
   // Security/privacy-sensitive suspected defects: secure review by a lead (docs/06).
   SECURITY_TRIAGE: { role: 'QA_LEAD', risk: 'HIGH' },
+  KNOWN_BUG_RETEST: { role: 'QA_ENGINEER', risk: 'LOW' },
 };
 
 const TRIAGE_KINDS: ReviewKind[] = ['FAILURE_TRIAGE', 'SECURITY_TRIAGE'];

@@ -30,6 +30,8 @@ export type SuiteRunRow = {
   /** BLOCKED when the preflight failed: nothing was queued, `reason` says why. */
   status: 'REQUESTED' | 'BLOCKED';
   reason: string | null;
+  /** The environment's preflight case run, which the automated runs wait for (ADR-0022). */
+  preflightRunId: string | null;
   requestedBy: string;
   createdAt: Date;
 };
@@ -37,7 +39,7 @@ export type SuiteRunRow = {
 export type SuiteRunItemOutcome = 'REQUESTED' | 'NOT_AUTOMATED' | 'NOT_APPROVED' | 'BLOCKED';
 
 const SUITE_RUN_COLS = `id, suite_id AS "suiteId", environment_id AS "environmentId", build, status, reason,
-  requested_by AS "requestedBy", created_at AS "createdAt"`;
+  preflight_run_id AS "preflightRunId", requested_by AS "requestedBy", created_at AS "createdAt"`;
 
 export type SuiteRunItemRow = {
   caseId: string;
@@ -143,6 +145,10 @@ export async function insertSuiteRun(
   return rows[0]!;
 }
 
+export async function setSuiteRunPreflight(db: Db, suiteRunId: string, runId: string): Promise<void> {
+  await db.query('UPDATE suite_runs SET preflight_run_id = $2 WHERE id = $1', [suiteRunId, runId]);
+}
+
 export async function insertSuiteRunItem(
   db: Db,
   item: {
@@ -169,7 +175,7 @@ export async function listSuiteRuns(
 ): Promise<SuiteRunSummaryRow[]> {
   return db.query<SuiteRunSummaryRow>(
     `SELECT sr.id, sr.suite_id AS "suiteId", sr.environment_id AS "environmentId", sr.build, sr.status, sr.reason,
-       sr.requested_by AS "requestedBy", sr.created_at AS "createdAt",
+       sr.preflight_run_id AS "preflightRunId", sr.requested_by AS "requestedBy", sr.created_at AS "createdAt",
        (SELECT count(*)::int FROM suite_run_items i WHERE i.suite_run_id = sr.id AND i.outcome = 'NOT_AUTOMATED'
           AND NOT EXISTS (SELECT 1 FROM manual_runs m WHERE m.suite_run_id = sr.id AND m.case_id = i.case_id)) AS "manualPending",
        (SELECT count(DISTINCT m.case_id)::int FROM manual_runs m WHERE m.suite_run_id = sr.id) AS "manualRecorded"

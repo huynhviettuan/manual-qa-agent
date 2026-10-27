@@ -1,9 +1,11 @@
 import { randomBytes } from 'node:crypto';
+import { readFile } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
 import {
   createActor,
   createApiKey,
   createDbFromEnv,
+  assignMissingCaseCodes,
   createProject,
   getActor,
   migrate,
@@ -12,7 +14,7 @@ import {
 } from '@qa/db';
 import { DomainError, EnvironmentKind, type Role } from '@qa/domain';
 import { createEvidenceStoreFromEnv } from '@qa/evidence';
-import { purgeExpiredEvidence } from '@qa/orchestrator';
+import { importCases, purgeExpiredEvidence } from '@qa/orchestrator';
 import { ingestDirectory, revokeSource } from '@qa/retrieval';
 import { runEval } from './eval.ts';
 
@@ -27,9 +29,15 @@ const USAGE = `Usage: pnpm qa <command> [options]
   eval    <fixturesDir>                     Run the labeled evaluation set (in-memory DB;
                                             mocked provider unless QA_LIVE_LLM=1)
   env     <id> --tenant T --project P --kind test|staging|production --base-url URL
-          [--actions draft,execute] [--hosts host:port,...]
+          [--actions draft,execute] [--hosts host:port,...] [--preflight-case CASE_ID]
                                             Configure an execution environment (admin). Runs may
-                                            only reach the base URL host plus --hosts
+                                            only reach the base URL host plus --hosts; a suite
+                                            run executes the preflight case first and blocks
+                                            its automated runs unless it passes
+  import  <file.csv> --label L --tenant T --project P --as ACTOR [--approve]
+                                            Import a test-case workbook (the 20 export columns);
+                                            prints what was imported, skipped and not mapped
+  codes   --tenant T --project P            Give a code (MODULE-NNN) to cases created without one
   purge-evidence                            Delete evidence past its retention
 
 Database: DATABASE_URL, or an embedded PGlite database in ./.pglite when unset.`;
@@ -44,6 +52,9 @@ const { positionals, values } = parseArgs({
     hosts: { type: 'string', default: '' },
     project: { type: 'string', default: 'pilot' },
     as: { type: 'string' },
+    label: { type: 'string' },
+    'preflight-case': { type: 'string' },
+    approve: { type: 'boolean', default: false },
   },
 });
 const [command, arg] = positionals;
@@ -124,6 +135,45 @@ try {
       });
       break;
     }
+    case 'import': {
+      if (!arg) throw new DomainError('VALIDATION', 'import needs a CSV file');
+      if (!values.label) throw new DomainError('VALIDATION', '--label is required');
+      await withDb(async (db) => {
+        const r = await importCases(db, await actorFor(db), {
+          csv: await readFile(arg, 'utf8'),
+          label: values.label!,
+          approve: values.approve,
+        });
+        console.log(
+          `${r.rows} rows: ${r.imported.length} imported as ${r.status}, ${r.skipped.length} skipped, ${r.rejected.length} rejected`,
+        );
+        for (const x of r.rejected) console.log(`  rejected row ${x.row}: ${x.reason}`);
+        const top = (m: Record<string, number>) =>
+          Object.entries(m)
+            .sort((a, b) => b[1] - a[1])
+            .map(([k, v]) => `${k} (${v})`)
+            .join(', ') || 'none';
+        console.log(
+          `  unresolved requirement ids: ${Object.keys(r.unresolvedRefs).length}: ${top(r.unresolvedRefs)}`,
+        );
+        console.log(`  unmapped techniques: ${top(r.unmappedTechniques)}`);
+        console.log(`  unmapped test types: ${top(r.unmappedTestTypes)}`);
+        console.log(`  expected results moved to the last step: ${r.expectedOnLastStep}`);
+        console.log(`  execution results not imported: ${r.executionsIgnored}`);
+      });
+      break;
+    }
+    case 'codes': {
+      await withDb(async (db) => {
+        const done = await assignMissingCaseCodes(db, {
+          tenantId: values.tenant!,
+          projectId: values.project!,
+        });
+        for (const c of done) console.log(`${c.code.padEnd(12)} ${c.caseId}`);
+        console.log(`${done.length} cases given a code`);
+      });
+      break;
+    }
     case 'revoke': {
       const [sourceId, version] = (arg ?? '').split('@');
       if (!sourceId || !version) throw new DomainError('VALIDATION', 'revoke needs <sourceId@version>');
@@ -166,6 +216,7 @@ try {
             allowedActions: actions,
             baseUrl: baseUrl?.origin ?? null,
             allowedHosts: hosts,
+            preflightCaseId: values['preflight-case'] ?? null,
           },
         ),
       );

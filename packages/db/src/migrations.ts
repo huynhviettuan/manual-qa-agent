@@ -526,6 +526,17 @@ ALTER TABLE suite_run_items ADD CONSTRAINT suite_run_items_outcome_check
 ALTER TABLE test_runs ADD COLUMN exclusive boolean NOT NULL DEFAULT false;
 `,
   },
+  {
+    id: '0009_preflight_case',
+    sql: /* sql */ `
+-- ADR-0022: an environment may name an approved case that proves it is ready (accounts sign in,
+-- the suite's data exists). A suite run executes it first; its other runs wait for it and are
+-- BLOCKED unless it PASSED.
+ALTER TABLE environments ADD COLUMN preflight_case_id text;
+ALTER TABLE test_runs ADD COLUMN after_run_id text REFERENCES test_runs(id);
+ALTER TABLE suite_runs ADD COLUMN preflight_run_id text REFERENCES test_runs(id);
+`,
+  },
 ];
 
 export async function migrate(db: Db): Promise<string[]> {

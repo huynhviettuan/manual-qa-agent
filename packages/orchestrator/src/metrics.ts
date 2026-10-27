@@ -10,6 +10,39 @@ async function grouped(db: Db, sql: string, params: unknown[]) {
   return Object.fromEntries(rows.map((r) => [r.k ?? 'none', n(r.c)]));
 }
 
+/**
+ * Manual execution effort (ADR-0022) from the testers' own start and finish times: what the team
+ * spends by hand, per tester. Recorded durations only; nothing is estimated.
+ */
+async function manualEffort(db: Db, p: string[], since: string) {
+  const minutes = `extract(epoch FROM (finished_at - started_at)) / 60`;
+  const where = `WHERE tenant_id = $1 AND project_id = $2 AND created_at > ${since}`;
+  const [total] = await db.query<{
+    runs: string;
+    cases: string;
+    minutes: string | null;
+    median: string | null;
+  }>(
+    `SELECT count(*) AS runs, count(DISTINCT case_id) AS cases, sum(${minutes}) AS minutes,
+       percentile_cont(0.5) WITHIN GROUP (ORDER BY ${minutes}) AS median
+     FROM manual_runs ${where}`,
+    p,
+  );
+  const byTester = await db.query<{ tester: string; runs: string; minutes: string | null }>(
+    `SELECT tester_id AS tester, count(*) AS runs, sum(${minutes}) AS minutes FROM manual_runs ${where}
+     GROUP BY 1 ORDER BY 1`,
+    p,
+  );
+  const round = (v: unknown) => Math.round(n(v) * 10) / 10;
+  return {
+    runs: n(total?.runs),
+    cases: n(total?.cases),
+    minutes: round(total?.minutes),
+    medianMinutesPerRun: total?.median == null ? null : round(total.median),
+    byTester: byTester.map((t) => ({ testerId: t.tester, runs: n(t.runs), minutes: round(t.minutes) })),
+  };
+}
+
 export async function projectMetrics(db: Db, scope: TenantScope, days = 7) {
   const p = [scope.tenantId, scope.projectId, String(days)];
   const since = `now() - ($3 || ' days')::interval`;
@@ -95,6 +128,7 @@ export async function projectMetrics(db: Db, scope: TenantScope, days = 7) {
     },
     reviews: { openByKind: reviewsOpen, oldestOpenHours: oldest[0]?.h == null ? null : n(oldest[0].h) },
     runs: { byState: runs },
+    manual: await manualEffort(db, p, since),
     policy: { deniedByReason: denied },
     triage: {
       bySuggestedCause: triage,

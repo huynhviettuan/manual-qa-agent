@@ -1,5 +1,5 @@
 import { listLatestCases, listLatestExecutions, listSuiteCases, type Db } from '@qa/db';
-import { DraftContent, type TenantScope } from '@qa/domain';
+import { DomainError, DraftContent, type TenantScope } from '@qa/domain';
 
 // ADR-0018: the tester workbook, generated from the stored cases. Columns follow the team's
 // manual test-case schema (manual-test-design skill §7). Execution columns come only from
@@ -29,6 +29,41 @@ export const CASE_COLUMNS = [
 ] as const;
 
 const BOM = String.fromCharCode(0xfeff);
+
+/** Parses RFC 4180 (quoted fields with commas, quotes and line breaks; CRLF or LF; optional BOM). */
+export function parseCsv(text: string): string[][] {
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let cell = '';
+  let quoted = false;
+  const src = text.startsWith(BOM) ? text.slice(1) : text;
+  for (let i = 0; i < src.length; i++) {
+    const ch = src[i]!;
+    if (quoted) {
+      if (ch === '"' && src[i + 1] === '"') {
+        cell += '"';
+        i++;
+      } else if (ch === '"') quoted = false;
+      else cell += ch;
+    } else if (ch === '"' && cell === '') quoted = true;
+    else if (ch === ',') {
+      row.push(cell);
+      cell = '';
+    } else if (ch === '\n' || ch === '\r') {
+      if (ch === '\r' && src[i + 1] === '\n') i++;
+      row.push(cell);
+      rows.push(row);
+      row = [];
+      cell = '';
+    } else cell += ch;
+  }
+  if (quoted) throw new DomainError('VALIDATION', 'CSV ends inside a quoted field');
+  if (cell !== '' || row.length) {
+    row.push(cell);
+    rows.push(row);
+  }
+  return rows.filter((r) => r.some((c) => c !== ''));
+}
 
 /** RFC 4180 with CRLF and a UTF-8 BOM, so spreadsheet programs read accented text correctly. */
 export function toCsv(rows: ReadonlyArray<ReadonlyArray<string>>): string {
@@ -73,7 +108,7 @@ export async function testCasesCsv(db: Db, scope: TenantScope, filter: { suiteId
           ...d.steps.map((s, i) => (s.testData ? `${i + 1}. ${s.testData}` : '')).filter(Boolean),
         ]),
         lines(d.steps.map((s, i) => `${i + 1}. ${s.action}`)),
-        lines(d.steps.map((s, i) => `${i + 1}. ${s.expected}`)),
+        lines(d.steps.map((s, i) => (s.expected ? `${i + 1}. ${s.expected}` : '')).filter(Boolean)),
         d.basis,
         lines(d.assumptions),
         d.openQuestions.join(', '),
