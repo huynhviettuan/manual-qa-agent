@@ -1,6 +1,6 @@
 {
   "model": "claude-opus-5-5 (interactive Claude Code session)",
-  "generatedAt": "2026-10-27T10:41:13.162Z",
+  "generatedAt": "2026-10-27T11:10:56.156Z",
   "summary": {
     "stories": 30,
     "drafted": 20,
@@ -8,7 +8,7 @@
     "pending": 0,
     "cases": 53,
     "steps": 80,
-    "flaggedCases": 2,
+    "flaggedCases": 53,
     "automatable": 30,
     "techniques": {
       "permission_matrix": 6,
@@ -81,7 +81,10 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"The main menu has no \"Cấu hình\" entry\"",
+            "step 2: no quoted evidence for \"The main menu shows a \"Cấu hình\" entry\""
+          ]
         },
         {
           "title": "A direct URL to a module without permission is refused",
@@ -116,7 +119,9 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"The configuration page is refused (no settings are shown) an\""
+          ]
         },
         {
           "title": "Marketing never sees customer phone numbers on screen",
@@ -149,7 +154,9 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"No customer phone number appears in the report; the phone co\""
+          ]
         },
         {
           "title": "A masked field stays masked in an Excel export",
@@ -183,7 +190,9 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"The exported file has no phone numbers: the phone column is \""
+          ]
         }
       ],
       "team": [
@@ -762,7 +771,10 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"The role shows lead.export as granted\"",
+            "step 2: no quoted evidence for \"The \"Xuất Excel\" button is shown without any deployment\""
+          ]
         },
         {
           "title": "Changing a role's discount threshold changes who approves",
@@ -804,7 +816,10 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"The role screen shows 15%\"",
+            "step 2: no quoted evidence for \"The approval request goes to the Fitness Manager, not to Adm\""
+          ]
         },
         {
           "title": "A new price tier version applies to contracts created after it",
@@ -848,7 +863,9 @@
           ],
           "assumptions": [],
           "reviewFlags": [
-            "step 1: no exact message, value or state in \"The tier list shows the new unit price\""
+            "step 1: no exact message, value or state in \"The tier list shows the new unit price\"",
+            "step 1: no quoted evidence for \"The tier list shows the new unit price\"",
+            "step 2: no quoted evidence for \"The unit price on the form equals the new tier price\""
           ]
         },
         {
@@ -883,7 +900,9 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"The screen is refused; no parameter can be saved\""
+          ]
         }
       ],
       "team": [
@@ -948,7 +967,9 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"The result field is a drop-down with the configured options;\""
+          ]
         },
         {
           "title": "An option added by Admin appears at once",
@@ -989,7 +1010,10 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"The list shows \"QA mới\" as active\"",
+            "step 2: no quoted evidence for \"The result drop-down includes \"QA mới\"\""
+          ]
         },
         {
           "title": "A deactivated option disappears from new choices but stays on old records",
@@ -1041,7 +1065,11 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"The lead shows \"QA mới\"\"",
+            "step 2: no quoted evidence for \"The option is marked inactive\"",
+            "step 3: no quoted evidence for \"The drop-down no longer offers \"QA mới\"; the first lead stil\""
+          ]
         }
       ],
       "team": [
@@ -1098,7 +1126,9 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"The save is refused and the note field is marked required; n\""
+          ]
         },
         {
           "title": "\"Khác\" with a whitespace-only note cannot be saved",
@@ -1133,7 +1163,9 @@
           "assumptions": [
             "A whitespace-only note counts as no note; the sources only say \"without a note\"."
           ],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"The save is refused as for an empty note\""
+          ]
         },
         {
           "title": "\"Khác\" with a note is saved",
@@ -1166,7 +1198,9 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"The record is saved with \"Khác\" and the note text shown\""
+          ]
         }
       ],
       "team": [
@@ -1247,7 +1281,10 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"The contract is in \"Chờ duyệt\"\"",
+            "step 2: no quoted evidence for \"The booking is refused while the contract is pending\""
+          ]
         },
         {
           "title": "The submitter cannot approve their own request",
@@ -1283,7 +1320,9 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"The approve action is refused for the submitter\""
+          ]
         },
         {
           "title": "Admin switches approval off for an action type",
@@ -1324,7 +1363,10 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"The approval matrix shows receipts as not requiring approval\"",
+            "step 2: no quoted evidence for \"The receipt is valid at once, with no approval request creat\""
+          ]
         },
         {
           "title": "Admin changes the approver of an action type",
@@ -1357,7 +1399,9 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"The approval task goes to Admin, not to the Fitness Manager\""
+          ]
         }
       ],
       "team": [
@@ -1503,7 +1547,12 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"The lead is created with an ID\"",
+            "step 2: no quoted evidence for \"The lead becomes a customer with the same ID\"",
+            "step 3: no quoted evidence for \"The contract and the session belong to the customer with tha\"",
+            "step 4: no quoted evidence for \"Exactly 1 record is found\""
+          ]
         }
       ],
       "team": []
@@ -1566,7 +1615,10 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"Unit price, total and end date come from the PT tier for 24;\"",
+            "step 2: no quoted evidence for \"The unit price changes to the next tier's price\""
+          ]
         },
         {
           "title": "A count above the highest tier is refused",
@@ -1602,7 +1654,9 @@
           "assumptions": [
             "The sources do not say what happens above the highest tier; refusing is the reading of BR-301 (price only from a tier)."
           ],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"No price is computed and the contract cannot be created\""
+          ]
         },
         {
           "title": "A price different from the tier makes an exception price that waits for approval",
@@ -1647,7 +1701,10 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"The save is refused until a reason is given\"",
+            "step 2: no quoted evidence for \"The contract is flagged \"Exception price\" and stays pending;\""
+          ]
         }
       ],
       "team": [
@@ -1757,7 +1814,10 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"No edit action is offered\"",
+            "step 2: no quoted evidence for \"The API refuses the edit and the contract is unchanged\""
+          ]
         },
         {
           "title": "A pending contract cannot be booked",
@@ -1792,7 +1852,9 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"The booking is refused; no session is created\""
+          ]
         },
         {
           "title": "A pending contract can still be edited",
@@ -1825,7 +1887,9 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"The new note is saved\""
+          ]
         }
       ],
       "team": []
@@ -1876,7 +1940,9 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"The deletion is refused and the 2 receipts are listed\""
+          ]
         },
         {
           "title": "After deleting the receipts and then the contract, totals fall by exactly the deleted amounts",
@@ -1930,7 +1996,10 @@
           ],
           "assumptions": [],
           "reviewFlags": [
-            "step 1: no exact message, value or state in \"Both totals are shown\""
+            "step 1: no exact message, value or state in \"Both totals are shown\"",
+            "step 1: no quoted evidence for \"Both totals are shown\"",
+            "step 2: no quoted evidence for \"All 3 records move to the trash\"",
+            "step 3: no quoted evidence for \"Total receipts fall by exactly 3.000.000; revenue falls by e\""
           ]
         }
       ],
@@ -2012,7 +2081,9 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"The booking is refused; no session is created\""
+          ]
         },
         {
           "title": "Reactivation proposes extending by the frozen days, applied only after Admin confirms",
@@ -2055,7 +2126,10 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"The screen shows 7 frozen days, the old end date and the pro\"",
+            "step 2: no quoted evidence for \"The end date becomes the proposed date\""
+          ]
         },
         {
           "title": "A freeze extends the end date at most once",
@@ -2089,7 +2163,9 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"The end date is unchanged; no second extension is offered\""
+          ]
         },
         {
           "title": "A freeze longer than 10 days creates a reminder task for the manager",
@@ -2134,7 +2210,10 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"No reminder task exists\"",
+            "step 2: no quoted evidence for \"A reminder task for the manager is created\""
+          ]
         }
       ],
       "team": [
@@ -2201,7 +2280,10 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"Sessions left fall by exactly 1 and the PT gets 1 credit\"",
+            "step 2: no quoted evidence for \"Sessions left fall by exactly 1 more and the PT gets 1 more \""
+          ]
         },
         {
           "title": "\"Hủy lịch\" neither consumes nor credits",
@@ -2234,7 +2316,9 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"Sessions left are unchanged and the PT gets no credit\""
+          ]
         },
         {
           "title": "Booking is refused with no sessions left, on an expired contract, or on an overlap",
@@ -2287,7 +2371,11 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"The booking is refused; no session is created\"",
+            "step 2: no quoted evidence for \"The booking is refused\"",
+            "step 3: no quoted evidence for \"The booking is refused\""
+          ]
         }
       ],
       "team": [
@@ -2344,7 +2432,9 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"No status actions (Hủy lịch, Khách không đến) are offered\""
+          ]
         },
         {
           "title": "Admin deleting a recorded session refunds 1 session and removes 1 PT credit",
@@ -2377,7 +2467,9 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"Sessions left rise by exactly 1, the PT has exactly 1 credit\""
+          ]
         },
         {
           "title": "Deleting a session in a paid period adds an adjustment line to the next period",
@@ -2412,7 +2504,9 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"The paid voucher is unchanged and the next period has a nega\""
+          ]
         }
       ],
       "team": [
@@ -2482,7 +2576,10 @@
           "assumptions": [
             "The foreign-group language is taken to be English; the sources say only \"the language of their nationality group\"."
           ],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"Exactly 1 email is listed under \"Emails sent\", in Vietnamese\"",
+            "step 2: no quoted evidence for \"Exactly 1 email, in English\""
+          ]
         },
         {
           "title": "Repeating the status change does not send a second email",
@@ -2517,7 +2614,9 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"Still exactly 1 email for that session\""
+          ]
         }
       ],
       "team": [
@@ -2613,7 +2712,10 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"Paid shows 2.000.000 and debt 3.000.000\"",
+            "step 2: no quoted evidence for \"Paid shows 0 and debt 5.000.000\""
+          ]
         },
         {
           "title": "The cash book closes at opening plus receipts minus expenses",
@@ -2648,7 +2750,9 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"Closing balance = opening + receipts - expenses, to the đồng\""
+          ]
         }
       ],
       "team": [
@@ -2714,7 +2818,9 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"Each set is one row with the plan (read-only) and the actual\""
+          ]
         },
         {
           "title": "A Cardio exercise shows time, speed and heart rate instead of weights",
@@ -2747,7 +2853,9 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"The row has the fields \"time\", \"speed\" and \"heart rate\" and \""
+          ]
         }
       ],
       "team": [
@@ -2875,7 +2983,9 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"The booking is accepted and the session is created\""
+          ]
         },
         {
           "title": "In-shift and off-shift cells have different colours",
@@ -2906,7 +3016,9 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"In-shift cells and off-shift cells use 2 different colours\""
+          ]
         }
       ],
       "team": [
@@ -2963,7 +3075,9 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"The lead is created\""
+          ]
         },
         {
           "title": "A lead without a channel or without a name is refused",
@@ -3003,7 +3117,10 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"The channel field is marked required and nothing is saved\"",
+            "step 2: no quoted evidence for \"The name field is marked required and nothing is saved\""
+          ]
         },
         {
           "title": "The country is chosen from the list and sets the email language",
@@ -3037,7 +3154,9 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"The field offers \"Nhật Bản\" from the country list; free text\""
+          ]
         }
       ],
       "team": [
@@ -3136,7 +3255,9 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"A receives 2 leads and B receives 1\""
+          ]
         },
         {
           "title": "A lead untouched for 60 working minutes moves to the next consultant, inside 08:30–20:30 only",
@@ -3178,7 +3299,10 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"It moves to the next consultant and the move is in its histo\"",
+            "step 2: no quoted evidence for \"It does not move before 08:30 the next working day\""
+          ]
         }
       ],
       "team": [
@@ -3272,7 +3396,9 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"Reminders arrive at 24 h, 3 h and 1 h before the deadline, e\""
+          ]
         },
         {
           "title": "An approval pending over 24 hours is reported to the approver's direct manager",
@@ -3308,7 +3434,9 @@
             }
           ],
           "assumptions": [],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"The approver's direct manager receives a notice\""
+          ]
         }
       ],
       "team": [
@@ -3413,7 +3541,10 @@
           "assumptions": [
             "\"End of the day\" is taken as the end of the session's calendar day; the sources do not give a time."
           ],
-          "reviewFlags": []
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"The PT receives 1 notice for that session\"",
+            "step 2: no quoted evidence for \"A task is created for the Studio Manager\""
+          ]
         }
       ],
       "team": [

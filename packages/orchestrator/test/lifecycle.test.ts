@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   assignMissingCaseCodes,
+  unstableCases,
   claimNextRun,
   createOrGetRun,
   createTestCase,
@@ -405,5 +406,127 @@ describe('retest reviews, code backfill and manual effort (ADR-0022)', () => {
     const done = await assignMissingCaseCodes(db, S);
     expect(done).toEqual([{ caseId: c.caseId, code: 'LEGACY-001' }]);
     expect(await assignMissingCaseCodes(db, S)).toEqual([]);
+  });
+});
+
+describe('trust (ADR-0023)', () => {
+  it('a known bug bound to steps accounts only for failures at those steps', async () => {
+    const c = await newCase('Bound bug', ['BR-404@v2'], {
+      steps: [
+        {
+          action: 'Open the booking',
+          expected: 'The form is shown',
+          sourceRefs: ['BR-404@v2'],
+          testData: '',
+        },
+        {
+          action: 'Book with no session left',
+          expected: 'Message "Hết buổi"',
+          sourceRefs: ['BR-404@v2'],
+          testData: '',
+        },
+      ],
+    });
+    await expect(setKnownBug(db, a.qa, c.caseId, 'BUG-050', ['step one'])).rejects.toThrow(/not a step id/);
+    expect(await setKnownBug(db, a.qa, c.caseId, 'BUG-050', ['2'])).toMatchObject({ knownBugSteps: ['2'] });
+    const suite = await createSuite(db, a.qa, { name: 'Bound bugs' });
+    await addSuiteCases(db, a.qa, suite.id, [{ caseId: c.caseId }]);
+    const started = await runSuite({ db, probe: null }, a.qa, suite.id, { environmentId: 'staging' });
+    const fail = (at: 1 | 2) =>
+      recordManualRun(db, a.qa, {
+        caseId: c.caseId,
+        suiteRunId: started.id,
+        environmentId: 'staging',
+        steps:
+          at === 1
+            ? [{ status: 'FAILED', actual: 'A 500 page' }, { status: 'SKIPPED' }]
+            : [{ status: 'PASSED' }, { status: 'FAILED', actual: 'No message (BUG-050)' }],
+      });
+    await fail(1);
+    let item = (await getSuiteRunReport(db, S, started.id)).items[0]!;
+    expect(item).toMatchObject({
+      status: 'FAILED',
+      failedStep: '1',
+      expectedFailure: false,
+      failedOutsideKnownBug: true,
+      knownBugUnbound: false,
+    });
+    await fail(2);
+    item = (await getSuiteRunReport(db, S, started.id)).items[0]!;
+    expect(item).toMatchObject({ failedStep: '2', expectedFailure: true, failedOutsideKnownBug: false });
+
+    // Unbound: every failure is labelled expected, and the report says the mark is unbound.
+    await setKnownBug(db, a.qa, c.caseId, 'BUG-050');
+    await fail(1);
+    item = (await getSuiteRunReport(db, S, started.id)).items[0]!;
+    expect(item).toMatchObject({ expectedFailure: true, knownBugUnbound: true });
+    const audits = await db.query<{ outcome: string }>(
+      `SELECT outcome FROM audit_events WHERE action_kind = 'CASE_KNOWN_BUG_SET' AND target = $1 ORDER BY created_at`,
+      [c.caseId],
+    );
+    expect(audits.map((x) => x.outcome)).toEqual(['BUG-050 @ 2', 'BUG-050']);
+  });
+
+  it('a P0 failure recorded by hand without evidence is unproven', async () => {
+    const c = await newCase('Money P0', ['BR-404@v2'], { priority: 'P0' });
+    const suite = await createSuite(db, a.qa, { name: 'Unproven' });
+    await addSuiteCases(db, a.qa, suite.id, [{ caseId: c.caseId }]);
+    const started = await runSuite({ db, probe: null }, a.qa, suite.id, { environmentId: 'staging' });
+    await recordManualRun(db, a.qa, {
+      caseId: c.caseId,
+      suiteRunId: started.id,
+      environmentId: 'staging',
+      steps: [{ status: 'FAILED', actual: 'Wrong total' }],
+    });
+    const report = await getSuiteRunReport(db, S, started.id);
+    expect(report.items[0]).toMatchObject({ status: 'FAILED', unproven: true });
+    expect(report.totals.unproven).toBe(1);
+  });
+
+  it('a bare identifier goes stale when the text behind it changes after the case was approved', async () => {
+    const c = await newCase('Cites BR-404 by name', ['BR-404']);
+    expect((await staleCases(db, S)).find((s) => s.caseId === c.caseId)).toBeUndefined();
+    await ingestSource(
+      db,
+      a.po,
+      src('BR-404', 'v3', '# BR-404\nA booking needs two sessions left; otherwise "Hết buổi".'),
+    );
+    const stale = (await staleCases(db, S)).find((s) => s.caseId === c.caseId)!;
+    expect(stale.refs).toEqual([{ ref: 'BR-404', status: 'TEXT_CHANGED:v2->v3' }]);
+    // A case approved after the change cites the new text.
+    const later = await newCase('Cites the new text', ['BR-404']);
+    expect((await staleCases(db, S)).find((s) => s.caseId === later.caseId)).toBeUndefined();
+  });
+
+  it('a case whose verdict flipped on the same spec, environment and build is unstable', async () => {
+    const c = await newCase('Flaky', ['AC-LOGIN@v1'], { level: 'ui' });
+    const exe = await proposeExecutable(db, a.qa, c.caseId, loginValidSpec);
+    await reviewExecutable(db, a.lead, exe.id, { decision: 'APPROVE' });
+    const mk = async (key: string, state: 'PASSED' | 'FAILED') => {
+      const { run } = await createOrGetRun(db, S, {
+        caseId: c.caseId,
+        caseRevision: exe.caseRevision,
+        executableId: exe.id,
+        specHash: exe.specHash,
+        environmentId: 'flaky-env',
+        idempotencyKey: key,
+        requestedBy: a.qa.id,
+        approvalId: null,
+      });
+      await db.query(`UPDATE test_runs SET state = $2, finished_at = now() WHERE id = $1`, [run.id, state]);
+    };
+    await mk('f-1', 'PASSED');
+    expect(await unstableCases(db, S)).toEqual([]);
+    await mk('f-2', 'FAILED');
+    expect(await unstableCases(db, S)).toEqual([
+      {
+        caseId: c.caseId,
+        specHash: exe.specHash,
+        environmentId: 'flaky-env',
+        build: '',
+        verdicts: ['FAILED', 'PASSED'],
+      },
+    ]);
+    expect(await testDesignMarkdown(db, S)).toContain('**Unstable cases (1):**');
   });
 });

@@ -1,4 +1,4 @@
-import { listLatestCases, listPublishedBugCases, type Db, type LatestCaseRow } from '@qa/db';
+import { listLatestCases, listPublishedBugCases, unstableCases, type Db, type LatestCaseRow } from '@qa/db';
 import { DraftContent, type TenantScope } from '@qa/domain';
 import { getCoverage } from './coverage.ts';
 import { listQuestions } from './questions.ts';
@@ -55,11 +55,12 @@ function toCase(c: LatestCaseRow): Case {
 }
 
 export async function testDesignMarkdown(db: Db, scope: TenantScope, now = new Date()): Promise<string> {
-  const [rows, coverage, questions, bugs] = await Promise.all([
+  const [rows, coverage, questions, bugs, unstable] = await Promise.all([
     listLatestCases(db, scope),
     getCoverage(db, scope),
     listQuestions(db, scope),
     listPublishedBugCases(db, scope),
+    unstableCases(db, scope),
   ]);
   const cases = rows.map(toCase);
   const approved = cases.filter((c) => c.status === 'APPROVED');
@@ -236,6 +237,25 @@ export async function testDesignMarkdown(db: Db, scope: TenantScope, now = new D
         )
         .join(', ') || 'none') +
       '.',
+    '',
+  );
+  const codeOf = new Map(cases.map((c) => [c.id, c.code]));
+  out.push(
+    `**Unstable cases (${unstable.length}):** verdicts differed between runs of the same steps on the same environment and build; not trusted until the cause is known.`,
+    '',
+  );
+  out.push(
+    unstable.length
+      ? table(
+          ['Case', 'Environment', 'Build', 'Verdicts'],
+          unstable.map((u) => [
+            codeOf.get(u.caseId) ?? u.caseId,
+            u.environmentId,
+            u.build || '—',
+            u.verdicts.join(' / '),
+          ]),
+        )
+      : 'None.',
     '',
   );
   return out.join('\n');

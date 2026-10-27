@@ -137,7 +137,13 @@ export type DraftOutput = z.infer<typeof DraftOutput>;
  */
 export const DraftContent = z.object({
   ...draftFields,
-  steps: z.array(stepOutput.extend({ testData: z.string().default('') })),
+  steps: z.array(
+    stepOutput.extend({
+      testData: z.string().default(''),
+      /** A verbatim quote from a cited source that the expected result follows from (ADR-0023). */
+      evidence: z.string().default(''),
+    }),
+  ),
   requirementRefs: designFields.requirementRefs.default([]),
   techniques: designFields.techniques.default([]),
   testTypes: designFields.testTypes.default([]),

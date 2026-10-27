@@ -86,7 +86,11 @@ describe('SessionExchangeProvider (ADR-0020)', () => {
     expect((await p.generate({ story, sources: [source] })).ok).toBe(false);
     await answer('draft', { designNotes: ['boundary at 5'], cases: [kase] });
     const drafted = await p.generate({ story, sources: [source] });
-    expect(drafted.ok && drafted.value.cases[0]).toMatchObject({ title: 'Locks at 5', reviewFlags: [] });
+    expect(drafted.ok && drafted.value.cases[0]).toMatchObject({ title: 'Locks at 5' });
+    // The only flags are the ADR-0023 "no quoted evidence" ones: the answer carries no quotes.
+    expect(
+      drafted.ok && drafted.value.cases[0]!.reviewFlags.every((f) => f.includes('no quoted evidence')),
+    ).toBe(true);
   });
 
   it('rejects an answer that breaks the schema or cites a source that was not supplied', async () => {

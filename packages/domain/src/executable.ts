@@ -349,3 +349,36 @@ export function describeLocator(l: Locator): string {
           : `text="${l.text}"`;
   return l.within ? `${describeLocator(l.within)} >> ${self}` : self;
 }
+
+/**
+ * ADR-0023: assertions that pass without claiming much, for the executable's reviewer. A short
+ * `contains` text, an API step that checks only its status, or an action after the last assertion
+ * (what it did is never checked). Flags, never rejections: the reviewer decides.
+ */
+export function weakAssertions(spec: ExecutableSpec): string[] {
+  const flags: string[] = [];
+  const steps = spec.steps;
+  for (const s of steps) {
+    if (s.type === 'expectText' && s.match === 'contains' && s.text.trim().length < 8)
+      flags.push(`step ${s.id}: "contains" on the short text "${s.text}" passes on almost any page`);
+    if (
+      s.type === 'apiRequest' &&
+      s.expectStatus !== undefined &&
+      !steps.some((t) => t.type.startsWith('expect'))
+    )
+      flags.push(
+        `step ${s.id}: only the status ${s.expectStatus} is checked; nothing reads what the request did`,
+      );
+  }
+  const lastAssertion = steps
+    .map((s) => s.type.startsWith('expect') || (s.type === 'apiRequest' && s.expectStatus !== undefined))
+    .lastIndexOf(true);
+  const trailing = steps
+    .slice(lastAssertion + 1)
+    .filter((s) => ['click', 'fill', 'navigate', 'apiRequest'].includes(s.type));
+  if (trailing.length)
+    flags.push(
+      `steps ${trailing.map((s) => s.id).join(', ')} act after the last assertion; their effect is never checked`,
+    );
+  return flags;
+}

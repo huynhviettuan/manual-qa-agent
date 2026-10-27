@@ -174,9 +174,12 @@ describe('ClaudeProvider.generate (mocked API)', () => {
     const vague = { ...draft.steps[0]!, expected: 'The account is handled correctly' };
     const { p } = provider(() => messageReply(set({ ...draft, steps: [draft.steps[0]!, vague] })));
     const out = await p.generate({ story, sources: [source] });
-    expect(out.ok && out.value.cases[0]!.reviewFlags).toEqual([
+    // Besides the vagueness flag, each step without a quote gets a "no quoted evidence" flag (ADR-0023).
+    const flags = out.ok ? out.value.cases[0]!.reviewFlags : [];
+    expect(flags).toContain(
       'step 2: the word "correctly" leaves the judgement to the tester in "The account is handled correctly"',
-    ]);
+    );
+    expect(flags.filter((f) => f.includes('no quoted evidence'))).toHaveLength(2);
   });
 
   it('returns a validated draft set whose steps cite retrieved sources', async () => {

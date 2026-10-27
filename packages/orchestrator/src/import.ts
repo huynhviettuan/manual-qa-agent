@@ -33,7 +33,7 @@ export type ImportInput = {
   csv: string;
   /** Names the import; the cases hang off one story `import:<label>`. */
   label: string;
-  /** Land as APPROVED (the team approved them already); otherwise DRAFT, for review here. */
+  /** Land as APPROVED (the team approved them already; QA lead or admin only); otherwise DRAFT, for review here. */
   approve?: boolean;
 };
 
@@ -100,6 +100,8 @@ export async function importCases(db: Db, actor: Actor, input: ImportInput): Pro
   if (hasRole(actor, 'AI_AGENT')) throw new DomainError('FORBIDDEN', 'the AI agent cannot import cases');
   if (!hasRole(actor, ...IMPORTER_ROLES))
     throw new DomainError('FORBIDDEN', `actor ${actor.id} cannot import cases`);
+  if (input.approve && !hasRole(actor, 'QA_LEAD', 'ADMIN'))
+    throw new DomainError('FORBIDDEN', 'importing cases as APPROVED needs a QA lead or admin');
   const label = input.label.trim();
   if (!/^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/.test(label))
     throw new DomainError('VALIDATION', 'label: 1–64 letters, digits, dot, dash or underscore');
@@ -271,7 +273,7 @@ export async function importCases(db: Db, actor: Actor, input: ImportInput): Pro
       policyVersion: null,
       decisionRecordId: null,
       approvalId: null,
-      outcome: `${status}:${report.imported.length} imported, ${report.skipped.length} skipped, ${report.rejected.length} rejected`,
+      outcome: `${status}${status === 'APPROVED' ? ` by ${actor.id}` : ''}:${report.imported.length} imported, ${report.skipped.length} skipped, ${report.rejected.length} rejected`,
     });
     return report;
   });

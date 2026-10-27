@@ -30,10 +30,13 @@ const USAGE = `Usage: pnpm qa <command> [options]
                                             mocked provider unless QA_LIVE_LLM=1)
   env     <id> --tenant T --project P --kind test|staging|production --base-url URL
           [--actions draft,execute] [--hosts host:port,...] [--preflight-case CASE_ID]
+          [--sentinel-case CASE_ID]
                                             Configure an execution environment (admin). Runs may
                                             only reach the base URL host plus --hosts; a suite
                                             run executes the preflight case first and blocks
-                                            its automated runs unless it passes
+                                            its automated runs unless it passes; the sentinel
+                                            case is known to fail there, and a suite run that sees
+                                            it pass is reported INCONCLUSIVE
   import  <file.csv> --label L --tenant T --project P --as ACTOR [--approve]
                                             Import a test-case workbook (the 20 export columns);
                                             prints what was imported, skipped and not mapped
@@ -54,6 +57,7 @@ const { positionals, values } = parseArgs({
     as: { type: 'string' },
     label: { type: 'string' },
     'preflight-case': { type: 'string' },
+    'sentinel-case': { type: 'string' },
     approve: { type: 'boolean', default: false },
   },
 });
@@ -217,6 +221,7 @@ try {
             baseUrl: baseUrl?.origin ?? null,
             allowedHosts: hosts,
             preflightCaseId: values['preflight-case'] ?? null,
+            sentinelCaseId: values['sentinel-case'] ?? null,
           },
         ),
       );

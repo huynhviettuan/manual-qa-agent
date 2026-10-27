@@ -84,7 +84,10 @@ describe('importCases', () => {
       /label/,
     );
 
-    const r = await importCases(db, a.qa, {
+    await expect(
+      importCases(db, a.qa, { csv: workbook(booking), label: 'x', approve: true }),
+    ).rejects.toThrow(/QA lead or admin/);
+    const r = await importCases(db, a.lead, {
       csv: workbook(
         booking,
         { Title: '', Steps: '1. x', 'Expected Results': '1. y' },
@@ -160,7 +163,7 @@ describe('importCases', () => {
       `SELECT outcome FROM audit_events WHERE action_kind = 'CASES_IMPORTED' ORDER BY created_at`,
     );
     expect(audit.map((x) => x.outcome)).toEqual([
-      'APPROVED:2 imported, 0 skipped, 3 rejected',
+      'APPROVED by p-lead:2 imported, 0 skipped, 3 rejected',
       'DRAFT:0 imported, 1 skipped, 0 rejected',
     ]);
 
@@ -172,7 +175,7 @@ describe('importCases', () => {
     const other = { tenantId: 't', projectId: 'p-copy' };
     const b = await seedProject(db, other);
     const exported = await testCasesCsv(db, S);
-    const r = await importCases(db, b.qa, { csv: exported, label: 'copy', approve: true });
+    const r = await importCases(db, b.lead, { csv: exported, label: 'copy', approve: true });
     expect(r.rejected).toEqual([]);
     expect(r.imported.map((i) => i.code).sort()).toEqual(['BKG-010', 'REPORT-001']);
     const copy = DraftContent.parse(

@@ -1,5 +1,5 @@
 {
-  "importedAt": "2026-10-27T10:51:17.682Z",
+  "importedAt": "2026-10-27T11:05:59.103Z",
   "catalogue": {
     "requirements": 386
   },
@@ -9,7 +9,7 @@
     "skipped": 0,
     "rejected": [],
     "status": "APPROVED",
-    "durationMs": 582,
+    "durationMs": 511,
     "unresolvedRefs": {
       "NFR-SEC": 25,
       "API-ERR": 19,
@@ -35,6 +35,172 @@
     "notCited": [
       "BR-603",
       "A-013"
+    ]
+  },
+  "observabilityHeldOut": {
+    "expectedResults": 983,
+    "flagged": 159,
+    "sample": [
+      {
+        "expected": "PT: idDocument listed in maskedFields and the number null",
+        "flag": "no exact message, value or state in \"PT: idDocument listed in maskedFields and the number null\""
+      },
+      {
+        "expected": "Kế toán: idDocument and health masked, values null",
+        "flag": "no exact message, value or state in \"Kế toán: idDocument and health masked, values null\""
+      },
+      {
+        "expected": "The CEO approves where Admin does, not renames (customer.identity); Trợ lý CEO and Studio Manager approve where the Fitness Manager does; the Studio Manager also approves workout plans",
+        "flag": "no exact message, value or state in \"The CEO approves where Admin does, not renames (customer.identity); Trợ lý CE...\""
+      },
+      {
+        "expected": "An event holds the new note and a before value",
+        "flag": "no exact message, value or state in \"An event holds the new note and a before value\""
+      },
+      {
+        "expected": "Only records that really contain the characters are found",
+        "flag": "no exact message, value or state in \"Only records that really contain the characters are found\""
+      },
+      {
+        "expected": "The tagged customer is found exactly once",
+        "flag": "no exact message, value or state in \"The tagged customer is found exactly once\""
+      },
+      {
+        "expected": "No error, no match-all",
+        "flag": "no exact message, value or state in \"No error, no match-all\""
+      },
+      {
+        "expected": "The customer is found each time",
+        "flag": "no exact message, value or state in \"The customer is found each time\""
+      },
+      {
+        "expected": "Done, recorded as late (after its deadline) but inside the grace",
+        "flag": "no exact message, value or state in \"Done, recorded as late (after its deadline) but inside the grace\""
+      },
+      {
+        "expected": "Reopened and ticked; the history keeps the lock, the reopening and the tick",
+        "flag": "no exact message, value or state in \"Reopened and ticked; the history keeps the lock, the reopening and the tick\""
+      },
+      {
+        "expected": "Nhóm nhu cầu: Thay đổi vóc dáng; Giảm đau & Cải thiện khả năng vận động; Nâng cao sinh lực, Trẻ hóa & Hiệu suất sống; Khác — no Lớp nhóm",
+        "flag": "no exact message, value or state in \"Nhóm nhu cầu: Thay đổi vóc dáng; Giảm đau & Cải thiện khả năng vận động; Nâng...\""
+      },
+      {
+        "expected": "Loại dịch vụ: Đánh giá thể chất, Tập thử, Đánh giá cơn đau, Khác (Tập thử between the two assessments)",
+        "flag": "no exact message, value or state in \"Loại dịch vụ: Đánh giá thể chất, Tập thử, Đánh giá cơn đau, Khác (Tập thử bet...\""
+      },
+      {
+        "expected": "Master, PT, Lễ tân, Marketing and Kế toán have none; Tư vấn none of kind leadNew",
+        "flag": "no exact message, value or state in \"Master, PT, Lễ tân, Marketing and Kế toán have none; Tư vấn none of kind leadNew\""
+      },
+      {
+        "expected": "Lễ tân: the lead is not in their list (not theirs)",
+        "flag": "no exact message, value or state in \"Lễ tân: the lead is not in their list (not theirs)\""
+      },
+      {
+        "expected": "One receipt recorded",
+        "flag": "no exact message, value or state in \"One receipt recorded\""
+      },
+      {
+        "expected": "After the second session: 202, one SESSION line too many netted by exactly one ADJUSTMENT of the corrected session: the amount is one session's pay",
+        "flag": "the word \"many\" leaves the judgement to the tester in \"After the second session: 202, one SESSION line too many netted by exactly on...\""
+      },
+      {
+        "expected": "The bell names the task",
+        "flag": "no exact message, value or state in \"The bell names the task\""
+      },
+      {
+        "expected": "The past-deadline task is listed",
+        "flag": "no exact message, value or state in \"The past-deadline task is listed\""
+      },
+      {
+        "expected": "Only itself",
+        "flag": "no exact message, value or state in \"Only itself\""
+      },
+      {
+        "expected": "Nothing: the reminders go to the assignee",
+        "flag": "no exact message, value or state in \"Nothing: the reminders go to the assignee\""
+      },
+      {
+        "expected": "One approvalOverdue notice naming the receipt",
+        "flag": "no exact message, value or state in \"One approvalOverdue notice naming the receipt\""
+      },
+      {
+        "expected": "The request is flagged overdue; the top bar counts it",
+        "flag": "no exact message, value or state in \"The request is flagged overdue; the top bar counts it\""
+      },
+      {
+        "expected": "Nothing new: a decided request is not reminded",
+        "flag": "no exact message, value or state in \"Nothing new: a decided request is not reminded\""
+      },
+      {
+        "expected": "The contract's code starts with QAHD",
+        "flag": "no exact message, value or state in \"The contract's code starts with QAHD\""
+      },
+      {
+        "expected": "The new no-show does not consume; the old one still does (its stored flag)",
+        "flag": "no exact message, value or state in \"The new no-show does not consume; the old one still does (its stored flag)\""
+      },
+      {
+        "expected": "Still on /login",
+        "flag": "no exact message, value or state in \"Still on /login\""
+      },
+      {
+        "expected": "The heading shows the text with its angle brackets",
+        "flag": "no exact message, value or state in \"The heading shows the text with its angle brackets\""
+      },
+      {
+        "expected": "No amount overflows its card",
+        "flag": "no exact message, value or state in \"No amount overflows its card\""
+      },
+      {
+        "expected": "The page does not scroll sideways",
+        "flag": "no exact message, value or state in \"The page does not scroll sideways\""
+      },
+      {
+        "expected": "Shown for Admin",
+        "flag": "no exact message, value or state in \"Shown for Admin\""
+      },
+      {
+        "expected": "The dialog ends inside the window; its submit button (Thêm người dùng) is fully in view without scrolling the page",
+        "flag": "no exact message, value or state in \"The dialog ends inside the window; its submit button (Thêm người dùng) is ful...\""
+      },
+      {
+        "expected": "The dialog shows the hint that each job title has a role of its name, starting from its source role's permissions",
+        "flag": "no exact message, value or state in \"The dialog shows the hint that each job title has a role of its name, startin...\""
+      },
+      {
+        "expected": "No field, label or checkbox of the form shows below the footer",
+        "flag": "no exact message, value or state in \"No field, label or checkbox of the form shows below the footer\""
+      },
+      {
+        "expected": "The calendar stays open after each list",
+        "flag": "no exact message, value or state in \"The calendar stays open after each list\""
+      },
+      {
+        "expected": "Only the customer without email is listed",
+        "flag": "no exact message, value or state in \"Only the customer without email is listed\""
+      },
+      {
+        "expected": "The lead gets an LD code",
+        "flag": "no exact message, value or state in \"The lead gets an LD code\""
+      },
+      {
+        "expected": "Still a lead (no KH code)",
+        "flag": "no exact message, value or state in \"Still a lead (no KH code)\""
+      },
+      {
+        "expected": "The first is in re-care",
+        "flag": "no exact message, value or state in \"The first is in re-care\""
+      },
+      {
+        "expected": "Payment status PARTIAL",
+        "flag": "no exact message, value or state in \"Payment status PARTIAL\""
+      },
+      {
+        "expected": "Paid",
+        "flag": "no exact message, value or state in \"Paid\""
+      }
     ]
   },
   "coverage": {

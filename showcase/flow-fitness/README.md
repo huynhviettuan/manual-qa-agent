@@ -23,6 +23,12 @@ imported records, to read beside the pilot's own `docs/test-design.md`.
 | Techniques outside the agent's list | CRUD (12 cases), Random (2) |
 | Cases whose expected results sit on the last step | 132 |
 | Execution results not imported | 353 (a result needs a run record) |
+| Observability check on the team's 983 expected results (held out, ADR-0023) | 159 flagged (16 %); the sample in `results/import-report.json` is nearly all false flags |
+
+**The held-out measurement.** The team's expected results were never used to tune the observability check, so
+what it flags here is its false-flag rate on human-written text: "Still on /login", "Payment status PARTIAL",
+"Paid", "The lead gets an LD code" are all verifiable to someone who knows the product, and all flagged. The check
+is lexical; it stays an advisory flag and was deliberately not tuned on this set.
 
 The five unresolved ids are not mistakes in the pilot. Four name requirement areas rather than numbered
 requirements, and the agent's identifiers (ADR-0005) end in a number; `BR-402a` has a lower-case suffix the

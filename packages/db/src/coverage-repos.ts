@@ -35,6 +35,9 @@ export type LatestCaseRow = {
   content: unknown;
   sourceRefs: string[];
   knownBug: string | null;
+  knownBugSteps: string[];
+  /** When the latest revision was written; an approved revision older than a source change cites old text. */
+  revisionAt: Date;
 };
 
 /** The latest revision of every case in the project, oldest case first. */
@@ -42,7 +45,8 @@ export async function listLatestCases(db: Db, scope: TenantScope): Promise<Lates
   return db
     .query<LatestCaseRow>(
       `SELECT DISTINCT ON (c.id) c.id AS "caseId", c.code, c.story_id AS "storyId", st.external_id AS "storyExternalId",
-       r.revision, r.status, r.content, r.source_refs AS "sourceRefs", c.known_bug AS "knownBug", c.created_at
+       r.revision, r.status, r.content, r.source_refs AS "sourceRefs", c.known_bug AS "knownBug",
+       c.known_bug_steps AS "knownBugSteps", r.created_at AS "revisionAt", c.created_at
      FROM test_cases c
      JOIN test_case_revisions r ON r.case_id = c.id
      JOIN stories st ON st.id = c.story_id

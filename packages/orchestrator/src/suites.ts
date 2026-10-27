@@ -16,6 +16,8 @@ import {
   listSuiteRunItems,
   listSuiteRuns,
   setSuiteRunPreflight,
+  setSuiteRunSentinel,
+  unstableCases,
   upsertSuiteCase,
   type Db,
   type EnvironmentRow,
@@ -103,13 +105,17 @@ export async function getSuiteDetail(db: Db, scope: TenantScope, suiteId: string
 
 // ------------------------------------------------------------------ preflight (ADR-0021)
 
-/** Answers whether the target answered HTTP at all; any status counts, a network error does not. */
+/** Answers whether the target is up: an HTTP answer below 500. A 5xx or a network error is not. */
 export type TargetProbe = (baseUrl: string) => Promise<boolean>;
 
 export const httpProbe: TargetProbe = async (baseUrl) => {
   try {
-    await fetch(baseUrl, { method: 'GET', redirect: 'manual', signal: AbortSignal.timeout(5000) });
-    return true;
+    const res = await fetch(baseUrl, {
+      method: 'GET',
+      redirect: 'manual',
+      signal: AbortSignal.timeout(5000),
+    });
+    return res.status < 500;
   } catch {
     return false;
   }
@@ -152,11 +158,15 @@ export async function preflight(
       const probe = deps.probe ?? httpProbe;
       if (!(await probe(environment.baseUrl))) reasons.push('TARGET_UNREACHABLE');
     }
-    // ADR-0022: a named preflight case must be runnable, or the environment cannot be proven ready.
-    if (environment.preflightCaseId) {
-      const c = await latestRevision(deps.db, scope, environment.preflightCaseId);
+    // ADR-0022/0023: a named preflight or sentinel case must be runnable.
+    for (const [caseId, reason] of [
+      [environment.preflightCaseId, 'PREFLIGHT_CASE_NOT_EXECUTABLE'],
+      [environment.sentinelCaseId, 'SENTINEL_CASE_NOT_EXECUTABLE'],
+    ] as const) {
+      if (!caseId) continue;
+      const c = await latestRevision(deps.db, scope, caseId);
       const exe = c ? await approvedExecutableForCase(deps.db, scope, c.caseId) : null;
-      if (!c || c.status !== 'APPROVED' || !exe) reasons.push('PREFLIGHT_CASE_NOT_EXECUTABLE');
+      if (!c || c.status !== 'APPROVED' || !exe) reasons.push(reason);
     }
   }
   return { environment, reasons };
@@ -209,6 +219,18 @@ export async function runSuite(
     await setSuiteRunPreflight(db, suiteRun.id, pre.id);
     afterRunId = pre.id;
   }
+  // ADR-0023: the sentinel runs with the suite; it is known to fail, and a pass means the run
+  // cannot be trusted to detect a failure.
+  const sentinelCaseId = check.environment?.sentinelCaseId;
+  if (!blocked && automated.size > 0 && sentinelCaseId) {
+    const sentinel = await requestRun(deps, actor, {
+      caseId: sentinelCaseId,
+      environmentId: input.environmentId,
+      idempotencyKey: `${suiteRun.id}:sentinel`,
+      afterRunId,
+    });
+    await setSuiteRunSentinel(db, suiteRun.id, sentinel.id);
+  }
   for (const c of cases) {
     let outcome: SuiteRunItemOutcome = 'NOT_APPROVED';
     let runId: string | null = null;
@@ -250,6 +272,14 @@ export async function listSuiteRunSummaries(db: Db, scope: TenantScope, suiteId:
 
 const TERMINAL = new Set(['PASSED', 'FAILED', 'INCONCLUSIVE', 'BLOCKED']);
 
+/** The first failed assertion's step id of an automated run, or the manual failed step number. */
+const failedStepOf = (assertions: unknown[], manualFailedStep: number | null | undefined): string | null => {
+  if (manualFailedStep != null) return String(manualFailedStep);
+  const a = assertions.find((x) => (x as { passed?: boolean | null }).passed === false) as
+    { stepId?: string } | undefined;
+  return a?.stepId ?? null;
+};
+
 /**
  * Per-case results with traceability; verdicts come from each run's deterministic assertions.
  * A case with a known bug (ADR-0021) keeps its verdict: the report only labels a FAILED result
@@ -263,15 +293,27 @@ export async function getSuiteRunReport(db: Db, scope: TenantScope, suiteRunId: 
   const manual = new Map(
     (await latestManualRunsForSuiteRun(db, scope, suiteRunId)).map((m) => [m.caseId, m]),
   );
+  const unstable = new Set(
+    (await unstableCases(db, scope)).map((u) => `${u.caseId}|${u.environmentId}|${u.build}`),
+  );
   const items = await Promise.all(
     (await listSuiteRunItems(db, scope, suiteRunId)).map(async (i) => {
       const c = cases.get(i.caseId);
       const triage = i.runId ? await latestTriage(db, scope, i.runId) : null;
+      const run = i.runId ? await getRun(db, scope, i.runId) : null;
       const m = i.outcome === 'NOT_AUTOMATED' ? manual.get(i.caseId) : undefined;
       const status = m ? m.status : i.outcome === 'REQUESTED' ? i.runState! : i.outcome;
       const started = m ? m.startedAt : i.startedAt;
       const finished = m ? m.finishedAt : i.finishedAt;
       const knownBug = c?.knownBug ?? null;
+      const bugSteps = c?.knownBugSteps ?? [];
+      const failedStep = failedStepOf(run?.assertions ?? [], m?.failedStep);
+      // ADR-0023: a known bug accounts for a failure only at the steps it is bound to.
+      const expectedFailure =
+        knownBug !== null &&
+        status === 'FAILED' &&
+        (bugSteps.length === 0 || (failedStep !== null && bugSteps.includes(failedStep)));
+      const priority = DraftContent.safeParse(c?.content).data?.priority ?? null;
       return {
         caseId: i.caseId,
         code: c?.code ?? null,
@@ -281,8 +323,21 @@ export async function getSuiteRunReport(db: Db, scope: TenantScope, suiteRunId: 
         status,
         reason: m ? m.reason || null : i.runReason,
         knownBug,
-        expectedFailure: knownBug !== null && status === 'FAILED',
+        knownBugSteps: bugSteps,
+        failedStep,
+        expectedFailure,
+        /** The known bug is bound to other steps: this failure is a real one. */
+        failedOutsideKnownBug: knownBug !== null && status === 'FAILED' && !expectedFailure,
+        /** A known bug with no steps bound labels every failure as expected; say so. */
+        knownBugUnbound: knownBug !== null && bugSteps.length === 0,
         retestNeeded: knownBug !== null && status === 'PASSED',
+        /** Verdicts of this case differed on this environment and build without a spec change. */
+        unstable: unstable.has(`${i.caseId}|${suiteRun.environmentId}|${suiteRun.build}`),
+        /** Assertions the verdict rests on (automated runs). */
+        assertions: run ? run.assertions.length : null,
+        /** A P0 failure or block recorded by hand with nothing attached: the result is unproven. */
+        unproven:
+          !!m && priority === 'P0' && (m.status === 'FAILED' || m.status === 'BLOCKED') && m.evidence === 0,
         runId: i.runId,
         manualRunId: m?.id ?? null,
         testerId: m?.testerId ?? null,
@@ -296,6 +351,16 @@ export async function getSuiteRunReport(db: Db, scope: TenantScope, suiteRunId: 
   const count = (s: string) => items.filter((i) => i.status === s).length;
   const requested = items.filter((i) => i.runId);
   const pre = suiteRun.preflightRunId ? await getRun(db, scope, suiteRun.preflightRunId) : null;
+  const sentinel = suiteRun.sentinelRunId ? await getRun(db, scope, suiteRun.sentinelRunId) : null;
+  // ADR-0023: detection is proven by a sentinel that FAILED; a sentinel that PASSED means the
+  // run's passes prove nothing, so the run as a whole is inconclusive. Verdicts stay as recorded.
+  const detection = !sentinel
+    ? ('NONE' as const)
+    : sentinel.state === 'FAILED'
+      ? ('PROVEN' as const)
+      : TERMINAL.has(sentinel.state)
+        ? ('NOT_PROVEN' as const)
+        : ('PENDING' as const);
   return {
     id: suiteRun.id,
     suiteId: suiteRun.suiteId,
@@ -305,9 +370,18 @@ export async function getSuiteRunReport(db: Db, scope: TenantScope, suiteRunId: 
     reason: suiteRun.reason,
     /** The environment's preflight case run (ADR-0022): the automated runs ran only if it PASSED. */
     preflight: pre ? { runId: pre.id, caseId: pre.caseId, status: pre.state, reason: pre.reason } : null,
+    sentinel: sentinel
+      ? { runId: sentinel.id, caseId: sentinel.caseId, status: sentinel.state, reason: sentinel.reason }
+      : null,
+    detection,
+    /** INCONCLUSIVE when the sentinel passed: nothing here is shown to detect a failure. */
+    outcome: detection === 'NOT_PROVEN' ? ('INCONCLUSIVE' as const) : ('AS_RECORDED' as const),
     requestedBy: suiteRun.requestedBy,
     createdAt: suiteRun.createdAt,
-    complete: requested.every((i) => TERMINAL.has(i.status)) && (!pre || TERMINAL.has(pre.state)),
+    complete:
+      requested.every((i) => TERMINAL.has(i.status)) &&
+      (!pre || TERMINAL.has(pre.state)) &&
+      (!sentinel || TERMINAL.has(sentinel.state)),
     totals: {
       cases: items.length,
       passed: count('PASSED'),
@@ -323,6 +397,9 @@ export async function getSuiteRunReport(db: Db, scope: TenantScope, suiteRunId: 
       expectedFailures: items.filter((i) => i.expectedFailure).length,
       /** Of `passed`: cases whose known bug may be fixed; retest and clear the mark. */
       retestNeeded: items.filter((i) => i.retestNeeded).length,
+      failedOutsideKnownBug: items.filter((i) => i.failedOutsideKnownBug).length,
+      unstable: items.filter((i) => i.unstable).length,
+      unproven: items.filter((i) => i.unproven).length,
     },
     items,
   };

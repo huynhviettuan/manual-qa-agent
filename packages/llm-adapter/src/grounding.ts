@@ -35,6 +35,35 @@ export function checkReadiness(
   return out;
 }
 
+const fold = (s: string) =>
+  s
+    .normalize('NFKC')
+    .replace(/[\u201c\u201d]/g, '"')
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+
+/**
+ * ADR-0023: an expected result's `evidence` quote must be in a source the step cites, verbatim up
+ * to whitespace, quotes and case. A wrong quote is flagged; a missing one on a `specified` case
+ * is flagged too, so the reviewer knows the expectation was not shown to follow from the text.
+ */
+export function quoteFlags(
+  steps: ReadonlyArray<{ expected: string; sourceRefs: string[]; evidence?: string }>,
+  sources: ReadonlyArray<{ sourceId: string; version: string; content: string }>,
+): string[] {
+  const text = new Map(sources.map((s) => [sourceRef(s.sourceId, s.version), fold(s.content)]));
+  return steps.flatMap((s, i) => {
+    const quote = fold(s.evidence ?? '');
+    if (!quote) return [`step ${i + 1}: no quoted evidence for "${s.expected.slice(0, 60)}"`];
+    const cited = s.sourceRefs.map((r) => text.get(r) ?? '');
+    return cited.some((t) => t.includes(quote))
+      ? []
+      : [`step ${i + 1}: the quote "${s.evidence!.slice(0, 60)}" is not in the cited sources`];
+  });
+}
+
 export function checkDraftSet(
   input: DraftInput,
   out: ProviderOutcome<DraftSetOutput>,
@@ -93,6 +122,7 @@ export function checkDraftSet(
             const problem = unobservableExpectation(s.expected);
             return problem ? [`step ${i + 1}: ${problem}`] : [];
           }),
+          ...quoteFlags(c.steps, input.sources),
           ...(c.level === 'manual' && !c.manualReason.trim()
             ? ['no reason given for keeping the case manual']
             : []),

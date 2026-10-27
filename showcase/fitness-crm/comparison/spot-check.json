@@ -1,0 +1,87 @@
+{
+  "checker": "",
+  "checkedAt": "",
+  "sample": [
+    {
+      "criterion": "AC-01",
+      "condition": "Signed-out access is sent to the login page",
+      "team": ["AUTH-04", "AUTH-05"],
+      "agent": [],
+      "verdict": "missed",
+      "agree": null,
+      "note": ""
+    },
+    {
+      "criterion": "AC-01",
+      "condition": "Phone numbers stay hidden on screens and in exports",
+      "team": ["RBAC-M6"],
+      "agent": ["A3", "A4"],
+      "verdict": "covered",
+      "agree": null,
+      "note": ""
+    },
+    {
+      "criterion": "AC-03",
+      "condition": "An added option shows at once; old data is unchanged",
+      "team": ["CFG-01"],
+      "agent": ["A2", "A3"],
+      "verdict": "covered",
+      "agree": null,
+      "note": ""
+    },
+    {
+      "criterion": "AC-05",
+      "condition": "The submitter cannot approve their own request",
+      "team": ["APR-01"],
+      "agent": ["A2"],
+      "verdict": "covered",
+      "agree": null,
+      "note": ""
+    },
+    {
+      "criterion": "AC-10",
+      "condition": "1001 sessions is refused",
+      "team": ["CON-05"],
+      "agent": ["A2"],
+      "verdict": "covered",
+      "agree": null,
+      "note": ""
+    },
+    {
+      "criterion": "AC-14",
+      "condition": "Reactivation extends the end date once, after confirmation",
+      "team": ["CON-23"],
+      "agent": ["A2", "A3"],
+      "verdict": "covered",
+      "agree": null,
+      "note": ""
+    },
+    {
+      "criterion": "AC-19",
+      "condition": "Paid and debt equal the valid receipts",
+      "team": ["MON-08"],
+      "agent": ["A1"],
+      "verdict": "covered",
+      "agree": null,
+      "note": ""
+    },
+    {
+      "criterion": "AC-25",
+      "condition": "Name and channel are the only required fields",
+      "team": ["LEAD-01", "LEAD-02", "LEAD-07"],
+      "agent": ["A1", "A2"],
+      "verdict": "covered",
+      "agree": null,
+      "note": ""
+    },
+    {
+      "criterion": "AC-26",
+      "condition": "An untouched lead moves on after 1 working hour, inside 08:30-20:30",
+      "team": ["LEAD-33"],
+      "agent": ["A2"],
+      "verdict": "covered",
+      "agree": null,
+      "note": ""
+    }
+  ]
+}

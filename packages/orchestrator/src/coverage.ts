@@ -1,5 +1,6 @@
 import {
   listActiveSources,
+  listIdentifierTextChanges,
   listLatestCases,
   listLatestStories,
   listPublishedBugCases,
@@ -42,16 +43,29 @@ const refsOf = (c: LatestCaseRow) =>
  * against text that no longer governs: review them against the current version.
  */
 export async function staleCases(db: Db, scope: TenantScope) {
-  const [cases, statuses] = await Promise.all([listLatestCases(db, scope), listSourceStatuses(db, scope)]);
+  const [cases, statuses, changes] = await Promise.all([
+    listLatestCases(db, scope),
+    listSourceStatuses(db, scope),
+    listIdentifierTextChanges(db, scope),
+  ]);
   const byRef = new Map(statuses.map((s) => [`${s.sourceId}@${s.version}`, s.status]));
+  // ADR-0023: a bare identifier follows the active version, but its text may have changed under it.
+  const changed = new Map(changes.map((c) => [c.identifier, c]));
+  const sourceChanged = new Map(changes.map((c) => [c.sourceId, c]));
   const out: Array<CoverageCase & { refs: Array<{ ref: string; status: string }> }> = [];
   for (const c of cases) {
     if (c.status !== 'APPROVED') continue;
     // Only a versioned citation (`sourceId@version`) can go stale; a bare identifier or source id
     // (an imported catalogue's `A-342`) follows whichever version is active.
     const refs = [...refsOf(c)]
-      .filter((ref) => !ref.startsWith('story:') && ref.includes('@'))
-      .map((ref) => ({ ref, status: byRef.get(ref) ?? 'UNKNOWN' }))
+      .filter((ref) => !ref.startsWith('story:'))
+      .map((ref) => {
+        if (ref.includes('@')) return { ref, status: byRef.get(ref) ?? 'UNKNOWN' };
+        const drift = changed.get(ref) ?? sourceChanged.get(ref);
+        return drift && c.revisionAt < drift.changedAt
+          ? { ref, status: `TEXT_CHANGED:${drift.previousVersion}->${drift.version}` }
+          : { ref, status: 'ACTIVE' };
+      })
       .filter((r) => r.status !== 'ACTIVE');
     if (refs.length) out.push({ ...summary(c), refs });
   }

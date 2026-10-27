@@ -7,6 +7,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { createTestDb, seedProject } from '../../packages/db/src/index.ts';
+import { unobservableExpectation } from '../../packages/domain/src/index.ts';
 import {
   getCoverage,
   importCases,
@@ -57,9 +58,9 @@ for (const kind of ['FR', 'BR', 'AC', 'DEC', 'NFR'] as const) {
 
 const csv = await readFile(join(repo, 'docs/test-cases.csv'), 'utf8');
 const started = Date.now();
-const report = await importCases(db, a.qa, { csv, label: 'flow-fitness-2026-10-27', approve: true });
+const report = await importCases(db, a.lead, { csv, label: 'flow-fitness-2026-10-27', approve: true });
 const ms = Date.now() - started;
-const again = await importCases(db, a.qa, { csv, label: 'flow-fitness-2026-10-27', approve: true });
+const again = await importCases(db, a.lead, { csv, label: 'flow-fitness-2026-10-27', approve: true });
 const coverage = await getCoverage(db, scope);
 // Coverage counts an identifier as covered when any case cites its source; with one source per
 // requirement kind that says little, so count the catalogue ids a case cites by name.
@@ -67,6 +68,22 @@ const [header, ...rows] = parseCsv(csv);
 const refColumn = header!.indexOf('Requirement ID(s)');
 const cited = new Set(rows.flatMap((r) => (r[refColumn] ?? '').split(',').map((x) => x.trim())));
 const citedIds = REQUIREMENTS.filter((r) => cited.has(r.id)).map((r) => r.id);
+// ADR-0023: the observability check on a held-out set. These 376 cases' expected results were
+// written by the team and never used to tune the check; what it flags here is its false-flag
+// rate on human-written results (a person should read the flagged ones to confirm).
+const expectedColumn = header!.indexOf('Expected Results');
+const expectations = rows.flatMap((r) =>
+  (r[expectedColumn] ?? '')
+    .split(/\r?\n/)
+    .map((l) => l.replace(/^\d+[.)]\s*/, '').trim())
+    .filter(Boolean),
+);
+const flagged = expectations.map((e) => [e, unobservableExpectation(e)] as const).filter(([, f]) => f);
+const observability = {
+  expectedResults: expectations.length,
+  flagged: flagged.length,
+  sample: flagged.slice(0, 40).map(([e, f]) => ({ expected: e, flag: f })),
+};
 const notCited = REQUIREMENTS.filter((r) => !cited.has(r.id)).map((r) => r.id);
 
 const sorted = (m: Record<string, number>) =>
@@ -93,6 +110,7 @@ await writeFile(
       },
       reimport: { imported: again.imported.length, skipped: again.skipped.length },
       catalogueIds: { total: REQUIREMENTS.length, citedByName: citedIds.length, notCited },
+      observabilityHeldOut: observability,
       coverage: { totals: coverage.totals, identifiersNotReached: coverage.gaps.identifiers },
     },
     null,
@@ -103,6 +121,9 @@ await writeFile(join(HERE, 'results', 'test-design.md'), await testDesignMarkdow
 console.error(
   `${report.rows} rows: ${report.imported.length} imported, ${report.skipped.length} skipped, ${report.rejected.length} rejected in ${ms} ms; ` +
     `re-import: ${again.imported.length} imported, ${again.skipped.length} skipped`,
+);
+console.error(
+  `observability check (held out): ${observability.flagged} of ${observability.expectedResults} expected results flagged`,
 );
 console.error(
   `unresolved ids: ${Object.keys(report.unresolvedRefs).length}; unmapped techniques: ${JSON.stringify(sorted(report.unmappedTechniques))}; ` +

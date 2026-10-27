@@ -32,7 +32,19 @@ const openRetests = async (db: Db, scope: TenantScope, caseId: string): Promise<
     (r) => r.subjectId === caseId && OPEN.includes(r.status as ReviewStatus),
   );
 
-export async function setKnownBug(db: Db, actor: Actor, caseId: string, bugRef: string | null) {
+const STEP_ID = /^[a-z0-9][a-z0-9_-]{0,63}$|^\d{1,3}$/;
+
+/**
+ * `steps` names what the defect breaks: executable step ids, or manual step numbers. A failure
+ * elsewhere is then a plain failure (ADR-0023). Empty binds nothing, and reports say so.
+ */
+export async function setKnownBug(
+  db: Db,
+  actor: Actor,
+  caseId: string,
+  bugRef: string | null,
+  steps: string[] = [],
+) {
   if (hasRole(actor, 'AI_AGENT')) throw new DomainError('FORBIDDEN', 'the AI agent cannot mark known bugs');
   if (!hasRole(actor, ...SETTER_ROLES))
     throw new DomainError('FORBIDDEN', `actor ${actor.id} cannot mark known bugs`);
@@ -40,10 +52,13 @@ export async function setKnownBug(db: Db, actor: Actor, caseId: string, bugRef: 
   const ref = bugRef?.trim() || null;
   if (ref && !BUG_REF.test(ref))
     throw new DomainError('VALIDATION', `"${ref}" is not a defect reference such as BUG-041 or PROJ-123`);
+  const bound = [...new Set(steps.map((s) => s.trim()).filter(Boolean))];
+  const bad = bound.find((s) => !STEP_ID.test(s));
+  if (bad) throw new DomainError('VALIDATION', `"${bad}" is not a step id or a step number`);
   const latest = await latestRevision(db, scope, caseId);
   if (!latest) throw new DomainError('NOT_FOUND', `test case ${caseId} not found`);
   return db.transaction(async (tx) => {
-    await setCaseKnownBug(tx, scope, caseId, ref);
+    await setCaseKnownBug(tx, scope, caseId, ref, bound);
     // Changing or clearing the mark answers any retest still open for the old one.
     if (latest.knownBug && latest.knownBug !== ref) {
       for (const r of await openRetests(tx, scope, caseId)) {
@@ -66,9 +81,9 @@ export async function setKnownBug(db: Db, actor: Actor, caseId: string, bugRef: 
       policyVersion: null,
       decisionRecordId: null,
       approvalId: null,
-      outcome: ref ?? 'CLEARED',
+      outcome: ref ? `${ref}${bound.length ? ` @ ${bound.join(',')}` : ''}` : 'CLEARED',
     });
-    return { caseId, code: latest.code, knownBug: ref };
+    return { caseId, code: latest.code, knownBug: ref, knownBugSteps: ref ? bound : [] };
   });
 }
 

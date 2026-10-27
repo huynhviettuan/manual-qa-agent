@@ -320,8 +320,8 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
     const { id } = IdParams.parse(req.params);
     const revisions = await listRevisions(db, scope(req), id);
     if (revisions.length === 0) throw new DomainError('NOT_FOUND', `test case ${id} not found`);
-    const { storyId, code, knownBug } = revisions[0]!;
-    return { caseId: id, code, storyId, knownBug, revisions };
+    const { storyId, code, knownBug, knownBugSteps } = revisions[0]!;
+    return { caseId: id, code, storyId, knownBug, knownBugSteps, revisions };
   });
 
   app.post('/api/test-cases/:id/review', async (req) => {
@@ -548,8 +548,13 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
   });
   app.post('/api/test-cases/:id/known-bug', async (req) => {
     const { id } = IdParams.parse(req.params);
-    const { bugRef } = z.object({ bugRef: z.string().max(100).nullable() }).parse(req.body);
-    return setKnownBug(db, req.actor, id, bugRef);
+    const { bugRef, steps } = z
+      .object({
+        bugRef: z.string().max(100).nullable(),
+        steps: z.array(z.string().max(64)).max(50).optional(),
+      })
+      .parse(req.body);
+    return setKnownBug(db, req.actor, id, bugRef, steps);
   });
   app.get('/api/export/test-design.md', async (req, reply) =>
     reply

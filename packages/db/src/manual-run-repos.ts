@@ -91,9 +91,11 @@ export async function latestManualRunsForSuiteRun(
   db: Db,
   scope: TenantScope,
   suiteRunId: string,
-): Promise<ManualRunRow[]> {
-  return db.query<ManualRunRow>(
-    `SELECT DISTINCT ON (case_id) ${COLS} FROM manual_runs
+): Promise<Array<ManualRunRow & { evidence: number }>> {
+  return db.query<ManualRunRow & { evidence: number }>(
+    `SELECT DISTINCT ON (case_id) ${COLS},
+       (SELECT count(*)::int FROM evidence_artifacts e WHERE e.manual_run_id = manual_runs.id) AS evidence
+     FROM manual_runs
       WHERE suite_run_id = $1 AND tenant_id = $2 AND project_id = $3
       ORDER BY case_id, created_at DESC, id DESC`,
     [suiteRunId, scope.tenantId, scope.projectId],

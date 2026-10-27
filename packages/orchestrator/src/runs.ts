@@ -34,6 +34,7 @@ import {
   specHash,
   type TenantScope,
   transitionRun,
+  weakAssertions,
 } from '@qa/domain';
 import type { EvidenceStore } from '@qa/evidence';
 import type { ExecutionOutcome, Executor, SecretResolver } from '@qa/execution';
@@ -113,6 +114,8 @@ export async function proposeExecutable(
     specHash: specHash(spec),
     destructiveSteps: destructiveSteps(spec),
     proposedBy: actor.id,
+    // ADR-0023: found in code, shown to the reviewer; never a rejection.
+    reviewFlags: weakAssertions(spec),
   });
   await audit(
     db,

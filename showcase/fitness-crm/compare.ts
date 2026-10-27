@@ -159,4 +159,23 @@ await writeFile(
     2,
   )}\n`,
 );
+// ADR-0023: a sample of the pairing for a person to check. Deterministic (every 4th group in
+// criterion order), written once; the checker fills `agree` and `note`, and the file is kept.
+const samplePath = join(HERE, 'comparison', 'spot-check.json');
+const sample = groups
+  .filter((_, i) => i % 4 === 0)
+  .map((g) => ({
+    criterion: g.criterion,
+    condition: g.condition,
+    team: g.team,
+    agent: g.agent,
+    verdict: g.verdict,
+    agree: null as boolean | null,
+    note: '',
+  }));
+try {
+  await readFile(samplePath, 'utf8');
+} catch {
+  await writeFile(samplePath, `${JSON.stringify({ checker: '', checkedAt: '', sample }, null, 2)}\n`);
+}
 console.error(JSON.stringify(summary, null, 2));

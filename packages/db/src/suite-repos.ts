@@ -13,6 +13,7 @@ export type SuiteCaseRow = {
   caseId: string;
   code: string | null;
   knownBug: string | null;
+  knownBugSteps: string[];
   section: string;
   position: number;
   revision: number;
@@ -32,6 +33,8 @@ export type SuiteRunRow = {
   reason: string | null;
   /** The environment's preflight case run, which the automated runs wait for (ADR-0022). */
   preflightRunId: string | null;
+  /** The environment's sentinel case run (ADR-0023): it must FAIL for the run's verdicts to be trusted. */
+  sentinelRunId: string | null;
   requestedBy: string;
   createdAt: Date;
 };
@@ -39,7 +42,8 @@ export type SuiteRunRow = {
 export type SuiteRunItemOutcome = 'REQUESTED' | 'NOT_AUTOMATED' | 'NOT_APPROVED' | 'BLOCKED';
 
 const SUITE_RUN_COLS = `id, suite_id AS "suiteId", environment_id AS "environmentId", build, status, reason,
-  preflight_run_id AS "preflightRunId", requested_by AS "requestedBy", created_at AS "createdAt"`;
+  preflight_run_id AS "preflightRunId", sentinel_run_id AS "sentinelRunId", requested_by AS "requestedBy",
+  created_at AS "createdAt"`;
 
 export type SuiteRunItemRow = {
   caseId: string;
@@ -104,7 +108,7 @@ export async function upsertSuiteCase(
 /** Suite cases with their latest revision (the suite always runs what the case is now). */
 export async function listSuiteCases(db: Db, scope: TenantScope, suiteId: string): Promise<SuiteCaseRow[]> {
   return db.query<SuiteCaseRow>(
-    `SELECT sc.case_id AS "caseId", c.code, c.known_bug AS "knownBug", sc.section, sc.position, r.revision,
+    `SELECT sc.case_id AS "caseId", c.code, c.known_bug AS "knownBug", c.known_bug_steps AS "knownBugSteps", sc.section, sc.position, r.revision,
        r.status, r.content, r.source_refs AS "sourceRefs"
      FROM test_suite_cases sc
      JOIN test_suites s ON s.id = sc.suite_id AND s.tenant_id = $2 AND s.project_id = $3
@@ -149,6 +153,10 @@ export async function setSuiteRunPreflight(db: Db, suiteRunId: string, runId: st
   await db.query('UPDATE suite_runs SET preflight_run_id = $2 WHERE id = $1', [suiteRunId, runId]);
 }
 
+export async function setSuiteRunSentinel(db: Db, suiteRunId: string, runId: string): Promise<void> {
+  await db.query('UPDATE suite_runs SET sentinel_run_id = $2 WHERE id = $1', [suiteRunId, runId]);
+}
+
 export async function insertSuiteRunItem(
   db: Db,
   item: {
@@ -175,7 +183,7 @@ export async function listSuiteRuns(
 ): Promise<SuiteRunSummaryRow[]> {
   return db.query<SuiteRunSummaryRow>(
     `SELECT sr.id, sr.suite_id AS "suiteId", sr.environment_id AS "environmentId", sr.build, sr.status, sr.reason,
-       sr.preflight_run_id AS "preflightRunId", sr.requested_by AS "requestedBy", sr.created_at AS "createdAt",
+       sr.preflight_run_id AS "preflightRunId", sr.sentinel_run_id AS "sentinelRunId", sr.requested_by AS "requestedBy", sr.created_at AS "createdAt",
        (SELECT count(*)::int FROM suite_run_items i WHERE i.suite_run_id = sr.id AND i.outcome = 'NOT_AUTOMATED'
           AND NOT EXISTS (SELECT 1 FROM manual_runs m WHERE m.suite_run_id = sr.id AND m.case_id = i.case_id)) AS "manualPending",
        (SELECT count(DISTINCT m.case_id)::int FROM manual_runs m WHERE m.suite_run_id = sr.id) AS "manualRecorded"

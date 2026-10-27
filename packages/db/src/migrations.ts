@@ -537,6 +537,19 @@ ALTER TABLE test_runs ADD COLUMN after_run_id text REFERENCES test_runs(id);
 ALTER TABLE suite_runs ADD COLUMN preflight_run_id text REFERENCES test_runs(id);
 `,
   },
+  {
+    id: '0010_trust',
+    sql: /* sql */ `
+-- ADR-0023: what a green report must earn.
+-- A known bug is bound to the steps it breaks; a failure elsewhere is a plain failure.
+ALTER TABLE test_cases ADD COLUMN known_bug_steps text[] NOT NULL DEFAULT '{}';
+-- A sentinel case known to fail on the environment proves a suite run can detect a failure.
+ALTER TABLE environments ADD COLUMN sentinel_case_id text;
+ALTER TABLE suite_runs ADD COLUMN sentinel_run_id text REFERENCES test_runs(id);
+-- Weak assertions found in code when an executable is proposed, for its reviewer.
+ALTER TABLE test_case_executables ADD COLUMN review_flags text[] NOT NULL DEFAULT '{}';
+`,
+  },
 ];
 
 export async function migrate(db: Db): Promise<string[]> {

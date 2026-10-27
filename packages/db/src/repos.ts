@@ -59,6 +59,8 @@ export type EnvironmentRow = {
   id: string;
   kind: 'test' | 'staging' | 'production';
   allowedActions: string[];
+  /** A case known to fail on this environment; a suite run that sees it pass is not trusted (ADR-0023). */
+  sentinelCaseId?: string | null;
   /** Execution target (Phase 2). Runs may only reach `allowedHosts`. */
   baseUrl?: string | null;
   allowedHosts?: string[];
@@ -68,11 +70,12 @@ export type EnvironmentRow = {
 
 export async function upsertEnvironment(db: Db, scope: TenantScope, e: EnvironmentRow) {
   await db.query(
-    `INSERT INTO environments (id, tenant_id, project_id, kind, allowed_actions, base_url, allowed_hosts, preflight_case_id)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+    `INSERT INTO environments (id, tenant_id, project_id, kind, allowed_actions, base_url, allowed_hosts, preflight_case_id,
+       sentinel_case_id)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
      ON CONFLICT (tenant_id, project_id, id) DO UPDATE SET kind = EXCLUDED.kind,
        allowed_actions = EXCLUDED.allowed_actions, base_url = EXCLUDED.base_url, allowed_hosts = EXCLUDED.allowed_hosts,
-       preflight_case_id = EXCLUDED.preflight_case_id`,
+       preflight_case_id = EXCLUDED.preflight_case_id, sentinel_case_id = EXCLUDED.sentinel_case_id`,
     [
       e.id,
       scope.tenantId,
@@ -82,6 +85,7 @@ export async function upsertEnvironment(db: Db, scope: TenantScope, e: Environme
       e.baseUrl ?? null,
       e.allowedHosts ?? [],
       e.preflightCaseId ?? null,
+      e.sentinelCaseId ?? null,
     ],
   );
 }
@@ -89,7 +93,7 @@ export async function upsertEnvironment(db: Db, scope: TenantScope, e: Environme
 export async function getEnvironment(db: Db, scope: TenantScope, id: string): Promise<EnvironmentRow | null> {
   const rows = await db.query<EnvironmentRow>(
     `SELECT id, kind, allowed_actions AS "allowedActions", base_url AS "baseUrl", allowed_hosts AS "allowedHosts",
-       preflight_case_id AS "preflightCaseId"
+       preflight_case_id AS "preflightCaseId", sentinel_case_id AS "sentinelCaseId"
        FROM environments WHERE id = $1 AND tenant_id = $2 AND project_id = $3`,
     [id, scope.tenantId, scope.projectId],
   );
@@ -310,6 +314,45 @@ export async function listSourceStatuses(db: Db, scope: TenantScope): Promise<So
   );
 }
 
+export type IdentifierTextChange = {
+  sourceId: string;
+  identifier: string;
+  /** The active version whose text for the identifier differs from the version before it. */
+  version: string;
+  previousVersion: string;
+  /** When the active version was ingested: a case approved before this cites the old text. */
+  changedAt: Date;
+};
+
+/**
+ * Identifiers whose chunk text differs between a source's active version and the version before
+ * it (ADR-0023): a case citing the bare identifier was approved against text that has changed.
+ */
+export async function listIdentifierTextChanges(db: Db, scope: TenantScope): Promise<IdentifierTextChange[]> {
+  return db.query<IdentifierTextChange>(
+    `WITH versions AS (
+       SELECT s.id, s.source_id, s.version, s.created_at,
+              lag(s.id) OVER (PARTITION BY s.source_id ORDER BY s.created_at, s.version) AS prev_id,
+              lag(s.version) OVER (PARTITION BY s.source_id ORDER BY s.created_at, s.version) AS prev_version
+         FROM knowledge_sources s
+        WHERE s.tenant_id = $1 AND s.project_id = $2 AND s.approval_status = 'APPROVED' AND s.status <> 'REVOKED'
+     ), active AS (SELECT * FROM versions v WHERE EXISTS (
+       SELECT 1 FROM knowledge_sources s WHERE s.id = v.id AND s.status = 'ACTIVE') AND v.prev_id IS NOT NULL
+     ), texts AS (
+       SELECT c.source_row_id, i AS identifier, string_agg(c.content, E'\n' ORDER BY c.chunk_index) AS text
+         FROM knowledge_chunks c, unnest(c.identifiers) AS i GROUP BY c.source_row_id, i
+     )
+     SELECT a.source_id AS "sourceId", n.identifier, a.version, a.prev_version AS "previousVersion",
+            a.created_at AS "changedAt"
+       FROM active a
+       JOIN texts n ON n.source_row_id = a.id
+       LEFT JOIN texts o ON o.source_row_id = a.prev_id AND o.identifier = n.identifier
+      WHERE o.text IS DISTINCT FROM n.text
+      ORDER BY a.source_id, n.identifier`,
+    [scope.tenantId, scope.projectId],
+  );
+}
+
 export type ChunkHit = {
   chunkId: string;
   sourceId: string;
@@ -490,11 +533,13 @@ export type CaseRevisionRow = {
   workflowId: string | null;
   /** An open defect that blocks the expected result (ADR-0021), set by a reviewer. */
   knownBug: string | null;
+  /** The steps the defect breaks (executable step ids, or manual step numbers); empty = unbound (ADR-0023). */
+  knownBugSteps: string[];
 };
 
 const REVISION_SELECT = `SELECT c.id AS "caseId", c.code, c.story_id AS "storyId", r.id AS "revisionId", r.revision,
   r.status, r.content, r.source_refs AS "sourceRefs", r.author_id AS "authorId", c.workflow_id AS "workflowId",
-  c.known_bug AS "knownBug"
+  c.known_bug AS "knownBug", c.known_bug_steps AS "knownBugSteps"
   FROM test_cases c JOIN test_case_revisions r ON r.case_id = c.id`;
 
 /** Per-project lock while a code is assigned, so two concurrent creations never take one sequence. */
@@ -627,10 +672,12 @@ export async function setCaseKnownBug(
   scope: TenantScope,
   caseId: string,
   knownBug: string | null,
+  steps: string[] = [],
 ): Promise<void> {
   const rows = await db.query(
-    `UPDATE test_cases SET known_bug = $4 WHERE id = $1 AND tenant_id = $2 AND project_id = $3 RETURNING id`,
-    [caseId, scope.tenantId, scope.projectId, knownBug],
+    `UPDATE test_cases SET known_bug = $4, known_bug_steps = $5
+      WHERE id = $1 AND tenant_id = $2 AND project_id = $3 RETURNING id`,
+    [caseId, scope.tenantId, scope.projectId, knownBug, knownBug ? steps : []],
   );
   if (rows.length === 0) throw new DomainError('NOT_FOUND', `test case ${caseId} not found`);
 }

@@ -14,19 +14,26 @@ export type ExecutableRow = {
   specHash: string;
   destructiveSteps: string[];
   status: 'PROPOSED' | 'APPROVED' | 'REJECTED' | 'SUPERSEDED';
+  /** Weak assertions found in code at proposal (ADR-0023), for the reviewer. */
+  reviewFlags: string[];
   proposedBy: string;
   reviewedBy: string | null;
   reviewReason: string | null;
 };
 
 const EXEC_COLS = `id, case_id AS "caseId", case_revision AS "caseRevision", version, spec, spec_hash AS "specHash",
-  destructive_steps AS "destructiveSteps", status, proposed_by AS "proposedBy", reviewed_by AS "reviewedBy",
+  destructive_steps AS "destructiveSteps", status, review_flags AS "reviewFlags", proposed_by AS "proposedBy", reviewed_by AS "reviewedBy",
   review_reason AS "reviewReason"`;
 
 export async function insertExecutable(
   db: Db,
   scope: TenantScope,
-  e: Pick<ExecutableRow, 'caseId' | 'caseRevision' | 'spec' | 'specHash' | 'destructiveSteps' | 'proposedBy'>,
+  e: Pick<
+    ExecutableRow,
+    'caseId' | 'caseRevision' | 'spec' | 'specHash' | 'destructiveSteps' | 'proposedBy'
+  > & {
+    reviewFlags?: string[];
+  },
 ): Promise<ExecutableRow> {
   return db.transaction(async (tx) => {
     const [{ next }] = (await tx.query<{ next: number }>(
@@ -35,8 +42,8 @@ export async function insertExecutable(
     )) as [{ next: number }];
     const rows = await tx.query<ExecutableRow>(
       `INSERT INTO test_case_executables (id, tenant_id, project_id, case_id, case_revision, version, spec, spec_hash,
-         destructive_steps, status, proposed_by)
-       VALUES ($1,$2,$3,$4,$5,$6,$7::text::jsonb,$8,$9,'PROPOSED',$10) RETURNING ${EXEC_COLS}`,
+         destructive_steps, status, proposed_by, review_flags)
+       VALUES ($1,$2,$3,$4,$5,$6,$7::text::jsonb,$8,$9,'PROPOSED',$10,$11) RETURNING ${EXEC_COLS}`,
       [
         newId('exe'),
         scope.tenantId,
@@ -48,6 +55,7 @@ export async function insertExecutable(
         e.specHash,
         e.destructiveSteps,
         e.proposedBy,
+        e.reviewFlags ?? [],
       ],
     );
     return rows[0]!;
@@ -240,6 +248,33 @@ export async function runsBehindFailedPreflight(
     pairs.map((x) => x.id),
   ]);
   return rows.map((r) => ({ ...r, preflightState: state.get(r.id)! }));
+}
+
+export type UnstableCase = {
+  caseId: string;
+  specHash: string;
+  environmentId: string;
+  build: string;
+  verdicts: string[];
+};
+
+/**
+ * Cases whose verdict differed between runs of the same spec on the same environment and build
+ * (ADR-0023). Derived from history, never resolved by retrying: the case is named so nobody
+ * trusts it until the cause is known. Runs outside a suite run count as build ''.
+ */
+export async function unstableCases(db: Db, scope: TenantScope): Promise<UnstableCase[]> {
+  return db.query<UnstableCase>(
+    `SELECT t.case_id AS "caseId", t.spec_hash AS "specHash", t.environment_id AS "environmentId",
+            coalesce(sr.build, '') AS build, array_agg(DISTINCT t.state ORDER BY t.state) AS verdicts
+       FROM test_runs t
+       LEFT JOIN suite_run_items i ON i.run_id = t.id
+       LEFT JOIN suite_runs sr ON sr.id = i.suite_run_id
+      WHERE t.tenant_id = $1 AND t.project_id = $2 AND t.state IN ('PASSED','FAILED')
+      GROUP BY 1, 2, 3, 4 HAVING count(DISTINCT t.state) > 1
+      ORDER BY 1, 2, 3, 4`,
+    [scope.tenantId, scope.projectId],
+  );
 }
 
 /** Runs whose worker lease expired mid-flight (crash). They are never re-executed blindly. */

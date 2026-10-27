@@ -226,6 +226,51 @@ describe('test suites', () => {
     }
   });
 
+  it('a sentinel that fails proves detection; one that passes makes the suite run inconclusive (ADR-0023)', async () => {
+    // Known to fail on this build: the dashboard text is not on the login page.
+    const failing = await testCase('Sentinel: known-false expectation', 'automated', {
+      steps: [
+        { id: 'open', type: 'navigate', path: '/login' },
+        {
+          id: 'nope',
+          type: 'expectText',
+          target: { by: 'testId', testId: 'login-form' },
+          text: 'Welcome back',
+          match: 'exact',
+        },
+      ],
+    });
+    const passing = await testCase('Sentinel that is not a sentinel', 'automated', loginValidSpec);
+    const real = await testCase('A real case', 'automated');
+    const suite = await createSuite(db, a.qa, { name: 'Sentinel' });
+    await addSuiteCases(db, a.qa, suite.id, [{ caseId: real }]);
+    const staging = (await getEnvironment(db, S, 'staging'))!;
+    const drain = async () => {
+      while (await workOnce(deps, 'suite-worker')) {
+        /* drain */
+      }
+    };
+    try {
+      await upsertEnvironment(db, S, { ...staging, sentinelCaseId: failing });
+      const ok = await runSuite(deps, a.qa, suite.id, { environmentId: 'staging' });
+      expect(ok).toMatchObject({ detection: 'PENDING', complete: false });
+      await drain();
+      const proven = await getSuiteRunReport(db, S, ok.id);
+      expect(proven).toMatchObject({ detection: 'PROVEN', outcome: 'AS_RECORDED', complete: true });
+      expect(proven.sentinel).toMatchObject({ caseId: failing, status: 'FAILED' });
+      expect(proven.items[0]).toMatchObject({ status: 'PASSED', assertions: 3 });
+
+      await upsertEnvironment(db, S, { ...staging, sentinelCaseId: passing });
+      const bad = await runSuite(deps, a.qa, suite.id, { environmentId: 'staging' });
+      await drain();
+      const unproven = await getSuiteRunReport(db, S, bad.id);
+      expect(unproven).toMatchObject({ detection: 'NOT_PROVEN', outcome: 'INCONCLUSIVE' });
+      expect(unproven.items[0]!.status).toBe('PASSED'); // the recorded verdict is untouched
+    } finally {
+      await upsertEnvironment(db, S, { ...staging, sentinelCaseId: null });
+    }
+  });
+
   it('a second suite run requests new runs; the first report is unchanged', async () => {
     const c = await testCase('Repeatable', 'automated');
     const suite = await createSuite(db, a.qa, { name: 'Repeat' });
