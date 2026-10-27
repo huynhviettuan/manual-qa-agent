@@ -53,7 +53,7 @@ had the whole project in context.
 | Clarification questions | 0 | 10 |
 | Draft cases | 30 (one restatement per story) | 53 (one per test condition) |
 | Techniques used | specification-based only | 11 (state transition 15, equivalence partitioning 9, decision table 8, …) |
-| Cases the observability check flagged | — | 2 of 53 (20 before ADR-0022) |
+| Cases the observability check flagged | — | 2 of 53 (20 before ADR-0022); every case also carries "no quoted evidence" flags since ADR-0023, as the draft-v5 prompt asks for no quotes |
 
 **The clarifications are real gaps in the Gym CRM documents.** For example: AC-13 says the trash is "viewable only
 by management", but the seeded roles keep it from the Fitness Manager (Admin only); AC-27 locks an overdue step
@@ -96,4 +96,9 @@ the documents do not spell out ("marked required"); the rest were absences ("No 
 relations ("equals the new tier price", "closing = opening + receipts − expenses") and recipients ("goes to Admin").
 The check now knows absences, relations and those states, and the replay flags 2 cases, exactly the 2 above. The
 check was tuned on these same drafts, so this shows it handles these shapes, not its rate on drafts it has not
-seen.
+seen. Measured afterwards on a held-out set (the Flow Fitness team's 983 expected results, ADR-0023) it flags
+16 %, nearly all falsely: see [showcase/flow-fitness](../flow-fitness/README.md).
+
+**Spot-check.** `compare.ts` writes [`comparison/spot-check.json`](comparison/spot-check.json): 9 of the 36
+conditions (every fourth) for a person to mark `agree` or not. It is empty until someone fills it in; the
+comparison above should be read as unchecked until then.
