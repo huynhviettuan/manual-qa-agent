@@ -18,6 +18,7 @@ import {
   startTask,
   type Db,
   type StoryRow,
+  listVocabularyTerms,
 } from '@qa/db';
 import {
   type AcceptanceCriterion,
@@ -531,7 +532,11 @@ async function draftCases(
   const db = ctx.deps.db;
   // 6. Draft generation, persisted as revision 1 in DRAFT for human review.
   const drafted = await step(ctx, 'generate_draft', async () => {
-    const d = await ctx.deps.generator.generate({ story: storyInput(story), sources: retrieval.chunks });
+    const d = await ctx.deps.generator.generate({
+      story: storyInput(story),
+      sources: retrieval.chunks,
+      vocabulary: await listVocabularyTerms(db, ctx.scope),
+    });
     await recordCall(ctx, 'draft', d, retrieval);
     return d;
   });

@@ -119,7 +119,10 @@ export function checkDraftSet(
     .filter((ac) => !traced.has(`story:${ac.id}`))
     .filter((ac) => !reported.some((m) => mentions(m, ac.id)))
     .map((ac) => `${ac.id}: not covered by any drafted case (coverage check)`);
-  const vocabulary = buildVocabulary(input.sources.map((s) => s.content));
+  const vocabulary = [
+    ...buildVocabulary(input.sources.map((s) => s.content)),
+    ...(input.vocabulary ?? []).map((t) => t.trim().toLowerCase()).filter((t) => t.length >= 3),
+  ];
   return {
     ...out,
     value: {

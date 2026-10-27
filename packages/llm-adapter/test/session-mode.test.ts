@@ -34,6 +34,20 @@ describe('QA_LLM_PROVIDER=session', () => {
     expect((await readdir(dir)).some((f) => f.startsWith('readiness-') && f.endsWith('.request.json'))).toBe(
       true,
     );
+    // Triage goes through the exchange too; a missing answer is UNAVAILABLE, never a guessed cause.
+    const triage = await p.triager.triage({
+      verdict: 'FAILED',
+      reason: 'ASSERTION_FAILED:login',
+      environmentKind: 'staging',
+      failingStep: { id: 'login', description: 'expect text', expected: 'Welcome', actual: 'Error' },
+      stepErrors: [],
+      httpErrors: [],
+      failedRequests: 0,
+      blockedRequests: 0,
+      consoleErrors: [],
+    });
+    expect(triage).toMatchObject({ ok: false, failure: 'UNAVAILABLE' });
+    expect((await readdir(dir)).some((f) => f.startsWith('triage-'))).toBe(true);
   });
 
   it('the key mode is the default, and its mock stands in without QA_LIVE_LLM', () => {

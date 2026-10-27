@@ -272,6 +272,17 @@ export async function listSuiteRunSummaries(db: Db, scope: TenantScope, suiteId:
 
 const TERMINAL = new Set(['PASSED', 'FAILED', 'INCONCLUSIVE', 'BLOCKED']);
 
+export type Detection = 'NONE' | 'PROVEN' | 'NOT_PROVEN' | 'PENDING';
+/** ADR-0023: what the sentinel's state says about the run's power to detect a failure. */
+export function detectionOf(sentinelState: string | null): Detection {
+  if (!sentinelState) return 'NONE';
+  if (sentinelState === 'FAILED') return 'PROVEN';
+  return TERMINAL.has(sentinelState) ? 'NOT_PROVEN' : 'PENDING';
+}
+/** A run whose sentinel passed proves nothing: inconclusive as a whole, verdicts as recorded. */
+export const outcomeOf = (d: Detection): 'INCONCLUSIVE' | 'AS_RECORDED' =>
+  d === 'NOT_PROVEN' ? 'INCONCLUSIVE' : 'AS_RECORDED';
+
 /** Per-row outcome of a run with data rows; null when the spec has none. */
 const rowsOf = (assertions: unknown[]) => {
   const rows = new Map<number, boolean>();
@@ -366,13 +377,7 @@ export async function getSuiteRunReport(db: Db, scope: TenantScope, suiteRunId: 
   const sentinel = suiteRun.sentinelRunId ? await getRun(db, scope, suiteRun.sentinelRunId) : null;
   // ADR-0023: detection is proven by a sentinel that FAILED; a sentinel that PASSED means the
   // run's passes prove nothing, so the run as a whole is inconclusive. Verdicts stay as recorded.
-  const detection = !sentinel
-    ? ('NONE' as const)
-    : sentinel.state === 'FAILED'
-      ? ('PROVEN' as const)
-      : TERMINAL.has(sentinel.state)
-        ? ('NOT_PROVEN' as const)
-        : ('PENDING' as const);
+  const detection = detectionOf(sentinel?.state ?? null);
   return {
     id: suiteRun.id,
     suiteId: suiteRun.suiteId,
@@ -387,7 +392,7 @@ export async function getSuiteRunReport(db: Db, scope: TenantScope, suiteRunId: 
       : null,
     detection,
     /** INCONCLUSIVE when the sentinel passed: nothing here is shown to detect a failure. */
-    outcome: detection === 'NOT_PROVEN' ? ('INCONCLUSIVE' as const) : ('AS_RECORDED' as const),
+    outcome: outcomeOf(detection),
     requestedBy: suiteRun.requestedBy,
     createdAt: suiteRun.createdAt,
     complete:

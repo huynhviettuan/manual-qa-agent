@@ -14,7 +14,8 @@ import {
 } from '@qa/db';
 import { DomainError, EnvironmentKind, type Role } from '@qa/domain';
 import { createEvidenceStoreFromEnv } from '@qa/evidence';
-import { importCases, purgeExpiredEvidence } from '@qa/orchestrator';
+import { createProvidersFromEnv } from '@qa/llm-adapter';
+import { importCases, purgeExpiredEvidence, runStoryWorkflow } from '@qa/orchestrator';
 import { ingestDirectory, revokeSource } from '@qa/retrieval';
 import { runEval } from './eval.ts';
 
@@ -41,8 +42,10 @@ const USAGE = `Usage: pnpm qa <command> [options]
                                             Import a test-case workbook (the 20 export columns);
                                             prints what was imported, skipped and not mapped
   codes   --tenant T --project P            Give a code (MODULE-NNN) to cases created without one
-  session                                   List the session-exchange requests still waiting for an
-                                            answer (QA_LLM_PROVIDER=session, ADR-0026)
+  session [replay] --tenant T --project P   List the session-exchange requests still waiting for an
+                                            answer (QA_LLM_PROVIDER=session, ADR-0026); "replay"
+                                            resubmits every story whose workflow stopped on a
+                                            missing answer, so answered requests take effect
   purge-evidence                            Delete evidence past its retention
 
 Database: DATABASE_URL, or an embedded PGlite database in ./.pglite when unset.`;
@@ -171,6 +174,49 @@ try {
       break;
     }
     case 'session': {
+      if (arg === 'replay') {
+        await withDb(async (db) => {
+          const scope = { tenantId: values.tenant!, projectId: values.project! };
+          const providers = createProvidersFromEnv();
+          const deps = {
+            db,
+            classifier: providers.classifier,
+            generator: providers.generator,
+            executables: providers.executables,
+          };
+          const stuck = await db.query<{
+            id: string;
+            storyId: string;
+            actorId: string;
+            idempotencyKey: string;
+          }>(
+            `SELECT id, story_id AS "storyId", actor_id AS "actorId", idempotency_key AS "idempotencyKey" FROM workflows
+              WHERE tenant_id = $1 AND project_id = $2 AND story_id IS NOT NULL
+                AND outcome->>'route' = 'REVIEW_REQUESTED'
+                AND (outcome->>'reason' LIKE '%UNAVAILABLE%' OR outcome->>'draftPending' LIKE '%UNAVAILABLE%')
+                AND idempotency_key NOT LIKE '%#replay%'
+              ORDER BY created_at`,
+            [scope.tenantId, scope.projectId],
+          );
+          for (const w of stuck) {
+            const actor = await getActor(db, scope, w.actorId);
+            if (!actor) continue;
+            const r = await runStoryWorkflow(deps, actor, w.storyId, {
+              idempotencyKey: `${w.idempotencyKey}#replay${Date.now()}`,
+            });
+            const o = r.outcome;
+            const detail =
+              o.route === 'DRAFT_CREATED'
+                ? `${o.caseIds.length} case(s)`
+                : o.route === 'REVIEW_REQUESTED'
+                  ? `${o.reason}${o.drafted ? ` + ${o.drafted.caseIds.length} partial case(s)` : ''}`
+                  : o.reasons.join(',');
+            console.log(`${w.storyId.padEnd(40)} ${o.route.padEnd(17)} ${detail}`);
+          }
+          console.log(`${stuck.length} stuck workflow(s) resubmitted`);
+        });
+        break;
+      }
       const { readdir, readFile } = await import('node:fs/promises');
       const { join } = await import('node:path');
       const dir = process.env.QA_SESSION_EXCHANGE_DIR || './.session-exchange';

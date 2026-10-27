@@ -55,7 +55,7 @@ export type ClaudeConfig = {
   providerLabel?: string;
 };
 
-const TriageSchema = z.object({
+export const TriageSchema = z.object({
   suspectedCause: z.enum(SUSPECTED_CAUSES),
   securitySensitive: z.boolean(),
   rationale: z.string(),

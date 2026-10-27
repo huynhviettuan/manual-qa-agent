@@ -53,7 +53,12 @@ export type ReadinessAssessment = {
   draftableClauses?: string[];
 };
 
-export type DraftInput = { story: StoryInput; sources: EvidenceChunk[] };
+export type DraftInput = {
+  story: StoryInput;
+  sources: EvidenceChunk[];
+  /** The product's own terms (VOCABULARY sources, ADR-0026); an expected result naming one is observable. */
+  vocabulary?: string[];
+};
 
 export interface ReadinessClassifier {
   classify(input: ReadinessInput): Promise<ProviderOutcome<ReadinessAssessment>>;

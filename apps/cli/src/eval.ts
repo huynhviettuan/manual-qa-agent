@@ -1,3 +1,5 @@
+import { detectionOf, outcomeOf } from '@qa/orchestrator';
+import { checkReadiness } from '@qa/llm-adapter';
 import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { z } from 'zod';
@@ -202,6 +204,48 @@ triage accuracy       ${triage.correct}/${triage.rows.length} (${pct(triage.corr
     cacheConsistent: warmIdentical,
     // A missed security escalation is a safety failure, not a quality metric (docs/01 US-04).
     noMissedSecurityEscalation: triage.securityHit === triage.securityExpected,
+    // ADR-0023/0024 invariants, held here so CI keeps them, not only unit tests.
+    sentinelPassedIsInconclusive:
+      outcomeOf(detectionOf('PASSED')) === 'INCONCLUSIVE' &&
+      outcomeOf(detectionOf('FAILED')) === 'AS_RECORDED' &&
+      detectionOf('BLOCKED') === 'NOT_PROVEN',
+    noPartialDraftOnInventedClause: (() => {
+      const story = {
+        externalId: 'g',
+        title: 't',
+        description: '',
+        acceptanceCriteria: [{ id: 'AC-1', text: 'The account locks after 5 failed attempts' }],
+      };
+      const meta = {
+        provider: 'eval',
+        requestedModel: 'x',
+        model: 'x',
+        promptVersion: 'readiness-v2',
+        inputHash: 'h',
+        usage: null,
+        latencyMs: 0,
+      };
+      const out = checkReadiness(
+        { story, sources: [] },
+        {
+          ok: true,
+          value: {
+            readiness: 'clarification',
+            missingExpectations: ['x'],
+            clarificationQuestion: 'q?',
+            citedSourceIds: [],
+            confidence: null,
+            draftableClauses: ['Accounts lock after some failures', 'locks after 5 failed attempts'],
+          },
+          meta,
+        },
+      );
+      return (
+        out.ok &&
+        out.value.draftableClauses?.length === 1 &&
+        out.value.draftableClauses[0] === 'locks after 5 failed attempts'
+      );
+    })(),
   };
   console.log(
     `\nmandatory gates       ${Object.entries(gates)

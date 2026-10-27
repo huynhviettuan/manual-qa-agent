@@ -20,11 +20,18 @@ and no key had to write a script to use it, and nothing told them which requests
 | **Mock** | the default without `QA_LIVE_LLM` | A deterministic stand-in behind the real SDK, no network | None |
 
 In session mode readiness, drafts and executable proposals all go through the exchange and every answer passes the
-same checks as any provider (ADR-0020); failure triage falls back to the keyless stand-in, labelled as such, because
-triage runs inside the worker where nobody is waiting. `createProvidersFromEnv` reports `mode` (`api-key`,
-`session`, `mock`) and `executables`, so the API logs which way it is on and the orchestrator gets the generator
-without each app choosing. `pnpm qa session` lists the requests still waiting for an answer, with their kind and
-subject, and where to write the answer.
+same checks as any provider (ADR-0020), failure triage included (a `triage` request kind; a run's suspected cause
+waits for the answer and stays absent until then, which is the advisory status triage has anyway, ADR-0009). `createProvidersFromEnv` reports `mode` (`api-key`,
+`session`, `mock`) and `executables` (Claude, OpenAI or the session: all three propose steps), so the API logs which
+way it is on and the orchestrator gets the generator without each app choosing. `pnpm qa session` lists the requests
+still waiting for an answer, with their kind and subject, and where to write the answer; `pnpm qa session replay`
+resubmits every story whose workflow stopped on a missing answer, under a new idempotency key, so the answers take
+effect without a person resubmitting each story.
+
+Two more pieces landed with this ADR: a `VOCABULARY` source type (the product's own terms, one per line: option
+lists, statuses, labels), whose active approved terms reach the draft check beside the terms derived from the cited
+sources; and two eval gates that hold ADR-0023/0024 invariants in CI (`sentinelPassedIsInconclusive`,
+`noPartialDraftOnInventedClause`).
 
 ## Consequences
 

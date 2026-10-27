@@ -1,7 +1,18 @@
+import {
+  buildExecutablePayload,
+  checkExecutable,
+  EXECUTABLE_PROMPT_VERSION,
+  EXECUTABLE_SYSTEM,
+  type ExecutableGenerator,
+  type ExecutableInput,
+  FlatExecutableAnswer,
+  toExecutableAnswer,
+} from './executables.ts';
 import OpenAI from 'openai';
 import { zodTextFormat } from 'openai/helpers/zod';
 import { z } from 'zod';
 import { canonicalJson, type DraftSet, DraftSetOutput, sha256 } from '@qa/domain';
+import type { ExecutableSpec } from '@qa/domain';
 import {
   assessmentFromDecisions,
   DECISIONS_PROMPT_VERSION,
@@ -192,7 +203,7 @@ No: ${q.no}`,
 }
 
 /** Drafts via OpenAI Responses API structured outputs, not stored provider-side. */
-export class OpenAIResponsesDrafter implements DraftGenerator {
+export class OpenAIResponsesDrafter implements DraftGenerator, ExecutableGenerator {
   readonly model: string;
   constructor(private readonly config: { client: OpenAI; model: string; providerLabel?: string }) {
     this.model = config.model;
@@ -244,6 +255,46 @@ export class OpenAIResponsesDrafter implements DraftGenerator {
         return { ok: false, failure: 'MALFORMED', detail: 'no_structured_output', meta };
       }
       return checkDraftSet(input, { ok: true, value: response.output_parsed, meta });
+    } catch (err) {
+      meta.latencyMs = performance.now() - started;
+      return { ok: false, ...classifyError(err), meta };
+    }
+  }
+
+  /** ADR-0026: executable steps for an approved case, through the same checks as Claude's. */
+  async generateExecutable(input: ExecutableInput): Promise<ProviderOutcome<ExecutableSpec>> {
+    const payload = buildExecutablePayload(input);
+    const meta = newMeta(this.config.providerLabel ?? 'openai', this.model, EXECUTABLE_PROMPT_VERSION, {
+      payload,
+    });
+    const started = performance.now();
+    try {
+      const response = await this.config.client.responses.parse({
+        model: this.model,
+        instructions: `${EXECUTABLE_SYSTEM}\nAnswer with specJson (the spec as a JSON string) and cannot (empty when there is a spec).`,
+        input: userMessage(payload),
+        text: { format: zodTextFormat(FlatExecutableAnswer, 'executable_steps') },
+        max_output_tokens: 16000,
+        store: false,
+      });
+      meta.model = response.model;
+      meta.latencyMs = performance.now() - started;
+      if (response.status === 'incomplete') {
+        const reason = response.incomplete_details?.reason ?? 'unknown';
+        return reason === 'content_filter'
+          ? { ok: false, failure: 'REFUSED', detail: 'content_filter', meta }
+          : {
+              ok: false,
+              failure: 'MALFORMED',
+              detail: reason === 'max_output_tokens' ? 'max_tokens' : reason,
+              meta,
+            };
+      }
+      if (response.output_parsed == null)
+        return { ok: false, failure: 'MALFORMED', detail: 'no_structured_output', meta };
+      const answer = toExecutableAnswer(response.output_parsed);
+      if (!answer) return { ok: false, failure: 'MALFORMED', detail: 'specJson is not JSON', meta };
+      return checkExecutable(input, { ok: true, value: answer, meta });
     } catch (err) {
       meta.latencyMs = performance.now() - started;
       return { ok: false, ...classifyError(err), meta };

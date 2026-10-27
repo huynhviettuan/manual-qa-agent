@@ -11,6 +11,8 @@ export const SourceType = z.enum([
   'API_CONTRACT',
   'BUG_REPORT',
   'NOTE',
+  /** The product's own terms, one per line (option lists, statuses, labels), for the observability check (ADR-0026). */
+  'VOCABULARY',
 ]);
 export type SourceType = z.infer<typeof SourceType>;
 

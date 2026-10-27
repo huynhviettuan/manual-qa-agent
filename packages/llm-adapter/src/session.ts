@@ -3,7 +3,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { z } from 'zod';
 import { canonicalJson, type DraftSet, DraftSetOutput, type ExecutableSpec, sha256 } from '@qa/domain';
-import { ReadinessSchema } from './claude.ts';
+import { ReadinessSchema, TriageSchema } from './claude.ts';
 import {
   buildExecutablePayload,
   checkExecutable,
@@ -16,10 +16,13 @@ import {
 import { checkDraftSet, checkReadiness } from './grounding.ts';
 import {
   buildPayload,
+  buildTriagePayload,
   DRAFT_PROMPT_VERSION,
   DRAFT_SYSTEM,
   READINESS_PROMPT_VERSION,
   READINESS_SYSTEM,
+  TRIAGE_PROMPT_VERSION,
+  TRIAGE_SYSTEM,
   userMessage,
 } from './prompts.ts';
 import type {
@@ -30,6 +33,9 @@ import type {
   ReadinessAssessment,
   ReadinessClassifier,
   ReadinessInput,
+  TriageAssessment,
+  TriageClassifier,
+  TriageFacts,
 } from './types.ts';
 
 /**
@@ -49,11 +55,13 @@ export type SessionExchangeConfig = {
 
 export const SESSION_PROVIDER = 'claude-code-session';
 
-export class SessionExchangeProvider implements ReadinessClassifier, DraftGenerator, ExecutableGenerator {
+export class SessionExchangeProvider
+  implements ReadinessClassifier, DraftGenerator, ExecutableGenerator, TriageClassifier
+{
   constructor(private readonly config: SessionExchangeConfig) {}
 
   private async exchange<T>(
-    kind: 'readiness' | 'draft' | 'executable',
+    kind: 'readiness' | 'draft' | 'executable' | 'triage',
     promptVersion: string,
     system: string,
     payload: unknown,
@@ -118,6 +126,28 @@ export class SessionExchangeProvider implements ReadinessClassifier, DraftGenera
       DraftSetOutput,
     );
     return checkDraftSet(input, out);
+  }
+
+  /** ADR-0026: a suspected cause for a failed run, answered in the session; advisory like any triage. */
+  async triage(facts: TriageFacts): Promise<ProviderOutcome<TriageAssessment>> {
+    const out = await this.exchange(
+      'triage',
+      TRIAGE_PROMPT_VERSION,
+      TRIAGE_SYSTEM,
+      buildTriagePayload(facts),
+      TriageSchema,
+    );
+    if (!out.ok) return out;
+    return {
+      ...out,
+      value: {
+        suspectedCause: out.value.suspectedCause,
+        securitySensitive: out.value.securitySensitive,
+        securityProbability: null,
+        rationale: out.value.rationale,
+        confidence: null,
+      },
+    };
   }
 
   /** ADR-0024: executable steps for an approved case, answered in the session like a draft. */

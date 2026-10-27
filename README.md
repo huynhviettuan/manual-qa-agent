@@ -261,7 +261,7 @@ Two ways ([ADR-0026](docs/adr/0026-two-ways-to-a-real-model.md)); without either
 
 **Option 1: an API key.** Set `QA_LIVE_LLM=1` plus one provider's key. Live calls are **billed** and run unattended.
 
-**Option 2: the session exchange.** Set `QA_LLM_PROVIDER=session` (and `QA_SESSION_EXCHANGE_DIR`, default `./.session-exchange`). Every readiness check, draft and executable proposal becomes a request file; a person opens Claude Code in the repository, has Claude read the requests and write the answer files, and runs the workflow again (the same idempotency key resumes it). `pnpm qa session` lists what is waiting. Every answer goes through the same schema and grounding checks as a key-based call, and the audit records `provider: claude-code-session`. It costs a session's quota and a person's attention, so it suits a pilot slice or a showcase, not regression.
+**Option 2: the session exchange.** Set `QA_LLM_PROVIDER=session` (and `QA_SESSION_EXCHANGE_DIR`, default `./.session-exchange`). Every readiness check, draft and executable proposal becomes a request file; a person opens Claude Code in the repository, has Claude read the requests and write the answer files, and runs the workflow again (the same idempotency key resumes it). `pnpm qa session` lists what is waiting, and `pnpm qa session replay` resubmits the stories that stopped on a missing answer once the answers exist. Every answer goes through the same schema and grounding checks as a key-based call, and the audit records `provider: claude-code-session`. It costs a session's quota and a person's attention, so it suits a pilot slice or a showcase, not regression.
 
 | Provider | Settings |
 | --- | --- |

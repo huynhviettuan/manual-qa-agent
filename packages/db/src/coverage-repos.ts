@@ -25,6 +25,22 @@ export async function listActiveSources(db: Db, scope: TenantScope): Promise<Act
   );
 }
 
+/** The product's terms from active VOCABULARY sources (ADR-0026): one term per non-empty line. */
+export async function listVocabularyTerms(db: Db, scope: TenantScope): Promise<string[]> {
+  const rows = await db.query<{ content: string }>(
+    `SELECT content FROM knowledge_sources WHERE tenant_id = $1 AND project_id = $2
+       AND source_type = 'VOCABULARY' AND approval_status = 'APPROVED' AND status = 'ACTIVE'`,
+    [scope.tenantId, scope.projectId],
+  );
+  const terms = new Set<string>();
+  for (const r of rows)
+    for (const line of r.content.split(/\r?\n/)) {
+      const t = line.replace(/^[-*#\s]+/, '').trim();
+      if (t && !t.startsWith('---') && !/^[a-zA-Z]+:/.test(t)) terms.add(t);
+    }
+  return [...terms];
+}
+
 export type LatestCaseRow = {
   caseId: string;
   code: string | null;

@@ -72,21 +72,12 @@ export function createProvidersFromEnv(env: NodeJS.ProcessEnv = process.env): De
       dir: env.QA_SESSION_EXCHANGE_DIR || './.session-exchange',
       modelLabel: env.QA_SESSION_MODEL_LABEL || 'claude (interactive Claude Code session)',
     });
-    const standIn = new ClaudeProvider({
-      client: createAnthropicClient({
-        apiKey: 'mock-no-network',
-        fetch: createFakeAnthropicFetch(heuristicResponder),
-      }),
-      model: DEFAULT_CLAUDE_MODEL,
-      effort: 'medium',
-      providerLabel: 'anthropic-mock',
-    });
     return {
       providers: { readiness: 'session', draft: 'session' },
       mode: 'session',
       live: false,
       classifier: session,
-      triager: standIn,
+      triager: session,
       generator: session,
       executables: session,
       models: { readiness: 'session', draft: 'session' },
@@ -186,7 +177,7 @@ export function createProvidersFromEnv(env: NodeJS.ProcessEnv = process.env): De
     classifier,
     triager: classifier,
     generator,
-    executables: claude ?? null,
+    executables: claude ?? (generator as OpenAIResponsesDrafter),
     models: { readiness: readinessModel, draft: draftModel },
   };
 }
