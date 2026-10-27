@@ -1,0 +1,129 @@
+{
+ "designNotes": [
+  "State transition on contract status: pending (editable, not bookable) -> approved (not editable, bookable)."
+ ],
+ "cases": [
+  {
+   "title": "An approved contract cannot be edited, even by Admin",
+   "priority": "P0",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "As Admin, open an approved contract",
+     "expected": "No edit action is offered",
+     "sourceRefs": [
+      "story:AC-11",
+      "GYM-BR-SERVICES-PRICES-CONTRACTS@v1"
+     ],
+     "testData": "",
+     "evidence": ""
+    },
+    {
+     "action": "As Admin, send an edit request for it through the API",
+     "expected": "The API refuses the edit and the contract is unchanged",
+     "sourceRefs": [
+      "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+      "story:AC-11"
+     ],
+     "testData": "",
+     "evidence": ""
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-11",
+    "GYM-BR-SERVICES-PRICES-CONTRACTS@v1"
+   ],
+   "techniques": [
+    "state_transition",
+    "permission_matrix"
+   ],
+   "testTypes": [
+    "negative",
+    "security"
+   ],
+   "testConditions": [
+    "approved + Admin -> no edit"
+   ],
+   "module": "Contracts",
+   "level": "api",
+   "manualReason": ""
+  },
+  {
+   "title": "A pending contract cannot be booked",
+   "priority": "P0",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "On the PT calendar, book a session on a contract in \"Chờ duyệt\"",
+     "expected": "The booking is refused; no session is created",
+     "sourceRefs": [
+      "story:AC-11",
+      "GYM-BR-SESSIONS-AND-CLASSES@v1",
+      "GYM-BR-SERVICES-PRICES-CONTRACTS@v1"
+     ],
+     "testData": "",
+     "evidence": ""
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-11",
+    "GYM-BR-SESSIONS-AND-CLASSES@v1",
+    "GYM-BR-SERVICES-PRICES-CONTRACTS@v1"
+   ],
+   "techniques": [
+    "state_transition"
+   ],
+   "testTypes": [
+    "negative"
+   ],
+   "testConditions": [
+    "pending -> booking refused"
+   ],
+   "module": "Contracts",
+   "level": "ui",
+   "manualReason": ""
+  },
+  {
+   "title": "A pending contract can still be edited",
+   "priority": "P2",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "Edit the note of a contract in \"Chờ duyệt\" and save",
+     "expected": "The new note is saved",
+     "sourceRefs": [
+      "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+      "story:AC-11"
+     ],
+     "testData": "",
+     "evidence": ""
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-11",
+    "GYM-BR-SERVICES-PRICES-CONTRACTS@v1"
+   ],
+   "techniques": [
+    "state_transition"
+   ],
+   "testTypes": [
+    "positive"
+   ],
+   "testConditions": [
+    "pending -> editable"
+   ],
+   "module": "Contracts",
+   "level": "ui",
+   "manualReason": ""
+  }
+ ]
+}

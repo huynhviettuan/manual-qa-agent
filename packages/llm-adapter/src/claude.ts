@@ -2,6 +2,17 @@ import Anthropic from '@anthropic-ai/sdk';
 import { betaZodOutputFormat } from '@anthropic-ai/sdk/helpers/beta/zod';
 import { z } from 'zod';
 import { canonicalJson, type DraftSet, DraftSetOutput, Readiness, sha256 } from '@qa/domain';
+import type { ExecutableSpec } from '@qa/domain';
+import {
+  buildExecutablePayload,
+  checkExecutable,
+  EXECUTABLE_PROMPT_VERSION,
+  EXECUTABLE_SYSTEM,
+  type ExecutableGenerator,
+  type ExecutableInput,
+  FlatExecutableAnswer,
+  toExecutableAnswer,
+} from './executables.ts';
 import { checkDraftSet, checkReadiness } from './grounding.ts';
 import {
   buildPayload,
@@ -110,7 +121,9 @@ function classifyError(err: unknown): { failure: 'MALFORMED' | 'UNAVAILABLE'; de
   };
 }
 
-export class ClaudeProvider implements ReadinessClassifier, DraftGenerator, TriageClassifier {
+export class ClaudeProvider
+  implements ReadinessClassifier, DraftGenerator, TriageClassifier, ExecutableGenerator
+{
   readonly model: string;
   private readonly effort: Effort;
   private readonly fallback: boolean;
@@ -207,6 +220,21 @@ export class ClaudeProvider implements ReadinessClassifier, DraftGenerator, Tria
         confidence: null,
       },
     };
+  }
+
+  /** ADR-0024/0025: proposes executable steps for an approved case; checked like a hand-written spec. */
+  async generateExecutable(input: ExecutableInput): Promise<ProviderOutcome<ExecutableSpec>> {
+    const out = await this.call(
+      EXECUTABLE_PROMPT_VERSION,
+      `${EXECUTABLE_SYSTEM}\nAnswer with specJson (the spec as a JSON string) and cannot (empty when there is a spec).`,
+      buildExecutablePayload(input),
+      FlatExecutableAnswer,
+      16000,
+    );
+    if (!out.ok) return out;
+    const answer = toExecutableAnswer(out.value);
+    if (!answer) return { ok: false, failure: 'MALFORMED', detail: 'specJson is not JSON', meta: out.meta };
+    return checkExecutable(input, { ...out, value: answer });
   }
 
   async generate(input: DraftInput): Promise<ProviderOutcome<DraftSet>> {

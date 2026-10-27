@@ -30,11 +30,11 @@ describe('draft content (ADR-0014)', () => {
       testTypes: ['boundary'],
       testConditions: ['5 failed logins'],
     };
-    // draft-v5 also needs the management fields and per-step test data.
+    // draft-v6 also needs the management fields and per-step test data.
     expect(DraftOutput.safeParse(v2).success).toBe(false);
     const v5 = {
       ...v2,
-      steps: v2.steps.map((s) => ({ ...s, testData: 'wrong password x5' })),
+      steps: v2.steps.map((s) => ({ ...s, testData: 'wrong password x5', evidence: '' })),
       module: 'Sign-in',
       level: 'ui',
       manualReason: '',

@@ -82,6 +82,12 @@ export function heuristicDraft(payload: PromptPayload): DraftSetOutput {
             .find((l) => MEASURABLE.test(l.replaceAll(ac.id, ''))) ?? ac.text,
         sourceRefs: support.length > 0 ? support.map((s) => s.ref) : [`story:${ac.id}`],
         testData: '',
+        // The stand-in quotes the measurable line it took the expectation from, when there was one.
+        evidence:
+          support
+            .flatMap((s) => s.content.split('\n'))
+            .find((l) => MEASURABLE.test(l.replaceAll(ac.id, '')))
+            ?.trim() ?? '',
       };
     }),
     assumptions: [],

@@ -1,0 +1,124 @@
+{
+ "designNotes": [
+  "EP on required fields: name+channel only (valid); missing either (invalid). Country from ISO list; email language from it."
+ ],
+ "cases": [
+  {
+   "title": "A lead with only a name and a channel is saved",
+   "priority": "P1",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "Open \"Thêm lead\", fill only the name and choose a channel, then save",
+     "expected": "The lead is created",
+     "sourceRefs": [
+      "story:AC-25",
+      "GYM-FR@v1"
+     ],
+     "testData": "name \"QA Tối Thiểu\", channel \"Walk-in\"",
+     "evidence": ""
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-25",
+    "GYM-FR@v1"
+   ],
+   "techniques": [
+    "equivalence_partitioning"
+   ],
+   "testTypes": [
+    "positive"
+   ],
+   "testConditions": [
+    "name + channel, nothing else"
+   ],
+   "module": "Leads and consulting",
+   "level": "ui",
+   "manualReason": ""
+  },
+  {
+   "title": "A lead without a channel or without a name is refused",
+   "priority": "P1",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "Save with a name and no channel",
+     "expected": "The channel field is marked required and nothing is saved",
+     "sourceRefs": [
+      "story:AC-25"
+     ],
+     "testData": "channel empty",
+     "evidence": ""
+    },
+    {
+     "action": "Save with a channel and no name",
+     "expected": "The name field is marked required and nothing is saved",
+     "sourceRefs": [
+      "story:AC-25"
+     ],
+     "testData": "name empty",
+     "evidence": ""
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-25"
+   ],
+   "techniques": [
+    "equivalence_partitioning"
+   ],
+   "testTypes": [
+    "negative"
+   ],
+   "testConditions": [
+    "no channel",
+    "no name"
+   ],
+   "module": "Leads and consulting",
+   "level": "ui",
+   "manualReason": ""
+  },
+  {
+   "title": "The country is chosen from the list and sets the email language",
+   "priority": "P2",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "In the nationality field, type \"Nhật\"",
+     "expected": "The field offers \"Nhật Bản\" from the country list; free text is not accepted",
+     "sourceRefs": [
+      "GYM-FR@v1",
+      "story:AC-25"
+     ],
+     "testData": "\"Nhật\"",
+     "evidence": ""
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-25",
+    "GYM-FR@v1"
+   ],
+   "techniques": [
+    "specification_based"
+   ],
+   "testTypes": [
+    "positive"
+   ],
+   "testConditions": [
+    "Vietnam -> Vietnamese",
+    "other country -> foreign group"
+   ],
+   "module": "Leads and consulting",
+   "level": "ui",
+   "manualReason": ""
+  }
+ ]
+}

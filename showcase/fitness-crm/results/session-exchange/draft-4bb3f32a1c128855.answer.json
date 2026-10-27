@@ -1,0 +1,168 @@
+{
+ "designNotes": [
+  "Permission matrix: for each module, the lowest role granted and the highest role refused (GYM-RBAC seeded roles).",
+  "Two channels per refusal: the menu (hidden) and a direct URL (refused).",
+  "Field masking: phone hidden for Marketing on a screen and in an export."
+ ],
+ "cases": [
+  {
+   "title": "A role without the Configuration permission sees no Configuration menu",
+   "priority": "P0",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "Sign in as Receptionist and open the main menu",
+     "expected": "The main menu has no \"Cấu hình\" entry",
+     "sourceRefs": [
+      "story:AC-01",
+      "GYM-RBAC@v1"
+     ],
+     "testData": "Receptionist (seeded role)",
+     "evidence": ""
+    },
+    {
+     "action": "Sign in as Admin and open the main menu",
+     "expected": "The main menu shows a \"Cấu hình\" entry",
+     "sourceRefs": [
+      "GYM-RBAC@v1"
+     ],
+     "testData": "Admin",
+     "evidence": ""
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-01",
+    "GYM-RBAC@v1"
+   ],
+   "techniques": [
+    "permission_matrix"
+   ],
+   "testTypes": [
+    "security",
+    "negative"
+   ],
+   "testConditions": [
+    "Configuration: Admin granted, every other role refused"
+   ],
+   "module": "Roles and permissions",
+   "level": "ui",
+   "manualReason": ""
+  },
+  {
+   "title": "A direct URL to a module without permission is refused",
+   "priority": "P0",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "Sign in as Receptionist and type the Configuration URL in the address bar",
+     "expected": "The configuration page is refused (no settings are shown) and the API answers 403 for its data",
+     "sourceRefs": [
+      "story:AC-01",
+      "GYM-RBAC@v1"
+     ],
+     "testData": "Receptionist; the Configuration page URL",
+     "evidence": ""
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-01",
+    "GYM-RBAC@v1"
+   ],
+   "techniques": [
+    "permission_matrix",
+    "attack_based"
+   ],
+   "testTypes": [
+    "security",
+    "negative"
+   ],
+   "testConditions": [
+    "Configuration URL as a refused role"
+   ],
+   "module": "Roles and permissions",
+   "level": "ui",
+   "manualReason": ""
+  },
+  {
+   "title": "Marketing never sees customer phone numbers on screen",
+   "priority": "P0",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "Sign in as Marketing and open the lead analysis report",
+     "expected": "No customer phone number appears in the report; the phone column is empty or masked",
+     "sourceRefs": [
+      "story:AC-01",
+      "GYM-RBAC@v1"
+     ],
+     "testData": "Marketing (phone and email hidden)",
+     "evidence": ""
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-01",
+    "GYM-RBAC@v1"
+   ],
+   "techniques": [
+    "permission_matrix"
+   ],
+   "testTypes": [
+    "security"
+   ],
+   "testConditions": [
+    "Field masking: phone hidden for Marketing"
+   ],
+   "module": "Roles and permissions",
+   "level": "ui",
+   "manualReason": ""
+  },
+  {
+   "title": "A masked field stays masked in an Excel export",
+   "priority": "P1",
+   "preconditions": [
+    "A custom role with customer.export and the phone field hidden"
+   ],
+   "testData": [],
+   "steps": [
+    {
+     "action": "As a role with phone hidden and an export permission, export a customer list to Excel",
+     "expected": "The exported file has no phone numbers: the phone column is empty or masked",
+     "sourceRefs": [
+      "story:AC-01",
+      "GYM-RBAC@v1"
+     ],
+     "testData": "A custom role with customer.export and phone hidden",
+     "evidence": ""
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-01",
+    "GYM-RBAC@v1"
+   ],
+   "techniques": [
+    "permission_matrix",
+    "error_guessing"
+   ],
+   "testTypes": [
+    "security"
+   ],
+   "testConditions": [
+    "Export of a list for a role with phone hidden"
+   ],
+   "module": "Roles and permissions",
+   "level": "manual",
+   "manualReason": "Opening and inspecting a downloaded Excel file is outside the browser steps the executor runs."
+  }
+ ]
+}

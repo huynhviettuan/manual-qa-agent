@@ -128,9 +128,25 @@
     const r = await api('GET', `/api/suite-runs/${id}`);
     const t = r.totals;
     // ADR-0021: a known bug only labels the verdict; the verdict itself is what was recorded.
+    // ADR-0023/0024 marks beside the verdict: never instead of it.
+    const marks = (i) =>
+      [
+        i.failedOutsideKnownBug
+          ? `<div class="flag">Failed outside known bug ${esc(i.knownBug)} (at step ${esc(i.failedStep || '?')})</div>`
+          : '',
+        i.knownBugUnbound && i.knownBug
+          ? '<div class="muted">Known bug unbound: every failure counts as expected</div>'
+          : '',
+        i.unstable ? '<div class="flag">Unstable: verdicts differed on this environment and build</div>' : '',
+        i.unproven ? '<div class="flag">Unproven: P0 result by hand with no evidence</div>' : '',
+        i.rows
+          ? `<div class="muted">Rows: ${i.rows.total - i.rows.failed} / ${i.rows.total} passed</div>`
+          : '',
+        i.assertions != null ? `<div class="muted">${i.assertions} assertion(s)</div>` : '',
+      ].join('');
     const bugNote = (i) =>
       i.expectedFailure
-        ? `<div class="flag">Expected: known bug ${esc(i.knownBug)}</div>`
+        ? `<div class="flag">Expected: known bug ${esc(i.knownBug)}${i.knownBugUnbound ? '' : ` at step ${esc(i.failedStep || '?')}`}</div>`
         : i.retestNeeded
           ? `<div class="flag">Passed with known bug ${esc(i.knownBug)}: retest and clear the mark</div>`
           : i.knownBug
@@ -139,7 +155,7 @@
     const row = (i) => h`<tr>
       <td>${i.manualRunId || i.status === 'NOT_AUTOMATED' ? `<a class="clickable" href="#/execute/${esc(i.caseId)}?run=${esc(id)}">${esc(i.title)}</a>` : esc(i.title)}
         <div class="muted">${esc(i.code || i.caseId)} · ${esc(i.section)}</div></td>
-      <td>${pill(i.status)}${i.testerId ? `<div class="muted">by ${esc(i.testerId)}</div>` : ''}${bugNote(i)}</td>
+      <td>${pill(i.status)}${i.testerId ? `<div class="muted">by ${esc(i.testerId)}</div>` : ''}${bugNote(i)}${marks(i)}</td>
       <td>${esc(i.reason ?? '')}</td>
       <td class="num">${i.durationMs == null ? '' : `${(i.durationMs / 1000).toFixed(1)} s`}</td></tr>`;
     app.innerHTML = h`
@@ -147,6 +163,16 @@
         <h2 id="h-run">Suite run ${esc(r.id)}</h2>
         <p class="muted">Environment <b>${esc(r.environmentId)}</b>${r.build ? ` · build <b>${esc(r.build)}</b>` : ''} · requested by ${esc(r.requestedBy)} on ${esc(fmtDate(r.createdAt))}</p>
         ${r.status === 'BLOCKED' ? `<div class="error">Blocked before anything ran: ${esc(r.reason)}. Fix the environment and request the run again.</div>` : ''}
+        ${
+          r.detection === 'NOT_PROVEN'
+            ? '<div class="error">Inconclusive as a whole: the sentinel case passed, so this run was not shown to detect a failure. The verdicts below are as recorded.</div>'
+            : r.detection === 'PROVEN'
+              ? '<p class="ok">Detection proven: the sentinel case failed as it should.</p>'
+              : r.detection === 'PENDING'
+                ? '<p class="muted">Sentinel still running.</p>'
+                : ''
+        }
+        ${r.preflight ? `<p class="muted">Preflight ${esc(r.preflight.caseId)}: ${pill(r.preflight.status)}${r.preflight.reason ? ` ${esc(r.preflight.reason)}` : ''}</p>` : ''}
         <p>${pill('PASSED')} ${t.passed} &nbsp; ${pill('FAILED')} ${t.failed}${t.expectedFailures ? ` <span class="muted">(${t.expectedFailures} on known bugs)</span>` : ''} &nbsp; ${pill('BLOCKED')} ${t.blocked} &nbsp; ${pill('INCONCLUSIVE')} ${t.inconclusive}
            &nbsp; <span class="pill NOT_AUTOMATED">manual pending</span> ${t.notAutomated} &nbsp; <span class="muted">recorded by hand: ${t.manualRecorded}</span>${t.retestNeeded ? ` &nbsp; <span class="flag">${t.retestNeeded} to retest (known bug passed)</span>` : ''}</p>
         <table><thead><tr><th>Case</th><th>Status</th><th>Reason</th><th class="num">Time</th></tr></thead>
@@ -179,6 +205,8 @@
         <form id="bugform" class="row" aria-label="Known bug">
           <div><label for="knownbug">Known bug (an open defect that blocks the expected result)</label>
             <input id="knownbug" type="text" placeholder="BUG-041" value="${esc(detail.knownBug || '')}"></div>
+          <div><label for="bugsteps">Steps it breaks (numbers or step ids, comma-separated; empty = unbound)</label>
+            <input id="bugsteps" type="text" placeholder="2" value="${esc((detail.knownBugSteps || []).join(', '))}"></div>
           <div><label>&nbsp;</label><button type="submit" class="secondary">${detail.knownBug ? 'Update' : 'Mark'}</button>
             ${detail.knownBug ? '<button type="button" id="clearbug" class="secondary">Clear</button>' : ''}</div>
           <div id="bugmsg"></div>
@@ -216,7 +244,11 @@
     // ADR-0021: a reviewer marks the defect; the server checks the role and audits it.
     const markBug = async (bugRef) => {
       try {
-        const out = await api('POST', `/api/test-cases/${caseId}/known-bug`, { bugRef });
+        const steps = el('bugsteps')
+          .value.split(',')
+          .map((s) => s.trim())
+          .filter(Boolean);
+        const out = await api('POST', `/api/test-cases/${caseId}/known-bug`, { bugRef, steps });
         el('bugmsg').innerHTML =
           `<div class="ok">${out.knownBug ? `Marked: ${esc(out.knownBug)}` : 'Cleared'}</div>`;
         setTimeout(() => viewExecute(caseId, suiteRunId), 600);
@@ -533,6 +565,12 @@
             : ''
         }
       </section>
+      <section class="card" aria-labelledby="h-reg">
+        <h2 id="h-reg">Regression scope</h2>
+        <form id="regform" class="row"><div><label for="regref">Requirement id, source id or story:AC</label><input id="regref" type="text" placeholder="BR-404"></div>
+          <div><label>&nbsp;</label><button type="submit" class="secondary">Show cases</button></div></form>
+        <div id="regout"></div>
+      </section>
       <section class="card" aria-labelledby="h-exp">
         <h2 id="h-exp">Exports</h2>
         <p><button id="dl-cases">Download test-cases.csv</button> <button id="dl-trace" class="secondary">Download traceability.csv</button> <button id="dl-design" class="secondary">Download test-design.md</button></p>
@@ -558,6 +596,22 @@
       download('/api/export/traceability.csv', 'traceability.csv'),
     );
     el('dl-design').addEventListener('click', () => download('/api/export/test-design.md', 'test-design.md'));
+    el('regform').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const ref = el('regref').value.trim();
+      if (!ref) return;
+      try {
+        const r = await api('GET', `/api/regression?ref=${encodeURIComponent(ref)}`);
+        const list = (title, cs) =>
+          cs.length
+            ? `<h3>${title} (${cs.length})</h3><ul>${cs.map((c) => h`<li><a class="clickable" href="#/execute/${esc(c.caseId)}">${esc(c.code || c.caseId)}</a> ${esc(c.title)}</li>`).join('')}</ul>`
+            : '';
+        el('regout').innerHTML =
+          `${list('Cases citing ' + esc(ref), r.cited)}${list('All approved P0', r.p0)}${list('Guarding a defect', r.guarding)}${r.caseIds.length ? '' : '<p class="muted">No approved case cites it.</p>'}`;
+      } catch (err) {
+        el('regout').innerHTML = `<div class="error">${esc(err.message)}</div>`;
+      }
+    });
   }
 
   // ---- utilities

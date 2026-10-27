@@ -1,0 +1,117 @@
+{
+ "designNotes": [
+  "State: Đã tập is final; deletion by Admin refunds 1 session, removes 1 credit; paid period -> negative adjustment next period."
+ ],
+ "cases": [
+  {
+   "title": "A session in \"Đã tập\" offers no status change",
+   "priority": "P1",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "Open a session in \"Đã tập\"",
+     "expected": "No status actions (Hủy lịch, Khách không đến) are offered",
+     "sourceRefs": [
+      "story:AC-16",
+      "GYM-BR-SESSIONS-AND-CLASSES@v1"
+     ],
+     "testData": "",
+     "evidence": ""
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-16",
+    "GYM-BR-SESSIONS-AND-CLASSES@v1"
+   ],
+   "techniques": [
+    "state_transition"
+   ],
+   "testTypes": [
+    "negative"
+   ],
+   "testConditions": [
+    "Đã tập -> any status"
+   ],
+   "module": "Sessions",
+   "level": "ui",
+   "manualReason": ""
+  },
+  {
+   "title": "Admin deleting a recorded session refunds 1 session and removes 1 PT credit",
+   "priority": "P0",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "As Admin, delete a \"Đã tập\" session from the check-in history with a reason",
+     "expected": "Sessions left rise by exactly 1, the PT has exactly 1 credit less, and the session is in the trash",
+     "sourceRefs": [
+      "story:AC-16",
+      "GYM-BR-SESSIONS-AND-CLASSES@v1"
+     ],
+     "testData": "",
+     "evidence": ""
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-16",
+    "GYM-BR-SESSIONS-AND-CLASSES@v1"
+   ],
+   "techniques": [
+    "state_transition"
+   ],
+   "testTypes": [
+    "positive"
+   ],
+   "testConditions": [
+    "delete Đã tập session"
+   ],
+   "module": "Sessions",
+   "level": "manual",
+   "manualReason": "Changes shared money and session data (deletion); kept manual until scoped cleanup exists."
+  },
+  {
+   "title": "Deleting a session in a paid period adds an adjustment line to the next period",
+   "priority": "P1",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "Delete a session whose period was already paid to the PT",
+     "expected": "The paid voucher is unchanged and the next period has a negative adjustment of 1 session",
+     "sourceRefs": [
+      "story:AC-16",
+      "GYM-BR-SESSIONS-AND-CLASSES@v1",
+      "GYM-BR-MONEY@v1"
+     ],
+     "testData": "",
+     "evidence": ""
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-16",
+    "GYM-BR-SESSIONS-AND-CLASSES@v1",
+    "GYM-BR-MONEY@v1"
+   ],
+   "techniques": [
+    "use_case"
+   ],
+   "testTypes": [
+    "positive"
+   ],
+   "testConditions": [
+    "period already paid"
+   ],
+   "module": "Money",
+   "level": "manual",
+   "manualReason": "Needs a paid payout period prepared first and arithmetic across periods."
+  }
+ ]
+}

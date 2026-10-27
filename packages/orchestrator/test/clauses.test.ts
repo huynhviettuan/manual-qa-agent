@@ -75,7 +75,7 @@ const generator: DraftGenerator = {
       }),
     );
     const value: DraftSet = { designNotes: ['from the clear clauses'], cases, coverageGaps: [] };
-    return { ok: true, value, meta: { ...meta, promptVersion: 'draft-v5' } };
+    return { ok: true, value, meta: { ...meta, promptVersion: 'draft-v6' } };
   },
 };
 

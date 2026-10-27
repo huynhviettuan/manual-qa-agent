@@ -36,6 +36,22 @@ export const ExecutableAnswer = z.union([
 ]);
 export type ExecutableAnswer = z.infer<typeof ExecutableAnswer>;
 
+/** The flat shape a structured-output provider answers with; `toExecutableAnswer` turns it into the union. */
+export const FlatExecutableAnswer = z.object({
+  /** The spec as a JSON string, or "" when the case cannot be executed. */
+  specJson: z.string(),
+  /** Why no spec, or "" when there is one. */
+  cannot: z.string(),
+});
+export function toExecutableAnswer(flat: z.infer<typeof FlatExecutableAnswer>): ExecutableAnswer | null {
+  if (flat.cannot.trim()) return { cannot: flat.cannot.trim() };
+  try {
+    return { spec: JSON.parse(flat.specJson) as unknown };
+  } catch {
+    return null;
+  }
+}
+
 export type ExecutableInput = {
   caseId: string;
   code: string | null;

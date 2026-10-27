@@ -3,6 +3,7 @@ import {
   type DraftSet,
   type DraftSetOutput,
   sourceRef,
+  buildVocabulary,
   unobservableExpectation,
 } from '@qa/domain';
 import { storyRefs } from './prompts.ts';
@@ -118,6 +119,7 @@ export function checkDraftSet(
     .filter((ac) => !traced.has(`story:${ac.id}`))
     .filter((ac) => !reported.some((m) => mentions(m, ac.id)))
     .map((ac) => `${ac.id}: not covered by any drafted case (coverage check)`);
+  const vocabulary = buildVocabulary(input.sources.map((s) => s.content));
   return {
     ...out,
     value: {
@@ -130,7 +132,7 @@ export function checkDraftSet(
         basis: c.assumptions.length > 0 ? ('assumption' as const) : ('specified' as const),
         reviewFlags: [
           ...c.steps.flatMap((s, i) => {
-            const problem = unobservableExpectation(s.expected);
+            const problem = unobservableExpectation(s.expected, vocabulary);
             return problem ? [`step ${i + 1}: ${problem}`] : [];
           }),
           ...quoteFlags(c.steps, input.sources),

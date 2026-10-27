@@ -53,7 +53,7 @@ had the whole project in context.
 | Clarification questions | 0 | 10 |
 | Draft cases | 30 (one restatement per story) | 53 (one per test condition) |
 | Techniques used | specification-based only | 11 (state transition 15, equivalence partitioning 9, decision table 8, …) |
-| Cases the observability check flagged | — | 2 of 53 (20 before ADR-0022); every case also carries "no quoted evidence" flags since ADR-0023, as the draft-v5 prompt asks for no quotes |
+| Cases the observability check flagged | — | 12 of 64 with the product vocabulary (ADR-0025), on the 53 full and 11 partial drafts; 101 of 105 steps also carry "no quoted evidence": the drafts were re-answered under draft-v6 by retrofitting quotes mechanically and only 4 steps had a run of three words from a source (see ADR-0025) |
 
 **The clarifications are real gaps in the Gym CRM documents.** For example: AC-13 says the trash is "viewable only
 by management", but the seeded roles keep it from the Fitness Manager (Admin only); AC-27 locks an overdue step

@@ -1,0 +1,174 @@
+{
+ "designNotes": [
+  "Decision table: approval on/off x submitter vs other approver.",
+  "State: pending -> approved (takes effect) / rejected (no effect)."
+ ],
+ "cases": [
+  {
+   "title": "A contract has no effect until approved",
+   "priority": "P0",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "As Consulting, create a contract",
+     "expected": "The contract is in \"Chờ duyệt\"",
+     "sourceRefs": [
+      "story:AC-05",
+      "GYM-RBAC@v1"
+     ],
+     "testData": "",
+     "evidence": ""
+    },
+    {
+     "action": "Try to book a session on it",
+     "expected": "The booking is refused while the contract is pending",
+     "sourceRefs": [
+      "story:AC-05",
+      "GYM-BR-PLATFORM@v1"
+     ],
+     "testData": "",
+     "evidence": ""
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-05",
+    "GYM-BR-PLATFORM@v1"
+   ],
+   "techniques": [
+    "state_transition"
+   ],
+   "testTypes": [
+    "positive"
+   ],
+   "testConditions": [
+    "pending contract: cannot be booked"
+   ],
+   "module": "Approvals",
+   "level": "ui",
+   "manualReason": ""
+  },
+  {
+   "title": "The submitter cannot approve their own request",
+   "priority": "P0",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "As Fitness Manager, submit an exception-price contract and open its approval request",
+     "expected": "The approve action is refused for the submitter",
+     "sourceRefs": [
+      "story:AC-05",
+      "GYM-RBAC@v1",
+      "GYM-BR-PLATFORM@v1"
+     ],
+     "testData": "submitter = approver = Fitness Manager",
+     "evidence": ""
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-05",
+    "GYM-RBAC@v1",
+    "GYM-BR-PLATFORM@v1"
+   ],
+   "techniques": [
+    "decision_table"
+   ],
+   "testTypes": [
+    "security",
+    "negative"
+   ],
+   "testConditions": [
+    "approver = submitter"
+   ],
+   "module": "Approvals",
+   "level": "ui",
+   "manualReason": ""
+  },
+  {
+   "title": "Admin switches approval off for an action type",
+   "priority": "P1",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "As Admin, switch off approval for receipts",
+     "expected": "The approval matrix shows receipts as not requiring approval",
+     "sourceRefs": [
+      "story:AC-05",
+      "GYM-RBAC@v1"
+     ],
+     "testData": "",
+     "evidence": ""
+    },
+    {
+     "action": "Create a receipt",
+     "expected": "The receipt is valid at once, with no approval request created",
+     "sourceRefs": [
+      "story:AC-05"
+     ],
+     "testData": "",
+     "evidence": ""
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-05",
+    "GYM-RBAC@v1"
+   ],
+   "techniques": [
+    "decision_table"
+   ],
+   "testTypes": [
+    "positive"
+   ],
+   "testConditions": [
+    "approval off -> takes effect at once"
+   ],
+   "module": "Approvals",
+   "level": "manual",
+   "manualReason": "Changes shared global configuration; kept manual until a settings snapshot and restore exist for it."
+  },
+  {
+   "title": "Admin changes the approver of an action type",
+   "priority": "P2",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "As Admin, set the approver of change vouchers to Admin and submit a renewal",
+     "expected": "The approval task goes to Admin, not to the Fitness Manager",
+     "sourceRefs": [
+      "story:AC-05",
+      "GYM-RBAC@v1"
+     ],
+     "testData": "",
+     "evidence": ""
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-05",
+    "GYM-RBAC@v1"
+   ],
+   "techniques": [
+    "use_case"
+   ],
+   "testTypes": [
+    "positive"
+   ],
+   "testConditions": [
+    "approver Fitness Manager -> Admin"
+   ],
+   "module": "Approvals",
+   "level": "manual",
+   "manualReason": "Changes shared global configuration; kept manual until a settings snapshot and restore exist for it."
+  }
+ ]
+}

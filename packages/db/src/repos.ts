@@ -66,16 +66,19 @@ export type EnvironmentRow = {
   allowedHosts?: string[];
   /** An approved case a suite run executes first, to prove the environment ready (ADR-0022). */
   preflightCaseId?: string | null;
+  /** Path prefixes of the product's test hooks a `testHook` step may call here (ADR-0025). */
+  testHookPaths?: string[];
 };
 
 export async function upsertEnvironment(db: Db, scope: TenantScope, e: EnvironmentRow) {
   await db.query(
     `INSERT INTO environments (id, tenant_id, project_id, kind, allowed_actions, base_url, allowed_hosts, preflight_case_id,
-       sentinel_case_id)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+       sentinel_case_id, test_hook_paths)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
      ON CONFLICT (tenant_id, project_id, id) DO UPDATE SET kind = EXCLUDED.kind,
        allowed_actions = EXCLUDED.allowed_actions, base_url = EXCLUDED.base_url, allowed_hosts = EXCLUDED.allowed_hosts,
-       preflight_case_id = EXCLUDED.preflight_case_id, sentinel_case_id = EXCLUDED.sentinel_case_id`,
+       preflight_case_id = EXCLUDED.preflight_case_id, sentinel_case_id = EXCLUDED.sentinel_case_id,
+       test_hook_paths = EXCLUDED.test_hook_paths`,
     [
       e.id,
       scope.tenantId,
@@ -86,6 +89,7 @@ export async function upsertEnvironment(db: Db, scope: TenantScope, e: Environme
       e.allowedHosts ?? [],
       e.preflightCaseId ?? null,
       e.sentinelCaseId ?? null,
+      e.testHookPaths ?? [],
     ],
   );
 }
@@ -93,7 +97,7 @@ export async function upsertEnvironment(db: Db, scope: TenantScope, e: Environme
 export async function getEnvironment(db: Db, scope: TenantScope, id: string): Promise<EnvironmentRow | null> {
   const rows = await db.query<EnvironmentRow>(
     `SELECT id, kind, allowed_actions AS "allowedActions", base_url AS "baseUrl", allowed_hosts AS "allowedHosts",
-       preflight_case_id AS "preflightCaseId", sentinel_case_id AS "sentinelCaseId"
+       preflight_case_id AS "preflightCaseId", sentinel_case_id AS "sentinelCaseId", test_hook_paths AS "testHookPaths"
        FROM environments WHERE id = $1 AND tenant_id = $2 AND project_id = $3`,
     [id, scope.tenantId, scope.projectId],
   );

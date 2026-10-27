@@ -1,3 +1,4 @@
+import type { ExecutableGenerator } from '@qa/llm-adapter';
 import { createDbFromEnv, migrate } from '@qa/db';
 import { createEvidenceStoreFromEnv } from '@qa/evidence';
 import { createProvidersFromEnv } from '@qa/llm-adapter';
@@ -25,6 +26,11 @@ const app = await buildApp({
     db,
     classifier: providers.classifier,
     generator: providers.generator,
+    // ADR-0024: Claude and the session exchange propose executables; other providers do not yet.
+    executables:
+      'generateExecutable' in providers.generator
+        ? (providers.generator as unknown as ExecutableGenerator)
+        : null,
     minReadyConfidence: minReadyConfidenceFromEnv(),
     decisionCacheTtlMs,
   },

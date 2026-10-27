@@ -374,7 +374,11 @@ async function executeClaimed(deps: RunDeps, claimed: RunRow, log: Logger): Prom
       runId: claimed.id,
       scope,
       spec: ExecutableSpec.parse(exe.spec),
-      target: { baseUrl: environment.baseUrl!, allowedHosts: environment.allowedHosts ?? [] },
+      target: {
+        baseUrl: environment.baseUrl!,
+        allowedHosts: environment.allowedHosts ?? [],
+        hookPaths: environment.testHookPaths ?? [],
+      },
       secrets: deps.secrets,
       store: deps.store,
     });

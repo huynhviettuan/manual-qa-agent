@@ -1,0 +1,145 @@
+{
+ "designNotes": [
+  "Paired scans complete a session; no-booking scans are errors; two PTs need two pairs. The reasons for a missing side are the open question"
+ ],
+ "cases": [
+  {
+   "title": "Paired scans of the customer and the right PT within 15 minutes complete the session",
+   "priority": "P0",
+   "preconditions": [],
+   "testData": [
+    "Scans 10 minutes apart"
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "steps": [
+    {
+     "action": "POST the customer scan for a booked session, then the PT scan 10 minutes later",
+     "expected": "The session turns to Đã tập",
+     "sourceRefs": [
+      "GYM-AC@v1",
+      "GYM-BR-SESSIONS-AND-CLASSES@v1"
+     ],
+     "testData": "",
+     "evidence": ""
+    },
+    {
+     "action": "Open the contract and the PT credits",
+     "expected": "Sessions left fell by 1; the PT has 1 credit for it",
+     "sourceRefs": [
+      "GYM-AC@v1",
+      "GYM-BR-SESSIONS-AND-CLASSES@v1"
+     ],
+     "testData": "",
+     "evidence": ""
+    },
+    {
+     "action": "Open the customer's email log",
+     "expected": "Exactly one email for the session",
+     "sourceRefs": [
+      "GYM-AC@v1",
+      "GYM-BR-SESSIONS-AND-CLASSES@v1"
+     ],
+     "testData": "",
+     "evidence": ""
+    }
+   ],
+   "requirementRefs": [
+    "story:AC-29"
+   ],
+   "techniques": [
+    "boundary_value_analysis",
+    "use_case"
+   ],
+   "testTypes": [
+    "positive"
+   ],
+   "testConditions": [
+    "pair inside 15 minutes"
+   ],
+   "module": "Check-in",
+   "level": "api",
+   "manualReason": ""
+  },
+  {
+   "title": "A scan with no booking is an error",
+   "priority": "P1",
+   "preconditions": [],
+   "testData": [],
+   "assumptions": [],
+   "missingRequirements": [],
+   "steps": [
+    {
+     "action": "POST a customer scan when the customer has no booking today",
+     "expected": "Refused with an error; no session is created or changed",
+     "sourceRefs": [
+      "GYM-AC@v1",
+      "GYM-BR-SESSIONS-AND-CLASSES@v1"
+     ],
+     "testData": "",
+     "evidence": ""
+    }
+   ],
+   "requirementRefs": [
+    "story:AC-29"
+   ],
+   "techniques": [
+    "equivalence_partitioning"
+   ],
+   "testTypes": [
+    "negative"
+   ],
+   "testConditions": [
+    "scan without booking"
+   ],
+   "module": "Check-in",
+   "level": "api",
+   "manualReason": ""
+  },
+  {
+   "title": "A customer training with two PTs needs a pair for each",
+   "priority": "P1",
+   "preconditions": [],
+   "testData": [],
+   "assumptions": [],
+   "missingRequirements": [],
+   "steps": [
+    {
+     "action": "Book two sessions today with two PTs; POST the customer scan and the first PT scan",
+     "expected": "Only the first session turns to Đã tập",
+     "sourceRefs": [
+      "GYM-AC@v1",
+      "GYM-BR-SESSIONS-AND-CLASSES@v1"
+     ],
+     "testData": "",
+     "evidence": ""
+    },
+    {
+     "action": "POST the second PT scan with a second customer scan",
+     "expected": "The second session turns to Đã tập",
+     "sourceRefs": [
+      "GYM-AC@v1",
+      "GYM-BR-SESSIONS-AND-CLASSES@v1"
+     ],
+     "testData": "",
+     "evidence": ""
+    }
+   ],
+   "requirementRefs": [
+    "story:AC-29"
+   ],
+   "techniques": [
+    "decision_table"
+   ],
+   "testTypes": [
+    "positive"
+   ],
+   "testConditions": [
+    "two PTs, one or two pairs"
+   ],
+   "module": "Check-in",
+   "level": "api",
+   "manualReason": ""
+  }
+ ]
+}

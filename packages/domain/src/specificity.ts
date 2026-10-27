@@ -32,20 +32,39 @@ const OBSERVABLE_RELATION =
 const UNSPECIFIC = /\b(correctly|properly|successfully|as expected|works?|fine|ok(ay)?|normal(ly)?)\b/i;
 
 /**
+ * Terms a project's sources name that a tester can see: quoted strings, codes (ACCOUNT_LOCKED), and
+ * capitalised labels of two words or more (Fitness Manager, Đã tập). An expected result that names
+ * one is observable to someone who knows the product (ADR-0025).
+ */
+export function buildVocabulary(texts: ReadonlyArray<string>): string[] {
+  const terms = new Set<string>();
+  for (const text of texts) {
+    for (const m of text.matchAll(/["“']([^"”']{2,60})["”']/g)) terms.add(m[1]!.trim().toLowerCase());
+    for (const m of text.matchAll(/\b[A-Z][A-Z0-9_]{2,}(?:_[A-Z0-9]+)*\b/g)) terms.add(m[0].toLowerCase());
+    for (const m of text.matchAll(/\b(?:\p{Lu}\p{Ll}+(?:\s+\p{Lu}\p{Ll}+)+)\b/gu))
+      terms.add(m[0].toLowerCase());
+  }
+  return [...terms].filter((t) => t.length >= 3);
+}
+
+/**
  * Why an expected result cannot be verified as written, or null when it can. A result needs an
  * exact message, value or state, and no word that leaves the judgement to the reader.
  */
-export function unobservableExpectation(text: string): string | null {
+export function unobservableExpectation(text: string, vocabulary: ReadonlyArray<string> = []): string | null {
   const t = text.trim();
   const quote = (s: string) => `"${s.length > 80 ? `${s.slice(0, 77)}...` : s}"`;
   if (t.length === 0) return 'the expected result is empty';
   const vague = VAGUE.exec(t) ?? UNSPECIFIC.exec(t);
   if (vague) return `the word "${vague[0]}" leaves the judgement to the tester in ${quote(t)}`;
+  const lower = t.toLowerCase();
+  const namesTheProduct = vocabulary.some((term) => lower.includes(term));
   if (
     !MEASURABLE.test(t) &&
     !OBSERVABLE_STATE.test(t) &&
     !OBSERVABLE_ABSENCE.test(t) &&
-    !OBSERVABLE_RELATION.test(t)
+    !OBSERVABLE_RELATION.test(t) &&
+    !namesTheProduct
   ) {
     return `no exact message, value or state in ${quote(t)}`;
   }

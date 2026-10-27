@@ -12,6 +12,7 @@ export const TOOL_NAMES = [
   'get_test_case',
   'check_executable',
   'propose_executable',
+  'propose_steps',
   'request_run',
   'get_run',
   'get_triage',
@@ -194,6 +195,23 @@ export function createAgentToolServer(api: QaApiClient, info = { name: 'qa-agent
           next: 'Waiting for a person other than the proposer to approve it (POST /api/executables/:id/review).',
         });
       }),
+  );
+
+  server.registerTool(
+    'propose_steps',
+    {
+      title: 'Ask the agent to propose executable steps',
+      description:
+        'Asks the server-side generator (ADR-0024) for the executable steps of an APPROVED api/ui case. The answer is a ' +
+        'PROPOSED executable with its weak-assertion flags, or the reason none could be written. A different person must ' +
+        'approve it; this server cannot approve anything.',
+      inputSchema: {
+        caseId: z.string().min(1),
+        hints: z.array(z.string().max(500)).max(20).optional(),
+      },
+      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false },
+    },
+    async ({ caseId, hints }) => guarded(async () => json(await api.proposeSteps(caseId, hints ?? []))),
   );
 
   server.registerTool(

@@ -93,6 +93,8 @@ const stepOutput = z.object({
   sourceRefs: z.array(z.string()),
   /** The concrete values this step uses, naming the partition or boundary each represents. */
   testData: z.string(),
+  /** A verbatim quote from a cited source that the expected result follows from; "" when none (draft-v6, ADR-0025). */
+  evidence: z.string(),
 });
 const draftFields = {
   title: z.string(),

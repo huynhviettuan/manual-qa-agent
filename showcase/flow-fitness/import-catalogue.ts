@@ -7,7 +7,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { createTestDb, seedProject } from '../../packages/db/src/index.ts';
-import { unobservableExpectation } from '../../packages/domain/src/index.ts';
+import { buildVocabulary, unobservableExpectation } from '../../packages/domain/src/index.ts';
 import {
   getCoverage,
   importCases,
@@ -79,10 +79,18 @@ const expectations = rows.flatMap((r) =>
     .filter(Boolean),
 );
 const flagged = expectations.map((e) => [e, unobservableExpectation(e)] as const).filter(([, f]) => f);
+// ADR-0025: the same check with the product's vocabulary (quoted strings, codes and labels of the
+// requirement texts), still never tuned on these results.
+const vocabulary = buildVocabulary(REQUIREMENTS.map((r) => r.text));
+const flaggedWithVocabulary = expectations
+  .map((e) => [e, unobservableExpectation(e, vocabulary)] as const)
+  .filter(([, f]) => f);
 const observability = {
   expectedResults: expectations.length,
   flagged: flagged.length,
-  sample: flagged.slice(0, 40).map(([e, f]) => ({ expected: e, flag: f })),
+  vocabularyTerms: vocabulary.length,
+  flaggedWithVocabulary: flaggedWithVocabulary.length,
+  sample: flaggedWithVocabulary.slice(0, 40).map(([e, f]) => ({ expected: e, flag: f })),
 };
 const notCited = REQUIREMENTS.filter((r) => !cited.has(r.id)).map((r) => r.id);
 
@@ -123,7 +131,7 @@ console.error(
     `re-import: ${again.imported.length} imported, ${again.skipped.length} skipped`,
 );
 console.error(
-  `observability check (held out): ${observability.flagged} of ${observability.expectedResults} expected results flagged`,
+  `observability check (held out): ${observability.flagged} of ${observability.expectedResults} expected results flagged; with the product vocabulary (${observability.vocabularyTerms} terms): ${observability.flaggedWithVocabulary}`,
 );
 console.error(
   `unresolved ids: ${Object.keys(report.unresolvedRefs).length}; unmapped techniques: ${JSON.stringify(sorted(report.unmappedTechniques))}; ` +

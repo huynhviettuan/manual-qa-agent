@@ -1,0 +1,78 @@
+{
+ "designNotes": [
+  "Decision on shift: inside vs outside the on-duty shift; booking allowed in both; grid colours differ (BR-402: a shift never limits)."
+ ],
+ "cases": [
+  {
+   "title": "A PT can book outside the on-duty shift",
+   "priority": "P1",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "Book a session in a slot outside the PT's shift",
+     "expected": "The booking is accepted and the session is created",
+     "sourceRefs": [
+      "story:AC-24",
+      "GYM-BR-SESSIONS-AND-CLASSES@v1"
+     ],
+     "testData": "a slot after the shift ends",
+     "evidence": ""
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-24",
+    "GYM-BR-SESSIONS-AND-CLASSES@v1"
+   ],
+   "techniques": [
+    "equivalence_partitioning"
+   ],
+   "testTypes": [
+    "positive"
+   ],
+   "testConditions": [
+    "slot inside shift",
+    "slot outside shift"
+   ],
+   "module": "PT schedule",
+   "level": "manual",
+   "manualReason": "Needs a booking created on a calendar cell, which the executor does not drive yet."
+  },
+  {
+   "title": "In-shift and off-shift cells have different colours",
+   "priority": "P3",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "Open the PT calendar for a day with a shift",
+     "expected": "In-shift cells and off-shift cells use 2 different colours",
+     "sourceRefs": [
+      "story:AC-24"
+     ],
+     "testData": "",
+     "evidence": ""
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-24"
+   ],
+   "techniques": [
+    "specification_based"
+   ],
+   "testTypes": [
+    "ui"
+   ],
+   "testConditions": [
+    "colour of in-shift vs off-shift cells"
+   ],
+   "module": "PT schedule",
+   "level": "manual",
+   "manualReason": "Needs human judgement of colours."
+  }
+ ]
+}

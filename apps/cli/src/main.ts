@@ -30,7 +30,7 @@ const USAGE = `Usage: pnpm qa <command> [options]
                                             mocked provider unless QA_LIVE_LLM=1)
   env     <id> --tenant T --project P --kind test|staging|production --base-url URL
           [--actions draft,execute] [--hosts host:port,...] [--preflight-case CASE_ID]
-          [--sentinel-case CASE_ID]
+          [--sentinel-case CASE_ID] [--test-hooks /__test__/reset,...]
                                             Configure an execution environment (admin). Runs may
                                             only reach the base URL host plus --hosts; a suite
                                             run executes the preflight case first and blocks
@@ -58,6 +58,7 @@ const { positionals, values } = parseArgs({
     label: { type: 'string' },
     'preflight-case': { type: 'string' },
     'sentinel-case': { type: 'string' },
+    'test-hooks': { type: 'string', default: '' },
     approve: { type: 'boolean', default: false },
   },
 });
@@ -222,6 +223,9 @@ try {
             allowedHosts: hosts,
             preflightCaseId: values['preflight-case'] ?? null,
             sentinelCaseId: values['sentinel-case'] ?? null,
+            testHookPaths: values['test-hooks']!.split(',')
+              .map((p) => p.trim())
+              .filter(Boolean),
           },
         ),
       );

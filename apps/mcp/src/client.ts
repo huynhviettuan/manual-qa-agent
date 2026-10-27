@@ -90,6 +90,15 @@ export class QaApiClient {
     ).then((r) => r.data);
   }
 
+  /** ADR-0024: asks the server's generator for the steps; the result is a PROPOSED executable or a reason. */
+  proposeSteps(caseId: string, hints: string[]) {
+    return this.request<Record<string, unknown>>(
+      'POST',
+      `/api/test-cases/${encodeURIComponent(caseId)}/executables/propose`,
+      { hints },
+    ).then((r) => r.data);
+  }
+
   proposeExecutable(caseId: string, spec: unknown) {
     return this.request<Record<string, unknown>>(
       'POST',

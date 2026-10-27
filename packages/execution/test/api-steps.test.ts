@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { ExecutableSpec, type ExecutableSpecInput } from '@qa/domain';
 import { LocalEvidenceStore } from '@qa/evidence';
-import { PlaywrightExecutor, type ExecutionTarget } from '../src/index.ts';
+import { PlaywrightExecutor, totpCode, type ExecutionTarget } from '../src/index.ts';
 
 // ADR-0024: testing through the API (sessions, JSON checks, response captures), data rows,
 // bounded waits, keys, uploads and downloads, against a small fake product.
@@ -408,5 +408,169 @@ describe('bounded waits, keys, uploads and downloads (ADR-0024)', () => {
     });
     expect(out.verdict, JSON.stringify(out.steps.filter((s) => s.error))).toBe('PASSED');
     expect(out.evidence.some((e) => e.kind === 'download' && e.name.includes('customers.csv'))).toBe(true);
+  });
+});
+
+describe('raw bodies, headers, one-time codes and test hooks (ADR-0025)', () => {
+  // A fake product that echoes what it received, with a TOTP-protected endpoint and a test hook.
+  const SECRET = 'GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ'; // RFC 6238 test secret, base32
+  let hookTarget: ExecutionTarget;
+  beforeAll(async () => {
+    const server = createServer((req, res) => {
+      const chunks: Buffer[] = [];
+      req.on('data', (c: Buffer) => chunks.push(c));
+      req.on('end', () => {
+        const raw = Buffer.concat(chunks).toString();
+        const json = (status: number, data: unknown) => {
+          res.writeHead(status, { 'content-type': 'application/json' });
+          res.end(JSON.stringify(data));
+        };
+        if (req.url === '/echo')
+          return json(200, {
+            contentType: req.headers['content-type'] ?? null,
+            origin: req.headers.origin ?? null,
+            raw,
+          });
+        if (req.url === '/totp') {
+          let body: { code?: string } = {};
+          try {
+            body = JSON.parse(raw);
+          } catch {
+            /* not json */
+          }
+          return json(body.code === totpCode(SECRET) ? 200 : 401, { ok: body.code === totpCode(SECRET) });
+        }
+        if (req.url?.startsWith('/__test__/')) return json(200, { reset: true });
+        json(404, {});
+      });
+    });
+    await new Promise<void>((r) => server.listen(0, '127.0.0.1', r));
+    close2 = () => new Promise((r) => server.close(r));
+    const baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+    hookTarget = { baseUrl, allowedHosts: [new URL(baseUrl).host], hookPaths: ['/__test__/reset'] };
+  });
+  let close2: () => Promise<unknown> = async () => undefined;
+  afterAll(() => close2());
+  const runOn = (spec: ExecutableSpecInput, target: ExecutionTarget, secrets: Record<string, string> = {}) =>
+    executor.execute({
+      runId: `run_hook_${++n}`,
+      scope,
+      spec: ExecutableSpec.parse(spec),
+      target,
+      secrets: (name) => secrets[name],
+      store,
+    });
+
+  it('computes RFC 6238 codes', () => {
+    expect(totpCode(SECRET, 59_000)).toBe('287082');
+    expect(totpCode(SECRET, 1_111_111_109_000)).toBe('081804');
+  });
+
+  it('sends a raw body with its content type and an allowlisted header; a TOTP code is computed at send time', async () => {
+    const out = await runOn(
+      {
+        steps: [
+          {
+            id: 'malformed',
+            type: 'apiRequest',
+            method: 'POST',
+            path: '/echo',
+            rawBody: { contentType: 'application/json', text: '{"fullName": "x", "phone": ' },
+            headers: { Origin: 'https://evil.example' },
+            expectJson: [
+              { path: 'contentType', equals: 'application/json' },
+              { path: 'origin', equals: 'https://evil.example' },
+              { path: 'raw', equals: '{"fullName": "x", "phone": ' },
+            ],
+          },
+          {
+            id: 'plain',
+            type: 'apiRequest',
+            method: 'POST',
+            path: '/echo',
+            rawBody: { contentType: 'text/plain', text: 'hello' },
+            expectJson: [{ path: 'contentType', equals: 'text/plain' }],
+          },
+          {
+            id: 'code',
+            type: 'apiRequest',
+            method: 'POST',
+            path: '/totp',
+            body: { code: { totp: 'ADMIN_TOTP' } },
+            expectStatus: 200,
+          },
+        ],
+      },
+      hookTarget,
+      { ADMIN_TOTP: SECRET },
+    );
+    expect(out.verdict, JSON.stringify(out.assertions.filter((a) => a.passed !== true))).toBe('PASSED');
+    expect(JSON.stringify(out)).not.toContain(SECRET);
+    expect(out.assertions.find((a) => a.stepId === 'code')?.passed).toBe(true);
+  });
+
+  it('a header outside the allowlist, or both body and rawBody, is refused by the schema', () => {
+    expect(() =>
+      ExecutableSpec.parse({
+        steps: [
+          {
+            id: 'x',
+            type: 'apiRequest',
+            method: 'GET',
+            path: '/echo',
+            headers: { Authorization: 'Bearer x' },
+            expectStatus: 200,
+          },
+        ],
+      }),
+    ).toThrow(/must be one of/);
+    expect(() =>
+      ExecutableSpec.parse({
+        steps: [
+          {
+            id: 'x',
+            type: 'apiRequest',
+            method: 'POST',
+            path: '/echo',
+            body: { a: '1' },
+            rawBody: { contentType: 'text/plain', text: 'a' },
+            expectStatus: 200,
+          },
+        ],
+      }),
+    ).toThrow(/both body and rawBody/);
+  });
+
+  it('a test hook runs only on a listed path; elsewhere the step is an error', async () => {
+    const ok = await runOn(
+      {
+        steps: [
+          { id: 'reset', type: 'testHook', method: 'POST', path: '/__test__/reset' },
+          { id: 'echo', type: 'apiRequest', method: 'GET', path: '/echo', expectStatus: 200 },
+        ],
+      },
+      hookTarget,
+    );
+    expect(ok.verdict).toBe('PASSED');
+    const refused = await runOn(
+      {
+        steps: [
+          { id: 'other', type: 'testHook', method: 'POST', path: '/__test__/drop' },
+          { id: 'echo', type: 'apiRequest', method: 'GET', path: '/echo', expectStatus: 200 },
+        ],
+      },
+      hookTarget,
+    );
+    expect(refused).toMatchObject({ verdict: 'INCONCLUSIVE', reason: 'STEP_ERROR:other' });
+    const none = await runOn(
+      {
+        steps: [
+          { id: 'reset', type: 'testHook', method: 'POST', path: '/__test__/reset' },
+          { id: 'echo', type: 'apiRequest', method: 'GET', path: '/echo', expectStatus: 200 },
+        ],
+      },
+      { ...hookTarget, hookPaths: [] },
+    );
+    expect(none.reason).toBe('STEP_ERROR:reset');
   });
 });

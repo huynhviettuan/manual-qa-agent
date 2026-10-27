@@ -95,7 +95,30 @@ export const InputValue = z.union([
   z.string().max(2000),
   z.object({ secret: z.string().regex(/^[A-Z][A-Z0-9_]{1,63}$/) }),
   z.object({ var: VarName }),
+  /** A one-time code computed at send time from a base32 TOTP secret (RFC 6238, 30 s, 6 digits), ADR-0025. */
+  z.object({ totp: z.string().regex(/^[A-Z][A-Z0-9_]{1,63}$/) }),
 ]);
+
+/** Request headers a step may set (ADR-0025): the ones security and locale cases need, nothing that forges identity. */
+export const ALLOWED_HEADERS = [
+  'origin',
+  'referer',
+  'accept',
+  'accept-language',
+  'idempotency-key',
+  'x-requested-with',
+  'user-agent',
+] as const;
+const HeaderName = z
+  .string()
+  .max(64)
+  .refine(
+    (h) => (ALLOWED_HEADERS as readonly string[]).includes(h.toLowerCase()),
+    `must be one of ${ALLOWED_HEADERS.join(', ')}`,
+  );
+const Headers = z.record(HeaderName, InputValue);
+/** A raw request body (not JSON, or deliberately malformed JSON) with its content type. */
+const RawBody = z.object({ contentType: z.string().min(1).max(100), text: z.string().max(20_000) });
 export type InputValue = z.infer<typeof InputValue>;
 
 export const DATE_FORMATS = ['yyyy-MM-dd', 'dd/MM/yyyy', 'MM/dd/yyyy', 'd/M/yyyy'] as const;
@@ -234,6 +257,9 @@ export const ExecutableStep = z.discriminatedUnion('type', [
     method: HttpMethod,
     path: PathTemplate,
     body: z.record(z.string(), InputValue).optional(),
+    /** Instead of `body`: the bytes as given, with their content type (ADR-0025). */
+    rawBody: RawBody.optional(),
+    headers: Headers.optional(),
     expectStatus: z.number().int().min(100).max(599).optional(),
     /** Checks on the JSON response body (ADR-0024); each is an assertion. */
     expectJson: z.array(JsonCheck).max(50).optional(),
@@ -254,6 +280,7 @@ export const ExecutableStep = z.discriminatedUnion('type', [
     method: HttpMethod,
     path: PathTemplate,
     body: z.record(z.string(), InputValue).optional(),
+    headers: Headers.optional(),
     token: z
       .object({
         path: JsonPath,
@@ -283,6 +310,18 @@ export const ExecutableStep = z.discriminatedUnion('type', [
         expectJson: z.array(JsonCheck).max(20).optional(),
       }),
     ]),
+  }),
+  /**
+   * A call to one of the product's own test hooks (ADR-0025): a disposable account, a throttle
+   * reset, a job run. Only paths the environment's administrator listed as hooks may be called,
+   * and never in production (policy). Not an assertion.
+   */
+  z.object({
+    ...base,
+    type: z.literal('testHook'),
+    method: HttpMethod,
+    path: PathTemplate,
+    body: z.record(z.string(), InputValue).optional(),
   }),
   /** A keyboard key (`Enter`, `Escape`, `Control+a`), on a target or the focused element. */
   z.object({ ...base, type: z.literal('press'), key: z.string().min(1).max(40), target: Locator.optional() }),
@@ -415,6 +454,10 @@ export const ExecutableSpec = z
         known.add(step.as);
       }
     }
+    for (const step of [...spec.setup, ...spec.steps, ...spec.teardown]) {
+      if (step.type === 'apiRequest' && step.body && step.rawBody)
+        ctx.addIssue({ code: 'custom', message: `step ${step.id} has both body and rawBody` });
+    }
     const ids = [...spec.setup, ...spec.steps, ...spec.teardown].map((s) => s.id);
     const dupes = ids.filter((id, i) => ids.indexOf(id) !== i);
     if (dupes.length)
@@ -445,10 +488,17 @@ export function destructiveSteps(spec: ExecutableSpec): string[] {
 /** Secret names a spec references (resolved only by the executor at run time). */
 export function referencedSecrets(spec: ExecutableSpec): string[] {
   const names = new Set<string>();
-  const visit = (v: InputValue) => typeof v === 'object' && 'secret' in v && names.add(v.secret);
+  const visit = (v: InputValue) => {
+    if (typeof v !== 'object') return;
+    if ('secret' in v) names.add(v.secret);
+    if ('totp' in v) names.add(v.totp);
+  };
   for (const s of [...spec.setup, ...spec.steps, ...spec.teardown]) {
     if (s.type === 'fill') visit(s.value);
-    if ((s.type === 'apiRequest' || s.type === 'session') && s.body) Object.values(s.body).forEach(visit);
+    if ((s.type === 'apiRequest' || s.type === 'session' || s.type === 'testHook') && s.body)
+      Object.values(s.body).forEach(visit);
+    if ((s.type === 'apiRequest' || s.type === 'session') && s.headers)
+      Object.values(s.headers).forEach(visit);
     if (s.type === 'apiRequest') s.expectJson?.forEach((c) => c.equals !== undefined && visit(c.equals));
     if (s.type === 'waitFor' && s.until.kind === 'request')
       s.until.expectJson?.forEach((c) => c.equals !== undefined && visit(c.equals));
@@ -474,8 +524,11 @@ export function stepVars(step: ExecutableStep): string[] {
       break;
     case 'apiRequest':
     case 'session':
+    case 'testHook':
       text(step.path);
       if (step.body) Object.values(step.body).forEach(input);
+      if (step.type !== 'testHook' && step.headers) Object.values(step.headers).forEach(input);
+      if (step.type === 'apiRequest' && step.rawBody) text(step.rawBody.text);
       if (step.type === 'apiRequest')
         step.expectJson?.forEach((c) => c.equals !== undefined && input(c.equals));
       break;

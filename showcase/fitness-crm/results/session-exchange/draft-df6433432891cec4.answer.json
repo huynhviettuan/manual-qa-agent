@@ -1,0 +1,103 @@
+{
+ "designNotes": [
+  "Deletion order (state): contract with receipts -> blocked, listed; receipts deleted -> contract deletable.",
+  "Metamorphic: totals after deletion = totals before - deleted amounts."
+ ],
+ "cases": [
+  {
+   "title": "Deleting a contract with receipts is blocked and lists them",
+   "priority": "P0",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "As Admin, delete a contract that has 2 receipts",
+     "expected": "The deletion is refused and the 2 receipts are listed",
+     "sourceRefs": [
+      "story:AC-12",
+      "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+      "GYM-FR@v1"
+     ],
+     "testData": "2 receipts of 1.000.000 and 2.000.000",
+     "evidence": ""
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-12",
+    "GYM-BR-SERVICES-PRICES-CONTRACTS@v1"
+   ],
+   "techniques": [
+    "state_transition"
+   ],
+   "testTypes": [
+    "negative"
+   ],
+   "testConditions": [
+    "contract with 2 receipts"
+   ],
+   "module": "Contracts",
+   "level": "ui",
+   "manualReason": ""
+  },
+  {
+   "title": "After deleting the receipts and then the contract, totals fall by exactly the deleted amounts",
+   "priority": "P0",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "Note total receipts and revenue for the period",
+     "expected": "Both totals are shown",
+     "sourceRefs": [
+      "story:AC-12"
+     ],
+     "testData": "",
+     "evidence": ""
+    },
+    {
+     "action": "Delete the 2 receipts with a reason, then the contract",
+     "expected": "All 3 records move to the trash",
+     "sourceRefs": [
+      "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+      "GYM-BR-PLATFORM@v1"
+     ],
+     "testData": "",
+     "evidence": "to the trash"
+    },
+    {
+     "action": "Reopen the totals",
+     "expected": "Total receipts fall by exactly 3.000.000; revenue falls by exactly the contract value",
+     "sourceRefs": [
+      "story:AC-12",
+      "GYM-BR-MONEY@v1"
+     ],
+     "testData": "",
+     "evidence": "the contract value"
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-12",
+    "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+    "GYM-BR-MONEY@v1",
+    "GYM-BR-PLATFORM@v1"
+   ],
+   "techniques": [
+    "metamorphic",
+    "use_case"
+   ],
+   "testTypes": [
+    "positive"
+   ],
+   "testConditions": [
+    "totals before - deleted = totals after"
+   ],
+   "module": "Money",
+   "level": "manual",
+   "manualReason": "Needs arithmetic across displayed totals and changes shared money data."
+  }
+ ]
+}

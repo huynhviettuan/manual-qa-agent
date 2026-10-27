@@ -1,0 +1,117 @@
+{
+ "designNotes": [
+  "Equivalence classes for the note when \"Khác\" is chosen: empty, whitespace only, non-empty."
+ ],
+ "cases": [
+  {
+   "title": "\"Khác\" with an empty note cannot be saved",
+   "priority": "P2",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "Choose \"Khác\" in a drop-down and save with the note empty",
+     "expected": "The save is refused and the note field is marked required; nothing is saved",
+     "sourceRefs": [
+      "story:AC-04",
+      "GYM-BR-PLATFORM@v1"
+     ],
+     "testData": "note = \"\" (empty class)",
+     "evidence": ""
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-04",
+    "GYM-BR-PLATFORM@v1"
+   ],
+   "techniques": [
+    "equivalence_partitioning"
+   ],
+   "testTypes": [
+    "negative"
+   ],
+   "testConditions": [
+    "note empty"
+   ],
+   "module": "Platform",
+   "level": "ui",
+   "manualReason": ""
+  },
+  {
+   "title": "\"Khác\" with a whitespace-only note cannot be saved",
+   "priority": "P3",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "Choose \"Khác\" and type three spaces as the note, then save",
+     "expected": "The save is refused as for an empty note",
+     "sourceRefs": [
+      "story:AC-04",
+      "GYM-BR-PLATFORM@v1"
+     ],
+     "testData": "note = \"   \"",
+     "evidence": ""
+    }
+   ],
+   "assumptions": [
+    "A whitespace-only note counts as no note; the sources only say \"without a note\"."
+   ],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-04",
+    "GYM-BR-PLATFORM@v1"
+   ],
+   "techniques": [
+    "error_guessing"
+   ],
+   "testTypes": [
+    "negative"
+   ],
+   "testConditions": [
+    "note whitespace only"
+   ],
+   "module": "Platform",
+   "level": "ui",
+   "manualReason": ""
+  },
+  {
+   "title": "\"Khác\" with a note is saved",
+   "priority": "P2",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "Choose \"Khác\", type a note and save",
+     "expected": "The record is saved with \"Khác\" and the note text shown",
+     "sourceRefs": [
+      "story:AC-04",
+      "GYM-BR-PLATFORM@v1"
+     ],
+     "testData": "note = \"Khách giới thiệu\"",
+     "evidence": ""
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-04",
+    "GYM-BR-PLATFORM@v1"
+   ],
+   "techniques": [
+    "equivalence_partitioning"
+   ],
+   "testTypes": [
+    "positive"
+   ],
+   "testConditions": [
+    "note non-empty"
+   ],
+   "module": "Platform",
+   "level": "ui",
+   "manualReason": ""
+  }
+ ]
+}

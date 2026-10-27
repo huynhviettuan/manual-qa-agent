@@ -1,6 +1,6 @@
 {
   "model": "claude-opus-5-5 (interactive Claude Code session)",
-  "generatedAt": "2026-10-27T11:40:07.266Z",
+  "generatedAt": "2026-10-27T12:02:49.218Z",
   "summary": {
     "stories": 30,
     "partialCriteria": 7,
@@ -10,7 +10,7 @@
     "pending": 0,
     "cases": 64,
     "steps": 105,
-    "flaggedCases": 64,
+    "flaggedCases": 63,
     "automatable": 40,
     "techniques": {
       "permission_matrix": 6,
@@ -1482,7 +1482,6 @@
           ],
           "assumptions": [],
           "reviewFlags": [
-            "step 2: no exact message, value or state in \"A notice names the new lead\"",
             "step 1: no quoted evidence for \"The lead is saved and assigned to a consultant\"",
             "step 2: no quoted evidence for \"A notice names the new lead\""
           ]
@@ -1602,7 +1601,6 @@
           "assumptions": [],
           "reviewFlags": [
             "step 1: no exact message, value or state in \"The step is ticked\"",
-            "step 2: no exact message, value or state in \"A task for this lead is listed, assigned to the coach manager\"",
             "step 1: no quoted evidence for \"The step is ticked\"",
             "step 2: no quoted evidence for \"A task for this lead is listed, assigned to the coach manage\""
           ]
@@ -1714,7 +1712,6 @@
           "assumptions": [],
           "reviewFlags": [
             "step 1: no quoted evidence for \"The lead is created with an ID\"",
-            "step 2: no quoted evidence for \"The lead becomes a customer with the same ID\"",
             "step 3: no quoted evidence for \"The contract and the session belong to the customer with tha\"",
             "step 4: no quoted evidence for \"Exactly 1 record is found\""
           ]
@@ -1820,9 +1817,7 @@
           "assumptions": [
             "The sources do not say what happens above the highest tier; refusing is the reading of BR-301 (price only from a tier)."
           ],
-          "reviewFlags": [
-            "step 1: no quoted evidence for \"No price is computed and the contract cannot be created\""
-          ]
+          "reviewFlags": []
         },
         {
           "title": "A price different from the tier makes an exception price that waits for approval",
@@ -2165,9 +2160,7 @@
           "assumptions": [],
           "reviewFlags": [
             "step 1: no exact message, value or state in \"Both totals are shown\"",
-            "step 1: no quoted evidence for \"Both totals are shown\"",
-            "step 2: no quoted evidence for \"All 3 records move to the trash\"",
-            "step 3: no quoted evidence for \"Total receipts fall by exactly 3.000.000; revenue falls by e\""
+            "step 1: no quoted evidence for \"Both totals are shown\""
           ]
         }
       ],
@@ -3968,8 +3961,6 @@
           ],
           "assumptions": [],
           "reviewFlags": [
-            "step 1: no exact message, value or state in \"The session turns to Đã tập\"",
-            "step 3: no exact message, value or state in \"Exactly one email for the session\"",
             "step 1: no quoted evidence for \"The session turns to Đã tập\"",
             "step 2: no quoted evidence for \"Sessions left fell by 1; the PT has 1 credit for it\"",
             "step 3: no quoted evidence for \"Exactly one email for the session\""
@@ -4049,8 +4040,6 @@
           ],
           "assumptions": [],
           "reviewFlags": [
-            "step 1: no exact message, value or state in \"Only the first session turns to Đã tập\"",
-            "step 2: no exact message, value or state in \"The second session turns to Đã tập\"",
             "step 1: no quoted evidence for \"Only the first session turns to Đã tập\"",
             "step 2: no quoted evidence for \"The second session turns to Đã tập\""
           ]

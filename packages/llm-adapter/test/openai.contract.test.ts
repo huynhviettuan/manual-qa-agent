@@ -172,6 +172,7 @@ describe('OpenAIResponsesDrafter via Responses API (mocked)', () => {
         expected: 'Locked 15 minutes',
         sourceRefs: ['AC-LOGIN@v2'],
         testData: '',
+        evidence: '',
       },
     ],
     assumptions: [],
@@ -192,7 +193,7 @@ describe('OpenAIResponsesDrafter via Responses API (mocked)', () => {
     expect(out).toMatchObject({
       ok: true,
       value: { cases: [{ title: 'Lockout' }], coverageGaps: [] },
-      meta: { model: 'gpt-test-draft', promptVersion: 'draft-v5' },
+      meta: { model: 'gpt-test-draft', promptVersion: 'draft-v6' },
     });
     const body = fetch.calls[0]!.body;
     expect(fetch.calls[0]!.endpoint).toBe('responses');

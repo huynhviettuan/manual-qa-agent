@@ -156,6 +156,7 @@ describe('ClaudeProvider.generate (mocked API)', () => {
         expected: 'Account locked for 15 minutes',
         sourceRefs: ['AC-LOGIN@v2'],
         testData: 'five wrong passwords',
+        evidence: '',
       },
     ],
     assumptions: [],

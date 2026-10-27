@@ -550,6 +550,13 @@ ALTER TABLE suite_runs ADD COLUMN sentinel_run_id text REFERENCES test_runs(id);
 ALTER TABLE test_case_executables ADD COLUMN review_flags text[] NOT NULL DEFAULT '{}';
 `,
   },
+  {
+    id: '0011_test_hooks',
+    sql: /* sql */ `
+-- ADR-0025: path prefixes of the product's own test hooks a testHook step may call on this environment.
+ALTER TABLE environments ADD COLUMN test_hook_paths text[] NOT NULL DEFAULT '{}';
+`,
+  },
 ];
 
 export async function migrate(db: Db): Promise<string[]> {

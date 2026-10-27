@@ -140,3 +140,31 @@ Use these thresholds when the "right" structure isn't obvious:
 
 When a decision genuinely isn't covered by a rule above, don't invent a pattern silently — flag the ambiguity and
 ask, the same discipline this skill's source repo applies to its own skills.
+
+## What a pilot and an agent added (2026-10)
+
+Rules learnt from running a 376-case suite against a live product for three weeks, then building them into an
+agent (manual-qa-agent ADR-0021 to ADR-0025). Each one changed what a green run meant.
+
+- **Bind a known bug to the assertion it breaks.** An expected failure is expected only at that step; a failure
+  anywhere else is a plain failure. A mark with no binding hides regressions, and the report must say it is unbound.
+- **Prove the run can fail.** A sentinel case known to fail on the environment runs with every suite run; if it
+  passes, the run's passes prove nothing and the run is inconclusive. 130 passes twice is also what a broken
+  executor produces.
+- **Preflight before queuing.** An unknown or unreachable environment is one BLOCKED suite run with a reason, never
+  N failed cases; a readiness case (sign in as each role) runs first and holds the rest until it passes.
+- **Exclusive cases.** A case that changes global settings or needs a machine-wide throttle runs alone on its
+  environment; the claim and the check are one step under a lock.
+- **Stability is derived, never retried.** A verdict that flips between runs of the same steps, environment and build
+  names the case as unstable; no retry resolves it.
+- **Weak assertions are flagged at proposal.** A `contains` on a short text, a status-only API step, an action after
+  the last assertion.
+- **Test through the API with a session per role** (its own cookie jar, credentials as secrets, a TOTP computed at
+  send time), JSON checks on the values the expected results name, captures from responses for teardown, and data
+  rows (one spec, one verdict per row) for permission matrices and boundary tables.
+- **Wait with a bound, and block on timeout.** A wait that runs out is BLOCKED, never a pass or a failure.
+- **Security cases need raw bodies, a content type and headers** (Origin, Accept-Language, Idempotency-Key) under
+  an allowlist; the product's own test hooks (a disposable account, a throttle reset) are the only way to make
+  lockout and time-based cases repeatable, and only an administrator may list them.
+- **A green report says four things:** which failures a known bug accounts for, whether detection was proven, which
+  cases are unstable, and which manual results lack evidence.

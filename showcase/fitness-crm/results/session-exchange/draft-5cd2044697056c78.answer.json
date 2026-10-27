@@ -1,0 +1,99 @@
+{
+ "designNotes": [
+  "The trash holds deleted data with its reason and refuses deletion; who may view it is the open question"
+ ],
+ "cases": [
+  {
+   "title": "Deleted data is in the trash with its reason",
+   "priority": "P1",
+   "preconditions": [],
+   "testData": [],
+   "assumptions": [],
+   "missingRequirements": [],
+   "steps": [
+    {
+     "action": "Delete a customer with the reason \"Trùng hồ sơ\"",
+     "expected": "The customer leaves the list",
+     "sourceRefs": [
+      "GYM-AC@v1",
+      "GYM-BR-PLATFORM@v1"
+     ],
+     "testData": "",
+     "evidence": ""
+    },
+    {
+     "action": "Open the trash as Admin",
+     "expected": "The customer is listed with the reason \"Trùng hồ sơ\"",
+     "sourceRefs": [
+      "GYM-AC@v1",
+      "GYM-BR-PLATFORM@v1"
+     ],
+     "testData": "",
+     "evidence": ""
+    }
+   ],
+   "requirementRefs": [
+    "story:AC-13"
+   ],
+   "techniques": [
+    "use_case"
+   ],
+   "testTypes": [
+    "positive"
+   ],
+   "testConditions": [
+    "deleted with a reason"
+   ],
+   "module": "Platform",
+   "level": "ui",
+   "manualReason": ""
+  },
+  {
+   "title": "A trash entry cannot be deleted",
+   "priority": "P0",
+   "preconditions": [],
+   "testData": [],
+   "assumptions": [],
+   "missingRequirements": [],
+   "steps": [
+    {
+     "action": "Open a trash entry as Admin and look for a delete action",
+     "expected": "No delete action is offered",
+     "sourceRefs": [
+      "GYM-AC@v1",
+      "GYM-BR-PLATFORM@v1"
+     ],
+     "testData": "",
+     "evidence": ""
+    },
+    {
+     "action": "Send DELETE for the trash entry through the API",
+     "expected": "Refused with 403; the entry is unchanged",
+     "sourceRefs": [
+      "GYM-AC@v1",
+      "GYM-BR-PLATFORM@v1"
+     ],
+     "testData": "",
+     "evidence": ""
+    }
+   ],
+   "requirementRefs": [
+    "story:AC-13"
+   ],
+   "techniques": [
+    "attack_based",
+    "error_guessing"
+   ],
+   "testTypes": [
+    "negative",
+    "security"
+   ],
+   "testConditions": [
+    "delete from the trash"
+   ],
+   "module": "Platform",
+   "level": "api",
+   "manualReason": ""
+  }
+ ]
+}

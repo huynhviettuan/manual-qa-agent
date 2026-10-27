@@ -1,5 +1,5 @@
 {
-  "importedAt": "2026-10-27T11:05:59.103Z",
+  "importedAt": "2026-10-27T12:02:02.233Z",
   "catalogue": {
     "requirements": 386
   },
@@ -9,7 +9,7 @@
     "skipped": 0,
     "rejected": [],
     "status": "APPROVED",
-    "durationMs": 511,
+    "durationMs": 517,
     "unresolvedRefs": {
       "NFR-SEC": 25,
       "API-ERR": 19,
@@ -40,6 +40,8 @@
   "observabilityHeldOut": {
     "expectedResults": 983,
     "flagged": 159,
+    "vocabularyTerms": 146,
+    "flaggedWithVocabulary": 116,
     "sample": [
       {
         "expected": "PT: idDocument listed in maskedFields and the number null",
@@ -50,10 +52,6 @@
         "flag": "no exact message, value or state in \"Kế toán: idDocument and health masked, values null\""
       },
       {
-        "expected": "The CEO approves where Admin does, not renames (customer.identity); Trợ lý CEO and Studio Manager approve where the Fitness Manager does; the Studio Manager also approves workout plans",
-        "flag": "no exact message, value or state in \"The CEO approves where Admin does, not renames (customer.identity); Trợ lý CE...\""
-      },
-      {
         "expected": "An event holds the new note and a before value",
         "flag": "no exact message, value or state in \"An event holds the new note and a before value\""
       },
@@ -62,16 +60,8 @@
         "flag": "no exact message, value or state in \"Only records that really contain the characters are found\""
       },
       {
-        "expected": "The tagged customer is found exactly once",
-        "flag": "no exact message, value or state in \"The tagged customer is found exactly once\""
-      },
-      {
         "expected": "No error, no match-all",
         "flag": "no exact message, value or state in \"No error, no match-all\""
-      },
-      {
-        "expected": "The customer is found each time",
-        "flag": "no exact message, value or state in \"The customer is found each time\""
       },
       {
         "expected": "Done, recorded as late (after its deadline) but inside the grace",
@@ -80,22 +70,6 @@
       {
         "expected": "Reopened and ticked; the history keeps the lock, the reopening and the tick",
         "flag": "no exact message, value or state in \"Reopened and ticked; the history keeps the lock, the reopening and the tick\""
-      },
-      {
-        "expected": "Nhóm nhu cầu: Thay đổi vóc dáng; Giảm đau & Cải thiện khả năng vận động; Nâng cao sinh lực, Trẻ hóa & Hiệu suất sống; Khác — no Lớp nhóm",
-        "flag": "no exact message, value or state in \"Nhóm nhu cầu: Thay đổi vóc dáng; Giảm đau & Cải thiện khả năng vận động; Nâng...\""
-      },
-      {
-        "expected": "Loại dịch vụ: Đánh giá thể chất, Tập thử, Đánh giá cơn đau, Khác (Tập thử between the two assessments)",
-        "flag": "no exact message, value or state in \"Loại dịch vụ: Đánh giá thể chất, Tập thử, Đánh giá cơn đau, Khác (Tập thử bet...\""
-      },
-      {
-        "expected": "Master, PT, Lễ tân, Marketing and Kế toán have none; Tư vấn none of kind leadNew",
-        "flag": "no exact message, value or state in \"Master, PT, Lễ tân, Marketing and Kế toán have none; Tư vấn none of kind leadNew\""
-      },
-      {
-        "expected": "Lễ tân: the lead is not in their list (not theirs)",
-        "flag": "no exact message, value or state in \"Lễ tân: the lead is not in their list (not theirs)\""
       },
       {
         "expected": "One receipt recorded",
@@ -166,28 +140,8 @@
         "flag": "no exact message, value or state in \"The dialog ends inside the window; its submit button (Thêm người dùng) is ful...\""
       },
       {
-        "expected": "The dialog shows the hint that each job title has a role of its name, starting from its source role's permissions",
-        "flag": "no exact message, value or state in \"The dialog shows the hint that each job title has a role of its name, startin...\""
-      },
-      {
-        "expected": "No field, label or checkbox of the form shows below the footer",
-        "flag": "no exact message, value or state in \"No field, label or checkbox of the form shows below the footer\""
-      },
-      {
         "expected": "The calendar stays open after each list",
         "flag": "no exact message, value or state in \"The calendar stays open after each list\""
-      },
-      {
-        "expected": "Only the customer without email is listed",
-        "flag": "no exact message, value or state in \"Only the customer without email is listed\""
-      },
-      {
-        "expected": "The lead gets an LD code",
-        "flag": "no exact message, value or state in \"The lead gets an LD code\""
-      },
-      {
-        "expected": "Still a lead (no KH code)",
-        "flag": "no exact message, value or state in \"Still a lead (no KH code)\""
       },
       {
         "expected": "The first is in re-care",
@@ -200,6 +154,54 @@
       {
         "expected": "Paid",
         "flag": "no exact message, value or state in \"Paid\""
+      },
+      {
+        "expected": "Waits",
+        "flag": "no exact message, value or state in \"Waits\""
+      },
+      {
+        "expected": "One email row about the session, in a failed state",
+        "flag": "no exact message, value or state in \"One email row about the session, in a failed state\""
+      },
+      {
+        "expected": "NO_CONTRACT",
+        "flag": "no exact message, value or state in \"NO_CONTRACT\""
+      },
+      {
+        "expected": "TRAINING",
+        "flag": "no exact message, value or state in \"TRAINING\""
+      },
+      {
+        "expected": "EXPIRING_SOON",
+        "flag": "no exact message, value or state in \"EXPIRING_SOON\""
+      },
+      {
+        "expected": "Each change moves exactly one figure in each place it belongs, in the right period, and nothing else",
+        "flag": "no exact message, value or state in \"Each change moves exactly one figure in each place it belongs, in the right p...\""
+      },
+      {
+        "expected": "Every difference is a defect with the two figures and the period; a figure that cannot be reconciled is a question for the owner",
+        "flag": "no exact message, value or state in \"Every difference is a defect with the two figures and the period; a figure th...\""
+      },
+      {
+        "expected": "One action wins; the other is told the session has changed; one session used, once",
+        "flag": "no exact message, value or state in \"One action wins; the other is told the session has changed; one session used,...\""
+      },
+      {
+        "expected": "One booking; the other sees the slot taken",
+        "flag": "no exact message, value or state in \"One booking; the other sees the slot taken\""
+      },
+      {
+        "expected": "The loser's screen shows the record as it now is, with a message that it changed",
+        "flag": "no exact message, value or state in \"The loser's screen shows the record as it now is, with a message that it changed\""
+      },
+      {
+        "expected": "Session notes with every finding and the request that proved it",
+        "flag": "no exact message, value or state in \"Session notes with every finding and the request that proved it\""
+      },
+      {
+        "expected": "Valid: 201, value 900,000 đ (1,000,000 − 10%), promotionDiscount 100,000, isExceptionPrice false, waiting for the normal contract approval",
+        "flag": "the word \"normal\" leaves the judgement to the tester in \"Valid: 201, value 900,000 đ (1,000,000 − 10%), promotionDiscount 100,000, isE...\""
       }
     ]
   },

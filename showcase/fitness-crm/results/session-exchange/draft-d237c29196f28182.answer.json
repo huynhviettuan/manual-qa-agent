@@ -1,0 +1,71 @@
+{
+ "designNotes": [
+  "Stop + Escalation: notification and the waiting list; the dashboard percentages await a formula"
+ ],
+ "cases": [
+  {
+   "title": "\"Stop + Escalation\" notifies the manager and Master and waits until handled",
+   "priority": "P1",
+   "preconditions": [],
+   "testData": [],
+   "assumptions": [],
+   "missingRequirements": [],
+   "steps": [
+    {
+     "action": "Choose Action \"Stop + Escalation\" on a logged set",
+     "expected": "The item is in the waiting list",
+     "sourceRefs": [
+      "GYM-AC@v1",
+      "GYM-FR@v1"
+     ],
+     "testData": "",
+     "evidence": ""
+    },
+    {
+     "action": "Open the manager's and Master's notifications",
+     "expected": "Each has a notice naming the customer and the set",
+     "sourceRefs": [
+      "GYM-AC@v1"
+     ],
+     "testData": "",
+     "evidence": ""
+    },
+    {
+     "action": "Reload the waiting list before anyone handles it",
+     "expected": "The item is still listed",
+     "sourceRefs": [
+      "GYM-AC@v1",
+      "GYM-FR@v1"
+     ],
+     "testData": "",
+     "evidence": ""
+    },
+    {
+     "action": "Handle the item as the manager",
+     "expected": "The item leaves the waiting list",
+     "sourceRefs": [
+      "GYM-AC@v1",
+      "GYM-FR@v1"
+     ],
+     "testData": "",
+     "evidence": ""
+    }
+   ],
+   "requirementRefs": [
+    "story:AC-21"
+   ],
+   "techniques": [
+    "state_transition"
+   ],
+   "testTypes": [
+    "positive"
+   ],
+   "testConditions": [
+    "escalation raised, unhandled, handled"
+   ],
+   "module": "Workouts",
+   "level": "ui",
+   "manualReason": ""
+  }
+ ]
+}

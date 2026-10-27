@@ -20,10 +20,31 @@ import {
   renderTemplate,
   type TenantScope,
 } from '@qa/domain';
+import { createHmac } from 'node:crypto';
 import { evidenceKey, type EvidenceStore, type StoredObject } from '@qa/evidence';
 
 /** Administrator-managed target; never derived from a spec, model output or user-supplied URL. */
-export type ExecutionTarget = { baseUrl: string; allowedHosts: string[] };
+export type ExecutionTarget = {
+  baseUrl: string;
+  allowedHosts: string[];
+  /** Path prefixes of the product's test hooks a `testHook` step may call (ADR-0025); default none. */
+  hookPaths?: string[];
+};
+
+/** RFC 6238 TOTP (SHA-1, 30 s, 6 digits) from a base32 secret; exported so tests share one clock. */
+export function totpCode(secretBase32: string, at = Date.now()): string {
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+  const clean = secretBase32.toUpperCase().replace(/[^A-Z2-7]/g, '');
+  let bits = '';
+  for (const ch of clean) bits += alphabet.indexOf(ch).toString(2).padStart(5, '0');
+  const key = Buffer.from((bits.match(/.{8}/g) ?? []).map((b) => parseInt(b, 2)));
+  const counter = Buffer.alloc(8);
+  counter.writeBigUInt64BE(BigInt(Math.floor(at / 30_000)));
+  const hmac = createHmac('sha1', key).update(counter).digest();
+  const offset = hmac[hmac.length - 1]! & 0x0f;
+  const code = ((hmac.readUInt32BE(offset) & 0x7fffffff) % 1_000_000).toString().padStart(6, '0');
+  return code;
+}
 
 /** Resolves secret references at run time (e.g. from a vault or `QA_SECRET_<NAME>`). */
 export type SecretResolver = (name: string) => string | undefined;
@@ -180,6 +201,8 @@ export class PlaywrightExecutor implements Executor {
     const valueOf = (v: InputValue) => {
       if (typeof v === 'string') return v;
       if ('secret' in v) return resolved.get(v.secret)!;
+      // A one-time code from a TOTP secret, computed now; the secret itself never leaves the resolver.
+      if ('totp' in v) return totpCode(resolved.get(v.totp)!);
       const value = vars.get(v.var);
       if (value === undefined) throw new StepError(`undefined value {{${v.var}}}`);
       return value;
@@ -189,7 +212,9 @@ export class PlaywrightExecutor implements Executor {
         ? JSON.stringify(redact(v))
         : 'secret' in v
           ? `[secret:${v.secret}]`
-          : `{{${v.var}}}`;
+          : 'totp' in v
+            ? `[totp:${v.totp}]`
+            : `{{${v.var}}}`;
     const render = (template: string) => {
       try {
         return renderTemplate(template, vars);
@@ -308,6 +333,7 @@ export class PlaywrightExecutor implements Executor {
               sessions,
               responses,
               row: currentRow,
+              hookPaths: input.target.hookPaths,
               saveFile: (name, contentType, data) => save('download', name, contentType, data),
               note: (text) => (log.note = redact(text).slice(0, 200)),
             });
@@ -457,6 +483,7 @@ export class PlaywrightExecutor implements Executor {
       sessions: Map<string, { ctx: APIRequestContext; headers: Record<string, string> }>;
       responses: Map<string, { status: number; json: unknown }>;
       row: number | undefined;
+      hookPaths: string[] | undefined;
       saveFile: (name: string, contentType: string, data: Uint8Array) => Promise<void>;
       note: (text: string) => void;
     },
@@ -525,15 +552,20 @@ export class PlaywrightExecutor implements Executor {
       body: Record<string, InputValue> | undefined,
       sessionName: string | undefined,
       maxTimeout = timeout,
+      extra: { raw?: { contentType: string; text: string }; headers?: Record<string, InputValue> } = {},
     ) => {
       const url = new URL(relative(render(path)), base).toString();
       const data = bodyOf(body);
       const sess = sessionName ? sessions.get(sessionName) : undefined;
       if (sessionName && !sess) throw new StepError(`session ${sessionName} is not open`);
+      const headers: Record<string, string> = { ...(sess?.headers ?? {}) };
+      for (const [k, v] of Object.entries(extra.headers ?? {})) headers[k] = valueOf(v);
+      if (extra.raw) headers['content-type'] = extra.raw.contentType;
       const res = await (sess?.ctx ?? context.request).fetch(url, {
         method,
-        ...(data ? { data } : {}),
-        ...(sess ? { headers: sess.headers } : {}),
+        // A raw body goes as bytes, so a JSON content type never re-serialises the text.
+        ...(extra.raw ? { data: Buffer.from(render(extra.raw.text)) } : data ? { data } : {}),
+        headers,
         maxRedirects: 0,
         timeout: maxTimeout,
       });
@@ -660,8 +692,24 @@ export class PlaywrightExecutor implements Executor {
           return [assertion(path, new URL(page.url()).pathname, false)];
         }
       }
+      case 'testHook': {
+        // Only a path the administrator listed as a hook, and policy already keeps production out.
+        const path = relative(render(step.path));
+        const allowedHook = (run.hookPaths ?? []).some(
+          (p) => path === p || path.startsWith(p.endsWith('/') ? p : `${p}/`),
+        );
+        if (!allowedHook) throw new StepError(`${path} is not a test hook of this environment`);
+        const res = await send(step.method, step.path, step.body, undefined);
+        responses.set(step.id, res);
+        if (res.status < 200 || res.status >= 300)
+          throw new StepError(`test hook ${path} answered ${res.status}`);
+        return [];
+      }
       case 'apiRequest': {
-        const res = await send(step.method, step.path, step.body, step.session);
+        const res = await send(step.method, step.path, step.body, step.session, timeout, {
+          raw: step.rawBody,
+          headers: step.headers,
+        });
         responses.set(step.id, res);
         return [
           ...(step.expectStatus === undefined
@@ -675,7 +723,9 @@ export class PlaywrightExecutor implements Executor {
         const ctx = await playwrightRequest.newContext({ baseURL: base.origin });
         const headers: Record<string, string> = {};
         sessions.set(step.name, { ctx, headers });
-        const res = await send(step.method, step.path, step.body, step.name);
+        const res = await send(step.method, step.path, step.body, step.name, timeout, {
+          headers: step.headers,
+        });
         responses.set(step.id, res);
         if (res.status < 200 || res.status >= 300)
           throw new StepError(`sign-in for session ${step.name} answered ${res.status}`);
@@ -756,6 +806,8 @@ function describe(step: ExecutableStep, show: (v: InputValue) => string): string
       return `${step.method} ${step.path}${step.session ? ` as ${step.session}` : ''}${step.expectStatus ? ` expect ${step.expectStatus}` : ''}${step.expectJson?.length ? ` and ${step.expectJson.length} JSON check(s)` : ''}`;
     case 'session':
       return `open session ${step.name} via ${step.method} ${step.path}`;
+    case 'testHook':
+      return `test hook ${step.method} ${step.path}`;
     case 'waitFor':
       return step.until.kind === 'text'
         ? `wait up to ${step.timeoutMs} ms for ${describeLocator(step.until.target)} to show "${step.until.text}"`

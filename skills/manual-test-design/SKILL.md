@@ -148,3 +148,24 @@ Unless the user asks for less, produce these in order:
 Keep it proportionate: for a small change, a few well-chosen cases plus the traceability and gaps sections are
 enough. When the cases will also be automated, keep one set of case records and generate the documents from it
 (see [references/case-records.md](references/case-records.md)), so the manual and automated views never drift.
+
+## What a pilot and an agent added (2026-10)
+
+From designing 376 cases for a live product and comparing an agent's drafts with them, condition by condition
+(manual-qa-agent ADR-0022 to ADR-0024):
+
+- **Quote the evidence.** Every expected result carries a verbatim quote from the cited source it follows from; a
+  result with no quote is an assumption, however confident it reads. A reviewer checks the quote, not the prose.
+- **Draft the clear clauses, ask about the rest.** A criterion with one unclear clause still has testable clauses;
+  quote them verbatim and design them now, and leave the unclear one to a question. Routing the whole criterion to
+  a question left 11 clear clauses in 7 criteria undesigned.
+- **Where people out-design the agent:** boundaries beyond the stated range (0 and non-numeric counts, 151-character
+  names), the other column of a decision table (the choice that needs no note), and adjacent permission layers
+  (signed-out access, actions inside a module, the API). Put those in every design, by name.
+- **A requirement id is a dated snapshot.** A case citing an id not in the catalogue does not load; when the text
+  behind an id changes, the cases approved before the change are stale and say so.
+- **Measure, do not calibrate.** A checker tuned on the cases it is scored on shows it handles those shapes, not
+  its accuracy; an "observability" check that is purely lexical flagged 16 % of human-written expected results,
+  nearly all falsely. Keep such checks advisory and measure them on a held-out set.
+- **Import what the team has.** A catalogue in the 20-column workbook loads as it is; what cannot be mapped (ids
+  without a number, techniques outside the list) is reported and flagged on the case, never coerced.

@@ -1,0 +1,84 @@
+{
+ "designNotes": [
+  "Boundary on reminder points 24 h, 3 h, 1 h before the deadline; channels bell, email, phone; approval overdue after 24 h -> direct manager."
+ ],
+ "cases": [
+  {
+   "title": "A task is reminded at 24, 3 and 1 hours before its deadline on every channel",
+   "priority": "P2",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "Create a task due in 25 hours and wait for each point",
+     "expected": "Reminders arrive at 24 h, 3 h and 1 h before the deadline, each by bell, email and phone",
+     "sourceRefs": [
+      "story:AC-28",
+      "GYM-FR@v1"
+     ],
+     "testData": "",
+     "evidence": ""
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-28",
+    "GYM-FR@v1"
+   ],
+   "techniques": [
+    "boundary_value_analysis"
+   ],
+   "testTypes": [
+    "positive"
+   ],
+   "testConditions": [
+    "24 h",
+    "3 h",
+    "1 h"
+   ],
+   "module": "Tasks",
+   "level": "manual",
+   "manualReason": "Depends on time passing and on email and phone delivery."
+  },
+  {
+   "title": "An approval pending over 24 hours is reported to the approver's direct manager",
+   "priority": "P2",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "Leave an approval request pending 25 hours",
+     "expected": "The approver's direct manager receives a notice",
+     "sourceRefs": [
+      "story:AC-28",
+      "GYM-BR-PLATFORM@v1",
+      "GYM-RBAC@v1"
+     ],
+     "testData": "",
+     "evidence": ""
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-28",
+    "GYM-BR-PLATFORM@v1",
+    "GYM-RBAC@v1"
+   ],
+   "techniques": [
+    "boundary_value_analysis"
+   ],
+   "testTypes": [
+    "boundary"
+   ],
+   "testConditions": [
+    "23 h: no report",
+    "25 h: reported"
+   ],
+   "module": "Approvals",
+   "level": "manual",
+   "manualReason": "Depends on time passing."
+  }
+ ]
+}

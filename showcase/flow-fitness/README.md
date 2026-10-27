@@ -23,7 +23,7 @@ imported records, to read beside the pilot's own `docs/test-design.md`.
 | Techniques outside the agent's list | CRUD (12 cases), Random (2) |
 | Cases whose expected results sit on the last step | 132 |
 | Execution results not imported | 353 (a result needs a run record) |
-| Observability check on the team's 983 expected results (held out, ADR-0023) | 159 flagged (16 %); the sample in `results/import-report.json` is nearly all false flags |
+| Observability check on the team's 983 expected results (held out, ADR-0023) | 159 flagged (16 %); with the catalogue's 146-term vocabulary (ADR-0025) 116 (12 %); the sample in `results/import-report.json` is nearly all false flags |
 
 **The held-out measurement.** The team's expected results were never used to tune the observability check, so
 what it flags here is its false-flag rate on human-written text: "Still on /login", "Payment status PARTIAL",

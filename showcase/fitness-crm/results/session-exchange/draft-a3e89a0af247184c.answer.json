@@ -1,0 +1,95 @@
+{
+ "designNotes": [
+  "One email per credited or refunded session; language by nationality group; status stored on the customer."
+ ],
+ "cases": [
+  {
+   "title": "A credited session sends exactly one email in the customer's language",
+   "priority": "P1",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "Mark \"Đã tập\" for a Vietnamese customer",
+     "expected": "Exactly 1 email is listed under \"Emails sent\", in Vietnamese, with its sending status",
+     "sourceRefs": [
+      "story:AC-17",
+      "GYM-BR-NOTIFICATIONS-AND-TASKS@v1",
+      "GYM-FR@v1"
+     ],
+     "testData": "nationality Vietnam",
+     "evidence": ""
+    },
+    {
+     "action": "Repeat for a foreign customer",
+     "expected": "Exactly 1 email, in English",
+     "sourceRefs": [
+      "GYM-BR-NOTIFICATIONS-AND-TASKS@v1"
+     ],
+     "testData": "nationality Japan",
+     "evidence": ""
+    }
+   ],
+   "assumptions": [
+    "The foreign-group language is taken to be English; the sources say only \"the language of their nationality group\"."
+   ],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-17",
+    "GYM-BR-NOTIFICATIONS-AND-TASKS@v1",
+    "GYM-FR@v1"
+   ],
+   "techniques": [
+    "specification_based"
+   ],
+   "testTypes": [
+    "positive"
+   ],
+   "testConditions": [
+    "Vietnamese customer",
+    "foreign customer"
+   ],
+   "module": "Customer email",
+   "level": "manual",
+   "manualReason": "Involves email delivery outside the browser."
+  },
+  {
+   "title": "Repeating the status change does not send a second email",
+   "priority": "P1",
+   "preconditions": [],
+   "testData": [],
+   "steps": [
+    {
+     "action": "Send the \"Đã tập\" action twice for the same session",
+     "expected": "Still exactly 1 email for that session",
+     "sourceRefs": [
+      "GYM-BR-NOTIFICATIONS-AND-TASKS@v1",
+      "story:AC-17",
+      "GYM-BR-SESSIONS-AND-CLASSES@v1"
+     ],
+     "testData": "",
+     "evidence": ""
+    }
+   ],
+   "assumptions": [],
+   "missingRequirements": [],
+   "requirementRefs": [
+    "story:AC-17",
+    "GYM-BR-NOTIFICATIONS-AND-TASKS@v1",
+    "GYM-BR-SESSIONS-AND-CLASSES@v1"
+   ],
+   "techniques": [
+    "error_guessing"
+   ],
+   "testTypes": [
+    "negative"
+   ],
+   "testConditions": [
+    "double submit"
+   ],
+   "module": "Customer email",
+   "level": "manual",
+   "manualReason": "Needs two simultaneous requests and email inspection."
+  }
+ ]
+}
