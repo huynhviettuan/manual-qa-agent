@@ -41,6 +41,8 @@ const USAGE = `Usage: pnpm qa <command> [options]
                                             Import a test-case workbook (the 20 export columns);
                                             prints what was imported, skipped and not mapped
   codes   --tenant T --project P            Give a code (MODULE-NNN) to cases created without one
+  session                                   List the session-exchange requests still waiting for an
+                                            answer (QA_LLM_PROVIDER=session, ADR-0026)
   purge-evidence                            Delete evidence past its retention
 
 Database: DATABASE_URL, or an embedded PGlite database in ./.pglite when unset.`;
@@ -166,6 +168,30 @@ try {
         console.log(`  expected results moved to the last step: ${r.expectedOnLastStep}`);
         console.log(`  execution results not imported: ${r.executionsIgnored}`);
       });
+      break;
+    }
+    case 'session': {
+      const { readdir, readFile } = await import('node:fs/promises');
+      const { join } = await import('node:path');
+      const dir = process.env.QA_SESSION_EXCHANGE_DIR || './.session-exchange';
+      const files = await readdir(dir).catch(() => [] as string[]);
+      const pending = files.filter(
+        (f) => f.endsWith('.request.json') && !files.includes(f.replace('.request.json', '.answer.json')),
+      );
+      for (const f of pending.sort()) {
+        const req = JSON.parse(await readFile(join(dir, f), 'utf8')) as {
+          kind: string;
+          promptVersion: string;
+          user: string;
+        };
+        const subject = /"(?:externalId|code|id)":\s*"([^"]+)"/.exec(req.user)?.[1] ?? '';
+        console.log(
+          `${req.kind.padEnd(11)} ${req.promptVersion.padEnd(13)} ${subject.padEnd(16)} ${f} -> write ${f.replace('.request.json', '.answer.json')}`,
+        );
+      }
+      console.log(
+        `${pending.length} request(s) waiting in ${dir}; answered ones are replayed on the next run`,
+      );
       break;
     }
     case 'codes': {

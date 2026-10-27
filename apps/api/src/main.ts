@@ -1,4 +1,3 @@
-import type { ExecutableGenerator } from '@qa/llm-adapter';
 import { createDbFromEnv, migrate } from '@qa/db';
 import { createEvidenceStoreFromEnv } from '@qa/evidence';
 import { createProvidersFromEnv } from '@qa/llm-adapter';
@@ -13,8 +12,12 @@ const db = await createDbFromEnv();
 await migrate(db);
 const providers = createProvidersFromEnv();
 logger.info(
-  { providers: providers.providers, live: providers.live, models: providers.models },
-  providers.live ? 'AI provider: LIVE (billed)' : 'AI provider: mock heuristic (no network)',
+  { providers: providers.providers, mode: providers.mode, live: providers.live, models: providers.models },
+  providers.mode === 'api-key'
+    ? 'AI provider: LIVE through an API key (billed)'
+    : providers.mode === 'session'
+      ? 'AI provider: session exchange (answers written by a person in a Claude Code session; ADR-0026)'
+      : 'AI provider: mock heuristic (no network)',
 );
 
 const evidenceStore = createEvidenceStoreFromEnv();
@@ -26,11 +29,7 @@ const app = await buildApp({
     db,
     classifier: providers.classifier,
     generator: providers.generator,
-    // ADR-0024: Claude and the session exchange propose executables; other providers do not yet.
-    executables:
-      'generateExecutable' in providers.generator
-        ? (providers.generator as unknown as ExecutableGenerator)
-        : null,
+    executables: providers.executables,
     minReadyConfidence: minReadyConfidenceFromEnv(),
     decisionCacheTtlMs,
   },
