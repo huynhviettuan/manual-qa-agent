@@ -567,3 +567,5 @@ export * from './manual-runs.ts';
 export * from './coverage.ts';
 export * from './exports.ts';
 export * from './questions.ts';
+export * from './design-doc.ts';
+export * from './lifecycle.ts';

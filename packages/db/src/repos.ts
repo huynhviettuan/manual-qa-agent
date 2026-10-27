@@ -1,5 +1,5 @@
 import type { AcceptanceCriterion, Actor, CaseStatus, Role, TenantScope } from '@qa/domain';
-import { DomainError, newId, sha256 } from '@qa/domain';
+import { caseCode, caseCodePrefix, DomainError, newId, sha256 } from '@qa/domain';
 import type { Db } from './db.ts';
 
 // Every function that reads or writes tenant data takes a TenantScope and filters on
@@ -290,6 +290,21 @@ export async function revokeSourceVersion(
   return rows.length > 0;
 }
 
+export type SourceStatusRow = {
+  sourceId: string;
+  version: string;
+  status: 'ACTIVE' | 'SUPERSEDED' | 'REVOKED';
+};
+
+/** Every source version of the project with its status, for staleness checks (ADR-0021). */
+export async function listSourceStatuses(db: Db, scope: TenantScope): Promise<SourceStatusRow[]> {
+  return db.query<SourceStatusRow>(
+    `SELECT source_id AS "sourceId", version, status FROM knowledge_sources
+      WHERE tenant_id = $1 AND project_id = $2 ORDER BY source_id, version`,
+    [scope.tenantId, scope.projectId],
+  );
+}
+
 export type ChunkHit = {
   chunkId: string;
   sourceId: string;
@@ -458,6 +473,8 @@ export async function completeTask(db: Db, taskId: string, state: 'SUCCEEDED' | 
 
 export type CaseRevisionRow = {
   caseId: string;
+  /** Human code (ADR-0021), e.g. `BKG-010`; null for cases created before codes existed. */
+  code: string | null;
   storyId: string;
   revisionId: string;
   revision: number;
@@ -466,11 +483,31 @@ export type CaseRevisionRow = {
   sourceRefs: string[];
   authorId: string;
   workflowId: string | null;
+  /** An open defect that blocks the expected result (ADR-0021), set by a reviewer. */
+  knownBug: string | null;
 };
 
-const REVISION_SELECT = `SELECT c.id AS "caseId", c.story_id AS "storyId", r.id AS "revisionId", r.revision,
-  r.status, r.content, r.source_refs AS "sourceRefs", r.author_id AS "authorId", c.workflow_id AS "workflowId"
+const REVISION_SELECT = `SELECT c.id AS "caseId", c.code, c.story_id AS "storyId", r.id AS "revisionId", r.revision,
+  r.status, r.content, r.source_refs AS "sourceRefs", r.author_id AS "authorId", c.workflow_id AS "workflowId",
+  c.known_bug AS "knownBug"
   FROM test_cases c JOIN test_case_revisions r ON r.case_id = c.id`;
+
+/** Per-project lock while a code is assigned, so two concurrent creations never take one sequence. */
+const CASE_CODE_LOCK = 7_340_021;
+
+/** The next unused sequence for a prefix in the project (codes are never reused, even after a rollback). */
+async function nextCaseCode(tx: Db, scope: TenantScope, prefix: string): Promise<string> {
+  await tx.query('SELECT pg_advisory_xact_lock($1, hashtext($2))', [
+    CASE_CODE_LOCK,
+    `${scope.tenantId}/${scope.projectId}`,
+  ]);
+  const rows = await tx.query<{ max: number | null }>(
+    `SELECT max(substring(code FROM '[0-9]+$')::int) AS max FROM test_cases
+      WHERE tenant_id = $1 AND project_id = $2 AND code LIKE $3`,
+    [scope.tenantId, scope.projectId, `${prefix}-%`],
+  );
+  return caseCode(prefix, Number(rows[0]?.max ?? 0) + 1);
+}
 
 export async function createTestCase(
   db: Db,
@@ -479,9 +516,11 @@ export async function createTestCase(
 ): Promise<CaseRevisionRow> {
   return db.transaction(async (tx) => {
     const caseId = newId('case');
+    const module = (c.content as { module?: unknown } | null)?.module;
+    const code = await nextCaseCode(tx, scope, caseCodePrefix(typeof module === 'string' ? module : ''));
     await tx.query(
-      'INSERT INTO test_cases (id, tenant_id, project_id, story_id, workflow_id) VALUES ($1,$2,$3,$4,$5)',
-      [caseId, scope.tenantId, scope.projectId, c.storyId, c.workflowId],
+      'INSERT INTO test_cases (id, tenant_id, project_id, story_id, workflow_id, code) VALUES ($1,$2,$3,$4,$5,$6)',
+      [caseId, scope.tenantId, scope.projectId, c.storyId, c.workflowId, code],
     );
     await tx.query(
       `INSERT INTO test_case_revisions (id, case_id, revision, status, content, source_refs, author_id)
@@ -528,6 +567,20 @@ export async function addRevision(
     );
     return (await latestRevision(tx, scope, caseId))!;
   });
+}
+
+/** Sets or clears the case's known bug (ADR-0021). Lifecycle state of the case, not revision content. */
+export async function setCaseKnownBug(
+  db: Db,
+  scope: TenantScope,
+  caseId: string,
+  knownBug: string | null,
+): Promise<void> {
+  const rows = await db.query(
+    `UPDATE test_cases SET known_bug = $4 WHERE id = $1 AND tenant_id = $2 AND project_id = $3 RETURNING id`,
+    [caseId, scope.tenantId, scope.projectId, knownBug],
+  );
+  if (rows.length === 0) throw new DomainError('NOT_FOUND', `test case ${caseId} not found`);
 }
 
 /** Status is the only mutable field of a revision; callers validate the transition first. */

@@ -124,6 +124,8 @@ export type RunRow = {
   blockedRequests: string[];
   leaseOwner: string | null;
   leaseUntil: Date | null;
+  /** Has its environment to itself while it runs (ADR-0021). */
+  exclusive: boolean;
   createdAt: Date;
   startedAt: Date | null;
   finishedAt: Date | null;
@@ -133,7 +135,7 @@ const RUN_COLS = `id, tenant_id AS "tenantId", project_id AS "projectId", case_i
   executable_id AS "executableId", spec_hash AS "specHash", environment_id AS "environmentId", state, reason,
   idempotency_key AS "idempotencyKey", requested_by AS "requestedBy", approval_id AS "approvalId", review_id AS "reviewId",
   assertions, cleanup_failed AS "cleanupFailed", blocked_requests AS "blockedRequests", lease_owner AS "leaseOwner",
-  lease_until AS "leaseUntil", created_at AS "createdAt", started_at AS "startedAt", finished_at AS "finishedAt"`;
+  lease_until AS "leaseUntil", exclusive, created_at AS "createdAt", started_at AS "startedAt", finished_at AS "finishedAt"`;
 
 /** Idempotent: the same key in the same scope returns the existing run. */
 export async function createOrGetRun(
@@ -149,12 +151,12 @@ export async function createOrGetRun(
     | 'idempotencyKey'
     | 'requestedBy'
     | 'approvalId'
-  >,
+  > & { exclusive?: boolean },
 ): Promise<{ run: RunRow; created: boolean }> {
   const inserted = await db.query<RunRow>(
     `INSERT INTO test_runs (id, tenant_id, project_id, case_id, case_revision, executable_id, spec_hash, environment_id,
-       state, idempotency_key, requested_by, approval_id)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'QUEUED',$9,$10,$11)
+       state, idempotency_key, requested_by, approval_id, exclusive)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'QUEUED',$9,$10,$11,$12)
      ON CONFLICT (tenant_id, project_id, idempotency_key) DO NOTHING RETURNING ${RUN_COLS}`,
     [
       newId('run'),
@@ -168,6 +170,7 @@ export async function createOrGetRun(
       r.idempotencyKey,
       r.requestedBy,
       r.approvalId,
+      r.exclusive ?? false,
     ],
   );
   if (inserted[0]) return { run: inserted[0], created: true };
@@ -186,19 +189,35 @@ export async function getRun(db: Db, scope: TenantScope, id: string): Promise<Ru
   return rows[0] ?? null;
 }
 
+/** Serialises claims across workers, so the exclusivity check and the claim are one step. */
+const CLAIM_LOCK = 7_340_022;
+
 /**
- * Atomically claims the oldest QUEUED run (any tenant: workers are trusted infrastructure;
- * every later read/write is scoped by the claimed run's tenant/project).
+ * Atomically claims the oldest QUEUED run that may run now (any tenant: workers are trusted
+ * infrastructure; every later read/write is scoped by the claimed run's tenant/project).
+ * ADR-0021: an exclusive run waits until nothing else of its environment is active, and while an
+ * exclusive run is active nothing else of that environment is claimed. The claim happens under a
+ * transaction-scoped advisory lock, so two workers never pass the check together.
  */
 export async function claimNextRun(db: Db, workerId: string, leaseMs: number): Promise<RunRow | null> {
-  const rows = await db.query<RunRow>(
-    `UPDATE test_runs SET state = 'POLICY_CHECK', lease_owner = $1, lease_until = now() + ($2 || ' milliseconds')::interval
-      WHERE id = (SELECT id FROM test_runs WHERE state = 'QUEUED' ORDER BY created_at LIMIT 1 FOR UPDATE SKIP LOCKED)
-        AND state = 'QUEUED'
-      RETURNING ${RUN_COLS}`,
-    [workerId, String(leaseMs)],
-  );
-  return rows[0] ?? null;
+  return db.transaction(async (tx) => {
+    await tx.query('SELECT pg_advisory_xact_lock($1)', [CLAIM_LOCK]);
+    const rows = await tx.query<RunRow>(
+      `UPDATE test_runs SET state = 'POLICY_CHECK', lease_owner = $1, lease_until = now() + ($2 || ' milliseconds')::interval
+        WHERE id = (
+          SELECT r.id FROM test_runs r WHERE r.state = 'QUEUED'
+            AND NOT EXISTS (
+              SELECT 1 FROM test_runs a
+               WHERE a.state IN ('POLICY_CHECK','RUNNING') AND a.tenant_id = r.tenant_id
+                 AND a.project_id = r.project_id AND a.environment_id = r.environment_id
+                 AND (a.exclusive OR r.exclusive))
+          ORDER BY r.created_at LIMIT 1 FOR UPDATE SKIP LOCKED)
+          AND state = 'QUEUED'
+        RETURNING ${RUN_COLS}`,
+      [workerId, String(leaseMs)],
+    );
+    return rows[0] ?? null;
+  });
 }
 
 /** Runs whose worker lease expired mid-flight (crash). They are never re-executed blindly. */

@@ -124,10 +124,10 @@ describe('coverage, exports and the question register (ADR-0018)', () => {
   });
 
   it('exports the tester workbook with the schema columns, execution from recorded runs only, and traceability', async () => {
-    const cases = await db.query<{ id: string }>(
-      `SELECT id FROM test_cases WHERE story_id = 'story_cov' ORDER BY created_at`,
+    const cases = await db.query<{ id: string; code: string }>(
+      `SELECT id, code FROM test_cases WHERE story_id = 'story_cov' ORDER BY created_at`,
     );
-    const caseId = cases[0]!.id;
+    const { id: caseId, code } = cases[0]!; // the CSV's Test Case ID is the case code (ADR-0021)
     await recordManualRun(db, a.qa, {
       caseId,
       environmentId: 'staging',
@@ -156,13 +156,13 @@ describe('coverage, exports and the question register (ADR-0018)', () => {
     expect(csv.startsWith('﻿Test Case ID,Requirement ID(s),Title,Feature/Module')).toBe(true);
     const lines = csv.split('\r\n');
     expect(lines[0]!.split(',')).toHaveLength(20);
-    const executed = lines.find((l) => l.startsWith(caseId))!;
+    const executed = lines.find((l) => l.startsWith(`${code},`))!;
     expect(executed).toContain('"BR-301@v1, story:AC-COV-1"');
     expect(executed).toContain('Fail');
     expect(executed).toContain('BUG-025');
     expect(executed).toContain('Raw ""Too big: expected number to be <=1000""');
     expect(executed).toContain('Yes (ui)');
-    const notRun = lines.find((l) => l.startsWith(manualOnly.caseId))!;
+    const notRun = lines.find((l) => l.startsWith(`${manualOnly.code},`))!;
     expect(notRun).toContain('Not Run');
     expect(notRun).toContain('No: Depends on time passing');
     expect(notRun).toContain('assumption');

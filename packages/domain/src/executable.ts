@@ -209,6 +209,12 @@ export const ExecutableSpec = z
     teardown: z.array(ExecutableStep).max(50).default([]),
     /** Values derived once at run start (today + n days, formatted), referenced as `{ var }` or `{{name}}`. */
     values: z.record(VarName, DerivedValue).default({}),
+    /**
+     * Runs alone on its environment (ADR-0021): a case that changes global settings or needs a
+     * machine-wide throttle to itself. The worker never runs it beside another run of the same
+     * environment, nor any other run beside it.
+     */
+    exclusive: z.boolean().default(false),
   })
   .superRefine((spec, ctx) => {
     // Every value a step uses is declared, or captured by an earlier step of the same or an earlier phase.

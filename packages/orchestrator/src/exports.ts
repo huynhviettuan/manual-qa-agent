@@ -60,7 +60,7 @@ export async function testCasesCsv(db: Db, scope: TenantScope, filter: { suiteId
       const e = latest.get(c.caseId);
       const refs = [...new Set([...d.requirementRefs, ...c.sourceRefs])];
       return [
-        c.caseId,
+        c.code ?? c.caseId,
         refs.join(', '),
         d.title,
         d.module || inSuite?.get(c.caseId) || '',
@@ -79,11 +79,12 @@ export async function testCasesCsv(db: Db, scope: TenantScope, filter: { suiteId
         d.openQuestions.join(', '),
         e?.actual ?? e?.reason ?? (e ? 'As expected' : ''),
         e ? (STATUS_WORD[e.status] ?? e.status) : 'Not Run',
-        e?.defectRef ?? '',
+        e?.defectRef ?? c.knownBug ?? '',
         e?.environmentId ?? '',
         lines([
           ...(c.status !== 'APPROVED' ? [`Revision ${c.revision} is ${c.status}`] : []),
           ...d.reviewFlags,
+          ...(c.knownBug ? [`Known bug ${c.knownBug}: a failure is expected until it is fixed`] : []),
           ...(e?.build ? [`Last run on build ${e.build}`] : []),
         ]),
         d.level === 'manual' ? (d.manualReason ? `No: ${d.manualReason}` : 'No') : `Yes (${d.level})`,
@@ -101,7 +102,7 @@ export async function traceabilityCsv(db: Db, scope: TenantScope) {
     for (const ref of new Set([...(d?.requirementRefs ?? []), ...c.sourceRefs])) {
       byRef.set(ref, [
         ...(byRef.get(ref) ?? []),
-        { caseId: c.caseId, title: d?.title ?? c.caseId, status: c.status },
+        { caseId: c.code ?? c.caseId, title: d?.title ?? c.caseId, status: c.status },
       ]);
     }
   }

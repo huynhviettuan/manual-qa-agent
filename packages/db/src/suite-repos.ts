@@ -11,6 +11,8 @@ export type SuiteRow = {
 
 export type SuiteCaseRow = {
   caseId: string;
+  code: string | null;
+  knownBug: string | null;
   section: string;
   position: number;
   revision: number;
@@ -23,11 +25,19 @@ export type SuiteRunRow = {
   id: string;
   suiteId: string;
   environmentId: string;
+  /** The build under test, as the requester named it (ADR-0021); empty when not given. */
+  build: string;
+  /** BLOCKED when the preflight failed: nothing was queued, `reason` says why. */
+  status: 'REQUESTED' | 'BLOCKED';
+  reason: string | null;
   requestedBy: string;
   createdAt: Date;
 };
 
-export type SuiteRunItemOutcome = 'REQUESTED' | 'NOT_AUTOMATED' | 'NOT_APPROVED';
+export type SuiteRunItemOutcome = 'REQUESTED' | 'NOT_AUTOMATED' | 'NOT_APPROVED' | 'BLOCKED';
+
+const SUITE_RUN_COLS = `id, suite_id AS "suiteId", environment_id AS "environmentId", build, status, reason,
+  requested_by AS "requestedBy", created_at AS "createdAt"`;
 
 export type SuiteRunItemRow = {
   caseId: string;
@@ -92,10 +102,11 @@ export async function upsertSuiteCase(
 /** Suite cases with their latest revision (the suite always runs what the case is now). */
 export async function listSuiteCases(db: Db, scope: TenantScope, suiteId: string): Promise<SuiteCaseRow[]> {
   return db.query<SuiteCaseRow>(
-    `SELECT sc.case_id AS "caseId", sc.section, sc.position, r.revision, r.status, r.content,
-       r.source_refs AS "sourceRefs"
+    `SELECT sc.case_id AS "caseId", c.code, c.known_bug AS "knownBug", sc.section, sc.position, r.revision,
+       r.status, r.content, r.source_refs AS "sourceRefs"
      FROM test_suite_cases sc
      JOIN test_suites s ON s.id = sc.suite_id AND s.tenant_id = $2 AND s.project_id = $3
+     JOIN test_cases c ON c.id = sc.case_id
      JOIN LATERAL (SELECT * FROM test_case_revisions WHERE case_id = sc.case_id ORDER BY revision DESC LIMIT 1) r ON true
      WHERE sc.suite_id = $1 ORDER BY sc.position`,
     [suiteId, scope.tenantId, scope.projectId],
@@ -105,14 +116,29 @@ export async function listSuiteCases(db: Db, scope: TenantScope, suiteId: string
 export async function insertSuiteRun(
   db: Db,
   scope: TenantScope,
-  r: { suiteId: string; environmentId: string; requestedBy: string },
+  r: {
+    suiteId: string;
+    environmentId: string;
+    build: string;
+    status: 'REQUESTED' | 'BLOCKED';
+    reason: string | null;
+    requestedBy: string;
+  },
 ): Promise<SuiteRunRow> {
   const rows = await db.query<SuiteRunRow>(
-    `INSERT INTO suite_runs (id, tenant_id, project_id, suite_id, environment_id, requested_by)
-     VALUES ($1,$2,$3,$4,$5,$6)
-     RETURNING id, suite_id AS "suiteId", environment_id AS "environmentId", requested_by AS "requestedBy",
-       created_at AS "createdAt"`,
-    [newId('suiterun'), scope.tenantId, scope.projectId, r.suiteId, r.environmentId, r.requestedBy],
+    `INSERT INTO suite_runs (id, tenant_id, project_id, suite_id, environment_id, build, status, reason, requested_by)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING ${SUITE_RUN_COLS}`,
+    [
+      newId('suiterun'),
+      scope.tenantId,
+      scope.projectId,
+      r.suiteId,
+      r.environmentId,
+      r.build,
+      r.status,
+      r.reason,
+      r.requestedBy,
+    ],
   );
   return rows[0]!;
 }
@@ -142,8 +168,8 @@ export async function listSuiteRuns(
   suiteId: string,
 ): Promise<SuiteRunSummaryRow[]> {
   return db.query<SuiteRunSummaryRow>(
-    `SELECT sr.id, sr.suite_id AS "suiteId", sr.environment_id AS "environmentId", sr.requested_by AS "requestedBy",
-       sr.created_at AS "createdAt",
+    `SELECT sr.id, sr.suite_id AS "suiteId", sr.environment_id AS "environmentId", sr.build, sr.status, sr.reason,
+       sr.requested_by AS "requestedBy", sr.created_at AS "createdAt",
        (SELECT count(*)::int FROM suite_run_items i WHERE i.suite_run_id = sr.id AND i.outcome = 'NOT_AUTOMATED'
           AND NOT EXISTS (SELECT 1 FROM manual_runs m WHERE m.suite_run_id = sr.id AND m.case_id = i.case_id)) AS "manualPending",
        (SELECT count(DISTINCT m.case_id)::int FROM manual_runs m WHERE m.suite_run_id = sr.id) AS "manualRecorded"
@@ -155,9 +181,7 @@ export async function listSuiteRuns(
 
 export async function getSuiteRun(db: Db, scope: TenantScope, id: string): Promise<SuiteRunRow | null> {
   const rows = await db.query<SuiteRunRow>(
-    `SELECT id, suite_id AS "suiteId", environment_id AS "environmentId", requested_by AS "requestedBy",
-       created_at AS "createdAt"
-     FROM suite_runs WHERE id = $1 AND tenant_id = $2 AND project_id = $3`,
+    `SELECT ${SUITE_RUN_COLS} FROM suite_runs WHERE id = $1 AND tenant_id = $2 AND project_id = $3`,
     [id, scope.tenantId, scope.projectId],
   );
   return rows[0] ?? null;

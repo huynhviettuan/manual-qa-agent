@@ -27,20 +27,22 @@ export async function listActiveSources(db: Db, scope: TenantScope): Promise<Act
 
 export type LatestCaseRow = {
   caseId: string;
+  code: string | null;
   storyId: string;
   storyExternalId: string;
   revision: number;
   status: CaseStatus;
   content: unknown;
   sourceRefs: string[];
+  knownBug: string | null;
 };
 
 /** The latest revision of every case in the project, oldest case first. */
 export async function listLatestCases(db: Db, scope: TenantScope): Promise<LatestCaseRow[]> {
   return db
     .query<LatestCaseRow>(
-      `SELECT DISTINCT ON (c.id) c.id AS "caseId", c.story_id AS "storyId", st.external_id AS "storyExternalId",
-       r.revision, r.status, r.content, r.source_refs AS "sourceRefs", c.created_at
+      `SELECT DISTINCT ON (c.id) c.id AS "caseId", c.code, c.story_id AS "storyId", st.external_id AS "storyExternalId",
+       r.revision, r.status, r.content, r.source_refs AS "sourceRefs", c.known_bug AS "knownBug", c.created_at
      FROM test_cases c
      JOIN test_case_revisions r ON r.case_id = c.id
      JOIN stories st ON st.id = c.story_id
@@ -93,8 +95,10 @@ export async function listLatestExecutions(db: Db, scope: TenantScope): Promise<
               finished_at AS at
        FROM manual_runs WHERE tenant_id = $1 AND project_id = $2
        UNION ALL
-       SELECT case_id, 'automated', state, reason, NULL, environment_id, NULL, NULL, NULL, created_at
-       FROM test_runs WHERE tenant_id = $1 AND project_id = $2
+       SELECT t.case_id, 'automated', t.state, t.reason, NULL, t.environment_id,
+              (SELECT NULLIF(sr.build, '') FROM suite_run_items i JOIN suite_runs sr ON sr.id = i.suite_run_id
+                WHERE i.run_id = t.id), NULL, NULL, t.created_at
+       FROM test_runs t WHERE t.tenant_id = $1 AND t.project_id = $2
          AND state IN ('PASSED','FAILED','INCONCLUSIVE','BLOCKED')
      ) x ORDER BY "caseId", at DESC`,
     [scope.tenantId, scope.projectId],

@@ -127,18 +127,28 @@
   async function viewSuiteRun(id) {
     const r = await api('GET', `/api/suite-runs/${id}`);
     const t = r.totals;
+    // ADR-0021: a known bug only labels the verdict; the verdict itself is what was recorded.
+    const bugNote = (i) =>
+      i.expectedFailure
+        ? `<div class="flag">Expected: known bug ${esc(i.knownBug)}</div>`
+        : i.retestNeeded
+          ? `<div class="flag">Passed with known bug ${esc(i.knownBug)}: retest and clear the mark</div>`
+          : i.knownBug
+            ? `<div class="muted">Known bug ${esc(i.knownBug)}</div>`
+            : '';
     const row = (i) => h`<tr>
       <td>${i.manualRunId || i.status === 'NOT_AUTOMATED' ? `<a class="clickable" href="#/execute/${esc(i.caseId)}?run=${esc(id)}">${esc(i.title)}</a>` : esc(i.title)}
-        <div class="muted">${esc(i.caseId)} · ${esc(i.section)}</div></td>
-      <td>${pill(i.status)}${i.testerId ? `<div class="muted">by ${esc(i.testerId)}</div>` : ''}</td>
+        <div class="muted">${esc(i.code || i.caseId)} · ${esc(i.section)}</div></td>
+      <td>${pill(i.status)}${i.testerId ? `<div class="muted">by ${esc(i.testerId)}</div>` : ''}${bugNote(i)}</td>
       <td>${esc(i.reason ?? '')}</td>
       <td class="num">${i.durationMs == null ? '' : `${(i.durationMs / 1000).toFixed(1)} s`}</td></tr>`;
     app.innerHTML = h`
       <section class="card" aria-labelledby="h-run">
         <h2 id="h-run">Suite run ${esc(r.id)}</h2>
-        <p class="muted">Environment <b>${esc(r.environmentId)}</b> · requested by ${esc(r.requestedBy)} on ${esc(fmtDate(r.createdAt))}</p>
-        <p>${pill('PASSED')} ${t.passed} &nbsp; ${pill('FAILED')} ${t.failed} &nbsp; ${pill('BLOCKED')} ${t.blocked} &nbsp; ${pill('INCONCLUSIVE')} ${t.inconclusive}
-           &nbsp; <span class="pill NOT_AUTOMATED">manual pending</span> ${t.notAutomated} &nbsp; <span class="muted">recorded by hand: ${t.manualRecorded}</span></p>
+        <p class="muted">Environment <b>${esc(r.environmentId)}</b>${r.build ? ` · build <b>${esc(r.build)}</b>` : ''} · requested by ${esc(r.requestedBy)} on ${esc(fmtDate(r.createdAt))}</p>
+        ${r.status === 'BLOCKED' ? `<div class="error">Blocked before anything ran: ${esc(r.reason)}. Fix the environment and request the run again.</div>` : ''}
+        <p>${pill('PASSED')} ${t.passed} &nbsp; ${pill('FAILED')} ${t.failed}${t.expectedFailures ? ` <span class="muted">(${t.expectedFailures} on known bugs)</span>` : ''} &nbsp; ${pill('BLOCKED')} ${t.blocked} &nbsp; ${pill('INCONCLUSIVE')} ${t.inconclusive}
+           &nbsp; <span class="pill NOT_AUTOMATED">manual pending</span> ${t.notAutomated} &nbsp; <span class="muted">recorded by hand: ${t.manualRecorded}</span>${t.retestNeeded ? ` &nbsp; <span class="flag">${t.retestNeeded} to retest (known bug passed)</span>` : ''}</p>
         <table><thead><tr><th>Case</th><th>Status</th><th>Reason</th><th class="num">Time</th></tr></thead>
           <tbody>${r.items.map(row).join('')}</tbody></table>
       </section>`;
@@ -163,9 +173,16 @@
       <section class="card" aria-labelledby="h-case">
         <p><a class="clickable" href="${suiteRunId ? `#/suite-runs/${esc(suiteRunId)}` : '#/suites'}">← back</a></p>
         <h2 id="h-case">${esc(c.title)}</h2>
-        <p class="muted">${esc(caseId)} · revision ${rev.revision} ${pill(rev.status)} · ${esc(c.priority)} · ${esc((c.techniques || []).join(', '))}
+        <p class="muted">${esc(detail.code || caseId)} · revision ${rev.revision} ${pill(rev.status)} · ${esc(c.priority)} · ${esc((c.techniques || []).join(', '))}
           ${c.module ? ` · ${esc(c.module)}` : ''} · ${esc(c.level || 'manual')}${c.manualReason ? ` (${esc(c.manualReason)})` : ''}</p>
         ${(c.reviewFlags || []).map((f) => `<p class="flag">⚑ ${esc(f)}</p>`).join('')}
+        <form id="bugform" class="row" aria-label="Known bug">
+          <div><label for="knownbug">Known bug (an open defect that blocks the expected result)</label>
+            <input id="knownbug" type="text" placeholder="BUG-041" value="${esc(detail.knownBug || '')}"></div>
+          <div><label>&nbsp;</label><button type="submit" class="secondary">${detail.knownBug ? 'Update' : 'Mark'}</button>
+            ${detail.knownBug ? '<button type="button" id="clearbug" class="secondary">Clear</button>' : ''}</div>
+          <div id="bugmsg"></div>
+        </form>
         ${c.requirementRefs?.length ? `<p class="muted">Verifies: ${esc(c.requirementRefs.join(', '))}</p>` : ''}
         ${c.preconditions?.length ? `<h3>Preconditions</h3><ul>${c.preconditions.map((p) => `<li>${esc(p)}</li>`).join('')}</ul>` : ''}
         ${c.testData?.length ? `<h3>Test data</h3><ul>${c.testData.map((p) => `<li>${esc(p)}</li>`).join('')}</ul>` : ''}
@@ -196,6 +213,23 @@
         <h3>History</h3>
         <div id="history">${renderHistory(history)}</div>
       </section>`;
+    // ADR-0021: a reviewer marks the defect; the server checks the role and audits it.
+    const markBug = async (bugRef) => {
+      try {
+        const out = await api('POST', `/api/test-cases/${caseId}/known-bug`, { bugRef });
+        el('bugmsg').innerHTML =
+          `<div class="ok">${out.knownBug ? `Marked: ${esc(out.knownBug)}` : 'Cleared'}</div>`;
+        setTimeout(() => viewExecute(caseId, suiteRunId), 600);
+      } catch (err) {
+        el('bugmsg').innerHTML = `<div class="error">${esc(err.message)}</div>`;
+      }
+    };
+    el('bugform').addEventListener('submit', (e) => {
+      e.preventDefault();
+      markBug(el('knownbug').value.trim() || null);
+    });
+    const clearBug = el('clearbug');
+    if (clearBug) clearBug.addEventListener('click', () => markBug(null));
     if (suiteRunId) {
       api('GET', `/api/suite-runs/${suiteRunId}`).then((r) => {
         el('env').value = r.environmentId;
@@ -485,11 +519,24 @@
         </tbody></table>
         ${cov.gaps.sources.length ? `<h3>Sources no case cites</h3><p>${cov.gaps.sources.map(esc).join(', ')}</p>` : ''}
         ${cov.gaps.criteria.length ? `<h3>Criteria no case covers</h3><p>${cov.gaps.criteria.map(esc).join(', ')}</p>` : ''}
+        ${
+          cov.stale.length
+            ? `<h3>Stale cases (${cov.stale.length})</h3><p class="muted">Approved against a source version that is no longer active: review each against the current version.</p>
+               <table><thead><tr><th>Case</th><th>Cited version</th><th>Now</th></tr></thead><tbody>${cov.stale
+                 .map(
+                   (
+                     s,
+                   ) => h`<tr><td><a class="clickable" href="#/execute/${esc(s.caseId)}">${esc(s.title)}</a><div class="muted">${esc(s.code || s.caseId)}</div></td>
+                     <td>${s.refs.map((r) => esc(r.ref)).join('<br>')}</td><td>${s.refs.map((r) => esc(r.status)).join('<br>')}</td></tr>`,
+                 )
+                 .join('')}</tbody></table>`
+            : ''
+        }
       </section>
       <section class="card" aria-labelledby="h-exp">
         <h2 id="h-exp">Exports</h2>
-        <p><button id="dl-cases">Download test-cases.csv</button> <button id="dl-trace" class="secondary">Download traceability.csv</button></p>
-        <p class="muted">The tester workbook has the team's 20 columns; execution columns come only from recorded runs.</p>
+        <p><button id="dl-cases">Download test-cases.csv</button> <button id="dl-trace" class="secondary">Download traceability.csv</button> <button id="dl-design" class="secondary">Download test-design.md</button></p>
+        <p class="muted">The tester workbook has the team's 20 columns; execution columns come only from recorded runs. The test-design document has the eight sections (analysis, techniques, coverage, traceability, gaps, risk order, regression scope), from the records.</p>
         <div id="dl-msg"></div>
       </section>`;
     const download = async (path, name) => {
@@ -510,6 +557,7 @@
     el('dl-trace').addEventListener('click', () =>
       download('/api/export/traceability.csv', 'traceability.csv'),
     );
+    el('dl-design').addEventListener('click', () => download('/api/export/test-design.md', 'test-design.md'));
   }
 
   // ---- utilities

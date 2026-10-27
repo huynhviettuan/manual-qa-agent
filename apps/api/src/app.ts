@@ -63,12 +63,16 @@ import {
   publishBug,
   revertBug,
   triageRun,
+  regressionScope,
   requestRun,
   resolveReviewAndContinue,
   reviewExecutable,
   runStoryWorkflow,
+  setKnownBug,
   submitStory,
+  testDesignMarkdown,
   type OrchestratorDeps,
+  type TargetProbe,
 } from '@qa/orchestrator';
 import { ingestSource, revokeSource, SourceMeta } from '@qa/retrieval';
 import { CONFIRMABLE_CAUSES, listQueue, promoteToReference, reviewTestCase } from '@qa/review';
@@ -92,6 +96,8 @@ export type AppOptions = {
   rateLimitPerMinute?: number;
   /** Retention for evidence attached to manual runs (days; default 30). */
   evidenceRetentionDays?: number;
+  /** Suite-run preflight reachability check (ADR-0021); default: an HTTP GET of the target, null skips it. */
+  targetProbe?: TargetProbe | null;
 };
 
 const ExecutableBody = z.object({ spec: z.unknown() });
@@ -292,9 +298,11 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
           const d = DraftContent.safeParse(c.content).data;
           return {
             caseId: c.caseId,
+            code: c.code,
             story: c.storyExternalId,
             revision: c.revision,
             status: c.status,
+            knownBug: c.knownBug,
             title: d?.title ?? c.caseId,
             priority: d?.priority ?? '',
             module: d?.module ?? '',
@@ -311,7 +319,8 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
     const { id } = IdParams.parse(req.params);
     const revisions = await listRevisions(db, scope(req), id);
     if (revisions.length === 0) throw new DomainError('NOT_FOUND', `test case ${id} not found`);
-    return { caseId: id, storyId: revisions[0]!.storyId, revisions };
+    const { storyId, code, knownBug } = revisions[0]!;
+    return { caseId: id, code, storyId, knownBug, revisions };
   });
 
   app.post('/api/test-cases/:id/review', async (req) => {
@@ -509,9 +518,31 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
 
   app.post('/api/suites/:id/runs', async (req, reply) => {
     const { id } = IdParams.parse(req.params);
-    const { environmentId } = z.object({ environmentId: z.string().min(1).max(100) }).parse(req.body);
-    return reply.code(202).send(await runSuite({ db }, req.actor, id, { environmentId }));
+    const { environmentId, build } = z
+      .object({ environmentId: z.string().min(1).max(100), build: z.string().max(200).optional() })
+      .parse(req.body);
+    const report = await runSuite({ db, probe: opts.targetProbe }, req.actor, id, { environmentId, build });
+    // A failed preflight (ADR-0021) is a complete answer, not an accepted request.
+    return reply.code(report.status === 'BLOCKED' ? 200 : 202).send(report);
   });
+
+  // ADR-0021: the regression set of one requirement, a case's known bug, the test-design document.
+  app.get('/api/regression', async (req) => {
+    const { ref } = z.object({ ref: z.string().min(1).max(200) }).parse(req.query);
+    return regressionScope(db, scope(req), ref);
+  });
+  app.post('/api/test-cases/:id/known-bug', async (req) => {
+    const { id } = IdParams.parse(req.params);
+    const { bugRef } = z.object({ bugRef: z.string().max(100).nullable() }).parse(req.body);
+    return setKnownBug(db, req.actor, id, bugRef);
+  });
+  app.get('/api/export/test-design.md', async (req, reply) =>
+    reply
+      .header('content-type', 'text/markdown; charset=utf-8')
+      .header('content-disposition', 'attachment; filename="test-design.md"')
+      .header('cache-control', 'no-store')
+      .send(await testDesignMarkdown(db, scope(req))),
+  );
 
   app.get('/api/suites/:id/runs', async (req) => {
     const { id } = IdParams.parse(req.params);

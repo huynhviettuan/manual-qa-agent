@@ -295,6 +295,8 @@ export async function requestRun(deps: Pick<RunDeps, 'db'>, actor: Actor, req: R
     idempotencyKey: req.idempotencyKey ?? newId('runkey'),
     requestedBy: actor.id,
     approvalId: req.approvalId ?? null,
+    // ADR-0021: the worker keeps an exclusive run alone on its environment.
+    exclusive: ExecutableSpec.parse(exe.spec).exclusive,
   });
   if (!created) return run;
 

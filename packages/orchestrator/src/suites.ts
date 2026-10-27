@@ -1,5 +1,6 @@
 import {
   approvedExecutableForCase,
+  getEnvironment,
   getSuite,
   getSuiteRun,
   insertAuditEvent,
@@ -15,6 +16,7 @@ import {
   listSuiteRuns,
   upsertSuiteCase,
   type Db,
+  type EnvironmentRow,
   type SuiteRunItemOutcome,
 } from '@qa/db';
 import { DomainError, DraftContent, hasRole, type Actor, type TenantScope } from '@qa/domain';
@@ -84,27 +86,85 @@ export async function getSuiteDetail(db: Db, scope: TenantScope, suiteId: string
     cases: await Promise.all(
       cases.map(async (c) => ({
         caseId: c.caseId,
+        code: c.code,
         section: c.section,
         title: DraftContent.safeParse(c.content).data?.title ?? c.caseId,
         status: c.status,
         revision: c.revision,
         sourceRefs: c.sourceRefs,
+        knownBug: c.knownBug,
         automated: (await approvedExecutableForCase(db, scope, c.caseId)) !== null,
       })),
     ),
   };
 }
 
+// ------------------------------------------------------------------ preflight (ADR-0021)
+
+/** Answers whether the target answered HTTP at all; any status counts, a network error does not. */
+export type TargetProbe = (baseUrl: string) => Promise<boolean>;
+
+export const httpProbe: TargetProbe = async (baseUrl) => {
+  try {
+    await fetch(baseUrl, { method: 'GET', redirect: 'manual', signal: AbortSignal.timeout(5000) });
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+export type SuiteRunDeps = Pick<RunDeps, 'db'> & {
+  /** Reachability check of the environment's target before anything is queued; `null` skips it. */
+  probe?: TargetProbe | null;
+};
+
+const hostOf = (url: string) => {
+  try {
+    return new URL(url).host;
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * Checks the environment once before a suite run queues anything, so a dead or misconfigured
+ * target reads as one BLOCKED suite run with a reason, never as N failed cases. The checks that
+ * concern execution apply only when the suite has something to execute.
+ */
+export async function preflight(
+  deps: SuiteRunDeps,
+  scope: TenantScope,
+  environmentId: string,
+  automatedCases: number,
+): Promise<{ environment: EnvironmentRow | null; reasons: string[] }> {
+  const environment = await getEnvironment(deps.db, scope, environmentId);
+  if (!environment) return { environment, reasons: ['UNKNOWN_ENVIRONMENT'] };
+  const reasons: string[] = [];
+  if (automatedCases > 0) {
+    if (environment.kind === 'production') reasons.push('PRODUCTION_ENVIRONMENT');
+    if (!environment.allowedActions.includes('execute')) reasons.push('EXECUTE_NOT_ALLOWED');
+    const host = environment.baseUrl ? hostOf(environment.baseUrl) : null;
+    if (!environment.baseUrl || !host || !(environment.allowedHosts ?? []).includes(host)) {
+      reasons.push('ENVIRONMENT_NOT_EXECUTABLE');
+    } else if (deps.probe !== null) {
+      const probe = deps.probe ?? httpProbe;
+      if (!(await probe(environment.baseUrl))) reasons.push('TARGET_UNREACHABLE');
+    }
+  }
+  return { environment, reasons };
+}
+
 /**
  * Requests one run per approved, automated case (each through `requestRun`, so policy applies per
  * case). Cases without an approved revision or an approved executable are recorded as such: they
- * are for a person to execute, and the report never presents them as passed.
+ * are for a person to execute, and the report never presents them as passed. A failed preflight
+ * blocks the whole suite run before any case is queued.
  */
 export async function runSuite(
-  deps: Pick<RunDeps, 'db'>,
+  deps: SuiteRunDeps,
   actor: Actor,
   suiteId: string,
-  input: { environmentId: string },
+  input: { environmentId: string; build?: string },
 ) {
   const { db } = deps;
   const scope = scopeOf(actor);
@@ -112,16 +172,29 @@ export async function runSuite(
   if (!suite) throw new DomainError('NOT_FOUND', `suite ${suiteId} not found`);
   const cases = await listSuiteCases(db, scope, suiteId);
   if (cases.length === 0) throw new DomainError('VALIDATION', `suite ${suiteId} has no cases`);
+  const build = input.build?.trim() ?? '';
+
+  const automated = new Set<string>();
+  for (const c of cases) {
+    if (c.status === 'APPROVED' && (await approvedExecutableForCase(db, scope, c.caseId)))
+      automated.add(c.caseId);
+  }
+  const check = await preflight(deps, scope, input.environmentId, automated.size);
+  const blocked = check.reasons.length > 0;
   const suiteRun = await insertSuiteRun(db, scope, {
     suiteId,
     environmentId: input.environmentId,
+    build,
+    status: blocked ? 'BLOCKED' : 'REQUESTED',
+    reason: blocked ? `PREFLIGHT:${check.reasons.join(',')}` : null,
     requestedBy: actor.id,
   });
   for (const c of cases) {
     let outcome: SuiteRunItemOutcome = 'NOT_APPROVED';
     let runId: string | null = null;
-    if (c.status === 'APPROVED') {
-      if (await approvedExecutableForCase(db, scope, c.caseId)) {
+    if (blocked) outcome = 'BLOCKED';
+    else if (c.status === 'APPROVED') {
+      if (automated.has(c.caseId)) {
         const run = await requestRun(deps, actor, {
           caseId: c.caseId,
           environmentId: input.environmentId,
@@ -139,7 +212,13 @@ export async function runSuite(
       position: c.position,
     });
   }
-  await audit(db, actor, 'SUITE_RUN_REQUESTED', suiteRun.id, input.environmentId);
+  await audit(
+    db,
+    actor,
+    blocked ? 'SUITE_RUN_BLOCKED' : 'SUITE_RUN_REQUESTED',
+    suiteRun.id,
+    blocked ? suiteRun.reason! : input.environmentId,
+  );
   return getSuiteRunReport(db, scope, suiteRun.id);
 }
 
@@ -150,7 +229,11 @@ export async function listSuiteRunSummaries(db: Db, scope: TenantScope, suiteId:
 
 const TERMINAL = new Set(['PASSED', 'FAILED', 'INCONCLUSIVE', 'BLOCKED']);
 
-/** Per-case results with traceability; verdicts come from each run's deterministic assertions. */
+/**
+ * Per-case results with traceability; verdicts come from each run's deterministic assertions.
+ * A case with a known bug (ADR-0021) keeps its verdict: the report only labels a FAILED result
+ * as `expectedFailure` and a PASSED one as `retestNeeded` (the bug may be fixed; clear the mark).
+ */
 export async function getSuiteRunReport(db: Db, scope: TenantScope, suiteRunId: string) {
   const suiteRun = await getSuiteRun(db, scope, suiteRunId);
   if (!suiteRun) throw new DomainError('NOT_FOUND', `suite run ${suiteRunId} not found`);
@@ -167,13 +250,18 @@ export async function getSuiteRunReport(db: Db, scope: TenantScope, suiteRunId: 
       const status = m ? m.status : i.outcome === 'REQUESTED' ? i.runState! : i.outcome;
       const started = m ? m.startedAt : i.startedAt;
       const finished = m ? m.finishedAt : i.finishedAt;
+      const knownBug = c?.knownBug ?? null;
       return {
         caseId: i.caseId,
+        code: c?.code ?? null,
         section: c?.section ?? '',
         title: DraftContent.safeParse(c?.content).data?.title ?? i.caseId,
         sourceRefs: c?.sourceRefs ?? [],
         status,
         reason: m ? m.reason || null : i.runReason,
+        knownBug,
+        expectedFailure: knownBug !== null && status === 'FAILED',
+        retestNeeded: knownBug !== null && status === 'PASSED',
         runId: i.runId,
         manualRunId: m?.id ?? null,
         testerId: m?.testerId ?? null,
@@ -190,6 +278,9 @@ export async function getSuiteRunReport(db: Db, scope: TenantScope, suiteRunId: 
     id: suiteRun.id,
     suiteId: suiteRun.suiteId,
     environmentId: suiteRun.environmentId,
+    build: suiteRun.build,
+    status: suiteRun.status,
+    reason: suiteRun.reason,
     requestedBy: suiteRun.requestedBy,
     createdAt: suiteRun.createdAt,
     complete: requested.every((i) => TERMINAL.has(i.status)),
@@ -204,6 +295,10 @@ export async function getSuiteRunReport(db: Db, scope: TenantScope, suiteRunId: 
       notAutomated: count('NOT_AUTOMATED'),
       manualRecorded: items.filter((i) => i.manualRunId).length,
       notApproved: count('NOT_APPROVED'),
+      /** Of `failed`: failures a known bug accounts for (verdicts unchanged). */
+      expectedFailures: items.filter((i) => i.expectedFailure).length,
+      /** Of `passed`: cases whose known bug may be fixed; retest and clear the mark. */
+      retestNeeded: items.filter((i) => i.retestNeeded).length,
     },
     items,
   };

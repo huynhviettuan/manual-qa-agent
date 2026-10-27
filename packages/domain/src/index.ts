@@ -1,3 +1,4 @@
+export * from './case-code.ts';
 export * from './errors.ts';
 export * from './executable.ts';
 export * from './ids.ts';

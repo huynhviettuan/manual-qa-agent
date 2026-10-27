@@ -504,6 +504,28 @@ ALTER TABLE evidence_artifacts ADD CONSTRAINT evidence_one_owner CHECK ((run_id 
 ALTER TABLE review_tasks ADD COLUMN observed_behaviour text;
 `,
   },
+  {
+    id: '0008_case_lifecycle',
+    sql: /* sql */ `
+-- ADR-0021: what the Flow Fitness pilot needed from a case over its life.
+-- A stable code people quote (MODULE-NNN), assigned when the case is created; older cases keep null.
+ALTER TABLE test_cases ADD COLUMN code text;
+CREATE UNIQUE INDEX test_cases_code_idx ON test_cases (tenant_id, project_id, code);
+-- An open defect that blocks the expected result, set by a reviewer. Reports label a FAILED result
+-- as expected and a PASSED one as "retest and clear"; verdicts themselves never change (ADR-0009).
+ALTER TABLE test_cases ADD COLUMN known_bug text;
+-- A suite run names the build under test, and is BLOCKED as a whole when its preflight fails.
+ALTER TABLE suite_runs ADD COLUMN build text NOT NULL DEFAULT '';
+ALTER TABLE suite_runs ADD COLUMN status text NOT NULL DEFAULT 'REQUESTED' CHECK (status IN ('REQUESTED','BLOCKED'));
+ALTER TABLE suite_runs ADD COLUMN reason text;
+ALTER TABLE suite_run_items DROP CONSTRAINT suite_run_items_outcome_check;
+ALTER TABLE suite_run_items ADD CONSTRAINT suite_run_items_outcome_check
+  CHECK (outcome IN ('REQUESTED','NOT_AUTOMATED','NOT_APPROVED','BLOCKED'));
+-- An exclusive run has its environment to itself (global settings, lockout): nothing else of the
+-- same environment runs beside it.
+ALTER TABLE test_runs ADD COLUMN exclusive boolean NOT NULL DEFAULT false;
+`,
+  },
 ];
 
 export async function migrate(db: Db): Promise<string[]> {

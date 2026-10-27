@@ -280,3 +280,17 @@ export async function updateBug(
   if (!rows[0]) throw new DomainError('CONFLICT', `bug ${id} is not in ${from.join('/')}`);
   return rows[0];
 }
+
+/** Cases whose runs produced a published bug (ADR-0021): they guard a defect once it is fixed. */
+export async function listPublishedBugCases(
+  db: Db,
+  scope: TenantScope,
+): Promise<Array<{ caseId: string; bugs: string[] }>> {
+  return db.query(
+    `SELECT t.case_id AS "caseId", array_agg(DISTINCT coalesce(b.external_key, b.id)) AS bugs
+       FROM bug_reports b JOIN test_runs t ON t.id = b.run_id
+      WHERE b.tenant_id = $1 AND b.project_id = $2 AND b.status = 'PUBLISHED'
+      GROUP BY t.case_id ORDER BY t.case_id`,
+    [scope.tenantId, scope.projectId],
+  );
+}
