@@ -36,6 +36,7 @@ const ready = {
   missingExpectations: [],
   clarificationQuestion: null,
   citedSourceIds: ['AC-LOGIN@v2'],
+  draftableClauses: [],
 };
 
 describe('ClaudeProvider.classify (mocked API)', () => {
@@ -49,7 +50,7 @@ describe('ClaudeProvider.classify (mocked API)', () => {
       provider: 'anthropic',
       requestedModel: 'claude-opus-5-5',
       model: 'claude-opus-5-5',
-      promptVersion: 'readiness-v1',
+      promptVersion: 'readiness-v2',
       usage: { inputTokens: 400, outputTokens: 120, cacheReadTokens: 0, cacheWriteTokens: 0 },
     });
     expect(out.meta.inputHash).toMatch(/^[0-9a-f]{64}$/);

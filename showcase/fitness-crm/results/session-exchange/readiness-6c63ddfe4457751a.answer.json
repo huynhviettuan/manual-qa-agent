@@ -1,0 +1,15 @@
+{
+ "readiness": "clarification",
+ "missingExpectations": [
+  "AC-21: \"the right Flag and Action percentages\" on the weekly dashboard has no formula (percentage of sets, sessions or customers?)."
+ ],
+ "clarificationQuestion": "For AC-21, how are the weekly Flag and Action percentages calculated: share of logged sets, of sessions, or of customers in the week?",
+ "citedSourceIds": [
+  "GYM-AC@v1",
+  "GYM-BR-WORKOUTS@v1",
+  "GYM-FR@v1"
+ ],
+ "draftableClauses": [
+  "Choosing Action \"Stop + Escalation\" notifies the manager and Master, and the item stays in the waiting list until handled"
+ ]
+}

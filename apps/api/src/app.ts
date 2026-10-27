@@ -58,6 +58,7 @@ import {
   driftAlerts,
   getRunReport,
   projectMetrics,
+  proposeExecutableFromCase,
   proposeBug,
   proposeExecutable,
   publishBug,
@@ -375,6 +376,21 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
     const { id } = IdParams.parse(req.params);
     const body = ExecutableBody.parse(req.body);
     return reply.code(201).send(await proposeExecutable(db, req.actor, id, body.spec));
+  });
+
+  // ADR-0024: the agent proposes the steps; the same checks and a different approver apply.
+  app.post('/api/test-cases/:id/executables/propose', async (req, reply) => {
+    const { id } = IdParams.parse(req.params);
+    const { hints } = z
+      .object({ hints: z.array(z.string().max(500)).max(20).optional() })
+      .parse(req.body ?? {});
+    const result = await proposeExecutableFromCase(
+      { db, executables: deps.executables },
+      req.actor,
+      id,
+      hints,
+    );
+    return reply.code(result.proposed ? 201 : 200).send(result);
   });
 
   app.post('/api/executables/:id/review', async (req) => {

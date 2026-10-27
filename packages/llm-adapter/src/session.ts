@@ -2,8 +2,17 @@ import { existsSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { z } from 'zod';
-import { canonicalJson, type DraftSet, DraftSetOutput, sha256 } from '@qa/domain';
+import { canonicalJson, type DraftSet, DraftSetOutput, type ExecutableSpec, sha256 } from '@qa/domain';
 import { ReadinessSchema } from './claude.ts';
+import {
+  buildExecutablePayload,
+  checkExecutable,
+  EXECUTABLE_PROMPT_VERSION,
+  EXECUTABLE_SYSTEM,
+  ExecutableAnswer,
+  type ExecutableGenerator,
+  type ExecutableInput,
+} from './executables.ts';
 import { checkDraftSet, checkReadiness } from './grounding.ts';
 import {
   buildPayload,
@@ -40,11 +49,11 @@ export type SessionExchangeConfig = {
 
 export const SESSION_PROVIDER = 'claude-code-session';
 
-export class SessionExchangeProvider implements ReadinessClassifier, DraftGenerator {
+export class SessionExchangeProvider implements ReadinessClassifier, DraftGenerator, ExecutableGenerator {
   constructor(private readonly config: SessionExchangeConfig) {}
 
   private async exchange<T>(
-    kind: 'readiness' | 'draft',
+    kind: 'readiness' | 'draft' | 'executable',
     promptVersion: string,
     system: string,
     payload: unknown,
@@ -109,5 +118,17 @@ export class SessionExchangeProvider implements ReadinessClassifier, DraftGenera
       DraftSetOutput,
     );
     return checkDraftSet(input, out);
+  }
+
+  /** ADR-0024: executable steps for an approved case, answered in the session like a draft. */
+  async generateExecutable(input: ExecutableInput): Promise<ProviderOutcome<ExecutableSpec>> {
+    const out = await this.exchange(
+      'executable',
+      EXECUTABLE_PROMPT_VERSION,
+      EXECUTABLE_SYSTEM,
+      buildExecutablePayload(input),
+      ExecutableAnswer,
+    );
+    return checkExecutable(input, out);
   }
 }

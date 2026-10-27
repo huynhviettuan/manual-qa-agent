@@ -1,0 +1,13 @@
+{
+ "readiness": "clarification",
+ "missingExpectations": [
+  "AC-22: the expected counts and amounts come from the GymMaster data being imported, which is not among the sources."
+ ],
+ "clarificationQuestion": "Please provide the GymMaster export (or its totals: customers, contract value, paid amounts, sessions left) that the import must match.",
+ "citedSourceIds": [
+  "GYM-AC@v1",
+  "GYM-BR-SERVICES-PRICES-CONTRACTS@v1",
+  "GYM-BR-MONEY@v1"
+ ],
+ "draftableClauses": []
+}

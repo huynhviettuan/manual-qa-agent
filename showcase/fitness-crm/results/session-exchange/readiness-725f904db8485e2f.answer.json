@@ -1,0 +1,12 @@
+{
+ "readiness": "clarification",
+ "missingExpectations": [
+  "AC-08: the expected lead counts, booking rate and show rate come from the Excel files of September and October 2026, which are not among the sources."
+ ],
+ "clarificationQuestion": "Please provide the September and October 2026 Excel files (or their totals per consultant) and say how booking rate and show rate are calculated.",
+ "citedSourceIds": [
+  "GYM-AC@v1",
+  "GYM-FR@v1"
+ ],
+ "draftableClauses": []
+}

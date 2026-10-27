@@ -1,0 +1,17 @@
+{
+ "readiness": "clarification",
+ "missingExpectations": [
+  "AC-29: \"hangs the session with the right reason\" does not say which reasons exist or what each one is called."
+ ],
+ "clarificationQuestion": "For AC-29, what reason should a session show when the customer scanned but the PT did not, and when the PT scanned but the customer did not?",
+ "citedSourceIds": [
+  "GYM-AC@v1",
+  "GYM-BR-SESSIONS-AND-CLASSES@v1",
+  "GYM-FR@v1"
+ ],
+ "draftableClauses": [
+  "a pair of the customer and the right PT within 15 minutes and the pairing window turns the session to *Đã tập* and triggers the session taken, the PT credit, and the email",
+  "a scan with no booking is an error",
+  "a customer training twice with two PTs needs a pair for each"
+ ]
+}

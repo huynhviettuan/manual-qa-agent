@@ -1,0 +1,22 @@
+{
+ "spec": {
+  "steps": [
+   {
+    "id": "anon",
+    "type": "apiRequest",
+    "method": "GET",
+    "path": "/api/v1/contracts",
+    "expectStatus": 401,
+    "expectJson": [
+     {
+      "path": "code",
+      "equals": "UNAUTHENTICATED"
+     }
+    ],
+    "sourceRefs": [
+     "FF-DEC@v1"
+    ]
+   }
+  ]
+ }
+}

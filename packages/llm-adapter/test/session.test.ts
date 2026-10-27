@@ -64,7 +64,7 @@ describe('SessionExchangeProvider (ADR-0020)', () => {
       meta: { provider: 'claude-code-session', model: null },
     });
     const req = JSON.parse(await readFile(join(dir, (await readdir(dir))[0]!), 'utf8'));
-    expect(req).toMatchObject({ kind: 'readiness', promptVersion: 'readiness-v1' });
+    expect(req).toMatchObject({ kind: 'readiness', promptVersion: 'readiness-v2' });
     expect(req.system).toContain('You assess whether a user story is ready');
     expect(req.user).toContain('<untrusted_data>');
   });
@@ -75,6 +75,7 @@ describe('SessionExchangeProvider (ADR-0020)', () => {
       missingExpectations: [],
       clarificationQuestion: null,
       citedSourceIds: ['AC-LOGIN@v2'],
+      draftableClauses: [],
     });
     const ready = await p.classify({ story, sources: [source] });
     expect(ready).toMatchObject({

@@ -13,6 +13,7 @@ import {
 import type { DraftGenerator, ReadinessClassifier, TriageClassifier } from './types.ts';
 
 export * from './claude.ts';
+export * from './executables.ts';
 export * from './decision-readiness.ts';
 export * from './decision-triage.ts';
 export * from './fake-anthropic.ts';

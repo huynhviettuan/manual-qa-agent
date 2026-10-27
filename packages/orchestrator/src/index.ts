@@ -1,3 +1,4 @@
+import type { ExecutableGenerator } from '@qa/llm-adapter';
 import {
   completeTask,
   createOrGetWorkflow,
@@ -52,6 +53,8 @@ export type OrchestratorDeps = {
   db: Db;
   classifier: ReadinessClassifier;
   generator: DraftGenerator;
+  /** Proposes executable steps for approved cases (ADR-0024); absent = the endpoint is unavailable. */
+  executables?: ExecutableGenerator | null;
   logger?: Logger;
   /** Per-workflow provider token budget (input + output). */
   workflowTokenBudget?: number;
@@ -92,6 +95,10 @@ export type WorkflowOutcome =
       reason: string;
       question: string;
       sourceRefs: string[];
+      /** ADR-0024: cases drafted now from the clauses that were clear, while the question is open. */
+      drafted?: { caseIds: string[]; cases: Array<{ caseId: string; title: string }>; clauses: string[] };
+      /** Clear clauses existed but their draft did not happen (the generator's failure). */
+      draftPending?: string;
     }
   | { route: 'DENIED'; reasons: string[] };
 
@@ -471,7 +478,7 @@ async function execute(ctx: Ctx): Promise<WorkflowOutcome> {
   if (policy.gate === 'DENY') return { route: 'DENIED', reasons: policy.reasons };
   if (policy.gate !== 'AUTO_PROCEED') {
     const clarify = assessment.readiness === 'clarification';
-    return requestReview(
+    const review = await requestReview(
       ctx,
       clarify ? 'REQUIREMENT_CLARIFICATION' : 'MISSING_KNOWLEDGE',
       policy.reasons.join(','),
@@ -484,23 +491,52 @@ async function execute(ctx: Ctx): Promise<WorkflowOutcome> {
         label: 'suggested',
       },
     );
+    // ADR-0024: the clauses the classifier found clear are drafted now, against the same sources,
+    // so one unclear clause no longer holds a whole criterion. The question stays open for the rest.
+    const clauses = assessment.draftableClauses ?? [];
+    if (!clarify || clauses.length === 0 || review.route !== 'REVIEW_REQUESTED') return review;
+    const reduced = story.acceptanceCriteria
+      .map((ac) => ({
+        id: ac.id,
+        text: clauses.filter((c) => foldText(ac.text).includes(foldText(c))).join('; '),
+      }))
+      .filter((ac) => ac.text);
+    if (reduced.length === 0) return review;
+    const partial = await draftCases(ctx, { ...story, acceptanceCriteria: reduced }, retrieval);
+    return partial.route === 'DRAFT_CREATED'
+      ? { ...review, drafted: { caseIds: partial.caseIds, cases: partial.cases, clauses } }
+      : { ...review, draftPending: partial.route === 'DRAFT_FAILED' ? partial.reason : partial.route };
   }
+  const draftedOut = await draftCases(ctx, story, retrieval);
+  if (draftedOut.route !== 'DRAFT_FAILED') return draftedOut;
+  return requestReview(
+    ctx,
+    'PROVIDER_FAILURE',
+    draftedOut.reason,
+    `Draft generation failed (${draftedOut.reason.replace('GENERATOR_', '')}: ${draftedOut.detail}). Please draft this test manually or retry.`,
+    retrievedRefs,
+  );
+}
 
+const foldText = (s: string) => s.normalize('NFKC').replace(/\s+/g, ' ').trim().toLowerCase();
+
+/** Drafts the story's cases (steps 6 and 7): one case per test condition, persisted as DRAFT revision 1. */
+type DraftFailed = { route: 'DRAFT_FAILED'; reason: string; detail: string };
+
+async function draftCases(
+  ctx: Ctx,
+  story: Parameters<typeof storyInput>[0],
+  retrieval: RetrievalResult,
+): Promise<WorkflowOutcome | DraftFailed> {
+  const db = ctx.deps.db;
   // 6. Draft generation, persisted as revision 1 in DRAFT for human review.
   const drafted = await step(ctx, 'generate_draft', async () => {
     const d = await ctx.deps.generator.generate({ story: storyInput(story), sources: retrieval.chunks });
     await recordCall(ctx, 'draft', d, retrieval);
     return d;
   });
-  if (!drafted.ok) {
-    return requestReview(
-      ctx,
-      'PROVIDER_FAILURE',
-      `GENERATOR_${drafted.failure}`,
-      `Draft generation failed (${drafted.failure}: ${drafted.detail}). Please draft this test manually or retry.`,
-      retrievedRefs,
-    );
-  }
+  if (!drafted.ok)
+    return { route: 'DRAFT_FAILED', reason: `GENERATOR_${drafted.failure}`, detail: drafted.detail };
   return step(ctx, 'persist_draft', async () => {
     // One test case per drafted case, each its own revision 1 in DRAFT, all tied to this workflow.
     const created: Array<{ caseId: string; title: string; refs: string[] }> = [];
@@ -570,3 +606,4 @@ export * from './questions.ts';
 export * from './design-doc.ts';
 export * from './lifecycle.ts';
 export * from './import.ts';
+export * from './executables.ts';

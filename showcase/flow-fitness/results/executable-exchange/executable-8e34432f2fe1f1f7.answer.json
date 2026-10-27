@@ -1,0 +1,3 @@
+{
+ "cannot": "Step 2 needs Admin to disable the user; Admin sign-in requires a TOTP code the executor does not have."
+}

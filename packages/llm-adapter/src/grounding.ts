@@ -23,6 +23,17 @@ export function checkReadiness(
   const unknown = out.value.citedSourceIds.filter((id) => !allowed.has(id));
   if (unknown.length > 0) return fail('UNGROUNDED', `cited unknown sources: ${unknown.join(', ')}`);
 
+  // ADR-0024: a draftable clause must be the criteria's own words; anything else is dropped, so a
+  // partial draft never rests on a clause the model invented.
+  const criteria = input.story.acceptanceCriteria.map((ac) => fold(ac.text));
+  const draftableClauses = (out.value.draftableClauses ?? []).filter((c) => {
+    const f = fold(c);
+    return f.length >= 8 && criteria.some((t) => t.includes(f));
+  });
+  if (out.value.readiness === 'ready' && draftableClauses.length > 0) {
+    return fail('INCONSISTENT', 'ready but names draftable clauses as if something were waiting');
+  }
+  out = { ...out, value: { ...out.value, draftableClauses } };
   if (out.value.readiness === 'ready') {
     if (out.value.citedSourceIds.length === 0 && input.sources.length > 0) {
       return fail('UNGROUNDED', 'ready without citing any source');

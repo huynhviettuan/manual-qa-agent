@@ -1,0 +1,48 @@
+{
+ "spec": {
+  "steps": [
+   {
+    "id": "wrong-password",
+    "type": "apiRequest",
+    "method": "POST",
+    "path": "/api/auth/sign-in/email",
+    "body": {
+     "email": {
+      "secret": "FF_RECEPTIONIST_EMAIL"
+     },
+     "password": "wrong-password-1"
+    },
+    "expectStatus": 401,
+    "expectJson": [
+     {
+      "path": "code",
+      "equals": "INVALID_EMAIL_OR_PASSWORD"
+     }
+    ],
+    "sourceRefs": [
+     "FF-DEC@v1"
+    ]
+   },
+   {
+    "id": "unknown-email",
+    "type": "apiRequest",
+    "method": "POST",
+    "path": "/api/auth/sign-in/email",
+    "body": {
+     "email": "nobody-qa@flow-fitness-qa.test",
+     "password": "any-password-1"
+    },
+    "expectStatus": 401,
+    "expectJson": [
+     {
+      "path": "code",
+      "equals": "INVALID_EMAIL_OR_PASSWORD"
+     }
+    ],
+    "sourceRefs": [
+     "FF-DEC@v1"
+    ]
+   }
+  ]
+ }
+}

@@ -1,0 +1,51 @@
+{
+ "designNotes": [
+  "Payout vouchers: a session is paid once; the allocation figures await the GymMaster export"
+ ],
+ "cases": [
+  {
+   "title": "A PT payout voucher never pays a session twice",
+   "priority": "P0",
+   "preconditions": [],
+   "testData": [],
+   "assumptions": [],
+   "missingRequirements": [],
+   "steps": [
+    {
+     "action": "Create a payout voucher for a PT covering a period with 3 credited sessions",
+     "expected": "The voucher lists the 3 sessions",
+     "sourceRefs": [
+      "GYM-AC@v1",
+      "GYM-BR-MONEY@v1"
+     ],
+     "testData": ""
+    },
+    {
+     "action": "Create a second payout voucher for the same PT and period",
+     "expected": "The 3 sessions are not listed again; the voucher is empty or refused",
+     "sourceRefs": [
+      "GYM-AC@v1",
+      "GYM-BR-MONEY@v1"
+     ],
+     "testData": ""
+    }
+   ],
+   "requirementRefs": [
+    "story:AC-18"
+   ],
+   "techniques": [
+    "metamorphic",
+    "error_guessing"
+   ],
+   "testTypes": [
+    "negative"
+   ],
+   "testConditions": [
+    "same sessions, second voucher"
+   ],
+   "module": "Money",
+   "level": "ui",
+   "manualReason": ""
+  }
+ ]
+}

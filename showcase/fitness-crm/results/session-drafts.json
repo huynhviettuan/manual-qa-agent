@@ -1,27 +1,29 @@
 {
   "model": "claude-opus-5-5 (interactive Claude Code session)",
-  "generatedAt": "2026-10-27T11:10:56.156Z",
+  "generatedAt": "2026-10-27T11:40:07.266Z",
   "summary": {
     "stories": 30,
+    "partialCriteria": 7,
+    "partialCases": 11,
     "drafted": 20,
     "clarification": 10,
     "pending": 0,
-    "cases": 53,
-    "steps": 80,
-    "flaggedCases": 53,
-    "automatable": 30,
+    "cases": 64,
+    "steps": 105,
+    "flaggedCases": 64,
+    "automatable": 40,
     "techniques": {
       "permission_matrix": 6,
-      "attack_based": 1,
-      "error_guessing": 4,
-      "use_case": 6,
-      "state_transition": 15,
-      "decision_table": 8,
+      "attack_based": 2,
+      "error_guessing": 6,
+      "use_case": 10,
+      "state_transition": 18,
+      "decision_table": 9,
       "specification_based": 5,
-      "equivalence_partitioning": 9,
+      "equivalence_partitioning": 10,
       "scenario": 1,
-      "boundary_value_analysis": 6,
-      "metamorphic": 3
+      "boundary_value_analysis": 7,
+      "metamorphic": 4
     },
     "teamCasesOnTheseCriteria": 123
   },
@@ -31,6 +33,7 @@
       "criterion": "AC-01",
       "text": "An account without permission for a module does not see its menu and cannot reach it by direct URL; a role with phone numbers hidden never sees them on any screen or export.",
       "route": "DRAFT_CREATED",
+      "partial": null,
       "pending": null,
       "question": null,
       "reason": null,
@@ -721,6 +724,7 @@
       "criterion": "AC-02",
       "text": "Admin changes permissions, approval thresholds, price tiers, timers, and session status rules on screen; changes take effect immediately, with no developer.",
       "route": "DRAFT_CREATED",
+      "partial": null,
       "pending": null,
       "question": null,
       "reason": null,
@@ -927,6 +931,7 @@
       "criterion": "AC-03",
       "text": "Every consulting step result, checklist item, and reason is a drop-down; admin adds or deactivates an option on screen, the change shows immediately, and old data is unchanged.",
       "route": "DRAFT_CREATED",
+      "partial": null,
       "pending": null,
       "question": null,
       "reason": null,
@@ -1087,6 +1092,7 @@
       "criterion": "AC-04",
       "text": "Choosing \"Khác\" in any drop-down cannot be saved without a note.",
       "route": "DRAFT_CREATED",
+      "partial": null,
       "pending": null,
       "question": null,
       "reason": null,
@@ -1232,6 +1238,7 @@
       "criterion": "AC-05",
       "text": "Actions in approval groups have no effect until approved; the submitter cannot approve them; admin switches approval on or off and changes approvers per action type on screen.",
       "route": "DRAFT_CREATED",
+      "partial": null,
       "pending": null,
       "question": null,
       "reason": null,
@@ -1426,12 +1433,61 @@
       "criterion": "AC-06",
       "text": "A lead created from the form gets the right channel and source, is assigned in the right round-robin order, and the manager is notified.",
       "route": "REVIEW_REQUESTED",
+      "partial": [
+        "the manager is notified"
+      ],
       "pending": null,
       "question": "Which channel and source should a lead created from the quick form (FR-LEAD-001) receive: fixed values per form, or values the person picks?",
       "reason": "READINESS_CLARIFICATION",
       "designNotes": [],
       "missingRequirements": [],
-      "drafts": [],
+      "drafts": [
+        {
+          "title": "The manager is notified when a lead is created from the form",
+          "priority": "P2",
+          "level": "ui",
+          "manualReason": "",
+          "basis": "specified",
+          "techniques": [
+            "use_case"
+          ],
+          "testTypes": [
+            "positive"
+          ],
+          "testConditions": [
+            "a new lead notifies the manager"
+          ],
+          "requirementRefs": [
+            "story:AC-06"
+          ],
+          "steps": [
+            {
+              "action": "Create a lead from the quick form as Tư vấn",
+              "expected": "The lead is saved and assigned to a consultant",
+              "testData": "",
+              "sourceRefs": [
+                "GYM-AC@v1",
+                "GYM-FR@v1",
+                "GYM-BR-LEADS-AND-CUSTOMERS@v1"
+              ]
+            },
+            {
+              "action": "Open the manager's notifications (bell)",
+              "expected": "A notice names the new lead",
+              "testData": "",
+              "sourceRefs": [
+                "GYM-AC@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": [
+            "step 2: no exact message, value or state in \"A notice names the new lead\"",
+            "step 1: no quoted evidence for \"The lead is saved and assigned to a consultant\"",
+            "step 2: no quoted evidence for \"A notice names the new lead\""
+          ]
+        }
+      ],
       "team": []
     },
     {
@@ -1439,12 +1495,119 @@
       "criterion": "AC-07",
       "text": "Reminder steps at 60 minutes, 24 hours, 3 hours and 60 minutes before the visit, and 15 days are created at the right time; overdue steps appear in \"Today's tasks\" and count as late in the audit; the \"Báo Studio\" step creates a task for the coach manager.",
       "route": "REVIEW_REQUESTED",
+      "partial": [
+        "overdue steps appear in \"Today's tasks\" and count as late in the audit",
+        "the \"Báo Studio\" step creates a task for the coach manager"
+      ],
       "pending": null,
       "question": "For AC-07, what are the first 60-minute step and the 15-day step measured from: lead creation, the last contact, or the appointment?",
       "reason": "READINESS_CLARIFICATION",
       "designNotes": [],
       "missingRequirements": [],
-      "drafts": [],
+      "drafts": [
+        {
+          "title": "An overdue reminder step appears in Today's tasks and counts as late",
+          "priority": "P1",
+          "level": "manual",
+          "manualReason": "Depends on time passing",
+          "basis": "specified",
+          "techniques": [
+            "state_transition"
+          ],
+          "testTypes": [
+            "negative"
+          ],
+          "testConditions": [
+            "due time passed without a tick"
+          ],
+          "requirementRefs": [
+            "story:AC-07"
+          ],
+          "steps": [
+            {
+              "action": "Let a reminder step of a lead pass its due time without being ticked",
+              "expected": "The step is overdue",
+              "testData": "",
+              "sourceRefs": [
+                "GYM-AC@v1",
+                "GYM-FR@v1",
+                "GYM-BR-LEADS-AND-CUSTOMERS@v1"
+              ]
+            },
+            {
+              "action": "Open Today's tasks as the consultant",
+              "expected": "The overdue step is listed",
+              "testData": "",
+              "sourceRefs": [
+                "GYM-AC@v1"
+              ]
+            },
+            {
+              "action": "Open the lead audit",
+              "expected": "The step counts as late",
+              "testData": "",
+              "sourceRefs": [
+                "GYM-AC@v1",
+                "GYM-BR-LEADS-AND-CUSTOMERS@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": [
+            "step 1: no exact message, value or state in \"The step is overdue\"",
+            "step 2: no exact message, value or state in \"The overdue step is listed\"",
+            "step 3: no exact message, value or state in \"The step counts as late\"",
+            "step 1: no quoted evidence for \"The step is overdue\"",
+            "step 2: no quoted evidence for \"The overdue step is listed\"",
+            "step 3: no quoted evidence for \"The step counts as late\""
+          ]
+        },
+        {
+          "title": "The Báo Studio step creates a task for the coach manager",
+          "priority": "P1",
+          "level": "ui",
+          "manualReason": "",
+          "basis": "specified",
+          "techniques": [
+            "use_case"
+          ],
+          "testTypes": [
+            "positive"
+          ],
+          "testConditions": [
+            "Báo Studio ticked"
+          ],
+          "requirementRefs": [
+            "story:AC-07"
+          ],
+          "steps": [
+            {
+              "action": "Tick the \"Báo Studio\" step on a lead",
+              "expected": "The step is ticked",
+              "testData": "",
+              "sourceRefs": [
+                "GYM-AC@v1",
+                "GYM-BR-LEADS-AND-CUSTOMERS@v1"
+              ]
+            },
+            {
+              "action": "Open the coach manager's tasks",
+              "expected": "A task for this lead is listed, assigned to the coach manager",
+              "testData": "",
+              "sourceRefs": [
+                "GYM-AC@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": [
+            "step 1: no exact message, value or state in \"The step is ticked\"",
+            "step 2: no exact message, value or state in \"A task for this lead is listed, assigned to the coach manager\"",
+            "step 1: no quoted evidence for \"The step is ticked\"",
+            "step 2: no quoted evidence for \"A task for this lead is listed, assigned to the coach manage\""
+          ]
+        }
+      ],
       "team": [
         {
           "id": "LEAD-40",
@@ -1460,6 +1623,7 @@
       "criterion": "AC-08",
       "text": "The consulting dashboard gives the right lead counts, booking rate, and show rate per consultant when compared with the Excel files of September and October 2026.",
       "route": "REVIEW_REQUESTED",
+      "partial": null,
       "pending": null,
       "question": "Please provide the September and October 2026 Excel files (or their totals per consultant) and say how booking rate and show rate are calculated.",
       "reason": "READINESS_CLARIFICATION",
@@ -1481,6 +1645,7 @@
       "criterion": "AC-09",
       "text": "One person goes through lead → appointment → show → contract → session with a single record.",
       "route": "DRAFT_CREATED",
+      "partial": null,
       "pending": null,
       "question": null,
       "reason": null,
@@ -1562,6 +1727,7 @@
       "criterion": "AC-10",
       "text": "Entering any session count gives the right tier unit price, end date, and display name; a price different from the tier flags the contract \"Exception price\" and it cannot be activated until approved.",
       "route": "DRAFT_CREATED",
+      "partial": null,
       "pending": null,
       "question": null,
       "reason": null,
@@ -1764,6 +1930,7 @@
       "criterion": "AC-11",
       "text": "An approved contract cannot be edited, even by admin; a contract not yet approved cannot be booked.",
       "route": "DRAFT_CREATED",
+      "partial": null,
       "pending": null,
       "question": null,
       "reason": null,
@@ -1899,6 +2066,7 @@
       "criterion": "AC-12",
       "text": "Deleting a contract with receipts is blocked and the receipts to delete first are listed; after deleting in the right order, total receipts and revenue fall by exactly the deleted amounts.",
       "route": "DRAFT_CREATED",
+      "partial": null,
       "pending": null,
       "question": null,
       "reason": null,
@@ -2018,12 +2186,108 @@
       "criterion": "AC-13",
       "text": "Deleted data is in the trash with its reason, viewable only by management, and cannot be deleted.",
       "route": "REVIEW_REQUESTED",
+      "partial": [
+        "Deleted data is in the trash with its reason",
+        "cannot be deleted"
+      ],
       "pending": null,
       "question": "For AC-13, who counts as \"management\" for viewing the trash: Admin only (as the seeded roles say), or the Fitness Manager too?",
       "reason": "READINESS_CLARIFICATION",
       "designNotes": [],
       "missingRequirements": [],
-      "drafts": [],
+      "drafts": [
+        {
+          "title": "Deleted data is in the trash with its reason",
+          "priority": "P1",
+          "level": "ui",
+          "manualReason": "",
+          "basis": "specified",
+          "techniques": [
+            "use_case"
+          ],
+          "testTypes": [
+            "positive"
+          ],
+          "testConditions": [
+            "deleted with a reason"
+          ],
+          "requirementRefs": [
+            "story:AC-13"
+          ],
+          "steps": [
+            {
+              "action": "Delete a customer with the reason \"Trùng hồ sơ\"",
+              "expected": "The customer leaves the list",
+              "testData": "",
+              "sourceRefs": [
+                "GYM-AC@v1",
+                "GYM-BR-PLATFORM@v1"
+              ]
+            },
+            {
+              "action": "Open the trash as Admin",
+              "expected": "The customer is listed with the reason \"Trùng hồ sơ\"",
+              "testData": "",
+              "sourceRefs": [
+                "GYM-AC@v1",
+                "GYM-BR-PLATFORM@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": [
+            "step 1: no exact message, value or state in \"The customer leaves the list\"",
+            "step 1: no quoted evidence for \"The customer leaves the list\"",
+            "step 2: no quoted evidence for \"The customer is listed with the reason \"Trùng hồ sơ\"\""
+          ]
+        },
+        {
+          "title": "A trash entry cannot be deleted",
+          "priority": "P0",
+          "level": "api",
+          "manualReason": "",
+          "basis": "specified",
+          "techniques": [
+            "attack_based",
+            "error_guessing"
+          ],
+          "testTypes": [
+            "negative",
+            "security"
+          ],
+          "testConditions": [
+            "delete from the trash"
+          ],
+          "requirementRefs": [
+            "story:AC-13"
+          ],
+          "steps": [
+            {
+              "action": "Open a trash entry as Admin and look for a delete action",
+              "expected": "No delete action is offered",
+              "testData": "",
+              "sourceRefs": [
+                "GYM-AC@v1",
+                "GYM-BR-PLATFORM@v1"
+              ]
+            },
+            {
+              "action": "Send DELETE for the trash entry through the API",
+              "expected": "Refused with 403; the entry is unchanged",
+              "testData": "",
+              "sourceRefs": [
+                "GYM-AC@v1",
+                "GYM-BR-PLATFORM@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"No delete action is offered\"",
+            "step 2: no quoted evidence for \"Refused with 403; the entry is unchanged\""
+          ]
+        }
+      ],
       "team": [
         {
           "id": "TRS-01",
@@ -2039,6 +2303,7 @@
       "criterion": "AC-14",
       "text": "A frozen contract cannot be booked or checked in; reactivation shows the frozen days and the proposed new end date; the end date changes only after admin confirms and is never extended twice; a freeze over 10 days reminds the manager.",
       "route": "DRAFT_CREATED",
+      "partial": null,
       "pending": null,
       "question": null,
       "reason": null,
@@ -2231,6 +2496,7 @@
       "criterion": "AC-15",
       "text": "\"Đã tập\" and no-show reduce sessions left by exactly 1 and credit the PT; \"Hủy lịch\" and delete do not; each status shows its color; booking is refused when no sessions are left, the contract has expired, or times overlap.",
       "route": "DRAFT_CREATED",
+      "partial": null,
       "pending": null,
       "question": null,
       "reason": null,
@@ -2393,6 +2659,7 @@
       "criterion": "AC-16",
       "text": "A session in \"Đã tập\" cannot change status; when admin deletes it, the customer gets exactly 1 session back and the PT exactly 1 credit less; if its period was already paid, the next period has an adjustment line.",
       "route": "DRAFT_CREATED",
+      "partial": null,
       "pending": null,
       "question": null,
       "reason": null,
@@ -2524,6 +2791,7 @@
       "criterion": "AC-17",
       "text": "Every credited or refunded session sends exactly one email to the customer, from the template and in the right language, with its sending status stored in the customer profile.",
       "route": "DRAFT_CREATED",
+      "partial": null,
       "pending": null,
       "question": null,
       "reason": null,
@@ -2634,12 +2902,61 @@
       "criterion": "AC-18",
       "text": "The PT revenue allocation report matches GymMaster's export on the same data; PT payout vouchers never pay a session twice.",
       "route": "REVIEW_REQUESTED",
+      "partial": [
+        "PT payout vouchers never pay a session twice"
+      ],
       "pending": null,
       "question": "Please provide the GymMaster PT revenue export (and the period and data set) that the allocation report must match.",
       "reason": "READINESS_CLARIFICATION",
       "designNotes": [],
       "missingRequirements": [],
-      "drafts": [],
+      "drafts": [
+        {
+          "title": "A PT payout voucher never pays a session twice",
+          "priority": "P0",
+          "level": "ui",
+          "manualReason": "",
+          "basis": "specified",
+          "techniques": [
+            "metamorphic",
+            "error_guessing"
+          ],
+          "testTypes": [
+            "negative"
+          ],
+          "testConditions": [
+            "same sessions, second voucher"
+          ],
+          "requirementRefs": [
+            "story:AC-18"
+          ],
+          "steps": [
+            {
+              "action": "Create a payout voucher for a PT covering a period with 3 credited sessions",
+              "expected": "The voucher lists the 3 sessions",
+              "testData": "",
+              "sourceRefs": [
+                "GYM-AC@v1",
+                "GYM-BR-MONEY@v1"
+              ]
+            },
+            {
+              "action": "Create a second payout voucher for the same PT and period",
+              "expected": "The 3 sessions are not listed again; the voucher is empty or refused",
+              "testData": "",
+              "sourceRefs": [
+                "GYM-AC@v1",
+                "GYM-BR-MONEY@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"The voucher lists the 3 sessions\"",
+            "step 2: no quoted evidence for \"The 3 sessions are not listed again; the voucher is empty or\""
+          ]
+        }
+      ],
       "team": [
         {
           "id": "MON-12",
@@ -2662,6 +2979,7 @@
       "criterion": "AC-19",
       "text": "Each contract's paid amount and debt always equal the sum of its valid receipts; cash book closing balance equals opening balance plus receipts minus expenses.",
       "route": "DRAFT_CREATED",
+      "partial": null,
       "pending": null,
       "question": null,
       "reason": null,
@@ -2777,6 +3095,7 @@
       "criterion": "AC-20",
       "text": "A customer's plans and every session log are visible in their profile, with plan and actual on the same row; choosing a Cardio exercise shows time, speed, and heart rate.",
       "route": "DRAFT_CREATED",
+      "partial": null,
       "pending": null,
       "question": null,
       "reason": null,
@@ -2873,12 +3192,83 @@
       "criterion": "AC-21",
       "text": "Choosing Action \"Stop + Escalation\" notifies the manager and Master, and the item stays in the waiting list until handled; the weekly workout dashboard gives the right Flag and Action percentages.",
       "route": "REVIEW_REQUESTED",
+      "partial": [
+        "Choosing Action \"Stop + Escalation\" notifies the manager and Master, and the item stays in the waiting list until handled"
+      ],
       "pending": null,
       "question": "For AC-21, how are the weekly Flag and Action percentages calculated: share of logged sets, of sessions, or of customers in the week?",
       "reason": "READINESS_CLARIFICATION",
       "designNotes": [],
       "missingRequirements": [],
-      "drafts": [],
+      "drafts": [
+        {
+          "title": "\"Stop + Escalation\" notifies the manager and Master and waits until handled",
+          "priority": "P1",
+          "level": "ui",
+          "manualReason": "",
+          "basis": "specified",
+          "techniques": [
+            "state_transition"
+          ],
+          "testTypes": [
+            "positive"
+          ],
+          "testConditions": [
+            "escalation raised, unhandled, handled"
+          ],
+          "requirementRefs": [
+            "story:AC-21"
+          ],
+          "steps": [
+            {
+              "action": "Choose Action \"Stop + Escalation\" on a logged set",
+              "expected": "The item is in the waiting list",
+              "testData": "",
+              "sourceRefs": [
+                "GYM-AC@v1",
+                "GYM-FR@v1"
+              ]
+            },
+            {
+              "action": "Open the manager's and Master's notifications",
+              "expected": "Each has a notice naming the customer and the set",
+              "testData": "",
+              "sourceRefs": [
+                "GYM-AC@v1"
+              ]
+            },
+            {
+              "action": "Reload the waiting list before anyone handles it",
+              "expected": "The item is still listed",
+              "testData": "",
+              "sourceRefs": [
+                "GYM-AC@v1",
+                "GYM-FR@v1"
+              ]
+            },
+            {
+              "action": "Handle the item as the manager",
+              "expected": "The item leaves the waiting list",
+              "testData": "",
+              "sourceRefs": [
+                "GYM-AC@v1",
+                "GYM-FR@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": [
+            "step 1: no exact message, value or state in \"The item is in the waiting list\"",
+            "step 2: no exact message, value or state in \"Each has a notice naming the customer and the set\"",
+            "step 3: no exact message, value or state in \"The item is still listed\"",
+            "step 4: no exact message, value or state in \"The item leaves the waiting list\"",
+            "step 1: no quoted evidence for \"The item is in the waiting list\"",
+            "step 2: no quoted evidence for \"Each has a notice naming the customer and the set\"",
+            "step 3: no quoted evidence for \"The item is still listed\"",
+            "step 4: no quoted evidence for \"The item leaves the waiting list\""
+          ]
+        }
+      ],
       "team": [
         {
           "id": "WKO-03",
@@ -2901,6 +3291,7 @@
       "criterion": "AC-22",
       "text": "Data imported from GymMaster matches the number of customers, contract value, paid amounts, and sessions left.",
       "route": "REVIEW_REQUESTED",
+      "partial": null,
       "pending": null,
       "question": "Please provide the GymMaster export (or its totals: customers, contract value, paid amounts, sessions left) that the import must match.",
       "reason": "READINESS_CLARIFICATION",
@@ -2922,6 +3313,7 @@
       "criterion": "AC-23",
       "text": "The lead, PT calendar, and session log screens work on a phone.",
       "route": "REVIEW_REQUESTED",
+      "partial": null,
       "pending": null,
       "question": "For AC-23, which phone width should be supported, and which tasks on the lead, PT calendar and session log screens must be completable there?",
       "reason": "READINESS_CLARIFICATION",
@@ -2943,6 +3335,7 @@
       "criterion": "AC-24",
       "text": "A PT can book outside the on-duty shift, and the grid colors in-shift and off-shift time differently (D-058).",
       "route": "DRAFT_CREATED",
+      "partial": null,
       "pending": null,
       "question": null,
       "reason": null,
@@ -3036,6 +3429,7 @@
       "criterion": "AC-25",
       "text": "A lead needs only a name and a channel; the country is chosen from the list of countries and the email goes in the language derived from it (D-057, D-060).",
       "route": "DRAFT_CREATED",
+      "partial": null,
       "pending": null,
       "question": null,
       "reason": null,
@@ -3216,6 +3610,7 @@
       "criterion": "AC-26",
       "text": "Leads are shared by turn weight; a lead not taken care of after 1 working hour moves on, never outside 08:30–20:30, and each move is in the history and the dashboard (D-050, D-052).",
       "route": "DRAFT_CREATED",
+      "partial": null,
       "pending": null,
       "question": null,
       "reason": null,
@@ -3327,12 +3722,62 @@
       "criterion": "AC-27",
       "text": "A ticked checklist step cannot be unticked; an overdue step past its grace period locks as \"Không thực hiện\" and cannot be ticked late (D-054).",
       "route": "REVIEW_REQUESTED",
+      "partial": [
+        "A ticked checklist step cannot be unticked"
+      ],
       "pending": null,
       "question": "For AC-27, how long is the grace period before an overdue step locks as \"Không thực hiện\", and does the Admin exception (untick with a reason) apply?",
       "reason": "READINESS_CLARIFICATION",
       "designNotes": [],
       "missingRequirements": [],
-      "drafts": [],
+      "drafts": [
+        {
+          "title": "A ticked checklist step cannot be unticked by the consultant",
+          "priority": "P1",
+          "level": "ui",
+          "manualReason": "",
+          "basis": "specified",
+          "techniques": [
+            "state_transition"
+          ],
+          "testTypes": [
+            "negative"
+          ],
+          "testConditions": [
+            "untick after tick"
+          ],
+          "requirementRefs": [
+            "story:AC-27"
+          ],
+          "steps": [
+            {
+              "action": "Tick a checklist step as Tư vấn",
+              "expected": "The step is ticked",
+              "testData": "",
+              "sourceRefs": [
+                "GYM-AC@v1",
+                "GYM-BR-LEADS-AND-CUSTOMERS@v1"
+              ]
+            },
+            {
+              "action": "Try to untick it",
+              "expected": "No untick action is offered; the step stays ticked",
+              "testData": "",
+              "sourceRefs": [
+                "GYM-AC@v1",
+                "GYM-BR-LEADS-AND-CUSTOMERS@v1",
+                "GYM-FR@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": [
+            "step 1: no exact message, value or state in \"The step is ticked\"",
+            "step 1: no quoted evidence for \"The step is ticked\"",
+            "step 2: no quoted evidence for \"No untick action is offered; the step stays ticked\""
+          ]
+        }
+      ],
       "team": [
         {
           "id": "LEAD-38",
@@ -3355,6 +3800,7 @@
       "criterion": "AC-28",
       "text": "A task is reminded at all three points before its deadline through the bell, email, and phone, and a slow approval past 24 hours is told to the approver's direct manager (D-053, D-056, D-048).",
       "route": "DRAFT_CREATED",
+      "partial": null,
       "pending": null,
       "question": null,
       "reason": null,
@@ -3461,12 +3907,155 @@
       "criterion": "AC-29",
       "text": "Simulated scans through the API: a pair of the customer and the right PT within 15 minutes and the pairing window turns the session to *Đã tập* and triggers the session taken, the PT credit, and the email; a missing side hangs the session with the right reason; a scan with no booking is an error; a customer training twice with two PTs needs a pair for each (D-069, D-070).",
       "route": "REVIEW_REQUESTED",
+      "partial": [
+        "a pair of the customer and the right PT within 15 minutes and the pairing window turns the session to *Đã tập* and triggers the session taken, the PT credit, and the email",
+        "a scan with no booking is an error",
+        "a customer training twice with two PTs needs a pair for each"
+      ],
       "pending": null,
       "question": "For AC-29, what reason should a session show when the customer scanned but the PT did not, and when the PT scanned but the customer did not?",
       "reason": "READINESS_CLARIFICATION",
       "designNotes": [],
       "missingRequirements": [],
-      "drafts": [],
+      "drafts": [
+        {
+          "title": "Paired scans of the customer and the right PT within 15 minutes complete the session",
+          "priority": "P0",
+          "level": "api",
+          "manualReason": "",
+          "basis": "specified",
+          "techniques": [
+            "boundary_value_analysis",
+            "use_case"
+          ],
+          "testTypes": [
+            "positive"
+          ],
+          "testConditions": [
+            "pair inside 15 minutes"
+          ],
+          "requirementRefs": [
+            "story:AC-29"
+          ],
+          "steps": [
+            {
+              "action": "POST the customer scan for a booked session, then the PT scan 10 minutes later",
+              "expected": "The session turns to Đã tập",
+              "testData": "",
+              "sourceRefs": [
+                "GYM-AC@v1",
+                "GYM-BR-SESSIONS-AND-CLASSES@v1"
+              ]
+            },
+            {
+              "action": "Open the contract and the PT credits",
+              "expected": "Sessions left fell by 1; the PT has 1 credit for it",
+              "testData": "",
+              "sourceRefs": [
+                "GYM-AC@v1",
+                "GYM-BR-SESSIONS-AND-CLASSES@v1"
+              ]
+            },
+            {
+              "action": "Open the customer's email log",
+              "expected": "Exactly one email for the session",
+              "testData": "",
+              "sourceRefs": [
+                "GYM-AC@v1",
+                "GYM-BR-SESSIONS-AND-CLASSES@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": [
+            "step 1: no exact message, value or state in \"The session turns to Đã tập\"",
+            "step 3: no exact message, value or state in \"Exactly one email for the session\"",
+            "step 1: no quoted evidence for \"The session turns to Đã tập\"",
+            "step 2: no quoted evidence for \"Sessions left fell by 1; the PT has 1 credit for it\"",
+            "step 3: no quoted evidence for \"Exactly one email for the session\""
+          ]
+        },
+        {
+          "title": "A scan with no booking is an error",
+          "priority": "P1",
+          "level": "api",
+          "manualReason": "",
+          "basis": "specified",
+          "techniques": [
+            "equivalence_partitioning"
+          ],
+          "testTypes": [
+            "negative"
+          ],
+          "testConditions": [
+            "scan without booking"
+          ],
+          "requirementRefs": [
+            "story:AC-29"
+          ],
+          "steps": [
+            {
+              "action": "POST a customer scan when the customer has no booking today",
+              "expected": "Refused with an error; no session is created or changed",
+              "testData": "",
+              "sourceRefs": [
+                "GYM-AC@v1",
+                "GYM-BR-SESSIONS-AND-CLASSES@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": [
+            "step 1: no quoted evidence for \"Refused with an error; no session is created or changed\""
+          ]
+        },
+        {
+          "title": "A customer training with two PTs needs a pair for each",
+          "priority": "P1",
+          "level": "api",
+          "manualReason": "",
+          "basis": "specified",
+          "techniques": [
+            "decision_table"
+          ],
+          "testTypes": [
+            "positive"
+          ],
+          "testConditions": [
+            "two PTs, one or two pairs"
+          ],
+          "requirementRefs": [
+            "story:AC-29"
+          ],
+          "steps": [
+            {
+              "action": "Book two sessions today with two PTs; POST the customer scan and the first PT scan",
+              "expected": "Only the first session turns to Đã tập",
+              "testData": "",
+              "sourceRefs": [
+                "GYM-AC@v1",
+                "GYM-BR-SESSIONS-AND-CLASSES@v1"
+              ]
+            },
+            {
+              "action": "POST the second PT scan with a second customer scan",
+              "expected": "The second session turns to Đã tập",
+              "testData": "",
+              "sourceRefs": [
+                "GYM-AC@v1",
+                "GYM-BR-SESSIONS-AND-CLASSES@v1"
+              ]
+            }
+          ],
+          "assumptions": [],
+          "reviewFlags": [
+            "step 1: no exact message, value or state in \"Only the first session turns to Đã tập\"",
+            "step 2: no exact message, value or state in \"The second session turns to Đã tập\"",
+            "step 1: no quoted evidence for \"Only the first session turns to Đã tập\"",
+            "step 2: no quoted evidence for \"The second session turns to Đã tập\""
+          ]
+        }
+      ],
       "team": [
         {
           "id": "CHK-01",
@@ -3489,6 +4078,7 @@
       "criterion": "AC-30",
       "text": "A session without a full check-in is notified to its PT at the end of the day, and to the Studio Manager with a task after 24 hours (D-071).",
       "route": "DRAFT_CREATED",
+      "partial": null,
       "pending": null,
       "question": null,
       "reason": null,

@@ -32,6 +32,7 @@ export function heuristicAssessment(payload: PromptPayload): {
         missingExpectations: ['No approved sources'],
         clarificationQuestion: null,
         citedSourceIds: [],
+        draftableClauses: [],
       },
       measurableAcIds: [],
     };
@@ -57,6 +58,7 @@ export function heuristicAssessment(payload: PromptPayload): {
         ? null
         : `Please specify the exact, measurable expected behaviour for: ${missing.map((m) => m.split(':')[0]).join(', ')}.`,
       citedSourceIds: [...cited],
+      draftableClauses: [],
     },
     measurableAcIds,
   };

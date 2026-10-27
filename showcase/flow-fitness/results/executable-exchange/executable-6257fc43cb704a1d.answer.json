@@ -1,0 +1,3 @@
+{
+ "cannot": "The case omits or forges the Origin header; apiRequest cannot set request headers. The step format needs a headers option, under the allowlist."
+}

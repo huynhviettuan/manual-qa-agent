@@ -1,0 +1,11 @@
+{
+ "readiness": "ready",
+ "missingExpectations": [],
+ "clarificationQuestion": null,
+ "citedSourceIds": [
+  "GYM-AC@v1",
+  "GYM-FR@v1",
+  "GYM-BR-LEADS-AND-CUSTOMERS@v1"
+ ],
+ "draftableClauses": []
+}

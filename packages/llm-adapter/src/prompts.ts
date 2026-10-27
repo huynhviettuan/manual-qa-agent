@@ -1,7 +1,7 @@
 import { redactSecrets, sourceRef, type EvidenceChunk } from '@qa/domain';
 import type { StoryInput, TriageFacts } from './types.ts';
 
-export const READINESS_PROMPT_VERSION = 'readiness-v1';
+export const READINESS_PROMPT_VERSION = 'readiness-v2';
 export const DRAFT_PROMPT_VERSION = 'draft-v5';
 
 // Stable system prompts (cacheable prefix). Volatile data goes only in the user message.
@@ -21,6 +21,9 @@ Classify readiness:
 - "other": none of the above; needs human triage.
 
 List each missing or ambiguous expectation. When not "ready", write one concrete question for the product owner.
+When "clarification": a criterion often has several clauses, and only one is unclear. Put the clauses that are
+specified enough to test now in draftableClauses, quoted verbatim from the criteria (never reworded), so they can be
+drafted while the question is open; leave it empty when nothing can be drafted yet.
 citedSourceIds must contain only refs of sources you actually relied on.`;
 
 export const DRAFT_SYSTEM = `You draft manual test cases for a QA engineer to review.

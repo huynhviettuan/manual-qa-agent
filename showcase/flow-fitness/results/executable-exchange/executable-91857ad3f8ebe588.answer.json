@@ -1,0 +1,3 @@
+{
+ "cannot": "The case sends a text/plain body; apiRequest cannot set the content type. The step format needs a content-type option."
+}

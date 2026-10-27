@@ -1,0 +1,16 @@
+{
+ "readiness": "clarification",
+ "missingExpectations": [
+  "AC-07: the first \"60 minutes\" and the \"15 days\" have no stated starting event; only the 24 h, 3 h and 60 min points are anchored (\"before the visit\")."
+ ],
+ "clarificationQuestion": "For AC-07, what are the first 60-minute step and the 15-day step measured from: lead creation, the last contact, or the appointment?",
+ "citedSourceIds": [
+  "GYM-AC@v1",
+  "GYM-FR@v1",
+  "GYM-BR-LEADS-AND-CUSTOMERS@v1"
+ ],
+ "draftableClauses": [
+  "overdue steps appear in \"Today's tasks\" and count as late in the audit",
+  "the \"Báo Studio\" step creates a task for the coach manager"
+ ]
+}

@@ -85,10 +85,13 @@ another requirement id; this comparison counts only cases filed under the same c
 
 **On the 10 criteria the agent asked about**, the team has 13 cases. 7 of them restate the gap the agent asked
 about as their expected result ("Same counts and rates", "Locked after the grace period" with no length, "Usable
-without sideways scrolling"), and 6 test a clear clause of the same criterion. That points at the agent's
-weakness: **it routes a whole criterion to a question, so 11 clear clauses in 7 criteria were not drafted** (for
-example AC-29's paired scans and "a scan with no booking is an error"). Drafting the clear clauses and asking about
-the rest is the next change to the drafting workflow.
+without sideways scrolling"), and 6 test a clear clause of the same criterion. That pointed at the agent's
+weakness: it routed a whole criterion to a question, so 11 clear clauses in 7 criteria were not drafted. Since
+ADR-0024 the readiness answer quotes the clauses that are clear and the workflow drafts them while the question is
+open: on the replay those 7 criteria carry 11 cases (AC-06 1, AC-07 2, AC-13 2, AC-18 1, AC-21 1, AC-27 1, AC-29 3,
+for example "A scan with no booking is an error"), and the 3 criteria that are wholly a data question (AC-08,
+AC-22, AC-23) have none. The pairing in `comparison/condition-map.json` still lists those clauses under
+`clearClausesNotDrafted`, as the record of the first run.
 
 **The observability check** (after ADR-0022). The first run flagged 20 of 53 cases (23 flags). Going flag by flag,
 2 leave the value unnamed ("The tier list shows the new unit price", "Both totals are shown"); 4 more name a state

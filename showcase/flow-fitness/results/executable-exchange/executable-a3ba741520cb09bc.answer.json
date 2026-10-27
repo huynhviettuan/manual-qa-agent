@@ -1,0 +1,3 @@
+{
+ "cannot": "The case sends a malformed JSON body; apiRequest bodies are JSON objects and cannot be malformed. The step format needs a raw-body option."
+}

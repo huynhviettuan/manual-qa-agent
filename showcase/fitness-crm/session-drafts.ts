@@ -29,20 +29,25 @@ for (const f of files) {
   const r = await submitStory(deps, a.qa, story);
   const o = r.outcome;
   const ac = story.acceptanceCriteria[0];
-  const drafts =
+  const draftedIds =
     o.route === 'DRAFT_CREATED'
-      ? await Promise.all(
-          o.caseIds.map(async (id) => DraftContent.parse((await latestRevision(db, scope, id))!.content)),
-        )
-      : [];
+      ? o.caseIds
+      : o.route === 'REVIEW_REQUESTED'
+        ? (o.drafted?.caseIds ?? [])
+        : [];
+  const drafts = await Promise.all(
+    draftedIds.map(async (id) => DraftContent.parse((await latestRevision(db, scope, id))!.content)),
+  );
   const team = CASES.filter((c) => c.requirement.id === ac.id);
   stories.push({
     story: story.externalId,
     criterion: ac.id,
     text: ac.text,
     route: o.route,
+    partial: o.route === 'REVIEW_REQUESTED' ? (o.drafted?.clauses ?? null) : null,
     pending:
-      o.route === 'REVIEW_REQUESTED' && o.reason.startsWith('GENERATOR_UNAVAILABLE')
+      o.route === 'REVIEW_REQUESTED' &&
+      (o.reason.startsWith('GENERATOR_UNAVAILABLE') || o.draftPending?.startsWith('GENERATOR_UNAVAILABLE'))
         ? 'draft'
         : o.route === 'REVIEW_REQUESTED' && o.reason.includes('UNAVAILABLE')
           ? 'readiness'
@@ -82,9 +87,13 @@ for (const f of files) {
 
 const pending = stories.filter((s) => s.pending);
 const drafted = stories.filter((s) => s.route === 'DRAFT_CREATED');
-const allDrafts = drafted.flatMap((s) => s.drafts);
+const allDrafts = stories.flatMap((s) => s.drafts);
+const partial = stories.filter((s) => s.route === 'REVIEW_REQUESTED' && s.drafts.length > 0);
 const summary = {
   stories: stories.length,
+  /** ADR-0024: criteria whose clear clauses were drafted while their question is open, and those cases. */
+  partialCriteria: partial.length,
+  partialCases: partial.reduce((n, s) => n + s.drafts.length, 0),
   drafted: drafted.length,
   clarification: stories.filter((s) => s.route === 'REVIEW_REQUESTED' && !s.pending).length,
   pending: pending.length,
@@ -107,5 +116,5 @@ await writeFile(
 console.error(
   pending.length
     ? `${pending.length} stories await an answer (${pending.map((s) => `${s.story}:${s.pending}`).join(', ')}); answer the request files in ${EXCHANGE} and run again`
-    : `done: ${summary.drafted}/${summary.stories} drafted, ${summary.cases} cases, ${summary.flaggedCases} flagged`,
+    : `done: ${summary.drafted}/${summary.stories} drafted, ${summary.partialCriteria} drafted in part, ${summary.cases} cases, ${summary.flaggedCases} flagged`,
 );

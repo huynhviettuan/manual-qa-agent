@@ -130,7 +130,7 @@ describe('Workflow A — readiness to draft', () => {
     ]);
     expect(audit.decisions[0]).toMatchObject({
       requestedModel: 'claude-opus-5-5',
-      promptVersion: 'readiness-v1',
+      promptVersion: 'readiness-v2',
     });
     expect(audit.policyEvaluations).toEqual([
       expect.objectContaining({ gate: 'AUTO_PROCEED', actionKind: 'draft' }),
@@ -247,6 +247,7 @@ describe('Workflow A — fail closed', () => {
           missingExpectations: [],
           clarificationQuestion: null,
           citedSourceIds: ['FAKE@v1'],
+          draftableClauses: [],
         }),
       'CLASSIFIER_UNGROUNDED',
     ],

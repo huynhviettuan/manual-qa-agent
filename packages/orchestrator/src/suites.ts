@@ -272,6 +272,16 @@ export async function listSuiteRunSummaries(db: Db, scope: TenantScope, suiteId:
 
 const TERMINAL = new Set(['PASSED', 'FAILED', 'INCONCLUSIVE', 'BLOCKED']);
 
+/** Per-row outcome of a run with data rows; null when the spec has none. */
+const rowsOf = (assertions: unknown[]) => {
+  const rows = new Map<number, boolean>();
+  for (const a of assertions as Array<{ row?: number; passed: boolean | null }>) {
+    if (a.row === undefined) continue;
+    rows.set(a.row, (rows.get(a.row) ?? true) && a.passed === true);
+  }
+  return rows.size ? { total: rows.size, failed: [...rows.values()].filter((ok) => !ok).length } : null;
+};
+
 /** The first failed assertion's step id of an automated run, or the manual failed step number. */
 const failedStepOf = (assertions: unknown[], manualFailedStep: number | null | undefined): string | null => {
   if (manualFailedStep != null) return String(manualFailedStep);
@@ -335,6 +345,8 @@ export async function getSuiteRunReport(db: Db, scope: TenantScope, suiteRunId: 
         unstable: unstable.has(`${i.caseId}|${suiteRun.environmentId}|${suiteRun.build}`),
         /** Assertions the verdict rests on (automated runs). */
         assertions: run ? run.assertions.length : null,
+        /** Data rows (ADR-0024): how many ran and how many had a failed assertion. */
+        rows: run ? rowsOf(run.assertions) : null,
         /** A P0 failure or block recorded by hand with nothing attached: the result is unproven. */
         unproven:
           !!m && priority === 'P0' && (m.status === 'FAILED' || m.status === 'BLOCKED') && m.evidence === 0,

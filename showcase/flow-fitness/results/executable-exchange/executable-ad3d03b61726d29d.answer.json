@@ -1,0 +1,3 @@
+{
+ "cannot": "Admin must sign in with two-factor (TOTP) and the executor has no TOTP secret."
+}

@@ -1,0 +1,16 @@
+{
+ "readiness": "clarification",
+ "missingExpectations": [
+  "AC-13: \"viewable only by management\" conflicts with the role model: GYM-RBAC excludes the trash from the Fitness Manager and grants it to Admin only."
+ ],
+ "clarificationQuestion": "For AC-13, who counts as \"management\" for viewing the trash: Admin only (as the seeded roles say), or the Fitness Manager too?",
+ "citedSourceIds": [
+  "GYM-AC@v1",
+  "GYM-RBAC@v1",
+  "GYM-BR-PLATFORM@v1"
+ ],
+ "draftableClauses": [
+  "Deleted data is in the trash with its reason",
+  "cannot be deleted"
+ ]
+}

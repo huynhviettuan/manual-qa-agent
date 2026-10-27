@@ -1,0 +1,50 @@
+{
+ "designNotes": [
+  "Round-robin assignment: the manager is notified of a new lead"
+ ],
+ "cases": [
+  {
+   "title": "The manager is notified when a lead is created from the form",
+   "priority": "P2",
+   "preconditions": [],
+   "testData": [],
+   "assumptions": [],
+   "missingRequirements": [],
+   "steps": [
+    {
+     "action": "Create a lead from the quick form as Tư vấn",
+     "expected": "The lead is saved and assigned to a consultant",
+     "sourceRefs": [
+      "GYM-AC@v1",
+      "GYM-FR@v1",
+      "GYM-BR-LEADS-AND-CUSTOMERS@v1"
+     ],
+     "testData": ""
+    },
+    {
+     "action": "Open the manager's notifications (bell)",
+     "expected": "A notice names the new lead",
+     "sourceRefs": [
+      "GYM-AC@v1"
+     ],
+     "testData": ""
+    }
+   ],
+   "requirementRefs": [
+    "story:AC-06"
+   ],
+   "techniques": [
+    "use_case"
+   ],
+   "testTypes": [
+    "positive"
+   ],
+   "testConditions": [
+    "a new lead notifies the manager"
+   ],
+   "module": "Leads",
+   "level": "ui",
+   "manualReason": ""
+  }
+ ]
+}

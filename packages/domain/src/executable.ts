@@ -149,6 +149,51 @@ const CapturePattern = z
     }
   }, 'must be a valid regular expression with exactly one capturing group');
 
+/** `data.items[0].id`: a dotted path with integer indexes into a JSON response (ADR-0024). */
+export const JsonPath = z
+  .string()
+  .max(200)
+  .regex(/^[A-Za-z_][A-Za-z0-9_]*(?:\[\d+\])*(?:\.[A-Za-z_][A-Za-z0-9_]*(?:\[\d+\])*)*$/);
+
+/** Reads a JSON path; `undefined` when any segment is missing. */
+export function readJsonPath(value: unknown, path: string): unknown {
+  let cur: unknown = value;
+  for (const seg of path.match(/[A-Za-z_][A-Za-z0-9_]*|\[\d+\]/g) ?? []) {
+    if (cur === null || typeof cur !== 'object') return undefined;
+    const key = seg.startsWith('[') ? Number(seg.slice(1, -1)) : seg;
+    cur = (cur as Record<string | number, unknown>)[key];
+  }
+  return cur;
+}
+
+/** One check on a JSON response: a value equal to an input, matching a pattern, or present at all. */
+export const JsonCheck = z
+  .object({
+    path: JsonPath,
+    equals: InputValue.optional(),
+    matches: z
+      .string()
+      .min(1)
+      .max(200)
+      .refine((p) => {
+        try {
+          new RegExp(p);
+          return true;
+        } catch {
+          return false;
+        }
+      }, 'must be a valid regular expression')
+      .optional(),
+    exists: z.boolean().optional(),
+  })
+  .refine((c) => c.equals !== undefined || c.matches !== undefined || c.exists !== undefined, {
+    message: 'a JSON check needs equals, matches or exists',
+  });
+export type JsonCheck = z.infer<typeof JsonCheck>;
+
+/** A named API session (a signed-in role) that later API steps send their requests through. */
+const SessionName = z.string().regex(/^[a-z][a-z0-9_-]{0,31}$/);
+
 const base = {
   id: z.string().regex(/^[a-z0-9][a-z0-9_-]{0,63}$/),
   /** Traceability back to the approved case's sources/AC (`sourceId@version` or `story:AC-ID`). */
@@ -190,8 +235,90 @@ export const ExecutableStep = z.discriminatedUnion('type', [
     path: PathTemplate,
     body: z.record(z.string(), InputValue).optional(),
     expectStatus: z.number().int().min(100).max(599).optional(),
+    /** Checks on the JSON response body (ADR-0024); each is an assertion. */
+    expectJson: z.array(JsonCheck).max(50).optional(),
+    /** Send through a session opened by an earlier `session` step; default: the browser's own. */
+    session: SessionName.optional(),
     /** DELETE is always treated as destructive; other methods may opt in. */
     destructive: z.boolean().default(false),
+  }),
+  /**
+   * Opens a named API session (ADR-0024): its own cookie jar, signed in by one request (the
+   * product's own sign-in endpoint, credentials as secrets). An optional bearer token is read from
+   * the response and sent on that session's later requests. A failed sign-in is a step error.
+   */
+  z.object({
+    ...base,
+    type: z.literal('session'),
+    name: SessionName,
+    method: HttpMethod,
+    path: PathTemplate,
+    body: z.record(z.string(), InputValue).optional(),
+    token: z
+      .object({
+        path: JsonPath,
+        header: z.string().min(1).max(64).default('Authorization'),
+        prefix: z.string().max(32).default('Bearer '),
+      })
+      .optional(),
+  }),
+  /**
+   * Waits on a real signal with a bound (ADR-0024): a text to appear, or a request to answer with
+   * a status and JSON values. Never a fixed sleep. Timing out BLOCKS the run (the signal never
+   * came; nothing was proved either way), it never passes.
+   */
+  z.object({
+    ...base,
+    type: z.literal('waitFor'),
+    timeoutMs: z.number().int().min(1000).max(120_000).default(30_000),
+    intervalMs: z.number().int().min(250).max(10_000).default(1000),
+    until: z.discriminatedUnion('kind', [
+      z.object({ kind: z.literal('text'), target: Locator, text: z.string().min(1).max(2000) }),
+      z.object({
+        kind: z.literal('request'),
+        method: HttpMethod,
+        path: PathTemplate,
+        session: SessionName.optional(),
+        expectStatus: z.number().int().min(100).max(599).optional(),
+        expectJson: z.array(JsonCheck).max(20).optional(),
+      }),
+    ]),
+  }),
+  /** A keyboard key (`Enter`, `Escape`, `Control+a`), on a target or the focused element. */
+  z.object({ ...base, type: z.literal('press'), key: z.string().min(1).max(40), target: Locator.optional() }),
+  /** Sets a file on a file input; the file travels with the spec (1 MB), never from the executor's disk. */
+  z.object({
+    ...base,
+    type: z.literal('upload'),
+    target: Locator,
+    file: z.object({
+      name: z
+        .string()
+        .min(1)
+        .max(120)
+        .regex(/^[A-Za-z0-9._-]+$/),
+      contentType: z.string().min(1).max(100),
+      dataBase64: z.string().max(1_400_000),
+    }),
+  }),
+  /** Clicks `trigger` and expects a download, whose name may be checked; the file is kept as evidence. */
+  z.object({
+    ...base,
+    type: z.literal('expectDownload'),
+    trigger: Locator,
+    nameMatches: z
+      .string()
+      .min(1)
+      .max(200)
+      .refine((p) => {
+        try {
+          new RegExp(p);
+          return true;
+        } catch {
+          return false;
+        }
+      }, 'must be a valid regular expression')
+      .optional(),
   }),
   /**
    * Reads a value from the page (the text of a strict locator, or the current URL) into the run's
@@ -205,6 +332,8 @@ export const ExecutableStep = z.discriminatedUnion('type', [
     from: z.discriminatedUnion('kind', [
       z.object({ kind: z.literal('text'), target: Locator }),
       z.object({ kind: z.literal('url') }),
+      /** A value of an earlier API or session step's JSON response (ADR-0024). */
+      z.object({ kind: z.literal('response'), step: z.string().min(1).max(64), path: JsonPath }),
     ]),
     pattern: CapturePattern.optional(),
   }),
@@ -227,11 +356,52 @@ export const ExecutableSpec = z
      * environment, nor any other run beside it.
      */
     exclusive: z.boolean().default(false),
+    /**
+     * Data rows (ADR-0024): the whole spec (setup, steps, teardown) runs once per row, with the
+     * row's columns as run-scoped values (`{{url}}`, `{ var: 'role' }`). One run, one verdict per
+     * row in the assertions; a permission matrix or a boundary table is one spec.
+     */
+    rows: z
+      .array(z.record(VarName, z.string().max(2000)))
+      .max(200)
+      .default([]),
   })
   .superRefine((spec, ctx) => {
-    // Every value a step uses is declared, or captured by an earlier step of the same or an earlier phase.
-    const known = new Set(Object.keys(spec.values));
+    const columns = spec.rows[0] ? Object.keys(spec.rows[0]).sort() : [];
+    for (const [i, row] of spec.rows.entries()) {
+      if (Object.keys(row).sort().join() !== columns.join())
+        ctx.addIssue({ code: 'custom', message: `row ${i + 1} has different columns from row 1` });
+      for (const c of Object.keys(row))
+        if (c in spec.values)
+          ctx.addIssue({ code: 'custom', message: `row column ${c} is also a declared value` });
+    }
+    // Every value a step uses is declared, a row column, or captured by an earlier step.
+    const known = new Set([...Object.keys(spec.values), ...columns]);
+    const sessions = new Set<string>();
+    const responders = new Set<string>();
     for (const step of [...spec.setup, ...spec.steps, ...spec.teardown]) {
+      if (step.type === 'session') sessions.add(step.name);
+      if (step.type === 'apiRequest' && step.session && !sessions.has(step.session))
+        ctx.addIssue({
+          code: 'custom',
+          message: `step ${step.id} uses session ${step.session} before it is opened`,
+        });
+      if (
+        step.type === 'waitFor' &&
+        step.until.kind === 'request' &&
+        step.until.session &&
+        !sessions.has(step.until.session)
+      )
+        ctx.addIssue({
+          code: 'custom',
+          message: `step ${step.id} uses session ${step.until.session} before it is opened`,
+        });
+      if (step.type === 'capture' && step.from.kind === 'response' && !responders.has(step.from.step))
+        ctx.addIssue({
+          code: 'custom',
+          message: `step ${step.id} reads the response of ${step.from.step}, which is not an earlier API step`,
+        });
+      if (step.type === 'apiRequest' || step.type === 'session') responders.add(step.id);
       for (const name of stepVars(step)) {
         if (!known.has(name))
           ctx.addIssue({ code: 'custom', message: `step ${step.id} uses undefined value {{${name}}}` });
@@ -249,7 +419,13 @@ export const ExecutableSpec = z
     const dupes = ids.filter((id, i) => ids.indexOf(id) !== i);
     if (dupes.length)
       ctx.addIssue({ code: 'custom', message: `duplicate step ids: ${[...new Set(dupes)].join(', ')}` });
-    if (!spec.steps.some((s) => s.type.startsWith('expect') || (s.type === 'apiRequest' && s.expectStatus))) {
+    if (
+      !spec.steps.some(
+        (s) =>
+          s.type.startsWith('expect') ||
+          (s.type === 'apiRequest' && (s.expectStatus || s.expectJson?.length)),
+      )
+    ) {
       ctx.addIssue({ code: 'custom', message: 'steps must contain at least one assertion' });
     }
   });
@@ -272,7 +448,10 @@ export function referencedSecrets(spec: ExecutableSpec): string[] {
   const visit = (v: InputValue) => typeof v === 'object' && 'secret' in v && names.add(v.secret);
   for (const s of [...spec.setup, ...spec.steps, ...spec.teardown]) {
     if (s.type === 'fill') visit(s.value);
-    if (s.type === 'apiRequest' && s.body) Object.values(s.body).forEach(visit);
+    if ((s.type === 'apiRequest' || s.type === 'session') && s.body) Object.values(s.body).forEach(visit);
+    if (s.type === 'apiRequest') s.expectJson?.forEach((c) => c.equals !== undefined && visit(c.equals));
+    if (s.type === 'waitFor' && s.until.kind === 'request')
+      s.until.expectJson?.forEach((c) => c.equals !== undefined && visit(c.equals));
   }
   return [...names];
 }
@@ -294,8 +473,18 @@ export function stepVars(step: ExecutableStep): string[] {
       text(step.text);
       break;
     case 'apiRequest':
+    case 'session':
       text(step.path);
       if (step.body) Object.values(step.body).forEach(input);
+      if (step.type === 'apiRequest')
+        step.expectJson?.forEach((c) => c.equals !== undefined && input(c.equals));
+      break;
+    case 'waitFor':
+      if (step.until.kind === 'text') text(step.until.text);
+      else {
+        text(step.until.path);
+        step.until.expectJson?.forEach((c) => c.equals !== undefined && input(c.equals));
+      }
       break;
   }
   return [...names];
@@ -364,6 +553,7 @@ export function weakAssertions(spec: ExecutableSpec): string[] {
     if (
       s.type === 'apiRequest' &&
       s.expectStatus !== undefined &&
+      !s.expectJson?.length &&
       !steps.some((t) => t.type.startsWith('expect'))
     )
       flags.push(
@@ -371,7 +561,11 @@ export function weakAssertions(spec: ExecutableSpec): string[] {
       );
   }
   const lastAssertion = steps
-    .map((s) => s.type.startsWith('expect') || (s.type === 'apiRequest' && s.expectStatus !== undefined))
+    .map(
+      (s) =>
+        s.type.startsWith('expect') ||
+        (s.type === 'apiRequest' && (s.expectStatus !== undefined || !!s.expectJson?.length)),
+    )
     .lastIndexOf(true);
   const trailing = steps
     .slice(lastAssertion + 1)

@@ -1,11 +1,20 @@
-import { type BrowserContext, chromium, type Locator as PwLocator, type Page } from 'playwright';
+import {
+  type APIRequestContext,
+  type BrowserContext,
+  chromium,
+  type Locator as PwLocator,
+  type Page,
+  request as playwrightRequest,
+} from 'playwright';
 import {
   deriveValue,
   describeLocator,
   type ExecutableSpec,
   type ExecutableStep,
   type InputValue,
+  type JsonCheck,
   type Locator,
+  readJsonPath,
   redactSecrets,
   referencedSecrets,
   renderTemplate,
@@ -26,11 +35,15 @@ export type Assertion = {
   expected: unknown;
   actual: unknown;
   passed: boolean | null;
+  /** The data row the assertion belongs to (ADR-0024). */
+  row?: number;
 };
 
 export type StepLog = {
   id: string;
   phase: 'setup' | 'steps' | 'teardown';
+  /** The data row this step ran for (ADR-0024); absent without rows. */
+  row?: number;
   type: ExecutableStep['type'];
   description: string;
   status: 'passed' | 'failed' | 'error' | 'skipped';
@@ -42,13 +55,14 @@ export type StepLog = {
 };
 
 export type EvidenceItem = {
-  kind: 'screenshot' | 'step-log' | 'network-log';
+  kind: 'screenshot' | 'step-log' | 'network-log' | 'download';
   name: string;
   contentType: string;
 } & StoredObject;
 
 export type ExecutionOutcome = {
-  verdict: 'PASSED' | 'FAILED' | 'INCONCLUSIVE';
+  /** BLOCKED: a bounded wait timed out (ADR-0024); the signal never came, nothing was proved. */
+  verdict: 'PASSED' | 'FAILED' | 'INCONCLUSIVE' | 'BLOCKED';
   reason: string;
   assertions: Assertion[];
   steps: StepLog[];
@@ -155,8 +169,14 @@ export class PlaywrightExecutor implements Executor {
     // The run's value table (ADR-0015): declared values are derived once, from one clock reading, so
     // every step sees the same date; capture steps add to it as the run goes.
     const startedAt = new Date();
-    const vars = new Map<string, string>();
-    for (const [name, def] of Object.entries(spec.values)) vars.set(name, deriveValue(def, startedAt));
+    const declared = new Map<string, string>();
+    for (const [name, def] of Object.entries(spec.values)) declared.set(name, deriveValue(def, startedAt));
+    const vars = new Map<string, string>(declared);
+    // ADR-0024: API sessions (a cookie jar and headers per signed-in role) and the JSON responses of
+    // API steps, for later checks and captures. Both start afresh for every data row.
+    const sessions = new Map<string, { ctx: APIRequestContext; headers: Record<string, string> }>();
+    const responses = new Map<string, { status: number; json: unknown }>();
+    let currentRow: number | undefined;
     const valueOf = (v: InputValue) => {
       if (typeof v === 'string') return v;
       if ('secret' in v) return resolved.get(v.secret)!;
@@ -208,7 +228,9 @@ export class PlaywrightExecutor implements Executor {
     let context: BrowserContext | undefined;
     try {
       context = await browser.newContext({
-        acceptDownloads: false,
+        acceptDownloads: [...spec.setup, ...spec.steps, ...spec.teardown].some(
+          (x) => x.type === 'expectDownload',
+        ),
         serviceWorkers: 'block',
         viewport: { width: 1280, height: 800 },
         locale: this.opts.locale ?? 'en-US',
@@ -262,6 +284,7 @@ export class PlaywrightExecutor implements Executor {
           const log: StepLog = {
             id: step.id,
             phase,
+            ...(currentRow === undefined ? {} : { row: currentRow }),
             type: step.type,
             description: describe(step, show),
             status: 'passed',
@@ -274,18 +297,25 @@ export class PlaywrightExecutor implements Executor {
           }
           const started = performance.now();
           try {
-            const assertion = await this.runStep(page, context!, step, base, {
+            const made = await this.runStep(page, context!, step, base, {
               valueOf,
+              show,
               render,
               relative,
               vars,
               masked,
               timeout,
+              sessions,
+              responses,
+              row: currentRow,
+              saveFile: (name, contentType, data) => save('download', name, contentType, data),
               note: (text) => (log.note = redact(text).slice(0, 200)),
             });
-            if (assertion) {
-              out.assertions.push(assertion);
-              if (assertion.passed !== true) log.status = 'failed';
+            // One step may make several assertions (a status and JSON checks); the first problem decides.
+            const assertion = made.find((a) => a.passed !== true) ?? made[0] ?? null;
+            for (const a of made) {
+              out.assertions.push(a);
+              if (a.passed !== true) log.status = 'failed';
             }
             if (assertion) log.screenshot = await screenshot(step.id);
             else if (step.type === 'navigate') {
@@ -310,6 +340,8 @@ export class PlaywrightExecutor implements Executor {
               500,
             );
             if (phase === 'teardown') out.cleanupFailed = true;
+            // A wait that timed out blocks the run: the signal never came (ADR-0024).
+            else if (err instanceof WaitTimeout) conclude('BLOCKED', `WAIT_TIMEOUT:${step.id}`);
             else conclude('INCONCLUSIVE', `${phase === 'setup' ? 'SETUP' : 'STEP'}_ERROR:${step.id}`);
             try {
               log.screenshot = await screenshot(`${step.id}-error`);
@@ -324,28 +356,41 @@ export class PlaywrightExecutor implements Executor {
         return stopped;
       };
 
-      try {
-        const setupFailed = await runPhase('setup', spec.setup, true);
-        if (setupFailed) {
-          for (const s of spec.steps) {
-            out.steps.push({
-              id: s.id,
-              phase: 'steps',
-              type: s.type,
-              description: describe(s, show),
-              status: 'skipped',
-              durationMs: 0,
-            });
+      // ADR-0024: with data rows the whole spec runs once per row, each row with its own values,
+      // sessions and responses; without rows, once.
+      const rows: Array<Record<string, string> | null> = spec.rows.length ? spec.rows : [null];
+      for (const [rowIndex, row] of rows.entries()) {
+        currentRow = row ? rowIndex : undefined;
+        vars.clear();
+        for (const [k, v] of declared) vars.set(k, v);
+        if (row) for (const [k, v] of Object.entries(row)) vars.set(k, v);
+        for (const sess of sessions.values()) await sess.ctx.dispose().catch(() => undefined);
+        sessions.clear();
+        responses.clear();
+        try {
+          const setupFailed = await runPhase('setup', spec.setup, true);
+          if (setupFailed) {
+            for (const s of spec.steps) {
+              out.steps.push({
+                id: s.id,
+                phase: 'steps',
+                ...(currentRow === undefined ? {} : { row: currentRow }),
+                type: s.type,
+                description: describe(s, show),
+                status: 'skipped',
+                durationMs: 0,
+              });
+            }
+          } else {
+            await runPhase('steps', spec.steps, true);
           }
-        } else {
-          await runPhase('steps', spec.steps, true);
+        } finally {
+          // Teardown always runs; the spec that created test data owns its cleanup.
+          await runPhase('teardown', spec.teardown, false).catch((err) => {
+            if (!(err instanceof EvidenceUnavailable)) throw err;
+            out.cleanupFailed = true;
+          });
         }
-      } finally {
-        // Teardown always runs; the spec that created test data owns its cleanup.
-        await runPhase('teardown', spec.teardown, false).catch((err) => {
-          if (!(err instanceof EvidenceUnavailable)) throw err;
-          out.cleanupFailed = true;
-        });
       }
     } catch (err) {
       if (err instanceof EvidenceUnavailable) {
@@ -357,6 +402,7 @@ export class PlaywrightExecutor implements Executor {
         `EXECUTOR_ERROR:${redact(err instanceof Error ? err.message : String(err)).slice(0, 200)}`,
       );
     } finally {
+      for (const sess of sessions.values()) await sess.ctx.dispose().catch(() => undefined);
       await context?.close().catch(() => undefined);
       await browser.close().catch(() => undefined);
     }
@@ -394,7 +440,7 @@ export class PlaywrightExecutor implements Executor {
     }
   }
 
-  /** Executes one step. Returns an assertion for expect* steps (and API steps with expectStatus). */
+  /** Executes one step. Returns its assertions (none for actions; several for an API step with JSON checks). */
   private async runStep(
     page: Page,
     context: BrowserContext,
@@ -402,43 +448,153 @@ export class PlaywrightExecutor implements Executor {
     base: URL,
     run: {
       valueOf: (v: InputValue) => string;
+      show: (v: InputValue) => string;
       render: (template: string) => string;
       relative: (path: string) => string;
       vars: Map<string, string>;
       masked: PwLocator[];
       timeout: number;
+      sessions: Map<string, { ctx: APIRequestContext; headers: Record<string, string> }>;
+      responses: Map<string, { status: number; json: unknown }>;
+      row: number | undefined;
+      saveFile: (name: string, contentType: string, data: Uint8Array) => Promise<void>;
       note: (text: string) => void;
     },
-  ): Promise<Assertion | null> {
-    const { valueOf, render, relative, vars, masked, timeout } = run;
-    const assertion = (expected: unknown, actual: unknown, passed: boolean | null): Assertion => ({
+  ): Promise<Assertion[]> {
+    const { valueOf, show, render, relative, vars, masked, timeout, sessions, responses } = run;
+    const assertion = (
+      expected: unknown,
+      actual: unknown,
+      passed: boolean | null,
+      name: string = step.type,
+    ): Assertion => ({
       stepId: step.id,
-      name: step.type,
+      name,
       expected,
       actual,
       passed,
+      ...(run.row === undefined ? {} : { row: run.row }),
     });
     const timedOut = (err: unknown) => err instanceof Error && err.name === 'TimeoutError';
+    const bodyOf = (body: Record<string, InputValue> | undefined) =>
+      body ? Object.fromEntries(Object.entries(body).map(([k, v]) => [k, valueOf(v)])) : undefined;
+    const parseJson = async (res: { text: () => Promise<string> }): Promise<unknown> => {
+      const text = await res.text();
+      try {
+        return text ? JSON.parse(text) : null;
+      } catch {
+        return undefined;
+      }
+    };
+    // JSON checks (ADR-0024): a secret compared to never reaches the evidence, only its name.
+    const jsonAssertions = (json: unknown, checks: JsonCheck[] | undefined): Assertion[] =>
+      (checks ?? []).map((c) => {
+        const actual = readJsonPath(json, c.path);
+        const shown =
+          actual === undefined ? undefined : typeof actual === 'string' ? actual : JSON.stringify(actual);
+        if (c.exists !== undefined)
+          return assertion(
+            `${c.path} ${c.exists ? 'exists' : 'absent'}`,
+            shown,
+            (actual !== undefined) === c.exists,
+            'expectJson',
+          );
+        if (c.matches !== undefined)
+          return assertion(
+            `${c.path} matches /${c.matches}/`,
+            shown,
+            shown !== undefined && new RegExp(c.matches).test(shown),
+            'expectJson',
+          );
+        const expected = valueOf(c.equals!);
+        const label = typeof c.equals === 'object' && 'secret' in c.equals ? show(c.equals) : expected;
+        return assertion(
+          `${c.path} = ${label}`,
+          typeof c.equals === 'object' && 'secret' in c.equals
+            ? shown === expected
+              ? label
+              : '[other]'
+            : shown,
+          shown === expected,
+          'expectJson',
+        );
+      });
+    const send = async (
+      method: string,
+      path: string,
+      body: Record<string, InputValue> | undefined,
+      sessionName: string | undefined,
+      maxTimeout = timeout,
+    ) => {
+      const url = new URL(relative(render(path)), base).toString();
+      const data = bodyOf(body);
+      const sess = sessionName ? sessions.get(sessionName) : undefined;
+      if (sessionName && !sess) throw new StepError(`session ${sessionName} is not open`);
+      const res = await (sess?.ctx ?? context.request).fetch(url, {
+        method,
+        ...(data ? { data } : {}),
+        ...(sess ? { headers: sess.headers } : {}),
+        maxRedirects: 0,
+        timeout: maxTimeout,
+      });
+      return { status: res.status(), json: await parseJson(res) };
+    };
 
     switch (step.type) {
       case 'navigate': {
         const path = relative(render(step.path));
         const res = await page.goto(new URL(path, base).toString(), { waitUntil: 'load' });
         if (!res) throw new StepError('navigation produced no response');
-        return null;
+        return [];
       }
       case 'click':
         await this.locate(page, step.target).click();
-        return null;
+        return [];
       case 'fill': {
         const target = this.locate(page, step.target);
         await target.fill(valueOf(step.value));
         if (typeof step.value !== 'string') masked.push(target);
-        return null;
+        return [];
       }
       case 'select':
         await this.locate(page, step.target).selectOption(step.option);
-        return null;
+        return [];
+      case 'press':
+        if (step.target) await this.locate(page, step.target).press(step.key);
+        else await page.keyboard.press(step.key);
+        return [];
+      case 'upload':
+        await this.locate(page, step.target).setInputFiles({
+          name: step.file.name,
+          mimeType: step.file.contentType,
+          buffer: Buffer.from(step.file.dataBase64, 'base64'),
+        });
+        return [];
+      case 'expectDownload': {
+        try {
+          const [download] = await Promise.all([
+            page.waitForEvent('download', { timeout }),
+            this.locate(page, step.trigger).click(),
+          ]);
+          const name = download.suggestedFilename();
+          const file = await download.path();
+          if (file) {
+            const { readFile } = await import('node:fs/promises');
+            await run.saveFile(
+              `download-${step.id}-${name.replace(/[^A-Za-z0-9._-]/g, '_').slice(0, 100)}`,
+              'application/octet-stream',
+              await readFile(file),
+            );
+          }
+          const ok = step.nameMatches === undefined || new RegExp(step.nameMatches).test(name);
+          return [
+            assertion(step.nameMatches ? `a download named /${step.nameMatches}/` : 'a download', name, ok),
+          ];
+        } catch (err) {
+          if (!timedOut(err)) throw err;
+          return [assertion('a download', 'no download', false)];
+        }
+      }
       case 'expectText': {
         const target = this.locate(page, step.target);
         const text = render(step.text);
@@ -447,19 +603,27 @@ export class PlaywrightExecutor implements Executor {
         try {
           // Waits on the real signal (the target containing the text), never a fixed sleep.
           await target.filter({ hasText: re }).waitFor({ state: 'visible', timeout });
-          return assertion(text, text, true);
+          return [assertion(text, text, true)];
         } catch (err) {
           if (!timedOut(err)) throw err;
           const actual = await target.innerText({ timeout: 1000 }).catch(() => null);
-          return assertion(text, actual?.trim() ?? null, actual === null ? null : false);
+          return [assertion(text, actual?.trim() ?? null, actual === null ? null : false)];
         }
       }
       case 'capture': {
         // Reads a value for later steps. Strict locator: two matches are an error, never a guess.
-        const source =
-          step.from.kind === 'url'
-            ? page.url()
-            : (await this.locate(page, step.from.target).innerText({ timeout })).trim();
+        let source: string;
+        if (step.from.kind === 'url') source = page.url();
+        else if (step.from.kind === 'text')
+          source = (await this.locate(page, step.from.target).innerText({ timeout })).trim();
+        else {
+          const res = responses.get(step.from.step);
+          if (!res) throw new StepError(`no response recorded for step ${step.from.step}`);
+          const v = readJsonPath(res.json, step.from.path);
+          if (v === undefined)
+            throw new StepError(`${step.from.path} is not in the response of ${step.from.step}`);
+          source = typeof v === 'string' ? v : JSON.stringify(v);
+        }
         let value = source;
         if (step.pattern) {
           const m = new RegExp(step.pattern).exec(source);
@@ -470,17 +634,17 @@ export class PlaywrightExecutor implements Executor {
         }
         vars.set(step.as, value);
         run.note(`${step.as} = ${JSON.stringify(value)}`);
-        return null;
+        return [];
       }
       case 'expectVisible':
       case 'expectHidden': {
         const state = step.type === 'expectVisible' ? 'visible' : 'hidden';
         try {
           await this.locate(page, step.target).waitFor({ state, timeout });
-          return assertion(state, state, true);
+          return [assertion(state, state, true)];
         } catch (err) {
           if (!timedOut(err)) throw err;
-          return assertion(state, state === 'visible' ? 'not visible' : 'visible', false);
+          return [assertion(state, state === 'visible' ? 'not visible' : 'visible', false)];
         }
       }
       case 'expectUrl': {
@@ -490,27 +654,83 @@ export class PlaywrightExecutor implements Executor {
           (step.match === 'exact' ? u.pathname === path : u.pathname.startsWith(path));
         try {
           await page.waitForURL(matches, { timeout, waitUntil: 'commit' });
-          return assertion(path, path, true);
+          return [assertion(path, path, true)];
         } catch (err) {
           if (!timedOut(err)) throw err;
-          return assertion(path, new URL(page.url()).pathname, false);
+          return [assertion(path, new URL(page.url()).pathname, false)];
         }
       }
       case 'apiRequest': {
-        const data = step.body
-          ? Object.fromEntries(Object.entries(step.body).map(([k, v]) => [k, valueOf(v)]))
-          : undefined;
-        const res = await context.request.fetch(new URL(relative(render(step.path)), base).toString(), {
-          method: step.method,
-          ...(data ? { data } : {}),
-          maxRedirects: 0,
-          timeout,
-        });
-        return step.expectStatus === undefined
-          ? null
-          : assertion(step.expectStatus, res.status(), res.status() === step.expectStatus);
+        const res = await send(step.method, step.path, step.body, step.session);
+        responses.set(step.id, res);
+        return [
+          ...(step.expectStatus === undefined
+            ? []
+            : [assertion(step.expectStatus, res.status, res.status === step.expectStatus)]),
+          ...jsonAssertions(res.json, step.expectJson),
+        ];
+      }
+      case 'session': {
+        // Its own cookie jar; requests stay relative to the target, so the host rule holds.
+        const ctx = await playwrightRequest.newContext({ baseURL: base.origin });
+        const headers: Record<string, string> = {};
+        sessions.set(step.name, { ctx, headers });
+        const res = await send(step.method, step.path, step.body, step.name);
+        responses.set(step.id, res);
+        if (res.status < 200 || res.status >= 300)
+          throw new StepError(`sign-in for session ${step.name} answered ${res.status}`);
+        if (step.token) {
+          const token = readJsonPath(res.json, step.token.path);
+          if (typeof token !== 'string' || !token)
+            throw new StepError(`no token at ${step.token.path} for session ${step.name}`);
+          headers[step.token.header] = `${step.token.prefix}${token}`;
+        }
+        run.note(`session ${step.name} open`);
+        return [];
+      }
+      case 'waitFor': {
+        const deadline = Date.now() + step.timeoutMs;
+        if (step.until.kind === 'text') {
+          const target = this.locate(page, step.until.target);
+          const text = render(step.until.text);
+          try {
+            await target
+              .filter({ hasText: new RegExp(escapeRe(text)) })
+              .waitFor({ state: 'visible', timeout: step.timeoutMs });
+            return [];
+          } catch (err) {
+            if (timedOut(err)) throw new WaitTimeout(step.id);
+            throw err;
+          }
+        }
+        const until = step.until;
+        for (;;) {
+          const res = await send(
+            until.method,
+            until.path,
+            undefined,
+            until.session,
+            Math.max(1000, deadline - Date.now()),
+          );
+          const statusOk = until.expectStatus === undefined || res.status === until.expectStatus;
+          const checks = jsonAssertions(res.json, until.expectJson);
+          if (statusOk && checks.every((a) => a.passed === true)) {
+            responses.set(step.id, res);
+            return [];
+          }
+          if (Date.now() + step.intervalMs > deadline) throw new WaitTimeout(step.id);
+          await new Promise((r) => setTimeout(r, step.intervalMs));
+        }
       }
     }
+  }
+}
+
+/** A bounded wait that ran out: the run is BLOCKED, never passed or failed (ADR-0024). */
+class WaitTimeout extends Error {
+  constructor(stepId: string) {
+    super(`waited the full bound at step ${stepId}; the signal never came`);
+    this.name = 'WaitTimeout';
   }
 }
 
@@ -533,8 +753,20 @@ function describe(step: ExecutableStep, show: (v: InputValue) => string): string
     case 'expectUrl':
       return `expect URL ${step.match} ${step.path}`;
     case 'apiRequest':
-      return `${step.method} ${step.path}${step.expectStatus ? ` expect ${step.expectStatus}` : ''}`;
+      return `${step.method} ${step.path}${step.session ? ` as ${step.session}` : ''}${step.expectStatus ? ` expect ${step.expectStatus}` : ''}${step.expectJson?.length ? ` and ${step.expectJson.length} JSON check(s)` : ''}`;
+    case 'session':
+      return `open session ${step.name} via ${step.method} ${step.path}`;
+    case 'waitFor':
+      return step.until.kind === 'text'
+        ? `wait up to ${step.timeoutMs} ms for ${describeLocator(step.until.target)} to show "${step.until.text}"`
+        : `wait up to ${step.timeoutMs} ms for ${step.until.method} ${step.until.path}${step.until.expectStatus ? ` to answer ${step.until.expectStatus}` : ''}`;
+    case 'press':
+      return `press ${step.key}${step.target ? ` on ${describeLocator(step.target)}` : ''}`;
+    case 'upload':
+      return `upload ${step.file.name} to ${describeLocator(step.target)}`;
+    case 'expectDownload':
+      return `click ${describeLocator(step.trigger)} and expect a download${step.nameMatches ? ` named /${step.nameMatches}/` : ''}`;
     case 'capture':
-      return `capture ${step.as} from ${step.from.kind === 'url' ? 'the URL' : `text of ${describeLocator(step.from.target)}`}${step.pattern ? ` matching /${step.pattern}/` : ''}`;
+      return `capture ${step.as} from ${step.from.kind === 'url' ? 'the URL' : step.from.kind === 'response' ? `${step.from.path} of ${step.from.step}` : `text of ${describeLocator(step.from.target)}`}${step.pattern ? ` matching /${step.pattern}/` : ''}`;
   }
 }

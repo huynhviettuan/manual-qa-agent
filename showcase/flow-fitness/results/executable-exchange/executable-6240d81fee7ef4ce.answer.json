@@ -1,0 +1,3 @@
+{
+ "cannot": "Ten wrong passwords lock an account; the case needs an account of its own (a test hook to create one) or it would lock a shared role, and the lockout window must be reset afterwards."
+}

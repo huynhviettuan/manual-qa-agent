@@ -1,0 +1,101 @@
+{
+ "designNotes": [
+  "Overdue steps and the Báo Studio step: the stated effects, whatever the anchor of the timers"
+ ],
+ "cases": [
+  {
+   "title": "An overdue reminder step appears in Today's tasks and counts as late",
+   "priority": "P1",
+   "preconditions": [],
+   "testData": [],
+   "assumptions": [],
+   "missingRequirements": [],
+   "steps": [
+    {
+     "action": "Let a reminder step of a lead pass its due time without being ticked",
+     "expected": "The step is overdue",
+     "sourceRefs": [
+      "GYM-AC@v1",
+      "GYM-FR@v1",
+      "GYM-BR-LEADS-AND-CUSTOMERS@v1"
+     ],
+     "testData": ""
+    },
+    {
+     "action": "Open Today's tasks as the consultant",
+     "expected": "The overdue step is listed",
+     "sourceRefs": [
+      "GYM-AC@v1"
+     ],
+     "testData": ""
+    },
+    {
+     "action": "Open the lead audit",
+     "expected": "The step counts as late",
+     "sourceRefs": [
+      "GYM-AC@v1",
+      "GYM-BR-LEADS-AND-CUSTOMERS@v1"
+     ],
+     "testData": ""
+    }
+   ],
+   "requirementRefs": [
+    "story:AC-07"
+   ],
+   "techniques": [
+    "state_transition"
+   ],
+   "testTypes": [
+    "negative"
+   ],
+   "testConditions": [
+    "due time passed without a tick"
+   ],
+   "module": "Leads",
+   "level": "manual",
+   "manualReason": "Depends on time passing"
+  },
+  {
+   "title": "The Báo Studio step creates a task for the coach manager",
+   "priority": "P1",
+   "preconditions": [],
+   "testData": [],
+   "assumptions": [],
+   "missingRequirements": [],
+   "steps": [
+    {
+     "action": "Tick the \"Báo Studio\" step on a lead",
+     "expected": "The step is ticked",
+     "sourceRefs": [
+      "GYM-AC@v1",
+      "GYM-BR-LEADS-AND-CUSTOMERS@v1"
+     ],
+     "testData": ""
+    },
+    {
+     "action": "Open the coach manager's tasks",
+     "expected": "A task for this lead is listed, assigned to the coach manager",
+     "sourceRefs": [
+      "GYM-AC@v1"
+     ],
+     "testData": ""
+    }
+   ],
+   "requirementRefs": [
+    "story:AC-07"
+   ],
+   "techniques": [
+    "use_case"
+   ],
+   "testTypes": [
+    "positive"
+   ],
+   "testConditions": [
+    "Báo Studio ticked"
+   ],
+   "module": "Leads",
+   "level": "ui",
+   "manualReason": ""
+  }
+ ]
+}

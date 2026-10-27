@@ -1,0 +1,174 @@
+{
+  "generatedAt": "2026-10-27T11:28:51.670Z",
+  "promptVersion": "exec-v1",
+  "cases": 20,
+  "pending": 12,
+  "proposed": 2,
+  "proposedWithoutFlags": 2,
+  "refused": 6,
+  "rejectedByChecks": 0,
+  "results": [
+    {
+      "code": "ACC-001",
+      "title": "Quản trị: administers, approves, freezes, burns and dates receipts; never decides its own request or a rename",
+      "proposed": false,
+      "failure": "UNAVAILABLE",
+      "detail": "awaiting an answer from the session",
+      "decisionRecordId": "dec_75c480b3ecd94ea995a6f544fff4a884"
+    },
+    {
+      "code": "ACC-002",
+      "title": "Fitness Manager: sells, approves others' contracts and receipts, assigns, confirms and deletes sessions; no Admin powers",
+      "proposed": false,
+      "failure": "UNAVAILABLE",
+      "detail": "awaiting an answer from the session",
+      "decisionRecordId": "dec_abab5692b7ef45b4925d3468cc81e878"
+    },
+    {
+      "code": "ACC-003",
+      "title": "Lễ tân: adds leads and customers, books, checks in, cancels, records receipts and gives tasks; never confirms, deletes, sells or approves",
+      "proposed": false,
+      "failure": "UNAVAILABLE",
+      "detail": "awaiting an answer from the session",
+      "decisionRecordId": "dec_7a84d565b16d410085049af9da7b1007"
+    },
+    {
+      "code": "ACC-004",
+      "title": "Tư vấn: works its own leads and customers to a contract; never sees others' records, assigns, merges, approves or books",
+      "proposed": false,
+      "failure": "UNAVAILABLE",
+      "detail": "awaiting an answer from the session",
+      "decisionRecordId": "dec_9f2e4de5da6b4942afee9552f45272b4"
+    },
+    {
+      "code": "ACC-005",
+      "title": "PT: its own sessions, customers, profile and plans; nobody else's, and no sales or bookings work",
+      "proposed": false,
+      "failure": "UNAVAILABLE",
+      "detail": "awaiting an answer from the session",
+      "decisionRecordId": "dec_e39cf0efe0f54365b45867b22ab97fd7"
+    },
+    {
+      "code": "ACC-006",
+      "title": "Master: reads the studio's customers, contracts, sessions and classes, approves workout plans; changes nothing else",
+      "proposed": false,
+      "failure": "UNAVAILABLE",
+      "detail": "awaiting an answer from the session",
+      "decisionRecordId": "dec_91ee64d83f96425e95aab56d7dc75583"
+    },
+    {
+      "code": "ACC-007",
+      "title": "Marketing: the lead analysis and its Excel, and tasks; nothing of leads, customers, contracts, sessions or money",
+      "proposed": false,
+      "failure": "UNAVAILABLE",
+      "detail": "awaiting an answer from the session",
+      "decisionRecordId": "dec_78982d27fc9c47aca51b48eb71232a9a"
+    },
+    {
+      "code": "ACC-008",
+      "title": "Kế toán: records money and reads every money report; never approves its own vouchers, sells, or runs the floor",
+      "proposed": false,
+      "failure": "UNAVAILABLE",
+      "detail": "awaiting an answer from the session",
+      "decisionRecordId": "dec_0803b41431d74b8c9e16132908b2a356"
+    },
+    {
+      "code": "ACC-009",
+      "title": "Studio Manager: a manager's work and Master's plan approval, the studio's Báo Studio tasks, and no Admin powers",
+      "proposed": false,
+      "failure": "UNAVAILABLE",
+      "detail": "awaiting an answer from the session",
+      "decisionRecordId": "dec_8576cb63c3f5478caf6571f22cdd6db7"
+    },
+    {
+      "code": "ACC-010",
+      "title": "Only Admin names a branch's Studio and Coach Managers, and only an active user; an empty choice names nobody",
+      "proposed": false,
+      "failure": "UNAVAILABLE",
+      "detail": "awaiting an answer from the session",
+      "decisionRecordId": "dec_cd4f79c6aa1a4d73b10d1af1575a0fea"
+    },
+    {
+      "code": "AUD-001",
+      "title": "A manager audits a lead's consulting, pass or fail with the criteria failed; a consultant cannot",
+      "proposed": false,
+      "failure": "UNAVAILABLE",
+      "detail": "awaiting an answer from the session",
+      "decisionRecordId": "dec_1206978442924bd8a4f2e74c08af6e3e"
+    },
+    {
+      "code": "AUTH-001",
+      "title": "A wrong password and an unknown email get the same generic answer",
+      "proposed": true,
+      "executableId": "exe_fcba6b273a9a4b15bae199b5b55501ab",
+      "version": 1,
+      "reviewFlags": [],
+      "decisionRecordId": "dec_0677e041c3374ac1820ceff58d5aa6ad"
+    },
+    {
+      "code": "AUTH-002",
+      "title": "An anonymous call to the API is refused 401",
+      "proposed": true,
+      "executableId": "exe_941f2c0ab38b42b3bfb27ab2370153a4",
+      "version": 1,
+      "reviewFlags": [],
+      "decisionRecordId": "dec_480bbacc24ad410eb7ce5d8a63909111"
+    },
+    {
+      "code": "AUTH-003",
+      "title": "Ten wrong passwords lock the account; the right one then answers 423",
+      "proposed": false,
+      "failure": "REFUSED",
+      "detail": "Ten wrong passwords lock an account; the case needs an account of its own (a test hook to create one) or it would lock a shared role, and the lockout window must be reset afterwards.",
+      "decisionRecordId": "dec_2ae700f0ce7a40d1a0960633af7409ec"
+    },
+    {
+      "code": "AUTH-004",
+      "title": "A signed-in user who is disabled loses access on the next request",
+      "proposed": false,
+      "failure": "REFUSED",
+      "detail": "Step 2 needs Admin to disable the user; Admin sign-in requires a TOTP code the executor does not have.",
+      "decisionRecordId": "dec_d45e61b5acaf4270923d2ec36471934e"
+    },
+    {
+      "code": "AUTH-005",
+      "title": "Access hours that exclude now take effect on the next request",
+      "proposed": false,
+      "failure": "UNAVAILABLE",
+      "detail": "awaiting an answer from the session",
+      "decisionRecordId": "dec_6e67b0728e9d44ce93ebd63550260290"
+    },
+    {
+      "code": "AUTH-006",
+      "title": "Admin cannot reset their own two-factor",
+      "proposed": false,
+      "failure": "REFUSED",
+      "detail": "Admin must sign in with two-factor (TOTP) and the executor has no TOTP secret.",
+      "decisionRecordId": "dec_44df2add6e0544b183dbe00b050f321c"
+    },
+    {
+      "code": "AUTH-007",
+      "title": "A state change without the app's Origin, or from another origin, is refused 403",
+      "proposed": false,
+      "failure": "REFUSED",
+      "detail": "The case omits or forges the Origin header; apiRequest cannot set request headers. The step format needs a headers option, under the allowlist.",
+      "decisionRecordId": "dec_2f98a18bccd9412a8453c28050bfe2fd"
+    },
+    {
+      "code": "AUTH-008",
+      "title": "A state change with a text/plain body is refused 415",
+      "proposed": false,
+      "failure": "REFUSED",
+      "detail": "The case sends a text/plain body; apiRequest cannot set the content type. The step format needs a content-type option.",
+      "decisionRecordId": "dec_e16865ec0f2646c78b5a5eb810c5fa99"
+    },
+    {
+      "code": "AUTH-009",
+      "title": "Malformed JSON answers 400 with the error contract, never 500",
+      "proposed": false,
+      "failure": "REFUSED",
+      "detail": "The case sends a malformed JSON body; apiRequest bodies are JSON objects and cannot be malformed. The step format needs a raw-body option.",
+      "decisionRecordId": "dec_3a38b61b6ee5456e93c9dd10c0193157"
+    }
+  ]
+}

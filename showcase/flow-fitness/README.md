@@ -35,6 +35,22 @@ requirements, and the agent's identifiers (ADR-0005) end in a number; `BR-402a` 
 identifier pattern does not accept. They are flagged on the cases that cite them, so a reviewer sees which cases
 rest on an id the registry does not carry.
 
+## Executables proposed by the agent (ADR-0024)
+
+`npx tsx showcase/flow-fitness/session-executables.ts` asks the agent, through the session exchange, for the
+executable steps of the first 20 API-level cases of the imported catalogue, with the environment described in
+words (sign-in endpoint, roles as secrets, the `/api/v1` prefix). Eight requests were answered in the session of
+2026-10-27 (`results/executable-exchange/`, `results/executables.json`):
+
+| Case | Answer |
+| --- | --- |
+| AUTH-001, AUTH-002 | Proposed, no weak-assertion flags: sign-in refusals and an anonymous call, each with `expectStatus` and an `expectJson` check on the product's error code |
+| AUTH-009, AUTH-008, AUTH-007 | Cannot: the case sends a malformed body, a `text/plain` body, or forges the Origin header, and the step format has no raw body, content type or headers |
+| AUTH-006, AUTH-004 | Cannot: Admin must sign in with a second factor (TOTP) the executor does not have |
+| AUTH-003 | Cannot: ten wrong passwords lock an account; the case needs an account of its own and a reset afterwards |
+
+The six refusals are the next additions to the step format, found by asking the agent to automate real cases.
+
 **Two coverage measures.** `GET /api/coverage` counts an identifier as covered when any case cites the source that
 carries it (ADR-0018). With one source per requirement kind that reads 490 of 490 here, which says little, so the
 coverage view now also reports `identifiersNamed` and `gaps.identifiersNotNamed`: identifiers a case cites by name (379 of 490 here).

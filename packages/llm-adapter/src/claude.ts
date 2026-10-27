@@ -55,6 +55,8 @@ export const ReadinessSchema = z.object({
   missingExpectations: z.array(z.string()),
   clarificationQuestion: z.string().nullable(),
   citedSourceIds: z.array(z.string()),
+  /** ADR-0024: clauses of the criteria that are specified enough to draft now, quoted verbatim. */
+  draftableClauses: z.array(z.string()),
 });
 
 /** Client with bounded retries (429/5xx/connection) and an explicit timeout. */

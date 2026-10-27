@@ -45,6 +45,12 @@ export type ReadinessAssessment = {
    * has none (Claude). Uncalibrated; policy may only use it to downgrade, never to authorize.
    */
   confidence: number | null;
+  /**
+   * When not ready: the clauses of the acceptance criteria that are specified enough to draft
+   * now, quoted from the criteria (ADR-0024). The rest waits for the clarification. Providers
+   * without the notion leave it empty.
+   */
+  draftableClauses?: string[];
 };
 
 export type DraftInput = { story: StoryInput; sources: EvidenceChunk[] };
